@@ -18,6 +18,7 @@ private:
     ~DebugProbe();
 
     static Nan::Persistent<v8::Function> constructor;
+    
 
     static NAN_METHOD(New);
 
@@ -26,6 +27,8 @@ private:
     // Async methods
     NRFJPROGJS_METHOD_DEFINITIONS(Connect);
     //NRFJPROGJS_METHOD_DEFINITIONS(Disconnect);
+
+    static void init(v8::Local<v8::FunctionTemplate> tpl);
 };
 
 class ConnectBaton : public Baton {

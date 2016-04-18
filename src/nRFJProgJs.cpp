@@ -4,6 +4,20 @@
 #include "nrfjprog_common.h"
 #include "nRFJProgJs.h"
 
+Nan::Persistent<v8::Function> DebugProbe::constructor;
+
+NAN_MODULE_INIT(DebugProbe::Init)
+{
+    v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
+    tpl->SetClassName(Nan::New("DebugProbe").ToLocalChecked());
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
+    init(tpl);
+
+    constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(target, Nan::New("DebugProbe").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+}
+
 NAN_METHOD(DebugProbe::New)
 {
     if (info.IsConstructCall()) {
@@ -16,6 +30,21 @@ NAN_METHOD(DebugProbe::New)
     }
 }
 
+DebugProbe::DebugProbe()
+{
+}
+
+DebugProbe::~DebugProbe()
+{
+}
+
+void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
+{
+    Nan::SetPrototypeMethod(tpl, "connect", Connect);
+}
+
+
+#pragma region Connect
 NAN_METHOD(DebugProbe::Connect)
 {
     auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
@@ -36,9 +65,9 @@ NAN_METHOD(DebugProbe::Connect)
 
 	auto baton = new ConnectBaton(callback);
 
-
     uv_queue_work(uv_default_loop(), baton->req, Connect, reinterpret_cast<uv_after_work_cb>(AfterConnect));
 }
+
 
 void DebugProbe::Connect(uv_work_t *req)
 {
@@ -48,37 +77,23 @@ void DebugProbe::Connect(uv_work_t *req)
 
 void DebugProbe::AfterConnect(uv_work_t *req)
 {
+    Nan::HandleScope scope;
     v8::Local<v8::Value> argv[1];
+
+    argv[0] = Nan::Undefined();
 
     auto baton = static_cast<ConnectBaton *>(req->data);
     baton->callback->Call(0, argv);
+
+    delete baton;
 }
 
-Nan::Persistent<v8::Function> DebugProbe::constructor;
+#pragma endregion Connect
 
 extern "C" {
-    void init_nRFJProg(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    void init_nRFJProgConst(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
+    void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
 
-    NAN_MODULE_INIT(init)
-    {
-        init_nRFJProgConst(target);
-        init_nRFJProg(target);
-    }
-
-    void init_nRFJProg(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
-    {
-        v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-        tpl->SetClassName(Nan::New("DebugProbe").ToLocalChecked());
-        tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-        Utility::SetMethod(target, "connect", Connect);
-
-        constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
-        Nan::Set(target, Nan::New("DebugProbe").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
-    }
-
-    void init_nRFJProgConst(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
+    void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     {
         NODE_DEFINE_CONSTANT(target, R0);
         NODE_DEFINE_CONSTANT(target, R1);
@@ -189,6 +204,12 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, UnalignedPageEraseWarning);
         NODE_DEFINE_CONSTANT(target, NoLogWarning);
         NODE_DEFINE_CONSTANT(target, UicrWriteOperationWithoutEraseWarning);
+    }
+
+    NAN_MODULE_INIT(init)
+    {
+        initConsts(target);
+        DebugProbe::Init(target);
     }
 }
 
