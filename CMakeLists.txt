@@ -45,6 +45,7 @@ set_target_properties(${PROJECT_NAME}
 
 if(WIN32)
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS "_CRT_SECURE_NO_WARNINGS")
+    target_link_libraries(${PROJECT_NAME} "nrfjprog/bin/win32/nrfjprog.dll")
 elseif(APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework CoreFoundation")
     target_link_libraries(${PROJECT_NAME} "-framework IOKit")

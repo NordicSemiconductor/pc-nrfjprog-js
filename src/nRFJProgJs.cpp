@@ -1,10 +1,24 @@
 #include <nan.h>
 
+#include <vector>
+
 #include "common.h"
 #include "nrfjprog_common.h"
 #include "nRFJProgJs.h"
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
+
+class ProbeInfo
+{
+public:
+	ProbeInfo(uint32_t serial_number, device_family_t family) :
+		serial_number(serial_number), family(family) {}
+
+	uint32_t serial_number;
+	device_family_t family;
+};
+
+static std::vector<ProbeInfo*> probes;
 
 NAN_MODULE_INIT(DebugProbe::Init)
 {
@@ -42,7 +56,6 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
 {
     Nan::SetPrototypeMethod(tpl, "connect", Connect);
 }
-
 
 #pragma region Connect
 NAN_METHOD(DebugProbe::Connect)
@@ -91,8 +104,6 @@ void DebugProbe::AfterConnect(uv_work_t *req)
 #pragma endregion Connect
 
 extern "C" {
-    void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     {
         NODE_DEFINE_CONSTANT(target, R0);
@@ -210,6 +221,25 @@ extern "C" {
     {
         initConsts(target);
         DebugProbe::Init(target);
+
+		auto const probe_count_max = 40;
+		uint32_t probe_count;
+
+		uint32_t _probes[probe_count_max];
+
+		// Find nRF51 devices available
+		NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+		NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+		NRFJPROG_close_dll();
+
+		for (auto i = 0; i < probe_count; i++)
+		{
+			probes.push_back(new ProbeInfo(_probes[i], NRF51_FAMILY));
+		}
+
+		// Find nRF52 devices available
+		NRFJPROG_open_dll("jlinkarm_nrf52_nrfjprog.dll", nullptr, NRF52_FAMILY);
+		NRFJPROG_close_dll();
     }
 }
 
