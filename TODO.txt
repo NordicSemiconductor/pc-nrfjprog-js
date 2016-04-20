@@ -1,0 +1,1 @@
+- Figure out how to handle errors when loading JLinkARM.dll, currently the AddOn just terminates NodeJS.
