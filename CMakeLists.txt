@@ -6,7 +6,6 @@ project (pc-nrfjprog-js)
 if(APPLE)
     set(CMAKE_SKIP_BUILD_RPATH TRUE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH "@loader_path/../../driver/lib")
 endif()
 
 set(NRFJPROG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/include)
@@ -44,8 +43,8 @@ set_target_properties(${PROJECT_NAME}
 )
 
 if(WIN32)
+    find_library (NRFJPROG_LIB NAMES nrfjprog PATHS ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/bin/win32)
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS "_CRT_SECURE_NO_WARNINGS")
-    target_link_libraries(${PROJECT_NAME} "nrfjprog/bin/win32/nrfjprog.dll")
 elseif(APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework CoreFoundation")
     target_link_libraries(${PROJECT_NAME} "-framework IOKit")
@@ -55,6 +54,8 @@ else()
 #    target_link_libraries(${PROJECT_NAME} "udev")
 endif()
 
+message(STATUS ${NRFJPROG_LIB})
+
 # Essential library files to link to a node addon,
 # you should add this line in every CMake.js based project.
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} pc-nrfjprog-js)
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${NRFJPROG_LIB})
