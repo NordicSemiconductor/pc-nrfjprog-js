@@ -111,13 +111,40 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
         return;
     }
 
-    NRFJPROG_close_dll();
-
     for (uint32_t i = 0; i < probe_count; i++)
     {
-        //TODO: Separate between 51 and 52
-        baton->probes.push_back(new ProbeInfo(_probes[i], NRF51_FAMILY));
+        device_family_t family = NRF52_FAMILY;
+        device_version_t deviceType = UNKNOWN;
+
+        baton->result = NRFJPROG_connect_to_emu_with_snr(_probes[i], emulatorSpeed);
+
+        NRFJPROG_read_device_version(&deviceType);
+
+        NRFJPROG_disconnect_from_emu();
+
+        switch (deviceType)
+        {
+            case NRF51_XLR1:
+            case NRF51_XLR2:
+            case NRF51_XLR3:
+            case NRF51_L3:
+            case NRF51_XLR3P:
+            case NRF51_XLR3LC:
+                family = NRF51_FAMILY;
+                break;
+            case NRF52_FP1_ENGA:
+            case NRF52_FP1_ENGB:
+            case NRF52_FP1:
+            case UNKNOWN:
+            default:
+                family = NRF52_FAMILY;
+                break;
+        }
+
+        baton->probes.push_back(new ProbeInfo(_probes[i], family));
     }
+
+    NRFJPROG_close_dll();
 }
 
 void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
@@ -149,7 +176,7 @@ void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
 
     delete baton;
 }
-#pragma endregion Connect
+#pragma endregion GetSerialnumbers
 
 #pragma region Program
 NAN_METHOD(DebugProbe::Program)
