@@ -2,23 +2,23 @@
 
 #include <vector>
 
-#include "common.h"
-#include "nrfjprog_common.h"
 #include "nRFJProgJs.h"
+#include "nrfjprog_common.h"
+
+#include <iostream>
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
 
-class ProbeInfo
+v8::Local<v8::Object> ProbeInfo::ToJs()
 {
-public:
-	ProbeInfo(uint32_t serial_number, device_family_t family) :
-		serial_number(serial_number), family(family) {}
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
-	uint32_t serial_number;
-	device_family_t family;
-};
+    Utility::Set(obj, "serialNumber", ConversionUtility::toJsNumber(serial_number));
+    Utility::Set(obj, "family", ConversionUtility::toJsNumber(family));
 
-static std::vector<ProbeInfo*> probes;
+    return scope.Escape(obj);
+}
 
 NAN_MODULE_INIT(DebugProbe::Init)
 {
@@ -54,11 +54,13 @@ DebugProbe::~DebugProbe()
 
 void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
 {
-    Nan::SetPrototypeMethod(tpl, "connect", Connect);
+    //Nan::SetPrototypeMethod(tpl, "program", Program);
+    //Nan::SetPrototypeMethod(tpl, "getVersion", GetVersion);
+    Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialnumbers);
 }
 
-#pragma region Connect
-NAN_METHOD(DebugProbe::Connect)
+#pragma region GetSerialnumbers
+NAN_METHOD(DebugProbe::GetSerialnumbers)
 {
     auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
     auto argumentCount = 0;
@@ -76,32 +78,252 @@ NAN_METHOD(DebugProbe::Connect)
         return;
     }
 
-	auto baton = new ConnectBaton(callback);
+    auto baton = new GetSerialnumbersBaton(callback);
 
-    uv_queue_work(uv_default_loop(), baton->req, Connect, reinterpret_cast<uv_after_work_cb>(AfterConnect));
+    uv_queue_work(uv_default_loop(), baton->req, GetSerialnumbers, reinterpret_cast<uv_after_work_cb>(AfterGetSerialnumbers));
 }
 
 
-void DebugProbe::Connect(uv_work_t *req)
+void DebugProbe::GetSerialnumbers(uv_work_t *req)
 {
-    //auto baton = static_cast<x*>(req->data);
-    //baton->result =
+    auto baton = static_cast<GetSerialnumbersBaton*>(req->data);
+    auto const probe_count_max = MAX_SERIAL_NUMBERS;
+    uint32_t probe_count = 0;
+
+    uint32_t _probes[MAX_SERIAL_NUMBERS];
+
+    // Find nRF51 devices available
+    baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+
+    if (baton->result != SUCCESS)
+    {
+        return;
+    }
+
+    baton->result = NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+
+    if (baton->result != SUCCESS)
+    {
+        return;
+    }
+
+    NRFJPROG_close_dll();
+
+    for (uint32_t i = 0; i < probe_count; i++)
+    {
+        //TODO: Separate between 51 and 52
+        baton->probes.push_back(new ProbeInfo(_probes[i], NRF51_FAMILY));
+    }
 }
 
-void DebugProbe::AfterConnect(uv_work_t *req)
+void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
 {
     Nan::HandleScope scope;
-    v8::Local<v8::Value> argv[1];
 
-    argv[0] = Nan::Undefined();
+    auto baton = static_cast<GetSerialnumbersBaton*>(req->data);
+    v8::Local<v8::Value> argv[2];
 
-    auto baton = static_cast<ConnectBaton *>(req->data);
-    baton->callback->Call(0, argv);
+    if (baton->result != SUCCESS)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting serialnumbers");
+        argv[1] = Nan::Undefined();
+    }
+    else
+    {
+        argv[0] = Nan::Undefined();
+        v8::Local<v8::Array> serialNumbers = Nan::New<v8::Array>();
+
+        for (uint32_t i = 0; i < baton->probes.size(); ++i)
+        {
+            Nan::Set(serialNumbers, Nan::New<v8::Integer>(i), baton->probes[i]->ToJs());
+        }
+
+        argv[1] = serialNumbers;
+    }
+
+    baton->callback->Call(2, argv);
 
     delete baton;
 }
-
 #pragma endregion Connect
+
+#pragma region Program
+NAN_METHOD(DebugProbe::Program)
+{
+    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto argumentCount = 0;
+
+    uint32_t serialNumber;
+    uint32_t family;
+    uint8_t *filename;
+    v8::Local<v8::Function> callback;
+
+    try
+    {
+        serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        family = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+                        
+        filename = ConversionUtility::getNativePointerToUint8(info[argumentCount]);
+        argumentCount++;
+
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+        return;
+    }
+
+    auto baton = new ProgramBaton(callback);
+    baton->serialnumber = serialNumber;
+    baton->family = (device_family_t)family;
+    baton->filename = std::string((char *)filename);
+
+    uv_queue_work(uv_default_loop(), baton->req, Program, reinterpret_cast<uv_after_work_cb>(AfterProgram));
+}
+
+void DebugProbe::Program(uv_work_t *req)
+{
+    auto baton = static_cast<ProgramBaton*>(req->data);
+    auto const probe_count_max = MAX_SERIAL_NUMBERS;
+    uint32_t probe_count = 0;
+
+    uint32_t _probes[MAX_SERIAL_NUMBERS];
+
+    // Find nRF51 devices available
+    baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+
+    if (baton->result != SUCCESS)
+    {
+        return;
+    }
+
+    baton->result = NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+
+    if (baton->result != SUCCESS)
+    {
+        return;
+    }
+
+    //TODO: Programming
+
+    NRFJPROG_close_dll();
+}
+
+void DebugProbe::AfterProgram(uv_work_t *req)
+{
+    Nan::HandleScope scope;
+
+    auto baton = static_cast<ProgramBaton*>(req->data);
+    v8::Local<v8::Value> argv[1];
+
+    if (baton->result != SUCCESS)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "programming");
+    }
+    else
+    {
+        argv[0] = Nan::Undefined();
+    }
+
+    baton->callback->Call(1, argv);
+
+    delete baton;
+}
+#pragma endregion Program
+
+#pragma region GetVersion
+NAN_METHOD(DebugProbe::GetVersion)
+{
+    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto argumentCount = 0;
+
+    uint32_t serialNumber;
+    uint32_t family;
+    v8::Local<v8::Function> callback;
+
+    try
+    {
+        serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        family = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+        return;
+    }
+
+    auto baton = new GetVersionBaton(callback);
+    baton->serialnumber = serialNumber;
+    baton->family = (device_family_t)family;
+
+    uv_queue_work(uv_default_loop(), baton->req, GetVersion, reinterpret_cast<uv_after_work_cb>(AfterGetVersion));
+}
+
+
+void DebugProbe::GetVersion(uv_work_t *req)
+{
+    auto baton = static_cast<GetVersionBaton*>(req->data);
+    auto const probe_count_max = MAX_SERIAL_NUMBERS;
+    uint32_t probe_count = 0;
+
+    uint32_t _probes[MAX_SERIAL_NUMBERS];
+
+    // Find nRF51 devices available
+    baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+
+    if (baton->result != SUCCESS)
+    {
+        return;
+    }
+
+    baton->result = NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+
+    if (baton->result != SUCCESS)
+    {
+        return;
+    }
+
+    //TODO: Get version
+
+    NRFJPROG_close_dll();
+}
+
+void DebugProbe::AfterGetVersion(uv_work_t *req)
+{
+    Nan::HandleScope scope;
+
+    auto baton = static_cast<GetVersionBaton*>(req->data);
+    v8::Local<v8::Value> argv[2];
+
+    if (baton->result != SUCCESS)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting version");
+        argv[1] = Nan::Undefined();
+    }
+    else
+    {
+        argv[0] = Nan::Undefined();
+        argv[1] = ConversionUtility::toJsNumber(baton->version);
+    }
+
+    baton->callback->Call(1, argv);
+
+    delete baton;
+}
+#pragma endregion GetVersion
 
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
@@ -221,25 +443,6 @@ extern "C" {
     {
         initConsts(target);
         DebugProbe::Init(target);
-
-		auto const probe_count_max = 40;
-		uint32_t probe_count;
-
-		uint32_t _probes[probe_count_max];
-
-		// Find nRF51 devices available
-		NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
-		NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
-		NRFJPROG_close_dll();
-
-		for (auto i = 0; i < probe_count; i++)
-		{
-			probes.push_back(new ProbeInfo(_probes[i], NRF51_FAMILY));
-		}
-
-		// Find nRF52 devices available
-		NRFJPROG_open_dll("jlinkarm_nrf52_nrfjprog.dll", nullptr, NRF52_FAMILY);
-		NRFJPROG_close_dll();
     }
 }
 
