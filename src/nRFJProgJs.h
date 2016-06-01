@@ -45,6 +45,8 @@ private:
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
+    static device_family_t getFamily(const uint32_t serialnumber);
+
     static uint32_t emulatorSpeed;
 };
 
@@ -64,6 +66,8 @@ public:
     uint32_t serialnumber;
     device_family_t family;
     std::string filename;
+    std::map<device_family_t, std::string> filenameMap;
+    bool useProvidedFamily;
 };
 
 class GetSerialnumbersBaton : public Baton {

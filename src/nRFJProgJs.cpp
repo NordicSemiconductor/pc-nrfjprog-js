@@ -63,6 +63,34 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialnumbers);
 }
 
+device_family_t DebugProbe::getFamily(const uint32_t serialnumber)
+{
+    device_version_t deviceType = UNKNOWN;
+
+    NRFJPROG_connect_to_emu_with_snr(serialnumber, emulatorSpeed);
+
+    NRFJPROG_read_device_version(&deviceType);
+
+    NRFJPROG_disconnect_from_emu();
+
+    switch (deviceType)
+    {
+        case NRF51_XLR1:
+        case NRF51_XLR2:
+        case NRF51_XLR3:
+        case NRF51_L3:
+        case NRF51_XLR3P:
+        case NRF51_XLR3LC:
+            return NRF51_FAMILY;
+        case NRF52_FP1_ENGA:
+        case NRF52_FP1_ENGB:
+        case NRF52_FP1:
+        case UNKNOWN:
+        default:
+            return NRF52_FAMILY;
+    }
+}
+
 #pragma region GetSerialnumbers
 NAN_METHOD(DebugProbe::GetSerialnumbers)
 {
@@ -113,33 +141,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
 
     for (uint32_t i = 0; i < probe_count; i++)
     {
-        device_family_t family = NRF52_FAMILY;
-        device_version_t deviceType = UNKNOWN;
-
-        baton->result = NRFJPROG_connect_to_emu_with_snr(_probes[i], emulatorSpeed);
-
-        NRFJPROG_read_device_version(&deviceType);
-
-        NRFJPROG_disconnect_from_emu();
-
-        switch (deviceType)
-        {
-            case NRF51_XLR1:
-            case NRF51_XLR2:
-            case NRF51_XLR3:
-            case NRF51_L3:
-            case NRF51_XLR3P:
-            case NRF51_XLR3LC:
-                family = NRF51_FAMILY;
-                break;
-            case NRF52_FP1_ENGA:
-            case NRF52_FP1_ENGB:
-            case NRF52_FP1:
-            case UNKNOWN:
-            default:
-                family = NRF52_FAMILY;
-                break;
-        }
+        device_family_t family = getFamily(_probes[i]);
 
         baton->probes.push_back(new ProbeInfo(_probes[i], family));
     }
@@ -185,20 +187,33 @@ NAN_METHOD(DebugProbe::Program)
     auto argumentCount = 0;
 
     uint32_t serialNumber;
-    uint32_t family;
+    uint32_t family = ANY_FAMILY;
     std::string filename;
+    v8::Local<v8::Object> filenameObject;
     v8::Local<v8::Function> callback;
 
     try
     {
         serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
         argumentCount++;
-
-        family = ConversionUtility::getNativeUint32(info[argumentCount]);
-        argumentCount++;
+        
+        if (info.Length() == 3)
+        {
+            filenameObject = ConversionUtility::getJsObject(info[argumentCount]);
+            argumentCount++;
+        }
+        else if (info.Length() == 4)
+        {
+            family = ConversionUtility::getNativeUint32(info[argumentCount]);
+            argumentCount++;
                         
-        filename = ConversionUtility::getNativeString(info[argumentCount]);
-        argumentCount++;
+            filename = ConversionUtility::getNativeString(info[argumentCount]);
+            argumentCount++;
+        }
+        else
+        {
+            throw "parameter count";
+        }
 
         callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
         argumentCount++;
@@ -210,10 +225,31 @@ NAN_METHOD(DebugProbe::Program)
         return;
     }
 
+    
+
     auto baton = new ProgramBaton(callback);
     baton->serialnumber = serialNumber;
     baton->family = (device_family_t)family;
-    baton->filename = filename;
+
+    if (info.Length() == 4)
+    {
+        std::cout << "Specific " << filename << std::endl;
+        baton->filename = filename;
+    }
+    else
+    {
+        if (Utility::Has(filenameObject, NRF51_FAMILY))
+        {
+            baton->filenameMap[NRF51_FAMILY] = ConversionUtility::getNativeString(Utility::Get(filenameObject, NRF51_FAMILY));
+            std::cout << "51: " << baton->filenameMap[NRF51_FAMILY] << std::endl;
+        }
+
+        if (Utility::Has(filenameObject, NRF52_FAMILY))
+        {
+            baton->filenameMap[NRF52_FAMILY] = ConversionUtility::getNativeString(Utility::Get(filenameObject, NRF52_FAMILY));
+            std::cout << "52: " << baton->filenameMap[NRF52_FAMILY] << std::endl;
+        }
+    }
 
     uv_queue_work(uv_default_loop(), baton->req, Program, reinterpret_cast<uv_after_work_cb>(AfterProgram));
 }
@@ -224,7 +260,25 @@ void DebugProbe::Program(uv_work_t *req)
     auto const probe_count_max = MAX_SERIAL_NUMBERS;
     uint32_t probe_count = 0;
 
-    baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+    if (baton->family != ANY_FAMILY)
+    {
+        baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, baton->family);
+        std::cout << "Specific family " << baton->family << std::endl;
+    }
+    else
+    {
+        baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+        baton->family = getFamily(baton->serialnumber);
+
+        if (baton->family != NRF51_FAMILY)
+        {
+            NRFJPROG_close_dll();
+            baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, baton->family);
+        }
+
+        baton->filename = baton->filenameMap[baton->family];
+        std::cout << "Found family " << baton->family << std::endl;
+    }
 
     if (baton->result != SUCCESS)
     {
@@ -251,6 +305,7 @@ void DebugProbe::Program(uv_work_t *req)
         //TODO: Set proper errorcode
         std::cout << "Nand read failed" << std::endl;
         NRFJPROG_close_dll();
+        delete[] code;
         return;
     }
 
@@ -260,6 +315,7 @@ void DebugProbe::Program(uv_work_t *req)
         std::cout << "Erase all failed" << std::endl;
         //TODO: Set proper errorcode
         NRFJPROG_close_dll();
+        delete[] code;
         return;
     }
 
@@ -283,6 +339,7 @@ void DebugProbe::Program(uv_work_t *req)
     } while (bytesFound != 0);
 
     NRFJPROG_close_dll();
+    delete[] code;
 }
 
 void DebugProbe::AfterProgram(uv_work_t *req)

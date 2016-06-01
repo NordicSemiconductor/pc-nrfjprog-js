@@ -83,7 +83,8 @@ typedef enum {
 /* Identified types of nRF devices */
 typedef enum {
 	NRF51_FAMILY,
-	NRF52_FAMILY
+	NRF52_FAMILY,
+    ANY_FAMILY
 } device_family_t;
 
 /* Possible rtt channel directions */

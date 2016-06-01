@@ -56,6 +56,7 @@ public:
     static bool Set(v8::Handle<v8::Object> target, const char *name, v8::Local<v8::Value> value);
 
     static bool Has(v8::Handle<v8::Object> target, const char *name);
+    static bool Has(v8::Handle<v8::Object> target, const int index);
 
     static void SetReturnValue(Nan::NAN_METHOD_ARGS_TYPE info, v8::Local<v8::Object> value);
 
