@@ -5,6 +5,8 @@
 #include "nRFJProgJs.h"
 #include "nrfjprog_common.h"
 
+#include "KeilHexFile.h"
+
 #include <iostream>
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
@@ -44,6 +46,8 @@ NAN_METHOD(DebugProbe::New)
     }
 }
 
+uint32_t DebugProbe::emulatorSpeed = 1000;
+
 DebugProbe::DebugProbe()
 {
 }
@@ -54,8 +58,8 @@ DebugProbe::~DebugProbe()
 
 void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
 {
-    //Nan::SetPrototypeMethod(tpl, "program", Program);
-    //Nan::SetPrototypeMethod(tpl, "getVersion", GetVersion);
+    Nan::SetPrototypeMethod(tpl, "program", Program);
+    Nan::SetPrototypeMethod(tpl, "getVersion", GetVersion);
     Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialnumbers);
 }
 
@@ -155,7 +159,7 @@ NAN_METHOD(DebugProbe::Program)
 
     uint32_t serialNumber;
     uint32_t family;
-    uint8_t *filename;
+    std::string filename;
     v8::Local<v8::Function> callback;
 
     try
@@ -166,7 +170,7 @@ NAN_METHOD(DebugProbe::Program)
         family = ConversionUtility::getNativeUint32(info[argumentCount]);
         argumentCount++;
                         
-        filename = ConversionUtility::getNativePointerToUint8(info[argumentCount]);
+        filename = ConversionUtility::getNativeString(info[argumentCount]);
         argumentCount++;
 
         callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
@@ -182,7 +186,7 @@ NAN_METHOD(DebugProbe::Program)
     auto baton = new ProgramBaton(callback);
     baton->serialnumber = serialNumber;
     baton->family = (device_family_t)family;
-    baton->filename = std::string((char *)filename);
+    baton->filename = filename;
 
     uv_queue_work(uv_default_loop(), baton->req, Program, reinterpret_cast<uv_after_work_cb>(AfterProgram));
 }
@@ -193,9 +197,6 @@ void DebugProbe::Program(uv_work_t *req)
     auto const probe_count_max = MAX_SERIAL_NUMBERS;
     uint32_t probe_count = 0;
 
-    uint32_t _probes[MAX_SERIAL_NUMBERS];
-
-    // Find nRF51 devices available
     baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
 
     if (baton->result != SUCCESS)
@@ -203,14 +204,56 @@ void DebugProbe::Program(uv_work_t *req)
         return;
     }
 
-    baton->result = NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+    baton->result = NRFJPROG_connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
 
     if (baton->result != SUCCESS)
     {
         return;
     }
 
-    //TODO: Programming
+    KeilHexFile program_hex;
+
+    KeilHexFile::Status status = program_hex.open(baton->filename.c_str());
+
+    uint32_t code_size = 512 * 1024;
+    uint8_t *code = new uint8_t[code_size];
+
+    if (program_hex.nand_read(0, code, code_size) != KeilHexFile::SUCCESS)
+    {
+        baton->result = -2;
+        //TODO: Set proper errorcode
+        std::cout << "Nand read failed" << std::endl;
+        NRFJPROG_close_dll();
+        return;
+    }
+
+    if (NRFJPROG_erase_all() != SUCCESS)
+    {
+        baton->result = -1;
+        std::cout << "Erase all failed" << std::endl;
+        //TODO: Set proper errorcode
+        NRFJPROG_close_dll();
+        return;
+    }
+
+    uint32_t foundAddress;
+    uint32_t bytesFound;
+
+    program_hex.find_contiguous(0, foundAddress, bytesFound);
+
+    do
+    {
+        baton->result = NRFJPROG_write(foundAddress, (const uint8_t *)&code[foundAddress], bytesFound, true);
+
+        if (baton->result != SUCCESS)
+        {
+            //TODO: Set proper errorcode
+            std::cout << "Write failed" << std::endl;
+            break;
+        }
+
+        program_hex.find_contiguous(foundAddress + bytesFound, foundAddress, bytesFound);
+    } while (bytesFound != 0);
 
     NRFJPROG_close_dll();
 }

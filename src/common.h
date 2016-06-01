@@ -83,7 +83,7 @@ public:
     uv_work_t *req;
     Nan::Callback *callback;
 
-    nrfjprogdll_err_t result;
+    uint32_t result;
 };
 
 const std::string getCurrentTimeInMilliseconds();

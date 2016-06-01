@@ -25,8 +25,7 @@ include_directories(${CMAKE_JS_INC} ${NRFJPROG_INCLUDE_DIR})
 
 # Specify source files
 file (GLOB SOURCE_FILES
-    "src/common.cpp"
-    "src/nRFJProgJS.cpp"
+    "src/*.cpp"
     "src/*.h"
 )
 

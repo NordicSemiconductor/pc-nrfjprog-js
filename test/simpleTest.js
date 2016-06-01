@@ -8,4 +8,9 @@ probe.getSerialNumbers((err, serialNumbers) => {
 
     console.log(nrfjprog.UP_DIRECTION);
     console.log(nrfjprog.DOWN_DIRECTION);
+
+    probe.program(682447605, 1, 'connectivity_115k2_with_s132_2.0.1.hex', err => {
+        console.log(err);
+        console.log('Done programming');
+    });
 });

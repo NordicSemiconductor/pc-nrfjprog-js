@@ -44,6 +44,8 @@ private:
     NRFJPROGJS_METHOD_DEFINITIONS(GetVersion); // Params: Serialnumber, family, callback
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
+
+    static uint32_t emulatorSpeed;
 };
 
 class ConnectBaton : public Baton {
