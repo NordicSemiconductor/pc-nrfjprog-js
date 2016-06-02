@@ -1,5 +1,5 @@
 {
-  "name": "pc-ble-driver-js",
+  "name": "pc-nrfjprog-js",
   "version": "0.1.0",
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
