@@ -15,6 +15,8 @@ Nan::Persistent<v8::Function> DebugProbe::constructor;
 DllFunctionPointersType DebugProbe::dll_function;
 char DebugProbe::dll_path[COMMON_MAX_PATH] = {'\0'};
 char DebugProbe::jlink_path[COMMON_MAX_PATH] = {'\0'};
+bool DebugProbe::loaded = false;
+NrfjprogErrorCodesType DebugProbe::error = NrfjprogErrorCodesType::Success;
 
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
@@ -58,23 +60,30 @@ DebugProbe::DebugProbe()
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
+    loaded = false;
 
     if (dll_find_result != Success)
     {
-        std::cout << "dll_find_result failed" << std::endl;
+        error = NrfjprogDllNotFoundError;
     }
-    if (jlink_dll_find_result != Success)
+    else if (jlink_dll_find_result != Success)
     {
-        std::cout << "jlink_dll_find_result failed" << std::endl;
+        error = NrfjprogDllNotFoundError;
     }
-    if (dll_load_result != Success)
+    else if (dll_load_result != Success)
     {
-        std::cout << "dll_load_result failed" << std::endl;
+        error = JLinkARMDllNotFoundError;
+    }
+    else
+    {
+        error = Success;
+        loaded = true;
     }
 }
 
 DebugProbe::~DebugProbe()
 {
+    loaded = false;
     DllFree();
 }
 
@@ -141,6 +150,12 @@ NAN_METHOD(DebugProbe::GetSerialnumbers)
 void DebugProbe::GetSerialnumbers(uv_work_t *req)
 {
     auto baton = static_cast<GetSerialnumbersBaton*>(req->data);
+
+    if (!loaded)
+    {
+        baton->result = error;
+        return;
+    }
     auto const probe_count_max = MAX_SERIAL_NUMBERS;
     uint32_t probe_count = 0;
 
@@ -279,8 +294,12 @@ NAN_METHOD(DebugProbe::Program)
 void DebugProbe::Program(uv_work_t *req)
 {
     auto baton = static_cast<ProgramBaton*>(req->data);
-    auto const probe_count_max = MAX_SERIAL_NUMBERS;
-    uint32_t probe_count = 0;
+    
+    if (!loaded)
+    {
+        baton->result = error;
+        return;
+    }
 
     if (baton->family != ANY_FAMILY)
     {
@@ -425,10 +444,12 @@ NAN_METHOD(DebugProbe::GetVersion)
 void DebugProbe::GetVersion(uv_work_t *req)
 {
     auto baton = static_cast<GetVersionBaton*>(req->data);
-    auto const probe_count_max = MAX_SERIAL_NUMBERS;
-    uint32_t probe_count = 0;
 
-    uint32_t _probes[MAX_SERIAL_NUMBERS];
+    if (!loaded)
+    {
+        baton->result = error;
+        return;
+    }
 
     // Find nRF51 devices available
     baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
@@ -438,7 +459,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
         return;
     }
 
-    baton->result = dll_function.enum_emu_snr(_probes, probe_count_max, &probe_count);
+    baton->result = dll_function.connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
 
     if (baton->result != SUCCESS)
     {

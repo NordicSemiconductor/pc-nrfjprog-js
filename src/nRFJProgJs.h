@@ -53,6 +53,9 @@ private:
     static DllFunctionPointersType dll_function;
     static char dll_path[COMMON_MAX_PATH];
     static char jlink_path[COMMON_MAX_PATH];
+
+    static bool loaded;
+    static NrfjprogErrorCodesType error;
 };
 
 class ConnectBaton : public Baton {
