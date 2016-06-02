@@ -4,6 +4,7 @@
 #include <nan.h>
 #include "common.h"
 #include "dllfunc.h"
+#include "osfiles.h"
 
 #define MAX_SERIAL_NUMBERS 100
 
@@ -50,6 +51,8 @@ private:
 
     static uint32_t emulatorSpeed;
     static DllFunctionPointersType dll_function;
+    static char dll_path[COMMON_MAX_PATH];
+    static char jlink_path[COMMON_MAX_PATH];
 };
 
 class ConnectBaton : public Baton {

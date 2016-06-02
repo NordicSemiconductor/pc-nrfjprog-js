@@ -26,7 +26,6 @@ include_directories(${CMAKE_JS_INC} ${NRFJPROG_INCLUDE_DIR})
 # Specify source files
 file (GLOB SOURCE_FILES
     "src/*.cpp"
-    "src/platform/*_win32.cpp"
     "src/*.h"
 )
 
@@ -43,7 +42,6 @@ set_target_properties(${PROJECT_NAME}
 )
 
 if(WIN32)
-    find_library (NRFJPROG_LIB NAMES nrfjprog PATHS ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/bin/win32)
     set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_DEFINITIONS "_CRT_SECURE_NO_WARNINGS")
 elseif(APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework CoreFoundation")
@@ -58,4 +56,4 @@ message(STATUS ${NRFJPROG_LIB})
 
 # Essential library files to link to a node addon,
 # you should add this line in every CMake.js based project.
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} ${NRFJPROG_LIB})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})

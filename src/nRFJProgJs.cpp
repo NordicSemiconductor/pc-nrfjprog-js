@@ -7,12 +7,14 @@
 
 #include "keilhexfile.h"
 #include "dllfunc.h"
-#include "osfiles.h"
+
 
 #include <iostream>
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
 DllFunctionPointersType DebugProbe::dll_function;
+char DebugProbe::dll_path[COMMON_MAX_PATH] = {'\0'};
+char DebugProbe::jlink_path[COMMON_MAX_PATH] = {'\0'};
 
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
@@ -53,11 +55,22 @@ uint32_t DebugProbe::emulatorSpeed = 1000;
 
 DebugProbe::DebugProbe()
 {
-    char dll_path[COMMON_MAX_PATH] = {'\0'};
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
-    char jlink_path[COMMON_MAX_PATH] = {'\0'};
     NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
+
+    if (dll_find_result != Success)
+    {
+        std::cout << "dll_find_result failed" << std::endl;
+    }
+    if (jlink_dll_find_result != Success)
+    {
+        std::cout << "jlink_dll_find_result failed" << std::endl;
+    }
+    if (dll_load_result != Success)
+    {
+        std::cout << "dll_load_result failed" << std::endl;
+    }
 }
 
 DebugProbe::~DebugProbe()
@@ -134,7 +147,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
     uint32_t _probes[MAX_SERIAL_NUMBERS];
 
     // Find nRF51 devices available
-    baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+    baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
 
     if (baton->result != SUCCESS)
     {
@@ -271,18 +284,18 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (baton->family != ANY_FAMILY)
     {
-        baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, baton->family);
+        baton->result = dll_function.open_dll(jlink_path, nullptr, baton->family);
         std::cout << "Specific family " << baton->family << std::endl;
     }
     else
     {
-        baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+        baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
         baton->family = getFamily(baton->serialnumber);
 
         if (baton->family != NRF51_FAMILY)
         {
             dll_function.close_dll();
-            baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, baton->family);
+            baton->result = dll_function.open_dll(jlink_path, nullptr, baton->family);
         }
 
         baton->filename = baton->filenameMap[baton->family];
@@ -418,7 +431,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
     uint32_t _probes[MAX_SERIAL_NUMBERS];
 
     // Find nRF51 devices available
-    baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+    baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
 
     if (baton->result != SUCCESS)
     {

@@ -15,3 +15,7 @@ add_compile_options(
     -std=c++11
     -Wlogical-op
 )
+
+file (GLOB PLATFORM_SOURCE_FILES
+    "src/platform/*_linux.cpp"
+)

@@ -4,3 +4,7 @@ message(STATUS "CFLAGS=-fPIC brew install --verbose  --env=std --build-from-sour
 set(Boost_USE_STATIC_LIBS ON)
 
 add_compile_options(-pthread -std=c++11)
+
+file (GLOB PLATFORM_SOURCE_FILES
+    "src/platform/*_osx.cpp"
+)
