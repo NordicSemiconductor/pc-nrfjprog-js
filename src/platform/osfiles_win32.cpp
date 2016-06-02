@@ -100,7 +100,7 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
     }
 
     /* Search for JLinkARM in the Current User Key.  */
-    if (RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Nordic Semiconductor\\nrfjprog", 0, KEY_QUERY_VALUE, &key) == ERROR_SUCCESS)
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Nordic Semiconductor\\nrfjprog", 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &key) == ERROR_SUCCESS)
     {
         TCHAR    achKey[MAX_KEY_LENGTH];   // buffer for subkey name
         DWORD    cbName;                   // size of name string 

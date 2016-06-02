@@ -6,9 +6,6 @@ probe.getSerialNumbers((err, serialNumbers) => {
     console.log(JSON.stringify(serialNumbers));
     console.log('I was called back!');
 
-    console.log(nrfjprog.UP_DIRECTION);
-    console.log(nrfjprog.DOWN_DIRECTION);
-
     console.log(nrfjprog.NRF51_FAMILY);
     console.log(nrfjprog.NRF52_FAMILY);
 

@@ -159,6 +159,13 @@ static name_map_t NrfjprogErrorCodesTypeMap = {
     NAME_MAP_ENTRY(UicrWriteOperationWithoutEraseWarning)
 };
 
+static name_map_t nrfjprog_js_err_map = {
+    { errorcodes::JsSuccess, "Success" },
+    { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
+    { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
+    { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" }
+};
+
 const std::string getCurrentTimeInMilliseconds()
 {
     auto current_time = std::chrono::system_clock::now();
@@ -768,20 +775,20 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const st
 
     switch (errorCode)
     {
-        case SUCCESS:
+        case errorcodes::JsSuccess:
             return scope.Escape(Nan::Undefined());
 
         default:
         {
             std::ostringstream errorStringStream;
             errorStringStream << "Error occured when " << customMessage << ". "
-                << "Errorcode: " << ConversionUtility::valueToString(errorCode, nrfjprogdll_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
+                << "Errorcode: " << ConversionUtility::valueToString(errorCode, nrfjprog_js_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
 
             v8::Local<v8::Value> error = Nan::Error(ConversionUtility::toJsString(errorStringStream.str())->ToString());
             v8::Local<v8::Object> errorObject = error.As<v8::Object>();
 
             Utility::Set(errorObject, "errno", errorCode);
-            Utility::Set(errorObject, "errcode", ConversionUtility::valueToString(errorCode, nrfjprogdll_err_map));
+            Utility::Set(errorObject, "errcode", ConversionUtility::valueToString(errorCode, nrfjprog_js_err_map));
             Utility::Set(errorObject, "erroperation", ConversionUtility::toJsString(customMessage));
             Utility::Set(errorObject, "errmsg", ConversionUtility::toJsString(errorStringStream.str()));
 

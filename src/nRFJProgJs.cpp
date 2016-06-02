@@ -16,8 +16,9 @@ DllFunctionPointersType DebugProbe::dll_function;
 char DebugProbe::dll_path[COMMON_MAX_PATH] = {'\0'};
 char DebugProbe::jlink_path[COMMON_MAX_PATH] = {'\0'};
 bool DebugProbe::loaded = false;
-NrfjprogErrorCodesType DebugProbe::error = NrfjprogErrorCodesType::Success;
-
+int DebugProbe::error = errorcodes::JsSuccess;
+uint32_t DebugProbe::emulatorSpeed = 1000;
+                                              
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
     Nan::EscapableHandleScope scope;
@@ -53,8 +54,6 @@ NAN_METHOD(DebugProbe::New)
     }
 }
 
-uint32_t DebugProbe::emulatorSpeed = 1000;
-
 DebugProbe::DebugProbe()
 {
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
@@ -64,19 +63,19 @@ DebugProbe::DebugProbe()
 
     if (dll_find_result != Success)
     {
-        error = NrfjprogDllNotFoundError;
+        error = errorcodes::CouldNotLoadDLL;
     }
     else if (jlink_dll_find_result != Success)
     {
-        error = NrfjprogDllNotFoundError;
+        error = errorcodes::CouldNotLoadDLL;
     }
     else if (dll_load_result != Success)
     {
-        error = JLinkARMDllNotFoundError;
+        error = errorcodes::CouldNotLoadDLL;
     }
     else
     {
-        error = Success;
+        error = errorcodes::JsSuccess;
         loaded = true;
     }
 }
@@ -166,6 +165,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
+        baton->result = errorcodes::CouldNotOpenDevice;
         return;
     }
 
@@ -173,6 +173,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
+        baton->result = errorcodes::CouldNotCallFunction;
         return;
     }
 
@@ -193,7 +194,7 @@ void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
     auto baton = static_cast<GetSerialnumbersBaton*>(req->data);
     v8::Local<v8::Value> argv[2];
 
-    if (baton->result != SUCCESS)
+    if (baton->result != errorcodes::JsSuccess)
     {
         argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting serialnumbers");
         argv[1] = Nan::Undefined();
@@ -323,6 +324,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
+        baton->result = errorcodes::CouldNotOpenDevice;
         return;
     }
 
@@ -330,6 +332,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
+        baton->result = errorcodes::CouldNotCallFunction;
         return;
     }
 
@@ -342,8 +345,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (program_hex.nand_read(0, code, code_size) != KeilHexFile::SUCCESS)
     {
-        baton->result = -2;
-        //TODO: Set proper errorcode
+        baton->result = errorcodes::CouldNotCallFunction;
         std::cout << "Nand read failed" << std::endl;
         dll_function.close_dll();
         delete[] code;
@@ -352,9 +354,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (dll_function.erase_all() != SUCCESS)
     {
-        baton->result = -1;
-        std::cout << "Erase all failed" << std::endl;
-        //TODO: Set proper errorcode
+        baton->result = errorcodes::CouldNotCallFunction;
         dll_function.close_dll();
         delete[] code;
         return;
@@ -371,8 +371,7 @@ void DebugProbe::Program(uv_work_t *req)
 
         if (baton->result != SUCCESS)
         {
-            //TODO: Set proper errorcode
-            std::cout << "Write failed" << std::endl;
+            baton->result = errorcodes::CouldNotCallFunction;
             break;
         }
 
@@ -390,7 +389,7 @@ void DebugProbe::AfterProgram(uv_work_t *req)
     auto baton = static_cast<ProgramBaton*>(req->data);
     v8::Local<v8::Value> argv[1];
 
-    if (baton->result != SUCCESS)
+    if (baton->result != errorcodes::JsSuccess)
     {
         argv[0] = ErrorMessage::getErrorMessage(baton->result, "programming");
     }
@@ -456,6 +455,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
+        baton->result = errorcodes::CouldNotOpenDevice;
         return;
     }
 
@@ -463,6 +463,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
+        baton->result = errorcodes::CouldNotOpenDevice;
         return;
     }
 
@@ -478,7 +479,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
     auto baton = static_cast<GetVersionBaton*>(req->data);
     v8::Local<v8::Value> argv[2];
 
-    if (baton->result != SUCCESS)
+    if (baton->result != errorcodes::JsSuccess)
     {
         argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting version");
         argv[1] = Nan::Undefined();
@@ -497,7 +498,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
 
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
-    {
+    {/*
         NODE_DEFINE_CONSTANT(target, R0);
         NODE_DEFINE_CONSTANT(target, R1);
         NODE_DEFINE_CONSTANT(target, R2);
@@ -540,10 +541,10 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
         NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
         NODE_DEFINE_CONSTANT(target, NRF52_FP1);
-
+        */
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
-
+        /*
         NODE_DEFINE_CONSTANT(target, UP_DIRECTION);
         NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION);
 
@@ -607,6 +608,12 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, UnalignedPageEraseWarning);
         NODE_DEFINE_CONSTANT(target, NoLogWarning);
         NODE_DEFINE_CONSTANT(target, UicrWriteOperationWithoutEraseWarning);
+        */
+
+        NODE_DEFINE_CONSTANT(target, JsSuccess);
+        NODE_DEFINE_CONSTANT(target, CouldNotOpenDevice);
+        NODE_DEFINE_CONSTANT(target, CouldNotLoadDLL);
+        NODE_DEFINE_CONSTANT(target, CouldNotCallFunction);
     }
 
     NAN_MODULE_INIT(init)

@@ -222,4 +222,12 @@ public:
     static v8::Local<v8::String> getStructErrorMessage(const std::string name, const std::string message);
 };
 
+typedef enum errorcodes
+{
+    JsSuccess,
+    CouldNotLoadDLL,
+    CouldNotOpenDevice,
+    CouldNotCallFunction
+} errorcodes;
+
 #endif // COMMON_H
