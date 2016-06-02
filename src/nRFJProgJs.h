@@ -3,6 +3,7 @@
 
 #include <nan.h>
 #include "common.h"
+#include "dllfunc.h"
 
 #define MAX_SERIAL_NUMBERS 100
 
@@ -48,6 +49,7 @@ private:
     static device_family_t getFamily(const uint32_t serialnumber);
 
     static uint32_t emulatorSpeed;
+    static DllFunctionPointersType dll_function;
 };
 
 class ConnectBaton : public Baton {

@@ -5,11 +5,14 @@
 #include "nRFJProgJs.h"
 #include "nrfjprog_common.h"
 
-#include "KeilHexFile.h"
+#include "keilhexfile.h"
+#include "dllfunc.h"
+#include "osfiles.h"
 
 #include <iostream>
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
+DllFunctionPointersType DebugProbe::dll_function;
 
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
@@ -50,10 +53,16 @@ uint32_t DebugProbe::emulatorSpeed = 1000;
 
 DebugProbe::DebugProbe()
 {
+    char dll_path[COMMON_MAX_PATH] = {'\0'};
+    NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
+    char jlink_path[COMMON_MAX_PATH] = {'\0'};
+    NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
+    NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
 }
 
 DebugProbe::~DebugProbe()
 {
+    DllFree();
 }
 
 void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
@@ -67,11 +76,11 @@ device_family_t DebugProbe::getFamily(const uint32_t serialnumber)
 {
     device_version_t deviceType = UNKNOWN;
 
-    NRFJPROG_connect_to_emu_with_snr(serialnumber, emulatorSpeed);
+    dll_function.connect_to_emu_with_snr(serialnumber, emulatorSpeed);
 
-    NRFJPROG_read_device_version(&deviceType);
+    dll_function.read_device_version(&deviceType);
 
-    NRFJPROG_disconnect_from_emu();
+    dll_function.disconnect_from_emu();
 
     switch (deviceType)
     {
@@ -125,14 +134,14 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
     uint32_t _probes[MAX_SERIAL_NUMBERS];
 
     // Find nRF51 devices available
-    baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+    baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
 
     if (baton->result != SUCCESS)
     {
         return;
     }
 
-    baton->result = NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+    baton->result = dll_function.enum_emu_snr(_probes, probe_count_max, &probe_count);
 
     if (baton->result != SUCCESS)
     {
@@ -146,7 +155,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
         baton->probes.push_back(new ProbeInfo(_probes[i], family));
     }
 
-    NRFJPROG_close_dll();
+    dll_function.close_dll();
 }
 
 void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
@@ -262,18 +271,18 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (baton->family != ANY_FAMILY)
     {
-        baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, baton->family);
+        baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, baton->family);
         std::cout << "Specific family " << baton->family << std::endl;
     }
     else
     {
-        baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+        baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
         baton->family = getFamily(baton->serialnumber);
 
         if (baton->family != NRF51_FAMILY)
         {
-            NRFJPROG_close_dll();
-            baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, baton->family);
+            dll_function.close_dll();
+            baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, baton->family);
         }
 
         baton->filename = baton->filenameMap[baton->family];
@@ -285,7 +294,7 @@ void DebugProbe::Program(uv_work_t *req)
         return;
     }
 
-    baton->result = NRFJPROG_connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
+    baton->result = dll_function.connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
 
     if (baton->result != SUCCESS)
     {
@@ -304,17 +313,17 @@ void DebugProbe::Program(uv_work_t *req)
         baton->result = -2;
         //TODO: Set proper errorcode
         std::cout << "Nand read failed" << std::endl;
-        NRFJPROG_close_dll();
+        dll_function.close_dll();
         delete[] code;
         return;
     }
 
-    if (NRFJPROG_erase_all() != SUCCESS)
+    if (dll_function.erase_all() != SUCCESS)
     {
         baton->result = -1;
         std::cout << "Erase all failed" << std::endl;
         //TODO: Set proper errorcode
-        NRFJPROG_close_dll();
+        dll_function.close_dll();
         delete[] code;
         return;
     }
@@ -326,7 +335,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     do
     {
-        baton->result = NRFJPROG_write(foundAddress, (const uint8_t *)&code[foundAddress], bytesFound, true);
+        baton->result = dll_function.write(foundAddress, (const uint8_t *)&code[foundAddress], bytesFound, true);
 
         if (baton->result != SUCCESS)
         {
@@ -338,7 +347,7 @@ void DebugProbe::Program(uv_work_t *req)
         program_hex.find_contiguous(foundAddress + bytesFound, foundAddress, bytesFound);
     } while (bytesFound != 0);
 
-    NRFJPROG_close_dll();
+    dll_function.close_dll();
     delete[] code;
 }
 
@@ -409,14 +418,14 @@ void DebugProbe::GetVersion(uv_work_t *req)
     uint32_t _probes[MAX_SERIAL_NUMBERS];
 
     // Find nRF51 devices available
-    baton->result = NRFJPROG_open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
+    baton->result = dll_function.open_dll("JLinkARM.dll", nullptr, NRF51_FAMILY);
 
     if (baton->result != SUCCESS)
     {
         return;
     }
 
-    baton->result = NRFJPROG_enum_emu_snr(_probes, probe_count_max, &probe_count);
+    baton->result = dll_function.enum_emu_snr(_probes, probe_count_max, &probe_count);
 
     if (baton->result != SUCCESS)
     {
@@ -425,7 +434,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
 
     //TODO: Get version
 
-    NRFJPROG_close_dll();
+    dll_function.close_dll();
 }
 
 void DebugProbe::AfterGetVersion(uv_work_t *req)

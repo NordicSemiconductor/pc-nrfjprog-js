@@ -1,4 +1,4 @@
-#include "FlashMemorySegment.h"
+#include "flashmemorysegment.h"
 #include <iterator>
 
 #ifdef __linux__

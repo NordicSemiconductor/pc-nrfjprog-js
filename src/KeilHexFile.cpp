@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <cstring>
 
-#include "KeilHexFile.h"
-#include "FlashMemorySegment.h"
+#include "keilhexfile.h"
+#include "flashmemorysegment.h"
 
 // This defines how much data to put on each line.
 #define NOMINAL_FILE_LINE_LEN           (16UL)
