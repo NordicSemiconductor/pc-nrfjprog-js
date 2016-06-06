@@ -6,7 +6,6 @@
 
 
 #include "nrfjprog.h"
-#include "OSFiles.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -40,14 +39,14 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
 
     strncpy(dll_path, dirname(pathbuf), dll_path_len - 1);
     strncat(dll_path, "/libnrfjprogdll.dylib", dll_path_len - strlen(dll_path) - 1);
-    
+
     if (!OSFilesExists(dll_path)) {
         /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
         void * dll = dlopen("libnrfjprogdll.dylib", RTLD_LAZY);
         if (dll){
             dlclose(dll);
             strncpy(dll_path, "libnrfjprogdll.dylib", dll_path_len - 1);
-            return Success;    
+            return Success;
         }
         return NrfjprogDllNotFoundError;
     }
@@ -57,24 +56,24 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
 
 NrfjprogErrorCodesType OSFilesFindJLink(char * jlink_path, int jlink_path_len)
 {
-    
+
     DIR * directory = opendir("/Applications/SEGGER/JLink/");
     if (directory == NULL){
-        
+
         /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
         void * dll = dlopen("libjlinkarm.dylib", RTLD_LAZY);
         if (dll){
             dlclose(dll);
             strncpy(jlink_path, "libjlinkarm.dylib", jlink_path_len - 1);
-            return Success;    
+            return Success;
         }
-        
+
         return JLinkARMDllNotFoundError;
-    } 
+    }
 
     char candidate[jlink_path_len];
     strncpy(candidate, "libjlinkarm.0.0.0.dylib", jlink_path_len - 1);
-    
+
     struct dirent * directory_entry;
     while (NULL != (directory_entry = readdir(directory))){
         /* Look for either .dylib, or highest .[NUM].dylib */
@@ -104,7 +103,7 @@ NrfjprogErrorCodesType OSFilesFindIni(char * ini_path, int ini_path_len)
 {
     char temp_ini_path[ini_path_len];
     memset(temp_ini_path, 0, ini_path_len);
-    
+
     int ret;
     pid_t pid;
     char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
@@ -122,9 +121,4 @@ NrfjprogErrorCodesType OSFilesFindIni(char * ini_path, int ini_path_len)
         return NrfjprogIniNotFoundError;
     }
     return Success;
-}   
-
-
-
-
-
+}

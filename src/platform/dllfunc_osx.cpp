@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 #include "nrfjprog.h"
-#include "DllFunc.h"
+#include "../dllfunc.h"
 
 static void * dll = NULL;
 
