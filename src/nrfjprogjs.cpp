@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "nRFJProgJs.h"
+#include "nrfjprogjs.h"
 #include "nrfjprog_common.h"
 
 #include "keilhexfile.h"
