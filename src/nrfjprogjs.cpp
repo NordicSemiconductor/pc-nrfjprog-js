@@ -411,7 +411,7 @@ NAN_METHOD(DebugProbe::GetVersion)
     auto argumentCount = 0;
 
     uint32_t serialNumber;
-    uint32_t family;
+    uint32_t family = ANY_FAMILY;
     v8::Local<v8::Function> callback;
 
     try
@@ -419,8 +419,11 @@ NAN_METHOD(DebugProbe::GetVersion)
         serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
         argumentCount++;
 
-        family = ConversionUtility::getNativeUint32(info[argumentCount]);
-        argumentCount++;
+        if (info.Length() == 3)
+        {
+            family = ConversionUtility::getNativeUint32(info[argumentCount]);
+            argumentCount++;
+        }
 
         callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
         argumentCount++;
@@ -450,8 +453,15 @@ void DebugProbe::GetVersion(uv_work_t *req)
         return;
     }
 
+    device_family_t family = baton->family;
+
+    if (family == ANY_FAMILY)
+    {
+        family = getFamily(baton->serialnumber);
+    }
+
     // Find nRF51 devices available
-    baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
+    baton->result = dll_function.open_dll(jlink_path, nullptr, family);
 
     if (baton->result != SUCCESS)
     {
