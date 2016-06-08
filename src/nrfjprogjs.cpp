@@ -56,6 +56,11 @@ NAN_METHOD(DebugProbe::New)
 
 DebugProbe::DebugProbe()
 {
+    if (loaded)
+    {
+        return;
+    }
+
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
@@ -475,9 +480,16 @@ void DebugProbe::GetVersion(uv_work_t *req)
     {
         baton->result = errorcodes::CouldNotOpenDevice;
         return;
-    }
+    }                                           
 
-    //TODO: Get version
+    //TODO: Get actual version (i.e. correct address)
+    baton->result = dll_function.read_u32(0x0, &baton->version);
+
+    if (baton->result != SUCCESS)
+    {
+        baton->result = errorcodes::CouldNotCallFunction;
+        return;
+    }
 
     dll_function.close_dll();
 }
@@ -500,7 +512,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         argv[1] = ConversionUtility::toJsNumber(baton->version);
     }
 
-    baton->callback->Call(1, argv);
+    baton->callback->Call(2, argv);
 
     delete baton;
 }
