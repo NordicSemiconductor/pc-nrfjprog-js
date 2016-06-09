@@ -13,4 +13,6 @@ probe.getSerialNumbers((err, serialNumbers) => {
         console.log(err);
         console.log('Done programming');
     });
+
+    probe.getVersion(serialNumbers[0].serialNumber, (err, version) => { console.log('Error: ' + err); console.log('Version: ' + version);});
 });

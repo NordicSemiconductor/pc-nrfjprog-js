@@ -268,15 +268,12 @@ NAN_METHOD(DebugProbe::Program)
         return;
     }
 
-    
-
     auto baton = new ProgramBaton(callback);
     baton->serialnumber = serialNumber;
     baton->family = (device_family_t)family;
 
     if (info.Length() == 4)
     {
-        std::cout << "Specific " << filename << std::endl;
         baton->filename = filename;
     }
     else
@@ -284,13 +281,11 @@ NAN_METHOD(DebugProbe::Program)
         if (Utility::Has(filenameObject, NRF51_FAMILY))
         {
             baton->filenameMap[NRF51_FAMILY] = ConversionUtility::getNativeString(Utility::Get(filenameObject, NRF51_FAMILY));
-            std::cout << "51: " << baton->filenameMap[NRF51_FAMILY] << std::endl;
         }
 
         if (Utility::Has(filenameObject, NRF52_FAMILY))
         {
             baton->filenameMap[NRF52_FAMILY] = ConversionUtility::getNativeString(Utility::Get(filenameObject, NRF52_FAMILY));
-            std::cout << "52: " << baton->filenameMap[NRF52_FAMILY] << std::endl;
         }
     }
 
@@ -310,7 +305,6 @@ void DebugProbe::Program(uv_work_t *req)
     if (baton->family != ANY_FAMILY)
     {
         baton->result = dll_function.open_dll(jlink_path, nullptr, baton->family);
-        std::cout << "Specific family " << baton->family << std::endl;
     }
     else
     {
@@ -324,7 +318,6 @@ void DebugProbe::Program(uv_work_t *req)
         }
 
         baton->filename = baton->filenameMap[baton->family];
-        std::cout << "Found family " << baton->family << std::endl;
     }
 
     if (baton->result != SUCCESS)
@@ -351,7 +344,6 @@ void DebugProbe::Program(uv_work_t *req)
     if (program_hex.nand_read(0, code, code_size) != KeilHexFile::SUCCESS)
     {
         baton->result = errorcodes::CouldNotCallFunction;
-        std::cout << "Nand read failed" << std::endl;
         dll_function.close_dll();
         delete[] code;
         return;
@@ -384,6 +376,7 @@ void DebugProbe::Program(uv_work_t *req)
     } while (bytesFound != 0);
 
     dll_function.sys_reset();
+    dll_function.go();
 
     dll_function.close_dll();
     delete[] code;
