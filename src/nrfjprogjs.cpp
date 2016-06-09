@@ -383,6 +383,8 @@ void DebugProbe::Program(uv_work_t *req)
         program_hex.find_contiguous(foundAddress + bytesFound, foundAddress, bytesFound);
     } while (bytesFound != 0);
 
+    dll_function.sys_reset();
+
     dll_function.close_dll();
     delete[] code;
 }
