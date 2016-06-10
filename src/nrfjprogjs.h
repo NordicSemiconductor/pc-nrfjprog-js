@@ -49,6 +49,8 @@ private:
 
     static device_family_t getFamily(const uint32_t serialnumber);
 
+    static void closeBeforeExit();
+
     static uint32_t emulatorSpeed;
     static DllFunctionPointersType dll_function;
     static char dll_path[COMMON_MAX_PATH];
@@ -56,6 +58,7 @@ private:
 
     static bool loaded;
     static int error;
+    static uint32_t versionMagicNumber;
 };
 
 class ConnectBaton : public Baton {
@@ -89,7 +92,8 @@ public:
     BATON_CONSTRUCTOR(GetVersionBaton);
     uint32_t serialnumber;
     device_family_t family;
-    uint32_t version;
+    uint8_t versionData[12];
+    std::string versionText;
 };
 
 #endif // __NRFJPROG_H__

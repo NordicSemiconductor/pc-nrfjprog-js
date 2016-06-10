@@ -227,7 +227,8 @@ typedef enum errorcodes
     JsSuccess,
     CouldNotLoadDLL,
     CouldNotOpenDevice,
-    CouldNotCallFunction
+    CouldNotCallFunction,
+    WrongMagicNumber
 } errorcodes;
 
 #endif // COMMON_H

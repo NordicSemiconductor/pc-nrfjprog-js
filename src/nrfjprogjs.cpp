@@ -8,7 +8,6 @@
 #include "keilhexfile.h"
 #include "dllfunc.h"
 
-
 #include <iostream>
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
@@ -18,6 +17,7 @@ char DebugProbe::jlink_path[COMMON_MAX_PATH] = {'\0'};
 bool DebugProbe::loaded = false;
 int DebugProbe::error = errorcodes::JsSuccess;
 uint32_t DebugProbe::emulatorSpeed = 1000;
+uint32_t DebugProbe::versionMagicNumber = 0x46D8A517; //YGGDRAIL
                                               
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
@@ -89,6 +89,14 @@ DebugProbe::~DebugProbe()
 {
     loaded = false;
     DllFree();
+}
+
+void DebugProbe::closeBeforeExit()
+{
+    dll_function.sys_reset();
+    dll_function.go();
+
+    dll_function.close_dll();
 }
 
 void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
@@ -344,7 +352,7 @@ void DebugProbe::Program(uv_work_t *req)
     if (program_hex.nand_read(0, code, code_size) != KeilHexFile::SUCCESS)
     {
         baton->result = errorcodes::CouldNotCallFunction;
-        dll_function.close_dll();
+        closeBeforeExit();
         delete[] code;
         return;
     }
@@ -352,7 +360,7 @@ void DebugProbe::Program(uv_work_t *req)
     if (dll_function.erase_all() != SUCCESS)
     {
         baton->result = errorcodes::CouldNotCallFunction;
-        dll_function.close_dll();
+        closeBeforeExit();
         delete[] code;
         return;
     }
@@ -375,10 +383,7 @@ void DebugProbe::Program(uv_work_t *req)
         program_hex.find_contiguous(foundAddress + bytesFound, foundAddress, bytesFound);
     } while (bytesFound != 0);
 
-    dll_function.sys_reset();
-    dll_function.go();
-
-    dll_function.close_dll();
+    closeBeforeExit();
     delete[] code;
 }
 
@@ -442,6 +447,17 @@ NAN_METHOD(DebugProbe::GetVersion)
     uv_queue_work(uv_default_loop(), baton->req, GetVersion, reinterpret_cast<uv_after_work_cb>(AfterGetVersion));
 }
 
+uint32_t getNumber(const uint8_t *data, const int offset, const int length)
+{
+    uint32_t _r = 0;
+
+    for (int i = 0; i < length; i++)
+    {
+        _r += (data[offset + i] << (i * 8));
+    }
+
+    return _r;
+}
 
 void DebugProbe::GetVersion(uv_work_t *req)
 {
@@ -478,19 +494,49 @@ void DebugProbe::GetVersion(uv_work_t *req)
     }                                           
 
     //TODO: Get actual version (i.e. correct address)
-    baton->result = dll_function.read_u32(0x0, &baton->version);
+    baton->result = dll_function.read(0x20000, baton->versionData, 12);
 
     if (baton->result != SUCCESS)
     {
         baton->result = errorcodes::CouldNotCallFunction;
+        closeBeforeExit();
         return;
     }
 
-    dll_function.sys_reset();
-    dll_function.go();
+    const uint32_t magicNumber = getNumber(baton->versionData, 0, 4);
 
-    dll_function.close_dll();
+    if (magicNumber != versionMagicNumber)
+    {
+        baton->result = errorcodes::WrongMagicNumber;
+        closeBeforeExit();
+        return;
+    }
+
+    const uint8_t length = getNumber(baton->versionData, 11, 1);
+
+    if (length > 0)
+    {
+        uint8_t *versiontext = new uint8_t[length + 1];
+        versiontext[length] = '\0';
+        baton->result = dll_function.read(0x35000 + 12, versiontext, length);
+
+        if (baton->result != SUCCESS)
+        {
+            baton->result = errorcodes::CouldNotCallFunction;
+            delete[] versiontext;
+            closeBeforeExit();
+            return;
+        }
+
+        baton->versionText = std::string((char *)versiontext);
+
+        delete[] versiontext;
+    }
+
+    closeBeforeExit();
 }
+
+#include <sstream>
 
 void DebugProbe::AfterGetVersion(uv_work_t *req)
 {
@@ -507,7 +553,26 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
     else
     {
         argv[0] = Nan::Undefined();
-        argv[1] = ConversionUtility::toJsNumber(baton->version);
+
+        v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+
+        uint8_t major = getNumber(baton->versionData, 4, 1);
+        uint8_t minor = getNumber(baton->versionData, 5, 1);
+        uint8_t bug = getNumber(baton->versionData, 6, 1);
+        uint32_t hash = getNumber(baton->versionData, 7, 4);
+
+        std::stringstream versionstring;
+
+        versionstring << (int)major << "." << (int)minor << "." << (int)bug << " " << hash;
+
+        Utility::Set(obj, "versionMajor", ConversionUtility::toJsNumber(major));
+        Utility::Set(obj, "versionMinor", ConversionUtility::toJsNumber(minor));
+        Utility::Set(obj, "versionBug", ConversionUtility::toJsNumber(bug));
+        Utility::Set(obj, "versionHash", ConversionUtility::toJsNumber(hash));
+        Utility::Set(obj, "versionString", ConversionUtility::toJsString(versionstring.str()));
+        Utility::Set(obj, "versionText", ConversionUtility::toJsString(baton->versionText));
+
+        argv[1] = obj;
     }
 
     baton->callback->Call(2, argv);

@@ -163,7 +163,8 @@ static name_map_t nrfjprog_js_err_map = {
     { errorcodes::JsSuccess, "Success" },
     { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
     { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
-    { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" }
+    { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" },
+    { errorcodes::WrongMagicNumber, "WrongMagicNumber" }
 };
 
 const std::string getCurrentTimeInMilliseconds()

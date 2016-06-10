@@ -15,11 +15,11 @@ probe.getSerialNumbers((err, serialNumbers) => {
 
         probe.getVersion(serialNumbers[0].serialNumber, (err, version) => {
             console.log('Error: ' + err);
-            console.log('Read version 1: ' + version);
+            console.log('Read version 1: ' + JSON.stringify(version));
 
             probe.getVersion(serialNumbers[0].serialNumber, (err, version2) => {
                 console.log('Error: ' + err);
-                console.log('Read version 2: ' + version2);
+                console.log('Read version 2: ' + JSON.stringify(version2));
 
                 if (version === version2) {
                     console.log('Version read correctly.');
