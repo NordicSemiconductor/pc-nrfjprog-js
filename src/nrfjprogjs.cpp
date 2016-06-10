@@ -518,7 +518,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
     {
         uint8_t *versiontext = new uint8_t[length + 1];
         versiontext[length] = '\0';
-        baton->result = dll_function.read(0x35000 + 12, versiontext, length);
+        baton->result = dll_function.read(0x20000 + 12, versiontext, length);
 
         if (baton->result != SUCCESS)
         {
