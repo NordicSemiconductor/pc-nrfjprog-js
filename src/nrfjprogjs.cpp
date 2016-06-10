@@ -486,6 +486,9 @@ void DebugProbe::GetVersion(uv_work_t *req)
         return;
     }
 
+    dll_function.sys_reset();
+    dll_function.go();
+
     dll_function.close_dll();
 }
 
