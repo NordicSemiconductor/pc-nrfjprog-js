@@ -96,6 +96,8 @@ void DebugProbe::closeBeforeExit()
     dll_function.sys_reset();
     dll_function.go();
 
+    dll_function.disconnect_from_emu();
+
     dll_function.close_dll();
 }
 
@@ -183,6 +185,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
     }
 
     baton->result = dll_function.enum_emu_snr(_probes, probe_count_max, &probe_count);
+    dll_function.close_dll();
 
     if (baton->result != SUCCESS)
     {
@@ -196,8 +199,6 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
 
         baton->probes.push_back(new ProbeInfo(_probes[i], family));
     }
-
-    dll_function.close_dll();
 }
 
 void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
@@ -494,7 +495,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
     }                                           
 
     //TODO: Get actual version (i.e. correct address)
-    baton->result = dll_function.read(0x20000, baton->versionData, 13);
+    baton->result = dll_function.read(0x20000, baton->versionData, 12);
 
     if (baton->result != SUCCESS)
     {
@@ -559,9 +560,9 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
 
         uint32_t magic = getNumber(baton->versionData, 0, 4);
         uint32_t hash = getNumber(baton->versionData, 4, 4);
-        uint8_t major = getNumber(baton->versionData, 9, 1);
-        uint8_t minor = getNumber(baton->versionData, 10, 1);
-        uint8_t bug = getNumber(baton->versionData, 11, 1);
+        uint8_t major = getNumber(baton->versionData, 8, 1);
+        uint8_t minor = getNumber(baton->versionData, 9, 1);
+        uint8_t bug = getNumber(baton->versionData, 10, 1);
     
         std::stringstream versionstring;
 
