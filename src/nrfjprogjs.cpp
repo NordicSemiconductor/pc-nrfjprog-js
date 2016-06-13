@@ -494,7 +494,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
     }                                           
 
     //TODO: Get actual version (i.e. correct address)
-    baton->result = dll_function.read(0x20000, baton->versionData, 12);
+    baton->result = dll_function.read(0x20000, baton->versionData, 13);
 
     if (baton->result != SUCCESS)
     {
@@ -507,18 +507,19 @@ void DebugProbe::GetVersion(uv_work_t *req)
 
     if (magicNumber != versionMagicNumber)
     {
+        std::cout << std::hex << magicNumber << std::endl;
         baton->result = errorcodes::WrongMagicNumber;
         closeBeforeExit();
         return;
     }
 
-    const uint8_t length = getNumber(baton->versionData, 11, 1);
+    const uint8_t length = getNumber(baton->versionData, 12, 1);
 
     if (length > 0)
     {
         uint8_t *versiontext = new uint8_t[length + 1];
         versiontext[length] = '\0';
-        baton->result = dll_function.read(0x20000 + 12, versiontext, length);
+        baton->result = dll_function.read(0x20000 + 13, versiontext, length);
 
         if (baton->result != SUCCESS)
         {
@@ -559,18 +560,20 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         uint8_t major = getNumber(baton->versionData, 4, 1);
         uint8_t minor = getNumber(baton->versionData, 5, 1);
         uint8_t bug = getNumber(baton->versionData, 6, 1);
-        uint32_t hash = getNumber(baton->versionData, 7, 4);
+        uint8_t reserved = getNumber(baton->versionData, 7, 1);
+        uint32_t hash = getNumber(baton->versionData, 8, 4);
 
         std::stringstream versionstring;
 
-        versionstring << (int)major << "." << (int)minor << "." << (int)bug << " " << hash;
+        versionstring << (int)major << "." << (int)minor << "." << (int)bug << " " << std::hex << hash;
 
-        Utility::Set(obj, "versionMajor", ConversionUtility::toJsNumber(major));
-        Utility::Set(obj, "versionMinor", ConversionUtility::toJsNumber(minor));
-        Utility::Set(obj, "versionBug", ConversionUtility::toJsNumber(bug));
-        Utility::Set(obj, "versionHash", ConversionUtility::toJsNumber(hash));
-        Utility::Set(obj, "versionString", ConversionUtility::toJsString(versionstring.str()));
-        Utility::Set(obj, "versionText", ConversionUtility::toJsString(baton->versionText));
+        Utility::Set(obj, "Major", ConversionUtility::toJsNumber(major));
+        Utility::Set(obj, "Minor", ConversionUtility::toJsNumber(minor));
+        Utility::Set(obj, "Bug", ConversionUtility::toJsNumber(bug));
+        Utility::Set(obj, "Reserved", ConversionUtility::toJsNumber(reserved));
+        Utility::Set(obj, "Hash", ConversionUtility::toJsNumber(hash));
+        Utility::Set(obj, "String", ConversionUtility::toJsString(versionstring.str()));
+        Utility::Set(obj, "Text", ConversionUtility::toJsString(baton->versionText));
 
         argv[1] = obj;
     }
