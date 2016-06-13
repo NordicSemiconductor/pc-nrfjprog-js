@@ -513,13 +513,13 @@ void DebugProbe::GetVersion(uv_work_t *req)
         return;
     }
 
-    const uint8_t length = getNumber(baton->versionData, 12, 1);
+    const uint8_t length = getNumber(baton->versionData, 11, 1);
 
     if (length > 0)
     {
         uint8_t *versiontext = new uint8_t[length + 1];
         versiontext[length] = '\0';
-        baton->result = dll_function.read(0x20000 + 13, versiontext, length);
+        baton->result = dll_function.read(0x20000 + 12, versiontext, length);
 
         if (baton->result != SUCCESS)
         {
@@ -557,20 +557,24 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
 
         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
-        uint8_t major = getNumber(baton->versionData, 4, 1);
-        uint8_t minor = getNumber(baton->versionData, 5, 1);
-        uint8_t bug = getNumber(baton->versionData, 6, 1);
-        uint8_t reserved = getNumber(baton->versionData, 7, 1);
-        uint32_t hash = getNumber(baton->versionData, 8, 4);
-
+        uint32_t magic = getNumber(baton->versionData, 0, 4);
+        uint32_t hash = getNumber(baton->versionData, 4, 4);
+        uint8_t major = getNumber(baton->versionData, 9, 1);
+        uint8_t minor = getNumber(baton->versionData, 10, 1);
+        uint8_t bug = getNumber(baton->versionData, 11, 1);
+    
         std::stringstream versionstring;
 
         versionstring << (int)major << "." << (int)minor << "." << (int)bug << " " << std::hex << hash;
 
+        std::stringstream magicString;
+
+        magicString << std::hex << magic;
+
+        Utility::Set(obj, "Magic", ConversionUtility::toJsString(magicString.str()));
         Utility::Set(obj, "Major", ConversionUtility::toJsNumber(major));
         Utility::Set(obj, "Minor", ConversionUtility::toJsNumber(minor));
         Utility::Set(obj, "Bug", ConversionUtility::toJsNumber(bug));
-        Utility::Set(obj, "Reserved", ConversionUtility::toJsNumber(reserved));
         Utility::Set(obj, "Hash", ConversionUtility::toJsNumber(hash));
         Utility::Set(obj, "String", ConversionUtility::toJsString(versionstring.str()));
         Utility::Set(obj, "Text", ConversionUtility::toJsString(baton->versionText));
