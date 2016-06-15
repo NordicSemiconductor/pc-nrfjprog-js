@@ -569,11 +569,11 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         uint32_t hash = getNumber(baton->versionData, 8, 4);
         uint8_t major = getNumber(baton->versionData, 12, 1);
         uint8_t minor = getNumber(baton->versionData, 13, 1);
-        uint8_t bug = getNumber(baton->versionData, 14, 1);
+        uint8_t patch = getNumber(baton->versionData, 14, 1);
     
         std::stringstream versionstring;
 
-        versionstring << (int)major << "." << (int)minor << "." << (int)bug << " " << std::hex << hash;
+        versionstring << (int)major << "." << (int)minor << "." << (int)patch << " " << std::hex << hash;
 
         std::stringstream magicString;
 
@@ -583,7 +583,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         Utility::Set(obj, "FirmwareID", ConversionUtility::toJsNumber(firmwareID));
         Utility::Set(obj, "Major", ConversionUtility::toJsNumber(major));
         Utility::Set(obj, "Minor", ConversionUtility::toJsNumber(minor));
-        Utility::Set(obj, "Bug", ConversionUtility::toJsNumber(bug));
+        Utility::Set(obj, "Patch", ConversionUtility::toJsNumber(patch));
         Utility::Set(obj, "Hash", ConversionUtility::toJsNumber(hash));
         Utility::Set(obj, "String", ConversionUtility::toJsString(versionstring.str()));
         Utility::Set(obj, "Text", ConversionUtility::toJsString(baton->versionText));
