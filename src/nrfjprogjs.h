@@ -92,7 +92,7 @@ public:
     BATON_CONSTRUCTOR(GetVersionBaton);
     uint32_t serialnumber;
     device_family_t family;
-    uint8_t versionData[12];
+    uint8_t versionData[16];
     std::string versionText;
 };
 

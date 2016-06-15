@@ -339,7 +339,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
-        baton->result = errorcodes::CouldNotCallFunction;
+        baton->result = errorcodes::CouldNotConnectToDevice;
         return;
     }
 
@@ -360,7 +360,7 @@ void DebugProbe::Program(uv_work_t *req)
 
     if (dll_function.erase_all() != SUCCESS)
     {
-        baton->result = errorcodes::CouldNotCallFunction;
+        baton->result = errorcodes::CouldNotErase;
         closeBeforeExit();
         delete[] code;
         return;
@@ -377,7 +377,7 @@ void DebugProbe::Program(uv_work_t *req)
 
         if (baton->result != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotCallFunction;
+            baton->result = errorcodes::CouldNotProgram;
             break;
         }
 
@@ -490,16 +490,16 @@ void DebugProbe::GetVersion(uv_work_t *req)
 
     if (baton->result != SUCCESS)
     {
-        baton->result = errorcodes::CouldNotOpenDevice;
+        baton->result = errorcodes::CouldNotConnectToDevice;
         return;
     }                                           
 
     //TODO: Get actual version (i.e. correct address)
-    baton->result = dll_function.read(0x20000, baton->versionData, 12);
+    baton->result = dll_function.read(0x20000, baton->versionData, 16);
 
     if (baton->result != SUCCESS)
     {
-        baton->result = errorcodes::CouldNotCallFunction;
+        baton->result = errorcodes::CouldNotRead;
         closeBeforeExit();
         return;
     }
@@ -514,17 +514,17 @@ void DebugProbe::GetVersion(uv_work_t *req)
         return;
     }
 
-    const uint8_t length = getNumber(baton->versionData, 11, 1);
+    const uint8_t length = getNumber(baton->versionData, 15, 1);
 
     if (length > 0)
     {
         uint8_t *versiontext = new uint8_t[length + 1];
         versiontext[length] = '\0';
-        baton->result = dll_function.read(0x20000 + 12, versiontext, length);
+        baton->result = dll_function.read(0x20000 + 16, versiontext, length);
 
         if (baton->result != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotCallFunction;
+            baton->result = errorcodes::CouldNotRead;
             delete[] versiontext;
             closeBeforeExit();
             return;
@@ -559,10 +559,11 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
         uint32_t magic = getNumber(baton->versionData, 0, 4);
-        uint32_t hash = getNumber(baton->versionData, 4, 4);
-        uint8_t major = getNumber(baton->versionData, 8, 1);
-        uint8_t minor = getNumber(baton->versionData, 9, 1);
-        uint8_t bug = getNumber(baton->versionData, 10, 1);
+        uint8_t firmwareID = getNumber(baton->versionData, 4, 1);
+        uint32_t hash = getNumber(baton->versionData, 8, 4);
+        uint8_t major = getNumber(baton->versionData, 12, 1);
+        uint8_t minor = getNumber(baton->versionData, 13, 1);
+        uint8_t bug = getNumber(baton->versionData, 14, 1);
     
         std::stringstream versionstring;
 
@@ -573,6 +574,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         magicString << std::hex << magic;
 
         Utility::Set(obj, "Magic", ConversionUtility::toJsString(magicString.str()));
+        Utility::Set(obj, "FirmwareID", ConversionUtility::toJsNumber(firmwareID));
         Utility::Set(obj, "Major", ConversionUtility::toJsNumber(major));
         Utility::Set(obj, "Minor", ConversionUtility::toJsNumber(minor));
         Utility::Set(obj, "Bug", ConversionUtility::toJsNumber(bug));

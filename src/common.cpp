@@ -163,7 +163,11 @@ static name_map_t nrfjprog_js_err_map = {
     { errorcodes::JsSuccess, "Success" },
     { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
     { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
+    { errorcodes::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
     { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" },
+    { errorcodes::CouldNotErase, "CouldNotErase" },
+    { errorcodes::CouldNotProgram, "CouldNotProgram" },
+    { errorcodes::CouldNotRead, "CouldNotRead" },
     { errorcodes::WrongMagicNumber, "WrongMagicNumber" }
 };
 

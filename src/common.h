@@ -227,7 +227,11 @@ typedef enum errorcodes
     JsSuccess,
     CouldNotLoadDLL,
     CouldNotOpenDevice,
+    CouldNotConnectToDevice,
     CouldNotCallFunction,
+    CouldNotErase,
+    CouldNotProgram,
+    CouldNotRead,
     WrongMagicNumber
 } errorcodes;
 
