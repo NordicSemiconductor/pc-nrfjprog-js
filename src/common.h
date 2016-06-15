@@ -232,6 +232,7 @@ typedef enum errorcodes
     CouldNotErase,
     CouldNotProgram,
     CouldNotRead,
+    CouldNotOpenHexFile,
     WrongMagicNumber
 } errorcodes;
 

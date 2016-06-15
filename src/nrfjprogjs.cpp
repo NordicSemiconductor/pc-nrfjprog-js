@@ -347,6 +347,12 @@ void DebugProbe::Program(uv_work_t *req)
 
     KeilHexFile::Status status = program_hex.open(baton->filename.c_str());
 
+    if (status != SUCCESS)
+    {
+        baton->result = errorcodes::CouldNotOpenHexFile;
+        return;
+    }
+
     uint32_t code_size = 512 * 1024;
     uint8_t *code = new uint8_t[code_size];
 
