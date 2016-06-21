@@ -18,7 +18,7 @@ bool DebugProbe::loaded = false;
 int DebugProbe::error = errorcodes::JsSuccess;
 uint32_t DebugProbe::emulatorSpeed = 1000;
 uint32_t DebugProbe::versionMagicNumber = 0x46D8A517; //YGGDRAIL
-                                              
+
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
     Nan::EscapableHandleScope scope;
@@ -44,11 +44,14 @@ NAN_MODULE_INIT(DebugProbe::Init)
 
 NAN_METHOD(DebugProbe::New)
 {
-    if (info.IsConstructCall()) {
+    if (info.IsConstructCall())
+    {
         auto obj = new DebugProbe();
         obj->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
-    } else {
+    }
+    else
+    {
         v8::Local<v8::Function> cons = Nan::New(constructor);
         info.GetReturnValue().Set(cons->NewInstance());
     }
@@ -56,15 +59,10 @@ NAN_METHOD(DebugProbe::New)
 
 DebugProbe::DebugProbe()
 {
-    if (loaded)
-    {
-        return;
-    }
+    error = Success;
 
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
-    NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
-    loaded = false;
 
     if (dll_find_result != Success)
     {
@@ -74,7 +72,24 @@ DebugProbe::DebugProbe()
     {
         error = errorcodes::CouldNotLoadDLL;
     }
-    else if (dll_load_result != Success)
+}
+
+void DebugProbe::loadDll()
+{
+    if (loaded)
+    {
+        return;
+    }
+
+    if (error != Success)
+    {
+        return;
+    }
+
+    NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
+    loaded = false;
+
+    if (dll_load_result != Success)
     {
         error = errorcodes::CouldNotLoadDLL;
     }
@@ -85,7 +100,12 @@ DebugProbe::DebugProbe()
     }
 }
 
+
+
 DebugProbe::~DebugProbe()
+{}
+
+void DebugProbe::unloadDll()
 {
     loaded = false;
     DllFree();
@@ -99,6 +119,8 @@ void DebugProbe::closeBeforeExit()
     dll_function.disconnect_from_emu();
 
     dll_function.close_dll();
+
+    unloadDll();
 }
 
 void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
@@ -141,12 +163,12 @@ NAN_METHOD(DebugProbe::GetSerialnumbers)
 {
     auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
     auto argumentCount = 0;
-	v8::Local<v8::Function> callback;
+    v8::Local<v8::Function> callback;
 
     try
     {
-		callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
-		argumentCount++;
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
     }
     catch (std::string error)
     {
@@ -165,11 +187,14 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
 {
     auto baton = static_cast<GetSerialnumbersBaton*>(req->data);
 
+    loadDll();
+
     if (!loaded)
     {
         baton->result = error;
         return;
     }
+
     auto const probe_count_max = MAX_SERIAL_NUMBERS;
     uint32_t probe_count = 0;
 
@@ -185,7 +210,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
     }
 
     baton->result = dll_function.enum_emu_snr(_probes, probe_count_max, &probe_count);
-    dll_function.close_dll();
+    closeBeforeExit();
 
     if (baton->result != SUCCESS)
     {
@@ -248,7 +273,7 @@ NAN_METHOD(DebugProbe::Program)
     {
         serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
         argumentCount++;
-        
+
         if (info.Length() == 3)
         {
             filenameObject = ConversionUtility::getJsObject(info[argumentCount]);
@@ -258,7 +283,7 @@ NAN_METHOD(DebugProbe::Program)
         {
             family = ConversionUtility::getNativeUint32(info[argumentCount]);
             argumentCount++;
-                        
+
             filename = ConversionUtility::getNativeString(info[argumentCount]);
             argumentCount++;
         }
@@ -304,7 +329,9 @@ NAN_METHOD(DebugProbe::Program)
 void DebugProbe::Program(uv_work_t *req)
 {
     auto baton = static_cast<ProgramBaton*>(req->data);
-    
+
+    loadDll();
+
     if (!loaded)
     {
         baton->result = error;
@@ -470,6 +497,8 @@ void DebugProbe::GetVersion(uv_work_t *req)
 {
     auto baton = static_cast<GetVersionBaton*>(req->data);
 
+    loadDll();
+
     if (!loaded)
     {
         baton->result = error;
@@ -498,7 +527,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
     {
         baton->result = errorcodes::CouldNotConnectToDevice;
         return;
-    }                                           
+    }
 
     //TODO: Get actual version (i.e. correct address)
     baton->result = dll_function.read(0x20000, baton->versionData, 16);
@@ -600,49 +629,49 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     {/*
-        NODE_DEFINE_CONSTANT(target, R0);
-        NODE_DEFINE_CONSTANT(target, R1);
-        NODE_DEFINE_CONSTANT(target, R2);
-        NODE_DEFINE_CONSTANT(target, R3);
-        NODE_DEFINE_CONSTANT(target, R4);
-        NODE_DEFINE_CONSTANT(target, R5);
-        NODE_DEFINE_CONSTANT(target, R6);
-        NODE_DEFINE_CONSTANT(target, R7);
-        NODE_DEFINE_CONSTANT(target, R8);
-        NODE_DEFINE_CONSTANT(target, R9);
-        NODE_DEFINE_CONSTANT(target, R10);
-        NODE_DEFINE_CONSTANT(target, R11);
-        NODE_DEFINE_CONSTANT(target, R12);
-        NODE_DEFINE_CONSTANT(target, R13);
-        NODE_DEFINE_CONSTANT(target, R14);
-        NODE_DEFINE_CONSTANT(target, R15);
-        NODE_DEFINE_CONSTANT(target, XPSR);
-        NODE_DEFINE_CONSTANT(target, MSP);
-        NODE_DEFINE_CONSTANT(target, PSP);
+     NODE_DEFINE_CONSTANT(target, R0);
+     NODE_DEFINE_CONSTANT(target, R1);
+     NODE_DEFINE_CONSTANT(target, R2);
+     NODE_DEFINE_CONSTANT(target, R3);
+     NODE_DEFINE_CONSTANT(target, R4);
+     NODE_DEFINE_CONSTANT(target, R5);
+     NODE_DEFINE_CONSTANT(target, R6);
+     NODE_DEFINE_CONSTANT(target, R7);
+     NODE_DEFINE_CONSTANT(target, R8);
+     NODE_DEFINE_CONSTANT(target, R9);
+     NODE_DEFINE_CONSTANT(target, R10);
+     NODE_DEFINE_CONSTANT(target, R11);
+     NODE_DEFINE_CONSTANT(target, R12);
+     NODE_DEFINE_CONSTANT(target, R13);
+     NODE_DEFINE_CONSTANT(target, R14);
+     NODE_DEFINE_CONSTANT(target, R15);
+     NODE_DEFINE_CONSTANT(target, XPSR);
+     NODE_DEFINE_CONSTANT(target, MSP);
+     NODE_DEFINE_CONSTANT(target, PSP);
 
-        NODE_DEFINE_CONSTANT(target, RAM_OFF);
-        NODE_DEFINE_CONSTANT(target, RAM_ON);
+     NODE_DEFINE_CONSTANT(target, RAM_OFF);
+     NODE_DEFINE_CONSTANT(target, RAM_ON);
 
-        NODE_DEFINE_CONSTANT(target, NONE);
-        NODE_DEFINE_CONSTANT(target, REGION_0);
-        NODE_DEFINE_CONSTANT(target, ALL);
-        NODE_DEFINE_CONSTANT(target, BOTH);
+     NODE_DEFINE_CONSTANT(target, NONE);
+     NODE_DEFINE_CONSTANT(target, REGION_0);
+     NODE_DEFINE_CONSTANT(target, ALL);
+     NODE_DEFINE_CONSTANT(target, BOTH);
 
-        NODE_DEFINE_CONSTANT(target, NO_REGION_0);
-        NODE_DEFINE_CONSTANT(target, FACTORY);
-        NODE_DEFINE_CONSTANT(target, USER);
+     NODE_DEFINE_CONSTANT(target, NO_REGION_0);
+     NODE_DEFINE_CONSTANT(target, FACTORY);
+     NODE_DEFINE_CONSTANT(target, USER);
 
-        NODE_DEFINE_CONSTANT(target, UNKNOWN);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
-        NODE_DEFINE_CONSTANT(target, NRF51_L3);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1);
-        */
+     NODE_DEFINE_CONSTANT(target, UNKNOWN);
+     NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
+     NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
+     NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
+     NODE_DEFINE_CONSTANT(target, NRF51_L3);
+     NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
+     NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
+     NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
+     NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
+     NODE_DEFINE_CONSTANT(target, NRF52_FP1);
+     */
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
         /*

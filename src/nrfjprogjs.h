@@ -26,7 +26,8 @@ public:
     v8::Local<v8::Object> ToJs();
 };
 
-class DebugProbe : public Nan::ObjectWrap {
+class DebugProbe : public Nan::ObjectWrap
+{
 public:
     static NAN_MODULE_INIT(Init);
 
@@ -45,6 +46,9 @@ private:
     NRFJPROGJS_METHOD_DEFINITIONS(GetSerialnumbers); // Params: None, callback
     NRFJPROGJS_METHOD_DEFINITIONS(GetVersion); // Params: Serialnumber, family, callback
 
+    static void loadDll();
+    static void unloadDll();
+
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
     static device_family_t getFamily(const uint32_t serialnumber);
@@ -61,17 +65,20 @@ private:
     static uint32_t versionMagicNumber;
 };
 
-class ConnectBaton : public Baton {
+class ConnectBaton : public Baton
+{
 public:
     BATON_CONSTRUCTOR(ConnectBaton);
 };
 
-class DisconnectBaton : public Baton {
+class DisconnectBaton : public Baton
+{
 public:
     BATON_CONSTRUCTOR(DisconnectBaton);
 };
 
-class ProgramBaton : public Baton {
+class ProgramBaton : public Baton
+{
 public:
     BATON_CONSTRUCTOR(ProgramBaton);
     uint32_t serialnumber;
@@ -81,13 +88,15 @@ public:
     bool useProvidedFamily;
 };
 
-class GetSerialnumbersBaton : public Baton {
+class GetSerialnumbersBaton : public Baton
+{
 public:
     BATON_CONSTRUCTOR(GetSerialnumbersBaton);
     std::vector<ProbeInfo*> probes;
 };
 
-class GetVersionBaton : public Baton {
+class GetVersionBaton : public Baton
+{
 public:
     BATON_CONSTRUCTOR(GetVersionBaton);
     uint32_t serialnumber;
