@@ -49,9 +49,11 @@ private:
     static void loadDll();
     static void unloadDll();
 
+    static device_family_t openDll(device_family_t family, const uint32_t serialnumber);
+
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
-    static device_family_t getFamily(const uint32_t serialnumber);
+    static nrfjprogdll_err_t correctFamily(const uint32_t serialnumber);
 
     static void closeBeforeExit();
 
@@ -61,7 +63,9 @@ private:
     static char jlink_path[COMMON_MAX_PATH];
 
     static bool loaded;
+    static bool connectedToDevice;
     static int error;
+    static int finderror;
     static uint32_t versionMagicNumber;
 };
 

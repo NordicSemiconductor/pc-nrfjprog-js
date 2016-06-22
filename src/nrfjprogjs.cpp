@@ -15,7 +15,9 @@ DllFunctionPointersType DebugProbe::dll_function;
 char DebugProbe::dll_path[COMMON_MAX_PATH] = {'\0'};
 char DebugProbe::jlink_path[COMMON_MAX_PATH] = {'\0'};
 bool DebugProbe::loaded = false;
+bool DebugProbe::connectedToDevice = false;
 int DebugProbe::error = errorcodes::JsSuccess;
+int DebugProbe::finderror = errorcodes::JsSuccess;
 uint32_t DebugProbe::emulatorSpeed = 1000;
 uint32_t DebugProbe::versionMagicNumber = 0x46D8A517; //YGGDRAIL
 
@@ -59,18 +61,18 @@ NAN_METHOD(DebugProbe::New)
 
 DebugProbe::DebugProbe()
 {
-    error = Success;
+    finderror = errorcodes::JsSuccess;
 
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
     NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
 
     if (dll_find_result != Success)
     {
-        error = errorcodes::CouldNotLoadDLL;
+        finderror = errorcodes::CouldNotLoadDLL;
     }
     else if (jlink_dll_find_result != Success)
     {
-        error = errorcodes::CouldNotLoadDLL;
+        finderror = errorcodes::CouldNotLoadDLL;
     }
 }
 
@@ -81,8 +83,9 @@ void DebugProbe::loadDll()
         return;
     }
 
-    if (error != Success)
+    if (finderror != errorcodes::JsSuccess)
     {
+        error = finderror;
         return;
     }
 
@@ -107,16 +110,24 @@ DebugProbe::~DebugProbe()
 
 void DebugProbe::unloadDll()
 {
-    loaded = false;
-    DllFree();
+    if (loaded)
+    {
+        loaded = false;
+        DllFree();
+    }
 }
 
 void DebugProbe::closeBeforeExit()
 {
-    dll_function.sys_reset();
-    dll_function.go();
+    if (connectedToDevice)
+    {
+        dll_function.sys_reset();
+        dll_function.go();
 
-    dll_function.disconnect_from_emu();
+        dll_function.disconnect_from_emu();
+
+        connectedToDevice = false;
+    }
 
     dll_function.close_dll();
 
@@ -130,32 +141,76 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialnumbers);
 }
 
-device_family_t DebugProbe::getFamily(const uint32_t serialnumber)
+device_family_t DebugProbe::openDll(device_family_t family, const uint32_t serialnumber)
 {
+    nrfjprogdll_err_t err = SUCCESS;
+
+    if (family == ANY_FAMILY || family == NRF51_FAMILY)
+    {  
+        err = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
+
+        if (err != SUCCESS)
+        {
+            error = errorcodes::CouldNotOpenDevice;
+            return ANY_FAMILY;
+        }
+
+        if (correctFamily(serialnumber) == SUCCESS)
+        {
+            return NRF51_FAMILY;
+        }
+        
+        dll_function.close_dll();
+    }
+
+    if (family == ANY_FAMILY || family == NRF52_FAMILY)
+    {
+        if (dll_function.open_dll(jlink_path, nullptr, NRF52_FAMILY) != SUCCESS)
+        {
+            error = errorcodes::CouldNotOpenDevice;
+            return ANY_FAMILY;
+        }
+
+        if (correctFamily(serialnumber) == SUCCESS)
+        {
+            return NRF52_FAMILY;
+        }
+
+        dll_function.close_dll();
+    }
+
+    return ANY_FAMILY;
+}
+
+nrfjprogdll_err_t DebugProbe::correctFamily(const uint32_t serialnumber)
+{
+    if (serialnumber == 0)
+    {
+        return SUCCESS;
+    }
+
     device_version_t deviceType = UNKNOWN;
 
-    dll_function.connect_to_emu_with_snr(serialnumber, emulatorSpeed);
+    nrfjprogdll_err_t err = dll_function.connect_to_emu_with_snr(serialnumber, emulatorSpeed);
 
-    dll_function.read_device_version(&deviceType);
+    if (err != SUCCESS)
+    {
+        return err;
+    }
 
+    connectedToDevice = true;
+
+    err = dll_function.read_device_version(&deviceType);
     dll_function.disconnect_from_emu();
 
-    switch (deviceType)
-    {
-        case NRF51_XLR1:
-        case NRF51_XLR2:
-        case NRF51_XLR3:
-        case NRF51_L3:
-        case NRF51_XLR3P:
-        case NRF51_XLR3LC:
-            return NRF51_FAMILY;
-        case NRF52_FP1_ENGA:
-        case NRF52_FP1_ENGB:
-        case NRF52_FP1:
-        case UNKNOWN:
-        default:
-            return NRF52_FAMILY;
+    connectedToDevice = false;
+
+    if (err != SUCCESS)
+    {    
+        return err;
     }
+
+    return err;
 }
 
 #pragma region GetSerialnumbers
@@ -192,6 +247,7 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
     if (!loaded)
     {
         baton->result = error;
+        unloadDll();
         return;
     }
 
@@ -200,30 +256,35 @@ void DebugProbe::GetSerialnumbers(uv_work_t *req)
 
     uint32_t _probes[MAX_SERIAL_NUMBERS];
 
-    // Find nRF51 devices available
-    baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
-
-    if (baton->result != SUCCESS)
+    if (openDll(NRF51_FAMILY, 0) == ANY_FAMILY)
     {
-        baton->result = errorcodes::CouldNotOpenDevice;
+        baton->result = error;
+        unloadDll();
         return;
     }
 
     baton->result = dll_function.enum_emu_snr(_probes, probe_count_max, &probe_count);
-    closeBeforeExit();
 
     if (baton->result != SUCCESS)
     {
+        closeBeforeExit();
         baton->result = errorcodes::CouldNotCallFunction;
         return;
     }
 
     for (uint32_t i = 0; i < probe_count; i++)
     {
-        device_family_t family = getFamily(_probes[i]);
+        device_family_t family = NRF51_FAMILY;
+
+        if (correctFamily(_probes[i]) == WRONG_FAMILY_FOR_DEVICE)
+        {
+            family = NRF52_FAMILY;
+        }
 
         baton->probes.push_back(new ProbeInfo(_probes[i], family));
     }
+
+    closeBeforeExit();
 }
 
 void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
@@ -308,7 +369,7 @@ NAN_METHOD(DebugProbe::Program)
 
     if (info.Length() == 4)
     {
-        baton->filename = filename;
+        baton->filenameMap[baton->family] = filename;
     }
     else
     {
@@ -338,37 +399,27 @@ void DebugProbe::Program(uv_work_t *req)
         return;
     }
 
-    if (baton->family != ANY_FAMILY)
-    {
-        baton->result = dll_function.open_dll(jlink_path, nullptr, baton->family);
-    }
-    else
-    {
-        baton->result = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
-        baton->family = getFamily(baton->serialnumber);
+    baton->family = openDll(baton->family, baton->serialnumber);
 
-        if (baton->family != NRF51_FAMILY)
-        {
-            dll_function.close_dll();
-            baton->result = dll_function.open_dll(jlink_path, nullptr, baton->family);
-        }
-
-        baton->filename = baton->filenameMap[baton->family];
-    }
-
-    if (baton->result != SUCCESS)
+    if (baton->family == ANY_FAMILY)
     {
-        baton->result = errorcodes::CouldNotOpenDevice;
+        baton->result = error;
+        unloadDll();
         return;
     }
 
+    baton->filename = baton->filenameMap[baton->family];
+    
     baton->result = dll_function.connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
 
     if (baton->result != SUCCESS)
     {
         baton->result = errorcodes::CouldNotConnectToDevice;
+        closeBeforeExit();
         return;
     }
+
+    connectedToDevice = true;
 
     KeilHexFile program_hex;
 
@@ -505,19 +556,12 @@ void DebugProbe::GetVersion(uv_work_t *req)
         return;
     }
 
-    device_family_t family = baton->family;
+    baton->family = openDll(baton->family, baton->serialnumber);
 
-    if (family == ANY_FAMILY)
+    if (baton->family == ANY_FAMILY)
     {
-        family = getFamily(baton->serialnumber);
-    }
-
-    // Find nRF51 devices available
-    baton->result = dll_function.open_dll(jlink_path, nullptr, family);
-
-    if (baton->result != SUCCESS)
-    {
-        baton->result = errorcodes::CouldNotOpenDevice;
+        baton->result = error;
+        unloadDll();
         return;
     }
 
@@ -526,10 +570,12 @@ void DebugProbe::GetVersion(uv_work_t *req)
     if (baton->result != SUCCESS)
     {
         baton->result = errorcodes::CouldNotConnectToDevice;
+        closeBeforeExit();
         return;
     }
 
-    //TODO: Get actual version (i.e. correct address)
+    connectedToDevice = true;
+
     baton->result = dll_function.read(0x20000, baton->versionData, 16);
 
     if (baton->result != SUCCESS)
@@ -601,21 +647,24 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         uint8_t patch = getNumber(baton->versionData, 14, 1);
     
         std::stringstream versionstring;
+        std::stringstream versionstringComplete;
 
-        versionstring << (int)major << "." << (int)minor << "." << (int)patch << " " << std::hex << hash;
+        versionstring << (int)major << "." << (int)minor << "." << (int)patch;
+        versionstringComplete << (int)major << "." << (int)minor << "." << (int)patch << " " << std::hex << hash;
 
         std::stringstream magicString;
 
         magicString << std::hex << magic;
 
-        Utility::Set(obj, "Magic", ConversionUtility::toJsString(magicString.str()));
-        Utility::Set(obj, "FirmwareID", ConversionUtility::toJsNumber(firmwareID));
-        Utility::Set(obj, "Major", ConversionUtility::toJsNumber(major));
-        Utility::Set(obj, "Minor", ConversionUtility::toJsNumber(minor));
-        Utility::Set(obj, "Patch", ConversionUtility::toJsNumber(patch));
-        Utility::Set(obj, "Hash", ConversionUtility::toJsNumber(hash));
-        Utility::Set(obj, "String", ConversionUtility::toJsString(versionstring.str()));
-        Utility::Set(obj, "Text", ConversionUtility::toJsString(baton->versionText));
+        Utility::Set(obj, "magic", ConversionUtility::toJsString(magicString.str()));
+        Utility::Set(obj, "firmwareID", ConversionUtility::toJsNumber(firmwareID));
+        Utility::Set(obj, "major", ConversionUtility::toJsNumber(major));
+        Utility::Set(obj, "minor", ConversionUtility::toJsNumber(minor));
+        Utility::Set(obj, "patch", ConversionUtility::toJsNumber(patch));
+        Utility::Set(obj, "hash", ConversionUtility::toJsNumber(hash));
+        Utility::Set(obj, "string", ConversionUtility::toJsString(versionstring.str()));
+        Utility::Set(obj, "stringComplete", ConversionUtility::toJsString(versionstringComplete.str()));
+        Utility::Set(obj, "text", ConversionUtility::toJsString(baton->versionText));
 
         argv[1] = obj;
     }
