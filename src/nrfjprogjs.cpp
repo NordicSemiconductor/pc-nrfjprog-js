@@ -1,3 +1,40 @@
+/*
+ * Copyright (c) 2016 Nordic Semiconductor ASA
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *   1. Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ *   2. Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ *
+ *   3. Neither the name of Nordic Semiconductor ASA nor the names of other
+ *   contributors to this software may be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ *
+ *   4. This software must only be used in or with a processor manufactured by Nordic
+ *   Semiconductor ASA, or in or with a processor manufactured by a third party that
+ *   is used in combination with a processor manufactured by Nordic Semiconductor.
+ *
+ *   5. Any software provided in binary or object form under this license must not be
+ *   reverse engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <nan.h>
 
 #include <vector>
@@ -146,7 +183,7 @@ device_family_t DebugProbe::openDll(device_family_t family, const uint32_t seria
     nrfjprogdll_err_t err = SUCCESS;
 
     if (family == ANY_FAMILY || family == NRF51_FAMILY)
-    {  
+    {
         err = dll_function.open_dll(jlink_path, nullptr, NRF51_FAMILY);
 
         if (err != SUCCESS)
@@ -159,7 +196,7 @@ device_family_t DebugProbe::openDll(device_family_t family, const uint32_t seria
         {
             return NRF51_FAMILY;
         }
-        
+
         dll_function.close_dll();
     }
 
@@ -206,7 +243,7 @@ nrfjprogdll_err_t DebugProbe::correctFamily(const uint32_t serialnumber)
     connectedToDevice = false;
 
     if (err != SUCCESS)
-    {    
+    {
         return err;
     }
 
@@ -409,7 +446,7 @@ void DebugProbe::Program(uv_work_t *req)
     }
 
     baton->filename = baton->filenameMap[baton->family];
-    
+
     baton->result = dll_function.connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
 
     if (baton->result != SUCCESS)
@@ -645,7 +682,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         uint8_t major = getNumber(baton->versionData, 12, 1);
         uint8_t minor = getNumber(baton->versionData, 13, 1);
         uint8_t patch = getNumber(baton->versionData, 14, 1);
-    
+
         std::stringstream versionstring;
         std::stringstream versionstringComplete;
 
