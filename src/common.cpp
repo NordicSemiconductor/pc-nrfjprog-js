@@ -186,6 +186,8 @@ static name_map_t NrfjprogErrorCodesTypeMap = {
 
 static name_map_t nrfjprog_js_err_map = {
     { errorcodes::JsSuccess, "Success" },
+    { errorcodes::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL" },
+    { errorcodes::CouldNotFindJprogDLL, "CouldNotFindJprogDLL" },
     { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
     { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
     { errorcodes::CouldNotConnectToDevice, "CouldNotConnectToDevice" },

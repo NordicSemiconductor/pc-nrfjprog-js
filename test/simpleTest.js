@@ -41,6 +41,11 @@ const nrfjprog = require('../index.js');
 let probe = new nrfjprog.DebugProbe();
 let probe2 = new nrfjprog.DebugProbe();
 probe.getSerialNumbers((err, serialNumbers) => {
+    if (err) {
+        console.log(err);
+        return;
+    }
+    
     console.log(JSON.stringify(serialNumbers));
     console.log('I was called back!');
 

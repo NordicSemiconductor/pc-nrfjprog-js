@@ -250,6 +250,8 @@ public:
 typedef enum errorcodes
 {
     JsSuccess,
+    CouldNotFindJlinkDLL,
+    CouldNotFindJprogDLL,
     CouldNotLoadDLL,
     CouldNotOpenDevice,
     CouldNotConnectToDevice,

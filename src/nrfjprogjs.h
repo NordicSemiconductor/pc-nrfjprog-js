@@ -34,7 +34,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef __NRFJPROG_H__
 #define __NRFJPROG_H__
 
@@ -82,6 +82,7 @@ private:
     NRFJPROGJS_METHOD_DEFINITIONS(Program); // Params: Serialnumber, family, file, callback
     NRFJPROGJS_METHOD_DEFINITIONS(GetSerialnumbers); // Params: None, callback
     NRFJPROGJS_METHOD_DEFINITIONS(GetVersion); // Params: Serialnumber, family, callback
+    NRFJPROGJS_METHOD_DEFINITIONS(ReadAddress); // Params: Serialnumber, family, address, length, callback
 
     static void loadDll();
     static void unloadDll();
@@ -144,6 +145,17 @@ public:
     device_family_t family;
     uint8_t versionData[16];
     std::string versionText;
+};
+
+class ReadAddressBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(ReadAddressBaton);
+    uint32_t serialnumber;
+    device_family_t family;
+    uint32_t address;
+    uint32_t length;
+    uint8_t *data;
 };
 
 #endif // __NRFJPROG_H__

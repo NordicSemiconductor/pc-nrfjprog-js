@@ -105,11 +105,11 @@ DebugProbe::DebugProbe()
 
     if (dll_find_result != Success)
     {
-        finderror = errorcodes::CouldNotLoadDLL;
+        finderror = errorcodes::CouldNotFindJprogDLL;
     }
     else if (jlink_dll_find_result != Success)
     {
-        finderror = errorcodes::CouldNotLoadDLL;
+        finderror = errorcodes::CouldNotFindJlinkDLL;
     }
 }
 
@@ -176,6 +176,7 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "program", Program);
     Nan::SetPrototypeMethod(tpl, "getVersion", GetVersion);
     Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialnumbers);
+    Nan::SetPrototypeMethod(tpl, "readAddress", ReadAddress);
 }
 
 device_family_t DebugProbe::openDll(device_family_t family, const uint32_t serialnumber)
@@ -711,6 +712,125 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
     delete baton;
 }
 #pragma endregion GetVersion
+
+#pragma region ReadAddress
+NAN_METHOD(DebugProbe::ReadAddress)
+{
+    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto argumentCount = 0;
+
+    uint32_t serialNumber;
+    uint32_t family = ANY_FAMILY;
+    uint32_t address = 0;
+    uint32_t length = 0;
+    v8::Local<v8::Function> callback;
+
+    try
+    {
+        serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        if (info.Length() == 5)
+        {
+            family = ConversionUtility::getNativeUint32(info[argumentCount]);
+            argumentCount++;
+        }
+
+        address = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        length = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+        return;
+    }
+
+    auto baton = new ReadAddressBaton(callback);
+    baton->serialnumber = serialNumber;
+    baton->family = (device_family_t)family;
+    baton->address = address;
+    baton->length = length;
+    baton->data = new uint8_t[length];
+
+    uv_queue_work(uv_default_loop(), baton->req, ReadAddress, reinterpret_cast<uv_after_work_cb>(AfterReadAddress));
+}
+
+void DebugProbe::ReadAddress(uv_work_t *req)
+{
+    auto baton = static_cast<ReadAddressBaton*>(req->data);
+
+    loadDll();
+
+    if (!loaded)
+    {
+        baton->result = error;
+        return;
+    }
+
+    baton->family = openDll(baton->family, baton->serialnumber);
+
+    if (baton->family == ANY_FAMILY)
+    {
+        baton->result = error;
+        unloadDll();
+        return;
+    }
+
+    baton->result = dll_function.connect_to_emu_with_snr(baton->serialnumber, emulatorSpeed);
+
+    if (baton->result != SUCCESS)
+    {
+        baton->result = errorcodes::CouldNotConnectToDevice;
+        closeBeforeExit();
+        return;
+    }
+
+    connectedToDevice = true;
+
+    baton->result = dll_function.read(baton->address, baton->data, baton->length);
+
+    if (baton->result != SUCCESS)
+    {
+        baton->result = errorcodes::CouldNotRead;
+        closeBeforeExit();
+        return;
+    }
+
+    closeBeforeExit();
+}
+
+void DebugProbe::AfterReadAddress(uv_work_t *req)
+{
+    Nan::HandleScope scope;
+
+    auto baton = static_cast<ReadAddressBaton*>(req->data);
+    v8::Local<v8::Value> argv[2];
+
+    if (baton->result != errorcodes::JsSuccess)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "reading address");
+        argv[1] = Nan::Undefined();
+    }
+    else
+    {
+        argv[0] = Nan::Undefined();
+
+        argv[1] = ConversionUtility::toJsValueArray(baton->data, baton->length);
+    }
+
+    baton->callback->Call(2, argv);
+
+    delete[] baton->data;
+    delete baton;
+}
+#pragma endregion ReadAddress
 
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
