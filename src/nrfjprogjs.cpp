@@ -411,6 +411,15 @@ NAN_METHOD(DebugProbe::Program)
     }
     else
     {
+        if (Utility::Has(filenameObject, "filecontent"))
+        {
+            baton->filecontent = ConversionUtility::getNativeBool(Utility::Get(filenameObject, "filecontent"));
+        }
+        else
+        {
+            baton->filecontent = false;
+        }
+
         if (Utility::Has(filenameObject, NRF51_FAMILY))
         {
             baton->filenameMap[NRF51_FAMILY] = ConversionUtility::getNativeString(Utility::Get(filenameObject, NRF51_FAMILY));
@@ -460,8 +469,16 @@ void DebugProbe::Program(uv_work_t *req)
     connectedToDevice = true;
 
     KeilHexFile program_hex;
+    KeilHexFile::Status status;
 
-    KeilHexFile::Status status = program_hex.open(baton->filename.c_str());
+    if (baton->filecontent)
+    {
+        status = program_hex.open(baton->filename);
+    }
+    else
+    {
+        status = program_hex.open(baton->filename.c_str());
+    }
 
     if (status != SUCCESS)
     {

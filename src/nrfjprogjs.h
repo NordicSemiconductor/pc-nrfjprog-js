@@ -128,6 +128,7 @@ public:
     std::string filename;
     std::map<device_family_t, std::string> filenameMap;
     bool useProvidedFamily;
+    bool filecontent;
 };
 
 class GetSerialnumbersBaton : public Baton
