@@ -631,7 +631,7 @@ void DebugProbe::GetVersion(uv_work_t *req)
 
     connectedToDevice = true;
 
-    baton->result = dll_function.read(0x20000, baton->versionData, 16);
+    baton->result = dll_function.read(0x20000, baton->versionData, 24);
 
     if (baton->result != SUCCESS)
     {
@@ -648,27 +648,6 @@ void DebugProbe::GetVersion(uv_work_t *req)
         baton->result = errorcodes::WrongMagicNumber;
         closeBeforeExit();
         return;
-    }
-
-    const uint8_t length = getNumber(baton->versionData, 15, 1);
-
-    if (length > 0)
-    {
-        uint8_t *versiontext = new uint8_t[length + 1];
-        versiontext[length] = '\0';
-        baton->result = dll_function.read(0x20000 + 16, versiontext, length);
-
-        if (baton->result != SUCCESS)
-        {
-            baton->result = errorcodes::CouldNotRead;
-            delete[] versiontext;
-            closeBeforeExit();
-            return;
-        }
-
-        baton->versionText = std::string((char *)versiontext);
-
-        delete[] versiontext;
     }
 
     closeBeforeExit();
@@ -695,11 +674,14 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
         uint32_t magic = getNumber(baton->versionData, 0, 4);
-        uint8_t firmwareID = getNumber(baton->versionData, 4, 1);
+        uint8_t structVersion = getNumber(baton->versionData, 4, 1);
         uint32_t hash = getNumber(baton->versionData, 8, 4);
         uint8_t major = getNumber(baton->versionData, 12, 1);
         uint8_t minor = getNumber(baton->versionData, 13, 1);
         uint8_t patch = getNumber(baton->versionData, 14, 1);
+        uint8_t sdBleApiVersion = getNumber(baton->versionData, 16, 1);
+        uint8_t transportType = getNumber(baton->versionData, 17, 1);
+        uint32_t baudrate = getNumber(baton->versionData, 20, 4);
 
         std::stringstream versionstring;
         std::stringstream versionstringComplete;
@@ -712,14 +694,27 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         magicString << std::hex << magic;
 
         Utility::Set(obj, "magic", ConversionUtility::toJsString(magicString.str()));
-        Utility::Set(obj, "firmwareID", ConversionUtility::toJsNumber(firmwareID));
+        Utility::Set(obj, "firmwareID", Nan::Undefined()); // Keep for backward compatibility
+        Utility::Set(obj, "structVersion", ConversionUtility::toJsNumber(structVersion));
         Utility::Set(obj, "major", ConversionUtility::toJsNumber(major));
         Utility::Set(obj, "minor", ConversionUtility::toJsNumber(minor));
         Utility::Set(obj, "patch", ConversionUtility::toJsNumber(patch));
         Utility::Set(obj, "hash", ConversionUtility::toJsNumber(hash));
         Utility::Set(obj, "string", ConversionUtility::toJsString(versionstring.str()));
         Utility::Set(obj, "stringComplete", ConversionUtility::toJsString(versionstringComplete.str()));
-        Utility::Set(obj, "text", ConversionUtility::toJsString(baton->versionText));
+
+        if (structVersion == 2)
+        {
+            Utility::Set(obj, "sdBleApiVersion", ConversionUtility::toJsNumber(sdBleApiVersion));
+            Utility::Set(obj, "transportType", ConversionUtility::toJsNumber(transportType));
+            Utility::Set(obj, "baudrate", ConversionUtility::toJsNumber(baudrate));
+        }
+        else
+        {
+            Utility::Set(obj, "sdBleApiVersion", Nan::Undefind());
+            Utility::Set(obj, "transportType", Nan::Undefined());
+            Utility::Set(obj, "baudrate", Nan::Undefined());
+        }
 
         argv[1] = obj;
     }

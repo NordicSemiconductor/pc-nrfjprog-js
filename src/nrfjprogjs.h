@@ -144,8 +144,7 @@ public:
     BATON_CONSTRUCTOR(GetVersionBaton);
     uint32_t serialnumber;
     device_family_t family;
-    uint8_t versionData[16];
-    std::string versionText;
+    uint8_t versionData[24];
 };
 
 class ReadAddressBaton : public Baton
