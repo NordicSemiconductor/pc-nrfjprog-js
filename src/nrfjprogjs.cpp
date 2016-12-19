@@ -681,7 +681,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         uint8_t patch = getNumber(baton->versionData, 14, 1);
         uint8_t sdBleApiVersion = getNumber(baton->versionData, 16, 1);
         uint8_t transportType = getNumber(baton->versionData, 17, 1);
-        uint32_t baudrate = getNumber(baton->versionData, 20, 4);
+        uint32_t baudRate = getNumber(baton->versionData, 20, 4);
 
         std::stringstream versionstring;
         std::stringstream versionstringComplete;
@@ -707,13 +707,13 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         {
             Utility::Set(obj, "sdBleApiVersion", ConversionUtility::toJsNumber(sdBleApiVersion));
             Utility::Set(obj, "transportType", ConversionUtility::toJsNumber(transportType));
-            Utility::Set(obj, "baudrate", ConversionUtility::toJsNumber(baudrate));
+            Utility::Set(obj, "baudRate", ConversionUtility::toJsNumber(baudRate));
         }
         else
         {
             Utility::Set(obj, "sdBleApiVersion", Nan::Undefined());
             Utility::Set(obj, "transportType", Nan::Undefined());
-            Utility::Set(obj, "baudrate", Nan::Undefined());
+            Utility::Set(obj, "baudRate", Nan::Undefined());
         }
 
         argv[1] = obj;
