@@ -711,7 +711,7 @@ void DebugProbe::AfterGetVersion(uv_work_t *req)
         }
         else
         {
-            Utility::Set(obj, "sdBleApiVersion", Nan::Undefind());
+            Utility::Set(obj, "sdBleApiVersion", Nan::Undefined());
             Utility::Set(obj, "transportType", Nan::Undefined());
             Utility::Set(obj, "baudrate", Nan::Undefined());
         }
