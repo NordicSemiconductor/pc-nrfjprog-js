@@ -82,6 +82,7 @@ private:
     NRFJPROGJS_METHOD_DEFINITIONS(Program); // Params: Serialnumber, family, file, callback
     NRFJPROGJS_METHOD_DEFINITIONS(GetSerialnumbers); // Params: None, callback
     NRFJPROGJS_METHOD_DEFINITIONS(GetVersion); // Params: Serialnumber, family, callback
+    NRFJPROGJS_METHOD_DEFINITIONS(GetFamily); // Params: Serialnumber, callback
     NRFJPROGJS_METHOD_DEFINITIONS(ReadAddress); // Params: Serialnumber, family, address, length, callback
 
     static void loadDll();
@@ -137,6 +138,15 @@ public:
     BATON_CONSTRUCTOR(GetSerialnumbersBaton);
     std::vector<ProbeInfo*> probes;
 };
+
+class GetFamilyBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetFamilyBaton);
+    uint32_t serialnumber;
+    device_family_t family;
+};
+
 
 class GetVersionBaton : public Baton
 {

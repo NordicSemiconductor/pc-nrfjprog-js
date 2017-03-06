@@ -177,6 +177,7 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getVersion", GetVersion);
     Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialnumbers);
     Nan::SetPrototypeMethod(tpl, "readAddress", ReadAddress);
+    Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
 }
 
 device_family_t DebugProbe::openDll(device_family_t family, const uint32_t serialnumber)
@@ -355,6 +356,92 @@ void DebugProbe::AfterGetSerialnumbers(uv_work_t *req)
     delete baton;
 }
 #pragma endregion GetSerialnumbers
+
+#pragma region GetFamily
+NAN_METHOD(DebugProbe::GetFamily)
+{
+    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto argumentCount = 0;
+    uint32_t serialNumber;
+    v8::Local<v8::Function> callback;
+
+    try
+    {
+        serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+        return;
+    }
+
+    auto baton = new GetFamilyBaton(callback);
+    baton->serialnumber = serialNumber;
+
+    uv_queue_work(uv_default_loop(), baton->req, GetSerialnumbers, reinterpret_cast<uv_after_work_cb>(AfterGetSerialnumbers));
+}
+
+
+void DebugProbe::GetFamily(uv_work_t *req)
+{
+    auto baton = static_cast<GetFamilyBaton*>(req->data);
+
+    loadDll();
+
+    if (!loaded)
+    {
+        baton->result = error;
+        unloadDll();
+        return;
+    }
+
+    if (openDll(NRF51_FAMILY, 0) == ANY_FAMILY)
+    {
+        baton->result = error;
+        unloadDll();
+        return;
+    }
+
+    device_family_t family = NRF51_FAMILY;
+
+    if (correctFamily(baton->serialnumber) == WRONG_FAMILY_FOR_DEVICE)
+    {
+        family = NRF52_FAMILY;
+    }
+
+    baton->family = family;
+
+    closeBeforeExit();
+}
+
+void DebugProbe::AfterGetFamily(uv_work_t *req)
+{
+    Nan::HandleScope scope;
+
+    auto baton = static_cast<GetFamilyBaton*>(req->data);
+    v8::Local<v8::Value> argv[2];
+
+    if (baton->result != errorcodes::JsSuccess)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting family");
+        argv[1] = Nan::Undefined();
+    }
+    else
+    {
+        argv[0] = Nan::Undefined();
+        argv[1] = ConversionUtility::toJsNumber(baton->family);
+    }
+
+    baton->callback->Call(2, argv);
+
+    delete baton;
+}
+#pragma endregion GetFamily
 
 #pragma region Program
 NAN_METHOD(DebugProbe::Program)
