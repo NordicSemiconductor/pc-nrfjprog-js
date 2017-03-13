@@ -383,7 +383,7 @@ NAN_METHOD(DebugProbe::GetFamily)
     auto baton = new GetFamilyBaton(callback);
     baton->serialnumber = serialNumber;
 
-    uv_queue_work(uv_default_loop(), baton->req, GetSerialnumbers, reinterpret_cast<uv_after_work_cb>(AfterGetSerialnumbers));
+    uv_queue_work(uv_default_loop(), baton->req, GetFamily, reinterpret_cast<uv_after_work_cb>(AfterGetFamily));
 }
 
 
