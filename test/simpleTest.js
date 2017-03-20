@@ -45,12 +45,21 @@ probe.getSerialNumbers((err, serialNumbers) => {
         console.log(err);
         return;
     }
-    
+
     console.log(JSON.stringify(serialNumbers));
     console.log('I was called back!');
 
-    console.log(nrfjprog.NRF51_FAMILY);
-    console.log(nrfjprog.NRF52_FAMILY);
+    console.log('NRF51: ', nrfjprog.NRF51_FAMILY);
+    console.log('NRF52: ', nrfjprog.NRF52_FAMILY);
+
+    probe.getFamily(serialNumbers[0].serialNumber, (err, family) => {
+        if (err) {
+            console.log(err);
+            return;
+        }
+
+        console.log(family);
+    });
 
 /*    setTimeout(() => {
         let probe3 = new nrfjprog.DebugProbe();
@@ -61,6 +70,7 @@ probe.getSerialNumbers((err, serialNumbers) => {
         });
     }, 500);
 */
+    /*
     probe.program(serialNumbers[0].serialNumber, { 0: 'connectivity_115k2_with_s130_2.0.1.hex', 1: 'connectivity_115k2_with_s132_2.0.1.hex'}, err => {
         console.log('Error: ' + err);
         console.log('Done programming');
@@ -86,4 +96,5 @@ probe.getSerialNumbers((err, serialNumbers) => {
             });
         });
     });
+    */
 });

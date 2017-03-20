@@ -390,6 +390,7 @@ NAN_METHOD(DebugProbe::GetFamily)
 void DebugProbe::GetFamily(uv_work_t *req)
 {
     auto baton = static_cast<GetFamilyBaton*>(req->data);
+    baton->result = errorcodes::JsSuccess;
 
     loadDll();
 
@@ -400,18 +401,15 @@ void DebugProbe::GetFamily(uv_work_t *req)
         return;
     }
 
-    if (openDll(NRF51_FAMILY, 0) == ANY_FAMILY)
+    device_family_t family = openDll(ANY_FAMILY, baton->serialnumber);
+
+    std::cout << "family: " << family << std::endl;
+
+    if (family == ANY_FAMILY)
     {
         baton->result = error;
         unloadDll();
         return;
-    }
-
-    device_family_t family = NRF51_FAMILY;
-
-    if (correctFamily(baton->serialnumber) == WRONG_FAMILY_FOR_DEVICE)
-    {
-        family = NRF52_FAMILY;
     }
 
     baton->family = family;
