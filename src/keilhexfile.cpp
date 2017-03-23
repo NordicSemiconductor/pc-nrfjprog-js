@@ -1,5 +1,7 @@
 /* Used to eliminate warnings from windows. Will make no harm in Linux. */
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include <fstream>
 #include <sstream>
@@ -637,14 +639,14 @@ void KeilHexFile::find_contiguous(uint32_t address_offset,
         bytes_available = 0;
         return;
     }
-    
+
     do
     {
         result_len += len;
         find((result_address + result_len), addr, len);
     }
     while ((0 != len) && (addr == (result_address + result_len)));
-    
+
     bytes_available = result_len;
 }
 
@@ -665,14 +667,14 @@ void KeilHexFile::find_contiguous_max(uint32_t address_offset,
         bytes_available = 0;
         return;
     }
-    
+
     do
     {
         result_len += len;
         find((result_address + result_len), addr, len);
     }
     while ((0 != len) && (addr == (result_address + result_len)));
-    
+
     bytes_available = result_len;
 
     if (bytes_available > bytes_max){
