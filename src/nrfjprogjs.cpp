@@ -498,7 +498,7 @@ NAN_METHOD(DebugProbe::Program)
     {
         if (Utility::Has(filenameObject, "filecontent"))
         {
-            baton->filecontent = ConversionUtility::getNativeBool(Utility::Get(filenameObject, "filecontent"));
+            baton->filecontent = ConversionUtility::getBool(Utility::Get(filenameObject, "filecontent"));
         }
         else
         {
