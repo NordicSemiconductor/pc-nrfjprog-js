@@ -24,123 +24,83 @@ NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_
         return NrfjprogDllLoadFailedError;
     }
 
-    if (!load_func_ptr(&dll_function->get_dll_version, "NRFJPROG_dll_version", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    
-    if (!load_func_ptr(&dll_function->open_dll, "NRFJPROG_open_dll", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->close_dll, "NRFJPROG_close_dll", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->enum_emu_snr, "NRFJPROG_enum_emu_snr", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->connect_to_emu_with_snr, "NRFJPROG_connect_to_emu_with_snr", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->connect_to_emu_without_snr, "NRFJPROG_connect_to_emu_without_snr", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->disconnect_from_emu, "NRFJPROG_disconnect_from_emu", dll))
-    {
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    
-    if (!load_func_ptr(&dll_function->recover, "NRFJPROG_recover", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->connect_to_device, "NRFJPROG_connect_to_device", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->readback_protect, "NRFJPROG_readback_protect", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->readback_status, "NRFJPROG_readback_status", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->read_region_0_size_and_source, "NRFJPROG_read_region_0_size_and_source", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->debug_reset, "NRFJPROG_debug_reset", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->sys_reset, "NRFJPROG_sys_reset", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->pin_reset, "NRFJPROG_pin_reset", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    
-    if (!load_func_ptr(&dll_function->disable_bprot, "NRFJPROG_disable_bprot", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->erase_all, "NRFJPROG_erase_all", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->erase_page, "NRFJPROG_erase_page", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-    if (!load_func_ptr(&dll_function->erase_uicr, "NRFJPROG_erase_uicr", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError; 
-    }
-
-    if (!load_func_ptr(&dll_function->write_u32, "NRFJPROG_write_u32", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->read_u32, "NRFJPROG_read_u32", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->write, "NRFJPROG_write", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->read, "NRFJPROG_read", dll)){ 
+    if (!load_func_ptr(&dll_function->dll_get_version, "HiLvlnRFJ_dll_get_version", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
-    if (!load_func_ptr(&dll_function->masserase, "NRFJPROG_masserase", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->ficrwrite_u32, "NRFJPROG_ficrwrite_u32", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->ficrwrite, "NRFJPROG_ficrwrite", dll)){ 
+    if (!load_func_ptr(&dll_function->dll_open, "HiLvlnRFJ_dll_open", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
-    if (!load_func_ptr(&dll_function->is_halted, "NRFJPROG_is_halted", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->halt, "NRFJPROG_halt", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->run, "NRFJPROG_run", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->go, "NRFJPROG_go", dll)){ 
+    if (!load_func_ptr(&dll_function->dll_close, "HiLvlnRFJ_dll_close", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
-    if (!load_func_ptr(&dll_function->is_ram_powered, "NRFJPROG_is_ram_powered", dll)){ 
-        return NrfjprogDllFunctionLoadFailedError;
-    }
-    if (!load_func_ptr(&dll_function->power_ram_all, "NRFJPROG_power_ram_all", dll)){ 
+    if (!load_func_ptr(&dll_function->is_dll_open, "HiLvlnRFJ_is_dll_open", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
-    if (!load_func_ptr(&dll_function->read_cpu_register, "NRFJPROG_read_cpu_register", dll)){ 
+    if (!load_func_ptr(&dll_function->get_connected_probes, "HiLvlnRFJ_get_connected_probes", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
-    if (!load_func_ptr(&dll_function->read_device_version, "NRFJPROG_read_device_version", dll)){ 
+    if (!load_func_ptr(&dll_function->probe_init, "HiLvlnRFJ_probe_init", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->probe_uninit, "HiLvlnRFJ_probe_uninit", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->probe_get_snr, "HiLvlnRFJ_probe_get_snr", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->get_device_family, "HiLvlnRFJ_get_device_family", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->get_device_version, "HiLvlnRFJ_get_device_version", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->program, "HiLvlnRFJ_program", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->read_to_file, "HiLvlnRFJ_read_to_file", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->erase, "HiLvlnRFJ_erase", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->recover, "HiLvlnRFJ_recover", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->read, "HiLvlnRFJ_read", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->read_u32, "HiLvlnRFJ_read_u32", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->write, "HiLvlnRFJ_write", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->write_u32, "HiLvlnRFJ_write_u32", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->reset, "HiLvlnRFJ_reset", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->go, "HiLvlnRFJ_go", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
