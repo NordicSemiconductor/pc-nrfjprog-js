@@ -12,18 +12,18 @@
 #ifndef NRFJPROG_H
 #define NRFJPROG_H
 
-#define major_version (8) 
-#define minor_version (1) 
+#define major_version (9) 
+#define minor_version (4) 
 #define micro_version (0) 
 
 
  enum NrfjprogErrorCodesType {
     
-	Success										= 0,				// Requested operation (operations) were successfully completed.
+	Success                                     = 0,				// Requested operation (operations) were successfully completed.
     
 	/* nrfjprog.exe or PC errors */
 	NrfjprogError								= 1,		        // An error condition that should not occur has happened. 
-														            // It is most probably a bug in nrfjprog.exe or nrfjprog.dll. 
+                                                                    // It is most probably a bug in nrfjprog.exe or nrfjprog.dll. 
 	NrfjprogOutdatedError						= 2,				// Nrfjprog version is too old for the device 
 	MemoryAllocationError						= 3,				// Memory allocation for nrfjprog failed failed.
 	
@@ -35,8 +35,10 @@
     DuplicatedArgumentsError					= 14,				// The same argument has been provided twice.
 	NoOperationError							= 15,				// The arguments passed do not perform a valid operation.
 	UnavailableOperationBecauseProtectionError	= 16,				// The operation attempted can not be performed because either the main-ap or the ctrl-ap is not available.
-	UnavailableOperationInFamilyError			= 17,				// The operation attempted can not be performed in the device because the feature is lacking in the device family.
+	UnavailableOperationInFamilyError			= 17,				// The operation attempted can not be performed in the device because the feature is lacking in your device.
 	WrongFamilyForDeviceError					= 18,				// The --family option given with the command (or the default from nrfjprog.ini) does not match the device connected.
+    UnavailableOperationBecauseMpuConfiguration = 19,               // For nRF51, --eraseuicr is unavailable unless the device came with an ANT softdevice programmed at Nordic factory.
+    
 
 	/* nrfjprog.dll errors */
     NrfjprogDllNotFoundError					= 20,				// Unable to find nrfjprog.dll in the installation folder. Reinstall nrfjprog.
@@ -44,10 +46,14 @@
     NrfjprogDllFunctionLoadFailedError			= 22,				// Failed to Load the functions from nrfjprog.dll
 	NrfjprogDllNotImplementedError				= 23,				// Dll still does not implement this function for your device.
 
-	/* nrfjprog.ini errors */
-	NrfjprogIniNotFoundError                    = 25,				// Unable to find nrfjprog.ini in the installation folder. Reinstall nrfjprog.
-	NrfjprogIniFormatError                      = 26,				// Format of nrfjprog.ini is incorrect
-	
+    /* nrfjprog.ini errors */
+    NrfjprogIniSyntaxError                      = 24,               // Syntax error in nrfjprog.ini file
+    NrfjprogIniNotFoundError                    = 25,               // Unable to find nrfjprog.ini in the installation folder. Reinstall nrfjprog.
+    NrfjprogIniCannotBeOpenedError              = 26,               // Opening the nrfjprog.ini file for read failed.
+    NrfjprogIniFamilyMissingError               = 27,               // Family parameter cannot be parsed from ini file. Line might be deleted or invalid format.
+    NrfjprogIniClockspeedMissingError           = 28,               // Clockspeed parameter cannot be parsed from ini file. Line might be deleted or invalid format.
+    NrfjprogIniQspiIniFileMissingError          = 29,               // DefaultQspiIni parameter cannot be parsed from ini file. Line might be deleted or invalid format.
+    
 	/* JLinkARM.dll errors */
     JLinkARMDllNotFoundError					= 30,				// Unable to find install path for JLink software
 	JLinkARMDllInvalidError						= 31,				// Dll found does not seem a valid dll.
@@ -71,12 +77,22 @@
 	NVMCOperationError							= 57,				// The flash operation in the device failed.
 	FlashNotErasedError							= 58,				// A program operation failed because the area to write was not erased.
 	RamIsOffError								= 59,				// The RAM area to read or write is unpowered.
+	NoReadPermissionError                       = 60,               // Unable to open file for read.
+    NoExternalMemoryConfiguredError             = 61,               // A QSPI operation is attempted without an external memory configured.
+    RecoverFailed                               = 62,               // Recovery failed.
+
+    /* QSPI ini parsing. */
+    NrfjprogQspiIniNotFoundError                = 70,               // Unable to find QSPI ini file given as defualt or given with option --qspiini.
+    NrfjprogQspiIniCannotBeOpenedError          = 71,               // Opening the QSPI ini file for read failed.
+    NrfjprogQspiSyntaxError                     = 72,               // The QSPI ini file has some syntax error.
+    NrfjprogQspiIniParsingError                 = 73,               // QSPI ini file parsed has one or more missing keys.
 
 	/* Warning. Will not be returned by nrfjprog but used to generate warnings. */
 	FicrOperationWarning						= 100,				// FICR operation. It is important to be certain of what you do.
 	UnalignedPageEraseWarning					= 101,				// Address provided with page erase is not aligned to first address of page.
 	NoLogWarning								= 102,				// No log is possible because the program has no write permission in the current directory.
-	UicrWriteOperationWithoutEraseWarning		= 103				// A UICR write operation is reuqested but there has not been a UICR erase.
+	UicrWriteOperationWithoutEraseWarning		= 103,				// A UICR write operation is requested but there has not been a UICR erase.
+    VeryLongOperationWarning                    = 104               // An operation that might take up to several minutes is been execued. Please wait.
 };
 
 #endif //NRFJPROG_H
