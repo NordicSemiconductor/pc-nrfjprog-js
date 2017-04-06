@@ -39,62 +39,13 @@
 
 const nrfjprog = require('../index.js');
 let probe = new nrfjprog.DebugProbe();
-let probe2 = new nrfjprog.DebugProbe();
-probe.getSerialNumbers((err, serialNumbers) => {
+
+probe.getDllVersion((err, dllVersion) => {
     if (err) {
-        console.log(err);
+        console.log(err, dllVersion);
         return;
     }
 
-    console.log(JSON.stringify(serialNumbers));
-    console.log('I was called back!');
+    console.log(dllVersion);
 
-    console.log('NRF51: ', nrfjprog.NRF51_FAMILY);
-    console.log('NRF52: ', nrfjprog.NRF52_FAMILY);
-
-    probe.getFamily(serialNumbers[0].serialNumber, (err, family) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-
-        console.log(family);
-    });
-
-/*    setTimeout(() => {
-        let probe3 = new nrfjprog.DebugProbe();
-
-        probe3.getVersion(serialNumbers[0].serialNumber, (err, version) => {
-            console.log('Error timeout: ' + err);
-            console.log('Read version timeout: ' + JSON.stringify(version));
-        });
-    }, 500);
-*/
-    /*
-    probe.program(serialNumbers[0].serialNumber, { 0: 'connectivity_115k2_with_s130_2.0.1.hex', 1: 'connectivity_115k2_with_s132_2.0.1.hex'}, err => {
-        console.log('Error: ' + err);
-        console.log('Done programming');
-
-        probe2.program(serialNumbers[0].serialNumber, { 0: 'connectivity_115k2_with_s130_2.0.1.hex', 1: 'connectivity_115k2_with_s132_2.0.1.hex'}, err => {
-            console.log('Error: ' + err);
-            console.log('Done programming');
-
-            probe.getVersion(serialNumbers[0].serialNumber, (err, version) => {
-                console.log('Error: ' + err);
-                console.log('Read version 1: ' + JSON.stringify(version));
-
-                probe2.getVersion(serialNumbers[0].serialNumber, (err, version2) => {
-                    console.log('Error: ' + err);
-                    console.log('Read version 2: ' + JSON.stringify(version2));
-
-                    if (version == version2) {
-                        console.log('Version read correctly.');
-                    } else {
-                        console.log('Version read wrongly.');
-                    }
-                });
-            });
-        });
-    });
-    */
 });

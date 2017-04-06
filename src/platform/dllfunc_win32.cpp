@@ -59,11 +59,11 @@ NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_
     if (!load_func_ptr(&dll_function->get_device_family, "HiLvlnRFJ_get_device_family", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-
+/*
     if (!load_func_ptr(&dll_function->get_device_version, "HiLvlnRFJ_get_device_version", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-
+*/
     if (!load_func_ptr(&dll_function->program, "HiLvlnRFJ_program", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
@@ -99,11 +99,11 @@ NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_
     if (!load_func_ptr(&dll_function->reset, "HiLvlnRFJ_reset", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-
+/*
     if (!load_func_ptr(&dll_function->go, "HiLvlnRFJ_go", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-
+*/
     return Success;
 }
 

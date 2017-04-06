@@ -85,7 +85,7 @@ NrfjprogErrorCodesType OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path,
         {
             /* Copy, check it exists and return if it does. */
             strncpy(dll_path, install_path, dll_path_len);
-            strncat(dll_path, "nrfjprog.dll", dll_path_len - strlen(dll_path) - 1);
+            strncat(dll_path, "libhighlevelnrfjprog_x86.dll", dll_path_len - strlen(dll_path) - 1);
             RegCloseKey(innerKey);
             RegCloseKey(key);
             if (OSFilesExists(dll_path))

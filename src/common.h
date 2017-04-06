@@ -254,6 +254,7 @@ typedef enum errorcodes
     CouldNotFindJprogDLL,
     CouldNotLoadDLL,
     CouldNotOpenDevice,
+    CouldNotOpenDLL,
     CouldNotConnectToDevice,
     CouldNotCallFunction,
     CouldNotErase,

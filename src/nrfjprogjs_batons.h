@@ -35,71 +35,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_H__
-#define __NRFJPROG_H__
+#ifndef __NRFJPROG_BATONS_H__
+#define __NRFJPROG_BATONS_H__
 
-#include <nan.h>
-#include "common.h"
-#include "dllfunc.h"
-#include "osfiles.h"
-
-#define MAX_SERIAL_NUMBERS 100
-
-#define NRFJPROGJS_METHOD_DEFINITIONS(MainName) \
-    static NAN_METHOD(MainName); \
-    static void MainName(uv_work_t *req); \
-    static void After##MainName(uv_work_t *req);
-
-class ProbeInfo
+class GetDllVersionBaton : public Baton
 {
 public:
-    ProbeInfo(uint32_t serial_number, device_family_t family) :
-        serial_number(serial_number), family(family)
-    {}
-
-    uint32_t serial_number;
-    device_family_t family;
-
-    v8::Local<v8::Object> ToJs();
+    BATON_CONSTRUCTOR(GetDllVersionBaton);
+    uint32_t major;
+    uint32_t minor;
+    uint32_t revision;
 };
 
-class DebugProbe : public Nan::ObjectWrap
-{
-public:
-    static NAN_MODULE_INIT(Init);
-
-private:
-    explicit DebugProbe();
-    ~DebugProbe();
-
-    static Nan::Persistent<v8::Function> constructor;
-
-    static NAN_METHOD(New);
-
-    // Sync methods
-
-    // Async methods
-    NRFJPROGJS_METHOD_DEFINITIONS(GetDllVersion); // Params: callback(error, dllversion)
-
-    static errorcodes loadDll();
-    static void unloadDll();
-
-    static void init(v8::Local<v8::FunctionTemplate> tpl);
-
-    static void closeBeforeExit();
-
-    static void logCallback(const char * msg);
-
-    static uint32_t emulatorSpeed;
-    static DllFunctionPointersType dll_function;
-    static char dll_path[COMMON_MAX_PATH];
-    static char jlink_path[COMMON_MAX_PATH];
-
-    static bool loaded;
-    static bool connectedToDevice;
-    static errorcodes finderror;
-
-    static std::string logMessage;
-};
-
-#endif // __NRFJPROG_H__
+#endif
