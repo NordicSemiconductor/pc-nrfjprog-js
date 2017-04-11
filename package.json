@@ -6,18 +6,25 @@
   "scripts": {
     "lint": "jshint api/ test/ && jscs api/ test/",
     "install": "node build.js",
-    "test": "mocha --es_staging --recursive test/api"
+    "test": "jest",
+    "test-watch": "jest --watch"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/NordicSemiconductor/pc-nrfjprog-js.git"
   },
   "author": "ken.redergard@nordicsemi.no",
-  "contributors": { "name": "Per Kristian Schanke", "email": "per.kristian.schanke@nordicsemi.no" },
+  "contributors": {
+    "name": "Per Kristian Schanke",
+    "email": "per.kristian.schanke@nordicsemi.no"
+  },
   "license": "ISC",
   "dependencies": {
     "bindings": "^1.2.1",
     "cmake-js": "1.1.0",
     "nan": "2.3.3"
+  },
+  "devDependencies": {
+    "jest": "^19.0.2"
   }
 }

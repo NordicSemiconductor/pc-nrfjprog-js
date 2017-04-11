@@ -56,17 +56,43 @@
         return; \
     } \
 \
-    nrfjprogdll_err_t openError = dll_function.dll_open(&DebugProbe::logCallback); \
+    bool isOpen; \
+    dll_function.is_dll_open(&isOpen); \
 \
-    if (openError != Success) \
+    if (!isOpen) \
     { \
-        baton->result = errorcodes::CouldNotOpenDLL; \
-        return; \
+        nrfjprogdll_err_t openError = dll_function.dll_open(&DebugProbe::logCallback); \
+\
+        if (openError != SUCCESS) \
+        { \
+            baton->result = errorcodes::CouldNotOpenDLL; \
+            return; \
+        } \
     } \
 } while(0);
 
 #define EXIT_AFTER_CALL() do { \
     closeBeforeExit();\
+} while(0);
+
+#define INIT_PROBE(probe, serialnumber) do { \
+    nrfjprogdll_err_t initError = dll_function.probe_init(&probe, serialnumber, 0, 0); \
+\
+    if (initError != SUCCESS) \
+    { \
+        baton->result = errorcodes::CouldNotOpenDevice; \
+        return; \
+    } \
+} while(0);
+
+#define UNINIT_PROBE(probe) do { \
+    nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe); \
+\
+    if (uninitError != SUCCESS) \
+    { \
+        baton->result = errorcodes::CouldNotOpenDevice; \
+        return; \
+    } \
 } while(0);
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
@@ -136,7 +162,7 @@ DebugProbe::DebugProbe()
 
 void DebugProbe::logCallback(const char * msg)
 {
-    logMessage = msg;
+    logMessage = logMessage.append(msg);
 }
 NrfjprogErrorCodesType dll_load_result;
 
@@ -162,7 +188,6 @@ errorcodes DebugProbe::loadDll()
 
     loaded = true;
     return errorcodes::JsSuccess;
-
 }
 
 DebugProbe::~DebugProbe()
@@ -187,6 +212,8 @@ void DebugProbe::closeBeforeExit()
 void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
 {
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
+    Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
+    Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
 }
 
 #pragma region GetDllVersion
@@ -194,7 +221,6 @@ NAN_METHOD(DebugProbe::GetDllVersion)
 {
     auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
     auto argumentCount = 0;
-    uint32_t serialNumber;
     v8::Local<v8::Function> callback;
 
     try
@@ -240,13 +266,7 @@ void DebugProbe::AfterGetDllVersion(uv_work_t *req)
     if (baton->result != errorcodes::JsSuccess)
     {
         argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting dll version");
-        //argv[1] = Nan::Undefined();
-
-        v8::Local<v8::Object> errorObj = Nan::New<v8::Object>();
-        Utility::Set(errorObj, "dll_load_result", ConversionUtility::toJsNumber(dll_load_result));
-        Utility::Set(errorObj, "logMessage", ConversionUtility::toJsString(logMessage));
-
-        argv[1] = errorObj;
+        argv[1] = Nan::Undefined();
     }
     else
     {
@@ -257,6 +277,157 @@ void DebugProbe::AfterGetDllVersion(uv_work_t *req)
 
         argv[0] = Nan::Undefined();
         argv[1] = versionObj;
+    }
+
+    baton->callback->Call(2, argv);
+
+    delete baton;
+}
+#pragma endregion GetFamily
+
+#pragma region GetConnectedDevices
+NAN_METHOD(DebugProbe::GetConnectedDevices)
+{
+    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto argumentCount = 0;
+    v8::Local<v8::Function> callback;
+
+    try
+    {
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+        return;
+    }
+
+    auto baton = new GetConnectedDevicesBaton(callback);
+
+    uv_queue_work(uv_default_loop(), baton->req, GetConnectedDevices, reinterpret_cast<uv_after_work_cb>(AfterGetConnectedDevices));
+}
+
+
+void DebugProbe::GetConnectedDevices(uv_work_t *req)
+{
+    auto baton = static_cast<GetConnectedDevicesBaton*>(req->data);
+    baton->result = errorcodes::JsSuccess;
+
+    OPEN_BEFORE_CALL();
+    uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
+    uint32_t available = 0;
+    nrfjprogdll_err_t error = dll_function.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available, 0);
+    EXIT_AFTER_CALL();
+
+    if (error != Success)
+    {
+        baton->result = errorcodes::CouldNotCallFunction;
+        return;
+    }
+
+    for (uint32_t i = 0; i < available; i++)
+    {
+        baton->probes.push_back(new ProbeInfo(serialNumbers[i], NRF51_FAMILY));
+    }
+}
+
+void DebugProbe::AfterGetConnectedDevices(uv_work_t *req)
+{
+    Nan::HandleScope scope;
+
+    auto baton = static_cast<GetConnectedDevicesBaton*>(req->data);
+    v8::Local<v8::Value> argv[2];
+
+    if (baton->result != errorcodes::JsSuccess)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting connected devices");
+        argv[1] = Nan::Undefined();
+    }
+    else
+    {
+        v8::Local<v8::Array> connectedDevices = Nan::New<v8::Array>();
+        for (uint32_t i = 0; i < baton->probes.size(); ++i)
+        {
+            Nan::Set(connectedDevices, ConversionUtility::toJsNumber(i), baton->probes[i]->ToJs());
+        }
+
+        argv[0] = Nan::Undefined();
+        argv[1] = connectedDevices;
+    }
+
+    baton->callback->Call(2, argv);
+
+    delete baton;
+}
+#pragma endregion GetConnectedDevices
+
+#pragma region GetFamily
+NAN_METHOD(DebugProbe::GetFamily)
+{
+    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto argumentCount = 0;
+    uint32_t serialNumber;
+    v8::Local<v8::Function> callback;
+
+    try
+    {
+        serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+        return;
+    }
+
+    auto baton = new GetFamilyBaton(callback);
+    baton->serialNumber = serialNumber;
+
+    uv_queue_work(uv_default_loop(), baton->req, GetFamily, reinterpret_cast<uv_after_work_cb>(AfterGetFamily));
+}
+
+
+void DebugProbe::GetFamily(uv_work_t *req)
+{
+    auto baton = static_cast<GetFamilyBaton*>(req->data);
+    baton->result = errorcodes::JsSuccess;
+    Probe_handle_t probe;
+
+    OPEN_BEFORE_CALL();
+    INIT_PROBE(probe, baton->serialNumber);
+    nrfjprogdll_err_t error = dll_function.get_device_family(probe, &baton->family);
+    UNINIT_PROBE(probe);
+    EXIT_AFTER_CALL();
+
+    if (error != Success)
+    {
+        baton->result = errorcodes::CouldNotCallFunction;
+        return;
+    }
+}
+
+void DebugProbe::AfterGetFamily(uv_work_t *req)
+{
+    Nan::HandleScope scope;
+
+    auto baton = static_cast<GetFamilyBaton*>(req->data);
+    v8::Local<v8::Value> argv[2];
+
+    if (baton->result != errorcodes::JsSuccess)
+    {
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, "getting family");
+        argv[1] = Nan::Undefined();
+    }
+    else
+    {
+        argv[0] = Nan::Undefined();
+        argv[1] = ConversionUtility::toJsNumber(baton->family);
     }
 
     baton->callback->Call(2, argv);

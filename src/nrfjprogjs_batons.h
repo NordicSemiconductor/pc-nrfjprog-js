@@ -38,6 +38,8 @@
 #ifndef __NRFJPROG_BATONS_H__
 #define __NRFJPROG_BATONS_H__
 
+#include "nrfjprogjs.h"
+
 class GetDllVersionBaton : public Baton
 {
 public:
@@ -45,6 +47,21 @@ public:
     uint32_t major;
     uint32_t minor;
     uint32_t revision;
+};
+
+class GetConnectedDevicesBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetConnectedDevicesBaton);
+    std::vector<ProbeInfo *> probes;
+};
+
+class GetFamilyBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetFamilyBaton);
+    uint32_t serialNumber;
+    device_family_t family;
 };
 
 #endif

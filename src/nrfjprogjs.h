@@ -80,6 +80,9 @@ private:
 
     // Async methods
     NRFJPROGJS_METHOD_DEFINITIONS(GetDllVersion); // Params: callback(error, dllversion)
+    NRFJPROGJS_METHOD_DEFINITIONS(GetConnectedDevices); // Params: callback(error, connectedDevices)
+
+    NRFJPROGJS_METHOD_DEFINITIONS(GetFamily); // Params: serialnumber, callback(error, family)
 
     static errorcodes loadDll();
     static void unloadDll();

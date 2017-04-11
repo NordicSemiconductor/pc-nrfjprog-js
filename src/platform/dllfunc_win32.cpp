@@ -107,7 +107,6 @@ NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_
     return Success;
 }
 
-
 void DllFree(void)
 {
     if (dll){
