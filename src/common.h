@@ -44,10 +44,19 @@
 #include <string>
 
 #include "nrfjprog_common.h"
+#include <functional>
+#include "dllfunc.h"
+
+struct Baton;
+
+typedef std::vector<v8::Local<v8::Value> > returnType;
+typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_function_t;
+typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
+typedef std::function<returnType(Baton*)> return_function_t;
 
 #define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
 
-#define BATON_CONSTRUCTOR(BatonType) BatonType(v8::Local<v8::Function> callback) : Baton(callback) {}
+#define BATON_CONSTRUCTOR(BatonType) BatonType(uint32_t serialNumber, uint32_t parameterCount, std::string name) : Baton(serialNumber, parameterCount, name) {}
 #define BATON_DESTRUCTOR(BatonType) ~BatonType()
 
 #define METHOD_DEFINITIONS(MainName) \
@@ -95,10 +104,13 @@ public:
 
 struct Baton {
 public:
-    explicit Baton(v8::Local<v8::Function> cb) {
+    explicit Baton(const uint32_t _serialNumber, const uint32_t _returnParameterCount, std::string _name) {
         req = new uv_work_t();
-        callback = new Nan::Callback(cb);
+        //callback = new Nan::Callback(cb);
         req->data = static_cast<void*>(this);
+        serialNumber = _serialNumber;
+        returnParameterCount = _returnParameterCount;
+        name = _name;
     }
 
     ~Baton()
@@ -108,6 +120,12 @@ public:
 
     uv_work_t *req;
     Nan::Callback *callback;
+    uint32_t serialNumber;
+    uint32_t returnParameterCount;
+
+    execute_function_t executeFunction;
+    return_function_t returnFunction;
+    std::string name;
 
     uint32_t result;
 };
