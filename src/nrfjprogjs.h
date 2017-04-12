@@ -43,12 +43,7 @@
 #include "dllfunc.h"
 #include "osfiles.h"
 
-#define MAX_SERIAL_NUMBERS 100
-
-#define NRFJPROGJS_METHOD_DEFINITIONS(MainName) \
-    static NAN_METHOD(MainName);
-    //static void MainName(uv_work_t *req);
-    //static void After##MainName(uv_work_t *req);
+#include "utility/errormessage.h"
 
 class ProbeInfo
 {
@@ -79,10 +74,10 @@ private:
     // Sync methods
 
     // Async methods
-    NRFJPROGJS_METHOD_DEFINITIONS(GetDllVersion); // Params: callback(error, dllversion)
-    NRFJPROGJS_METHOD_DEFINITIONS(GetConnectedDevices); // Params: callback(error, connectedDevices)
+    static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)
+    static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
 
-    NRFJPROGJS_METHOD_DEFINITIONS(GetFamily); // Params: serialnumber, callback(error, family)
+    static NAN_METHOD(GetFamily); // Params: serialnumber, callback(error, family)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret);
     static void DebugProbe::ExecuteFunction(uv_work_t *req);

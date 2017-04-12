@@ -46,7 +46,12 @@
 #include "keilhexfile.h"
 #include "dllfunc.h"
 
+#include "utility/utility.h"
+#include "utility/conversion.h"
+
 #include <iostream>
+
+#define MAX_SERIAL_NUMBERS 100
 
 Nan::Persistent<v8::Function> DebugProbe::constructor;
 DllFunctionPointersType DebugProbe::dll_function;

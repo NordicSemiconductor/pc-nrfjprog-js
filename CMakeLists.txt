@@ -27,6 +27,8 @@ include_directories(${CMAKE_JS_INC} ${NRFJPROG_INCLUDE_DIR})
 file (GLOB SOURCE_FILES
     "src/*.cpp"
     "src/*.h"
+    "src/utility/*.cpp"
+    "src/utility/*.h"
 )
 
 # This line will tell CMake that we're building a shared library
