@@ -111,7 +111,8 @@ static name_map_t device_version_map = {
 
 static name_map_t device_family_map = {
     NAME_MAP_ENTRY(NRF51_FAMILY),
-    NAME_MAP_ENTRY(NRF52_FAMILY)
+    NAME_MAP_ENTRY(NRF52_FAMILY),
+    NAME_MAP_ENTRY(UNKNOWN_FAMILY)
 };
 
 static name_map_t rtt_direction_map = {

@@ -356,7 +356,7 @@ NAN_METHOD(DebugProbe::GetConnectedDevices)
             Probe_handle_t getFamilyProbe;
             nrfjprogdll_err_t initError = dll_function.probe_init(&getFamilyProbe, serialNumbers[i], 0, 0);
 
-            device_family_t family;
+            device_family_t family = UNKNOWN_FAMILY;
 
             if (initError == SUCCESS)
             {
@@ -465,6 +465,7 @@ extern "C" {
      */
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
+        NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY);
         /*
         NODE_DEFINE_CONSTANT(target, UP_DIRECTION);
         NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION);
