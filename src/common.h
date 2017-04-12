@@ -72,7 +72,6 @@ struct Baton {
 public:
     explicit Baton(const uint32_t _serialNumber, const uint32_t _returnParameterCount, std::string _name) {
         req = new uv_work_t();
-        //callback = new Nan::Callback(cb);
         req->data = static_cast<void*>(this);
         serialNumber = _serialNumber;
         returnParameterCount = _returnParameterCount;

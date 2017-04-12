@@ -423,6 +423,43 @@ NAN_METHOD(DebugProbe::GetFamily)
     CallFunction(info, p, e, r);
 }
 
+NAN_METHOD(DebugProbe::Read)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        uint32_t serialNumber = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        auto baton = new ReadBaton(serialNumber, 1, "read");
+
+        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        baton->length = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<ReadBaton*>(b);
+        baton->data = new uint8_t[baton->length];
+        return dll_function.read(probe, baton->address, baton->data, baton->length, 0);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        auto baton = static_cast<ReadBaton*>(b);
+        std::vector<v8::Local<v8::Value> > vector;
+
+        vector.push_back(Convert::toJsValueArray(baton->data, baton->length));
+
+        delete[] baton->data;
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r);
+}
+
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     {/*

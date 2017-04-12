@@ -78,6 +78,7 @@ private:
     static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
 
     static NAN_METHOD(GetFamily); // Params: serialnumber, callback(error, family)
+    static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, family)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret);
     static void DebugProbe::ExecuteFunction(uv_work_t *req);

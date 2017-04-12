@@ -39,6 +39,7 @@
 #define __NRFJPROG_BATONS_H__
 
 #include "nrfjprogjs.h"
+#include <memory>
 
 class GetDllVersionBaton : public Baton
 {
@@ -62,6 +63,15 @@ public:
     BATON_CONSTRUCTOR(GetFamilyBaton);
     uint32_t serialNumber;
     device_family_t family;
+};
+
+class ReadBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(ReadBaton);
+    uint32_t address;
+    uint32_t length;
+    uint8_t *data;
 };
 
 #endif

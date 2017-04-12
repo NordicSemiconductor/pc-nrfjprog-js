@@ -103,11 +103,19 @@ describe('Test nrfjprog integration', () => {
                     expect(family).toBeUndefined();
                     done();
                 }
-                console.log('Test')
 
                 debugProbe.getFamily(1, callback);
             });
 
+            it('reads from specified address', done => {
+                const callback = (err, contents) => {
+                    expect(err).toBeUndefined();
+                    expect(contents).toBeDefined();
+                    done();
+                }
+
+                debugProbe.read(device.serialNumber, 0x0, 1, callback);
+            });
         });
     });
 });
