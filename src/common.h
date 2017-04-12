@@ -145,7 +145,7 @@ public:
     {
         if (!js->IsNumber())
         {
-            throw "number";
+            throw std::string("unsigned integer");
         }
 
         return static_cast<NativeType>(js->ToUint32()->Uint32Value());
@@ -155,7 +155,7 @@ public:
     {
         if (!js->IsNumber())
         {
-            throw "number";
+            throw std::string("signed integer");
         }
 
         return static_cast<NativeType>(js->ToInt32()->Int32Value());
@@ -165,7 +165,7 @@ public:
     {
         if (!js->IsNumber())
         {
-            throw "number";
+            throw std::string("float");
         }
 
         return static_cast<NativeType>(js->ToNumber()->NumberValue());
@@ -175,7 +175,7 @@ public:
     {
         if (!js->IsBoolean())
         {
-            throw "bool";
+            throw std::string("bool");
         }
 
         return static_cast<NativeType>(js->ToBoolean()->BooleanValue());

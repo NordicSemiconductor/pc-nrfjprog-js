@@ -128,11 +128,12 @@ void DebugProbe::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_f
     auto argumentCount = 0;
     v8::Local<v8::Function> callback;
 
-    Baton *baton;
+    Baton *baton = nullptr;
 
     try
     {
         baton = parse(info, argumentCount);
+
         callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
         baton->callback = new Nan::Callback(callback);
         argumentCount++;
@@ -141,6 +142,12 @@ void DebugProbe::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_f
     {
         auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
         Nan::ThrowTypeError(message);
+
+        if (baton != nullptr)
+        {
+            delete baton;
+        }
+
         return;
     }
 
@@ -346,7 +353,19 @@ NAN_METHOD(DebugProbe::GetConnectedDevices)
 
         for (uint32_t i = 0; i < available; i++)
         {
-            baton->probes.push_back(new ProbeInfo(serialNumbers[i], NRF51_FAMILY));
+            Probe_handle_t getFamilyProbe;
+            nrfjprogdll_err_t initError = dll_function.probe_init(&getFamilyProbe, serialNumbers[i], 0, 0);
+
+            device_family_t family;
+
+            if (initError == SUCCESS)
+            {
+                dll_function.get_device_family(getFamilyProbe, &family);
+
+                dll_function.probe_uninit(&getFamilyProbe);
+            }
+
+            baton->probes.push_back(new ProbeInfo(serialNumbers[i], family));
         }
 
         return SUCCESS;

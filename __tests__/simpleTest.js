@@ -48,7 +48,6 @@ describe('Test nrfjprog integration', () => {
     });
 
     describe('Generic functionality', () => {
-
         it('gets dll version', done => {
             const callback = (err, version) => {
                 expect(err).toBeUndefined();
@@ -71,6 +70,10 @@ describe('Test nrfjprog integration', () => {
 
             debugProbe.getConnectedDevices(callback);
         });
+
+        it('throws when wrong parameters are sent in', () => {
+            expect(() => { debugProbe.getDllVersion(); }).toThrowErrorMatchingSnapshot();
+        });
     });
 
     describe('Single-device', () =>{
@@ -87,12 +90,24 @@ describe('Test nrfjprog integration', () => {
             it('finds correct family', done => {
                 const callback = (err, family) => {
                     expect(err).toBeUndefined();
-                    expect(family).toBe(nrfjprog.NRF51_FAMILY);
+                    expect(family).toBe(device.family);
                     done();
                 }
 
                 debugProbe.getFamily(device.serialNumber, callback);
             });
+
+            it('throws an error when device do not exist', done => {
+                const callback = (err, family) => {
+                    expect(err).toMatchSnapshot();
+                    expect(family).toBeUndefined();
+                    done();
+                }
+                console.log('Test')
+
+                debugProbe.getFamily(1, callback);
+            });
+
         });
     });
 });
