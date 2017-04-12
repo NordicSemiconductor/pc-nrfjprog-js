@@ -68,8 +68,8 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
     Nan::EscapableHandleScope scope;
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
-    Utility::Set(obj, "serialNumber", ConversionUtility::toJsNumber(serial_number));
-    Utility::Set(obj, "family", ConversionUtility::toJsNumber(family));
+    Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
+    Utility::Set(obj, "family", Convert::toJsNumber(family));
 
     return scope.Escape(obj);
 }
@@ -139,7 +139,7 @@ void DebugProbe::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_f
     {
         baton = parse(info, argumentCount);
 
-        callback = ConversionUtility::getCallbackFunction(info[argumentCount]);
+        callback = Convert::getCallbackFunction(info[argumentCount]);
         baton->callback = new Nan::Callback(callback);
         argumentCount++;
     }
@@ -307,6 +307,7 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
+    Nan::SetPrototypeMethod(tpl, "read", Read);
 }
 
 NAN_METHOD(DebugProbe::GetDllVersion)
@@ -327,9 +328,9 @@ NAN_METHOD(DebugProbe::GetDllVersion)
         std::vector<v8::Local<v8::Value> > vector;
 
         v8::Local<v8::Object> versionObj = Nan::New<v8::Object>();
-        Utility::Set(versionObj, "major", ConversionUtility::toJsNumber(baton->major));
-        Utility::Set(versionObj, "minor", ConversionUtility::toJsNumber(baton->minor));
-        Utility::Set(versionObj, "revision", ConversionUtility::toJsNumber(baton->revision));
+        Utility::Set(versionObj, "major", Convert::toJsNumber(baton->major));
+        Utility::Set(versionObj, "minor", Convert::toJsNumber(baton->minor));
+        Utility::Set(versionObj, "revision", Convert::toJsNumber(baton->revision));
 
         vector.push_back(versionObj);
 
@@ -383,7 +384,7 @@ NAN_METHOD(DebugProbe::GetConnectedDevices)
         v8::Local<v8::Array> connectedDevices = Nan::New<v8::Array>();
         for (uint32_t i = 0; i < baton->probes.size(); ++i)
         {
-            Nan::Set(connectedDevices, ConversionUtility::toJsNumber(i), baton->probes[i]->ToJs());
+            Nan::Set(connectedDevices, Convert::toJsNumber(i), baton->probes[i]->ToJs());
         }
 
         vector.push_back(connectedDevices);
@@ -397,7 +398,7 @@ NAN_METHOD(DebugProbe::GetConnectedDevices)
 NAN_METHOD(DebugProbe::GetFamily)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        uint32_t serialNumber = ConversionUtility::getNativeUint32(info[argumentCount]);
+        uint32_t serialNumber = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
 
         auto baton = new GetFamilyBaton(serialNumber, 1, "get device family");
@@ -414,7 +415,7 @@ NAN_METHOD(DebugProbe::GetFamily)
         auto baton = static_cast<GetFamilyBaton*>(b);
         std::vector<v8::Local<v8::Value> > vector;
 
-        vector.push_back(ConversionUtility::toJsNumber(baton->family));
+        vector.push_back(Convert::toJsNumber(baton->family));
 
         return vector;
     };

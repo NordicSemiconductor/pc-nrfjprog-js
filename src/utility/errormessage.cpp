@@ -19,15 +19,15 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const st
         {
             std::ostringstream errorStringStream;
             errorStringStream << "Error occured when " << customMessage << ". "
-                << "Errorcode: " << ConversionUtility::valueToString(errorCode, nrfjprog_js_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
+                << "Errorcode: " << Convert::valueToString(errorCode, nrfjprog_js_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
 
-            v8::Local<v8::Value> error = Nan::Error(ConversionUtility::toJsString(errorStringStream.str())->ToString());
+            v8::Local<v8::Value> error = Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
             v8::Local<v8::Object> errorObject = error.As<v8::Object>();
 
             Utility::Set(errorObject, "errno", errorCode);
-            Utility::Set(errorObject, "errcode", ConversionUtility::valueToString(errorCode, nrfjprog_js_err_map));
-            Utility::Set(errorObject, "erroperation", ConversionUtility::toJsString(customMessage));
-            Utility::Set(errorObject, "errmsg", ConversionUtility::toJsString(errorStringStream.str()));
+            Utility::Set(errorObject, "errcode", Convert::valueToString(errorCode, nrfjprog_js_err_map));
+            Utility::Set(errorObject, "erroperation", Convert::toJsString(customMessage));
+            Utility::Set(errorObject, "errmsg", Convert::toJsString(errorStringStream.str()));
 
             return scope.Escape(error);
         }
@@ -68,7 +68,7 @@ v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber
 
     stream << " argument must be a " << message;
 
-    return ConversionUtility::toJsString(stream.str())->ToString();
+    return Convert::toJsString(stream.str())->ToString();
 }
 
 v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string name, const std::string message)
@@ -77,5 +77,5 @@ v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string name
 
     stream << "Property: " << name << " Message: " << message;
 
-    return ConversionUtility::toJsString(stream.str())->ToString();
+    return Convert::toJsString(stream.str())->ToString();
 }

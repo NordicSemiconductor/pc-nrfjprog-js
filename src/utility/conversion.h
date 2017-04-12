@@ -4,7 +4,7 @@
 #include <nan.h>
 #include "../common.h"
 
-class ConversionUtility
+class Convert
 {
 public:
     static uint32_t     getNativeUint32(v8::Local<v8::Object>js, const char *name);

@@ -82,104 +82,104 @@ public:
     }
 };
 
-uint32_t ConversionUtility::getNativeUint32(v8::Local<v8::Object>js, const char *name)
+uint32_t Convert::getNativeUint32(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint32_t>::getNativeUnsigned(js, name));
 }
 
-uint32_t ConversionUtility::getNativeUint32(v8::Local<v8::Value> js)
+uint32_t Convert::getNativeUint32(v8::Local<v8::Value> js)
 {
     return ConvUtil<uint32_t>::getNativeUnsigned(js);
 }
 
-uint16_t ConversionUtility::getNativeUint16(v8::Local<v8::Object>js, const char *name)
+uint16_t Convert::getNativeUint16(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint16_t>::getNativeUnsigned(js, name));
 }
 
-uint16_t ConversionUtility::getNativeUint16(v8::Local<v8::Value> js)
+uint16_t Convert::getNativeUint16(v8::Local<v8::Value> js)
 {
     return ConvUtil<uint16_t>::getNativeUnsigned(js);
 }
 
-uint8_t ConversionUtility::getNativeUint8(v8::Local<v8::Object>js, const char *name)
+uint8_t Convert::getNativeUint8(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint8_t>::getNativeUnsigned(js, name));
 }
 
-uint8_t ConversionUtility::getNativeUint8(v8::Local<v8::Value> js)
+uint8_t Convert::getNativeUint8(v8::Local<v8::Value> js)
 {
     return ConvUtil<uint8_t>::getNativeUnsigned(js);
 }
 
-int32_t ConversionUtility::getNativeInt32(v8::Local<v8::Object>js, const char *name)
+int32_t Convert::getNativeInt32(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int32_t>::getNativeSigned(js, name));
 }
 
-int32_t ConversionUtility::getNativeInt32(v8::Local<v8::Value>js)
+int32_t Convert::getNativeInt32(v8::Local<v8::Value>js)
 {
     return ConvUtil<int32_t>::getNativeSigned(js);
 }
 
-int16_t ConversionUtility::getNativeInt16(v8::Local<v8::Object>js, const char *name)
+int16_t Convert::getNativeInt16(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int16_t>::getNativeSigned(js, name));
 }
 
-int16_t ConversionUtility::getNativeInt16(v8::Local<v8::Value>js)
+int16_t Convert::getNativeInt16(v8::Local<v8::Value>js)
 {
     return ConvUtil<int16_t>::getNativeSigned(js);
 }
 
-int8_t ConversionUtility::getNativeInt8(v8::Local<v8::Object>js, const char *name)
+int8_t Convert::getNativeInt8(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int8_t>::getNativeSigned(js, name));
 }
 
-int8_t ConversionUtility::getNativeInt8(v8::Local<v8::Value>js)
+int8_t Convert::getNativeInt8(v8::Local<v8::Value>js)
 {
     return ConvUtil<int8_t>::getNativeSigned(js);
 }
 
-double ConversionUtility::getNativeDouble(v8::Local<v8::Object>js, const char *name)
+double Convert::getNativeDouble(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<double>::getNativeFloat(js, name));
 }
 
-double ConversionUtility::getNativeDouble(v8::Local<v8::Value>js)
+double Convert::getNativeDouble(v8::Local<v8::Value>js)
 {
     return ConvUtil<double>::getNativeFloat(js);
 }
 
-uint8_t ConversionUtility::getNativeBool(v8::Local<v8::Object>js, const char *name)
+uint8_t Convert::getNativeBool(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<bool>::getNativeBool(js, name));
 }
 
-uint8_t ConversionUtility::getNativeBool(v8::Local<v8::Value>js)
+uint8_t Convert::getNativeBool(v8::Local<v8::Value>js)
 {
     return ConvUtil<bool>::getNativeBool(js);
 }
 
-bool ConversionUtility::getBool(v8::Local<v8::Object>js, const char *name)
+bool Convert::getBool(v8::Local<v8::Object>js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<bool>::getNativeBool(js, name));
 }
 
-bool ConversionUtility::getBool(v8::Local<v8::Value>js)
+bool Convert::getBool(v8::Local<v8::Value>js)
 {
     return ConvUtil<bool>::getNativeBool(js);
 }
 
-uint8_t *ConversionUtility::getNativePointerToUint8(v8::Local<v8::Object>js, const char *name)
+uint8_t *Convert::getNativePointerToUint8(v8::Local<v8::Object>js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
-    RETURN_VALUE_OR_THROW_EXCEPTION(ConversionUtility::getNativePointerToUint8(value));
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getNativePointerToUint8(value));
 }
 
-uint8_t *ConversionUtility::getNativePointerToUint8(v8::Local<v8::Value> js)
+uint8_t *Convert::getNativePointerToUint8(v8::Local<v8::Value> js)
 {
     if (!js->IsArray())
     {
@@ -200,14 +200,14 @@ uint8_t *ConversionUtility::getNativePointerToUint8(v8::Local<v8::Value> js)
     return string;
 }
 
-uint16_t *ConversionUtility::getNativePointerToUint16(v8::Local<v8::Object>js, const char *name)
+uint16_t *Convert::getNativePointerToUint16(v8::Local<v8::Object>js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
-    RETURN_VALUE_OR_THROW_EXCEPTION(ConversionUtility::getNativePointerToUint16(value));
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getNativePointerToUint16(value));
 }
 
-uint16_t *ConversionUtility::getNativePointerToUint16(v8::Local<v8::Value>js)
+uint16_t *Convert::getNativePointerToUint16(v8::Local<v8::Value>js)
 {
     v8::Local<v8::Array> jsarray = v8::Local<v8::Array>::Cast(js);
     auto length = jsarray->Length();
@@ -223,7 +223,7 @@ uint16_t *ConversionUtility::getNativePointerToUint16(v8::Local<v8::Value>js)
     return string;
 }
 
-v8::Local<v8::Object> ConversionUtility::getJsObject(v8::Local<v8::Value>js)
+v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Value>js)
 {
     if (!js->IsObject())
     {
@@ -233,14 +233,14 @@ v8::Local<v8::Object> ConversionUtility::getJsObject(v8::Local<v8::Value>js)
     return js->ToObject();
 }
 
-v8::Local<v8::Object> ConversionUtility::getJsObject(v8::Local<v8::Object> js, const char *name)
+v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
-    RETURN_VALUE_OR_THROW_EXCEPTION(ConversionUtility::getJsObject(obj));
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getJsObject(obj));
 }
 
-v8::Local<v8::Object> ConversionUtility::getJsObjectOrNull(v8::Local<v8::Value>js)
+v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Value>js)
 {
     if (js->IsNull())
     {
@@ -251,25 +251,25 @@ v8::Local<v8::Object> ConversionUtility::getJsObjectOrNull(v8::Local<v8::Value>j
     }
     else if (js->IsObject())
     {
-        return ConversionUtility::getJsObject(js);
+        return Convert::getJsObject(js);
     }
 
     throw std::string("object or null");
 }
 
-v8::Local<v8::Object> ConversionUtility::getJsObjectOrNull(v8::Local<v8::Object>js, const char *name)
+v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Object>js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
-    RETURN_VALUE_OR_THROW_EXCEPTION(ConversionUtility::getJsObjectOrNull(obj));
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getJsObjectOrNull(obj));
 }
 
-uint16_t ConversionUtility::stringToValue(name_map_t name_map, v8::Local<v8::Object> string, uint16_t defaultValue)
+uint16_t Convert::stringToValue(name_map_t name_map, v8::Local<v8::Object> string, uint16_t defaultValue)
 {
     name_map_it_t it;
     auto key = defaultValue;
 
-    auto name = reinterpret_cast<const char *>(ConversionUtility::getNativePointerToUint8(string));
+    auto name = reinterpret_cast<const char *>(Convert::getNativePointerToUint8(string));
 
     for (it = name_map.begin(); it != name_map.end(); ++it)
     {
@@ -283,14 +283,14 @@ uint16_t ConversionUtility::stringToValue(name_map_t name_map, v8::Local<v8::Obj
     return key;
 }
 
-std::string ConversionUtility::getNativeString(v8::Local<v8::Object>js, const char *name)
+std::string Convert::getNativeString(v8::Local<v8::Object>js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
-    RETURN_VALUE_OR_THROW_EXCEPTION(ConversionUtility::getNativeString(obj));
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getNativeString(obj));
 }
 
-std::string ConversionUtility::getNativeString(v8::Local<v8::Value> js)
+std::string Convert::getNativeString(v8::Local<v8::Value> js)
 {
     if (!js->IsString())
     {
@@ -300,43 +300,43 @@ std::string ConversionUtility::getNativeString(v8::Local<v8::Value> js)
     return std::string(*Nan::Utf8String(js));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsNumber(int32_t nativeValue)
+v8::Handle<v8::Value> Convert::toJsNumber(int32_t nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Integer>(nativeValue));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsNumber(uint32_t nativeValue)
+v8::Handle<v8::Value> Convert::toJsNumber(uint32_t nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Integer>(nativeValue));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsNumber(uint16_t nativeValue)
+v8::Handle<v8::Value> Convert::toJsNumber(uint16_t nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Integer>(nativeValue));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsNumber(uint8_t nativeValue)
+v8::Handle<v8::Value> Convert::toJsNumber(uint8_t nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Integer>(nativeValue));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsNumber(double nativeValue)
+v8::Handle<v8::Value> Convert::toJsNumber(double nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Number>(nativeValue));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsBool(uint8_t nativeValue)
+v8::Handle<v8::Value> Convert::toJsBool(uint8_t nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Boolean>(nativeValue ? true : false));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsValueArray(uint8_t *nativeData, uint16_t length)
+v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t *nativeData, uint16_t length)
 {
     Nan::EscapableHandleScope scope;
 
@@ -344,18 +344,18 @@ v8::Handle<v8::Value> ConversionUtility::toJsValueArray(uint8_t *nativeData, uin
 
     for (int i = 0; i < length; ++i)
     {
-        valueArray->Set(i, ConversionUtility::toJsNumber(nativeData[i]));
+        valueArray->Set(i, Convert::toJsNumber(nativeData[i]));
     }
 
     return scope.Escape(valueArray);
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsString(const char *cString)
+v8::Handle<v8::Value> Convert::toJsString(const char *cString)
 {
-    return ConversionUtility::toJsString(cString, strlen(cString));
+    return Convert::toJsString(cString, strlen(cString));
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsString(const char *cString, size_t length)
+v8::Handle<v8::Value> Convert::toJsString(const char *cString, size_t length)
 {
     Nan::EscapableHandleScope scope;
     auto name = static_cast<char*>(malloc(length + 1));
@@ -371,19 +371,19 @@ v8::Handle<v8::Value> ConversionUtility::toJsString(const char *cString, size_t 
     return scope.Escape(_name);
 }
 
-v8::Handle<v8::Value> ConversionUtility::toJsString(uint8_t *cString, size_t length)
+v8::Handle<v8::Value> Convert::toJsString(uint8_t *cString, size_t length)
 {
-    return ConversionUtility::toJsString(reinterpret_cast<const char *>(cString), length);
+    return Convert::toJsString(reinterpret_cast<const char *>(cString), length);
 }
 
 
-v8::Handle<v8::Value> ConversionUtility::toJsString(std::string string)
+v8::Handle<v8::Value> Convert::toJsString(std::string string)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::String>(string).ToLocalChecked());
 }
 
-const char * ConversionUtility::valueToString(uint16_t value, name_map_t name_map, const char *defaultValue)
+const char * Convert::valueToString(uint16_t value, name_map_t name_map, const char *defaultValue)
 {
     name_map_it_t it = name_map.find(value);
 
@@ -395,7 +395,7 @@ const char * ConversionUtility::valueToString(uint16_t value, name_map_t name_ma
     return it->second;
 }
 
-v8::Handle<v8::Value> ConversionUtility::valueToJsString(uint16_t value, name_map_t name_map, v8::Handle<v8::Value> defaultValue)
+v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_map, v8::Handle<v8::Value> defaultValue)
 {
     Nan::EscapableHandleScope scope;
     name_map_it_t it = name_map.find(value);
@@ -408,14 +408,14 @@ v8::Handle<v8::Value> ConversionUtility::valueToJsString(uint16_t value, name_ma
     return scope.Escape(Nan::New<v8::String>(it->second).ToLocalChecked());
 }
 
-v8::Local<v8::Function> ConversionUtility::getCallbackFunction(v8::Local<v8::Object> js, const char *name)
+v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
-    return ConversionUtility::getCallbackFunction(obj);
+    return Convert::getCallbackFunction(obj);
 }
 
-v8::Local<v8::Function> ConversionUtility::getCallbackFunction(v8::Local<v8::Value> js)
+v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Value> js)
 {
     Nan::EscapableHandleScope scope;
     if (!js->IsFunction())
@@ -425,7 +425,7 @@ v8::Local<v8::Function> ConversionUtility::getCallbackFunction(v8::Local<v8::Val
     return scope.Escape(js.As<v8::Function>());
 }
 
-uint8_t ConversionUtility::extractHexHelper(char text)
+uint8_t Convert::extractHexHelper(char text)
 {
     if (text >= '0' && text <= '9')
     {
@@ -445,7 +445,7 @@ uint8_t ConversionUtility::extractHexHelper(char text)
     return 0xFF;
 }
 
-uint8_t *ConversionUtility::extractHex(v8::Local<v8::Value> js)
+uint8_t *Convert::extractHex(v8::Local<v8::Value> js)
 {
     v8::Local<v8::String> jsString = v8::Local<v8::String>::Cast(js);
     auto length = jsString->Length();
@@ -475,7 +475,7 @@ uint8_t *ConversionUtility::extractHex(v8::Local<v8::Value> js)
     return retArray;
 }
 
-v8::Handle<v8::Value> ConversionUtility::encodeHex(const char *text, int length)
+v8::Handle<v8::Value> Convert::encodeHex(const char *text, int length)
 {
     std::ostringstream encoded;
     encoded.flags(std::ios::uppercase);
@@ -487,5 +487,5 @@ v8::Handle<v8::Value> ConversionUtility::encodeHex(const char *text, int length)
         encoded << std::hex << (static_cast<int>(text[i]) & 0xFF);
     }
 
-    return ConversionUtility::toJsString(encoded.str());
+    return Convert::toJsString(encoded.str());
 }

@@ -22,52 +22,52 @@ void Utility::SetMethod(v8::Handle<v8::Object> target, const char *exportName, N
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int32_t value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, uint32_t value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int16_t value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, uint16_t value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int8_t value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, uint8_t value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, bool value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsBool(value));
+    return Utility::Set(target, name, Convert::toJsBool(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, double value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsNumber(value));
+    return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const char *value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsString(value));
+    return Utility::Set(target, name, Convert::toJsString(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, std::string value)
 {
-    return Utility::Set(target, name, ConversionUtility::toJsString(value));
+    return Utility::Set(target, name, Convert::toJsString(value));
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, v8::Local<v8::Value> value)
