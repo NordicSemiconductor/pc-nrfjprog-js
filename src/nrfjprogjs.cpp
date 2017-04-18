@@ -41,6 +41,7 @@
 #include "nrfjprogjs.h"
 #include "nrfjprog_common.h"
 #include "nrfjprogjs_batons.h"
+#include "nrfjprog_helpers.h"
 
 #include "keilhexfile.h"
 #include "dllfunc.h"
@@ -61,17 +62,6 @@ bool nRFjprog::connectedToDevice = false;
 errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
 uint32_t nRFjprog::emulatorSpeed = 1000;
 std::string nRFjprog::logMessage;
-
-v8::Local<v8::Object> ProbeInfo::ToJs()
-{
-    Nan::EscapableHandleScope scope;
-    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
-
-    Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
-    Utility::Set(obj, "family", Convert::toJsNumber(family));
-
-    return scope.Escape(obj);
-}
 
 NAN_MODULE_INIT(nRFjprog::Init)
 {
@@ -117,7 +107,7 @@ nRFjprog::nRFjprog()
     }
 }
 
-void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret)
+void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
 {
     if (parse == nullptr ||
         execute == nullptr ||
@@ -133,9 +123,16 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
     v8::Local<v8::Function> callback;
 
     Baton *baton = nullptr;
+    uint32_t serialNumber = 0;
 
     try
     {
+        if (hasSerialNumber)
+        {
+            serialNumber = Convert::getNativeUint32(info[argumentCount]);
+            argumentCount++;
+        }
+
         baton = parse(info, argumentCount);
 
         callback = Convert::getCallbackFunction(info[argumentCount]);
@@ -157,6 +154,7 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 
     baton->executeFunction = execute;
     baton->returnFunction = ret;
+    baton->serialNumber = serialNumber;
 
     uv_queue_work(uv_default_loop(), baton->req, ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
 }
@@ -307,12 +305,15 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
     Nan::SetPrototypeMethod(tpl, "read", Read);
+    Nan::SetPrototypeMethod(tpl, "readU32", ReadU32);
+
+    Nan::SetPrototypeMethod(tpl, "erase", Erase);
 }
 
 NAN_METHOD(nRFjprog::GetDllVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetDllVersionBaton(0, "get dll version");
+        auto baton = new GetDllVersionBaton("get dll version");
 
         return baton;
     };
@@ -324,7 +325,7 @@ NAN_METHOD(nRFjprog::GetDllVersion)
 
     return_function_t r = [&] (Baton *b) -> returnType {
         auto baton = static_cast<GetDllVersionBaton*>(b);
-        std::vector<v8::Local<v8::Value> > vector;
+        returnType vector;
 
         v8::Local<v8::Object> versionObj = Nan::New<v8::Object>();
         Utility::Set(versionObj, "major", Convert::toJsNumber(baton->major));
@@ -336,13 +337,13 @@ NAN_METHOD(nRFjprog::GetDllVersion)
         return vector;
     };
 
-    CallFunction(info, p, e, r);
+    CallFunction(info, p, e, r, false);
 }
 
 NAN_METHOD(nRFjprog::GetConnectedDevices)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        return new GetConnectedDevicesBaton(0, "get connected devices");
+        return new GetConnectedDevicesBaton("get connected devices");
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
@@ -378,7 +379,7 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
 
     return_function_t r = [&] (Baton *b) -> returnType {
         auto baton = static_cast<GetConnectedDevicesBaton*>(b);
-        std::vector<v8::Local<v8::Value> > vector;
+        returnType vector;
 
         v8::Local<v8::Array> connectedDevices = Nan::New<v8::Array>();
         for (uint32_t i = 0; i < baton->probes.size(); ++i)
@@ -391,16 +392,13 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
         return vector;
     };
 
-    CallFunction(info, p, e, r);
+    CallFunction(info, p, e, r, false);
 }
 
 NAN_METHOD(nRFjprog::GetFamily)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        uint32_t serialNumber = Convert::getNativeUint32(info[argumentCount]);
-        argumentCount++;
-
-        auto baton = new GetFamilyBaton(serialNumber, "get device family");
+        auto baton = new GetFamilyBaton("get device family");
 
         return baton;
     };
@@ -412,23 +410,22 @@ NAN_METHOD(nRFjprog::GetFamily)
 
     return_function_t r = [&] (Baton *b) -> returnType {
         auto baton = static_cast<GetFamilyBaton*>(b);
-        std::vector<v8::Local<v8::Value> > vector;
+        returnType vector;
 
         vector.push_back(Convert::toJsNumber(baton->family));
 
         return vector;
     };
 
-    CallFunction(info, p, e, r);
+    CallFunction(info, p, e, r, true);
 }
 
 NAN_METHOD(nRFjprog::Read)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        uint32_t serialNumber = Convert::getNativeUint32(info[argumentCount]);
-        argumentCount++;
+        auto baton = new ReadBaton("read");
 
-        auto baton = new ReadBaton(serialNumber, "read");
+        baton->data = nullptr;
 
         baton->address = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
@@ -447,16 +444,72 @@ NAN_METHOD(nRFjprog::Read)
 
     return_function_t r = [&] (Baton *b) -> returnType {
         auto baton = static_cast<ReadBaton*>(b);
-        std::vector<v8::Local<v8::Value> > vector;
+        returnType vector;
 
         vector.push_back(Convert::toJsValueArray(baton->data, baton->length));
-
-        delete[] baton->data;
 
         return vector;
     };
 
-    CallFunction(info, p, e, r);
+    CallFunction(info, p, e, r, true);
+}
+
+NAN_METHOD(nRFjprog::ReadU32)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new ReadU32Baton("readU32");
+
+        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<ReadU32Baton*>(b);
+        return dll_function.read_u32(probe, baton->address, &baton->data, 0);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        auto baton = static_cast<ReadU32Baton*>(b);
+        returnType vector;
+
+        vector.push_back(Convert::toJsNumber(baton->data));
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r, true);
+}
+
+NAN_METHOD(nRFjprog::Erase)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new EraseBaton("erase");
+
+        v8::Local<v8::Object> eraseOptions = Convert::getJsObject(info[argumentCount]);
+        EraseOptions options(eraseOptions);
+        baton->erase_mode = options.eraseMode;
+        baton->start_address = options.startAddress;
+        baton->end_address = options.endAddress;
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<EraseBaton*>(b);
+        return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address, 0);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        auto baton = static_cast<EraseBaton*>(b);
+        returnType vector;
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r, true);
 }
 
 extern "C" {
@@ -508,6 +561,11 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
         NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY);
+
+        NODE_DEFINE_CONSTANT(target, ERASE_NONE);
+        NODE_DEFINE_CONSTANT(target, ERASE_ALL);
+        NODE_DEFINE_CONSTANT(target, ERASE_SECTOR);
+        NODE_DEFINE_CONSTANT(target, ERASE_SECTOR_AND_UICR);
         /*
         NODE_DEFINE_CONSTANT(target, UP_DIRECTION);
         NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION);

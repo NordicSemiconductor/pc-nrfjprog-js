@@ -115,6 +115,42 @@ describe('Test nrfjprog integration', () => {
 
                 nRFjprog.read(device.serialNumber, 0x0, 1, callback);
             });
+
+            it('reads 5 bytes from specified address', done => {
+                const readLength = 5;
+
+                const callback = (err, contents) => {
+                    expect(err).toBeUndefined();
+                    expect(contents).toBeDefined();
+                    expect(contents.length).toBe(readLength);
+                    done();
+                }
+
+                nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
+            });
+
+            it('reads unsigned 32 from specified address', done => {
+                const callback = (err, contents) => {
+                    expect(err).toBeUndefined();
+                    expect(contents).toBeDefined();
+                    done();
+                }
+
+                nRFjprog.readU32(device.serialNumber, 0x0, callback);
+            });
+        });
+
+        describe('Destructive functionality', () => {
+            it('erases the whole device', done => {
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                }
+
+                nRFjprog.erase(device.serialNumber, {}, callback);
+            });
+
+
         });
     });
 });

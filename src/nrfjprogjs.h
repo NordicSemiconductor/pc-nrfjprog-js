@@ -43,25 +43,12 @@
 
 #include "utility/errormessage.h"
 
-struct Baton;
+class Baton;
 
 typedef std::vector<v8::Local<v8::Value> > returnType;
 typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_function_t;
 typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
 typedef std::function<returnType(Baton*)> return_function_t;
-
-class ProbeInfo
-{
-public:
-    ProbeInfo(uint32_t serial_number, device_family_t family) :
-        serial_number(serial_number), family(family)
-    {}
-
-    uint32_t serial_number;
-    device_family_t family;
-
-    v8::Local<v8::Object> ToJs();
-};
 
 class nRFjprog : public Nan::ObjectWrap
 {
@@ -84,10 +71,16 @@ private:
 
     static NAN_METHOD(GetFamily); // Params: serialnumber, callback(error, family)
     static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, family)
+    static NAN_METHOD(ReadU32); // Params: serialnumber, address, callback(error, family)
+    static NAN_METHOD(Erase); // Params: serialnumber, options {erasse_mode, start_address, end_address}, callback(error, family)
 
-    static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret);
-    static void nRFjprog::ExecuteFunction(uv_work_t *req);
-    static void nRFjprog::ReturnFunction(uv_work_t *req);
+    static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
+                             const parse_parameters_function_t parse,
+                             const execute_function_t execute,
+                             const return_function_t ret,
+                             const bool hasSerialNumber);
+    static void ExecuteFunction(uv_work_t *req);
+    static void ReturnFunction(uv_work_t *req);
 
     static errorcodes loadDll();
     static void unloadDll();

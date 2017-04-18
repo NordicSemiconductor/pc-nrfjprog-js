@@ -34,100 +34,33 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_BATONS_H__
-#define __NRFJPROG_BATONS_H__
+#ifndef __NRFJPROG_HELPERS_H__
+#define __NRFJPROG_HELPERS_H__
 
-#include <memory>
+#include <nan.h>
 #include "nrfjprogjs.h"
-#include "nrfjprog_helpers.h"
 
-#define BATON_CONSTRUCTOR(BatonType, returnParameterCount) BatonType(std::string name) : Baton(returnParameterCount, name) {}
-#define BATON_DESTRUCTOR(BatonType) ~BatonType()
-
-class Baton {
-public:
-    explicit Baton(const uint32_t _returnParameterCount, std::string _name) {
-        req = new uv_work_t();
-        req->data = static_cast<void*>(this);
-        returnParameterCount = _returnParameterCount;
-        name = _name;
-    }
-
-    ~Baton()
-    {
-        delete callback;
-    }
-
-    uv_work_t *req;
-    Nan::Callback *callback;
-    uint32_t serialNumber;
-    uint32_t returnParameterCount;
-
-    execute_function_t executeFunction;
-    return_function_t returnFunction;
-    std::string name;
-
-    uint32_t result;
-};
-
-class GetDllVersionBaton : public Baton
+class ProbeInfo
 {
 public:
-    BATON_CONSTRUCTOR(GetDllVersionBaton, 1);
-    uint32_t major;
-    uint32_t minor;
-    uint32_t revision;
-};
+    ProbeInfo(uint32_t serial_number, device_family_t family) :
+        serial_number(serial_number), family(family)
+    {}
 
-class GetConnectedDevicesBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(GetConnectedDevicesBaton, 1);
-    std::vector<ProbeInfo *> probes;
-};
-
-class GetFamilyBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(GetFamilyBaton, 1);
-    uint32_t serialNumber;
+    uint32_t serial_number;
     device_family_t family;
+
+    v8::Local<v8::Object> ToJs();
 };
 
-class ReadBaton : public Baton
+class EraseOptions
 {
 public:
-    BATON_CONSTRUCTOR(ReadBaton, 1);
-    BATON_DESTRUCTOR(ReadBaton)
-    {
-        if (data != nullptr)
-        {
-            delete[] data;
-            data = nullptr;
-        }
-    }
+    EraseOptions(v8::Local<v8::Object> obj);
 
-    uint32_t address;
-    uint32_t length;
-    uint8_t *data;
-};
-
-class ReadU32Baton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(ReadU32Baton, 1);
-    uint32_t address;
-    uint32_t length;
-    uint32_t data;
-};
-
-class EraseBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(EraseBaton, 0);
-    erase_mode_t erase_mode;
-    uint32_t start_address;
-    uint32_t end_address;
+    erase_mode_t eraseMode;
+    uint32_t startAddress;
+    uint32_t endAddress;
 };
 
 #endif

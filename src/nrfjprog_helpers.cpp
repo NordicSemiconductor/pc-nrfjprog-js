@@ -34,100 +34,39 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_BATONS_H__
-#define __NRFJPROG_BATONS_H__
-
-#include <memory>
-#include "nrfjprogjs.h"
 #include "nrfjprog_helpers.h"
 
-#define BATON_CONSTRUCTOR(BatonType, returnParameterCount) BatonType(std::string name) : Baton(returnParameterCount, name) {}
-#define BATON_DESTRUCTOR(BatonType) ~BatonType()
+#include "utility/utility.h"
+#include "utility/conversion.h"
 
-class Baton {
-public:
-    explicit Baton(const uint32_t _returnParameterCount, std::string _name) {
-        req = new uv_work_t();
-        req->data = static_cast<void*>(this);
-        returnParameterCount = _returnParameterCount;
-        name = _name;
-    }
+v8::Local<v8::Object> ProbeInfo::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
-    ~Baton()
+    Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
+    Utility::Set(obj, "family", Convert::toJsNumber(family));
+
+    return scope.Escape(obj);
+}
+
+EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
+    eraseMode(ERASE_ALL),
+    startAddress(0),
+    endAddress(0)
+{
+    if (Utility::Has(obj, "erase_mode"))
     {
-        delete callback;
+        eraseMode = (erase_mode_t)Convert::getNativeUint32(obj, "erase_mode");
     }
 
-    uv_work_t *req;
-    Nan::Callback *callback;
-    uint32_t serialNumber;
-    uint32_t returnParameterCount;
-
-    execute_function_t executeFunction;
-    return_function_t returnFunction;
-    std::string name;
-
-    uint32_t result;
-};
-
-class GetDllVersionBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(GetDllVersionBaton, 1);
-    uint32_t major;
-    uint32_t minor;
-    uint32_t revision;
-};
-
-class GetConnectedDevicesBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(GetConnectedDevicesBaton, 1);
-    std::vector<ProbeInfo *> probes;
-};
-
-class GetFamilyBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(GetFamilyBaton, 1);
-    uint32_t serialNumber;
-    device_family_t family;
-};
-
-class ReadBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(ReadBaton, 1);
-    BATON_DESTRUCTOR(ReadBaton)
+    if (Utility::Has(obj, "start_adress"))
     {
-        if (data != nullptr)
-        {
-            delete[] data;
-            data = nullptr;
-        }
+        startAddress = (erase_mode_t)Convert::getNativeUint32(obj, "erase_mode");
     }
 
-    uint32_t address;
-    uint32_t length;
-    uint8_t *data;
-};
-
-class ReadU32Baton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(ReadU32Baton, 1);
-    uint32_t address;
-    uint32_t length;
-    uint32_t data;
-};
-
-class EraseBaton : public Baton
-{
-public:
-    BATON_CONSTRUCTOR(EraseBaton, 0);
-    erase_mode_t erase_mode;
-    uint32_t start_address;
-    uint32_t end_address;
-};
-
-#endif
+    if (Utility::Has(obj, "end_address"))
+    {
+        endAddress = (erase_mode_t)Convert::getNativeUint32(obj, "end_address");
+    }
+}
