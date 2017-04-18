@@ -52,15 +52,15 @@
 
 #define MAX_SERIAL_NUMBERS 100
 
-Nan::Persistent<v8::Function> DebugProbe::constructor;
-DllFunctionPointersType DebugProbe::dll_function;
-char DebugProbe::dll_path[COMMON_MAX_PATH] = {'\0'};
-char DebugProbe::jlink_path[COMMON_MAX_PATH] = {'\0'};
-bool DebugProbe::loaded = false;
-bool DebugProbe::connectedToDevice = false;
-errorcodes DebugProbe::finderror = errorcodes::JsSuccess;
-uint32_t DebugProbe::emulatorSpeed = 1000;
-std::string DebugProbe::logMessage;
+Nan::Persistent<v8::Function> nRFjprog::constructor;
+DllFunctionPointersType nRFjprog::dll_function;
+char nRFjprog::dll_path[COMMON_MAX_PATH] = {'\0'};
+char nRFjprog::jlink_path[COMMON_MAX_PATH] = {'\0'};
+bool nRFjprog::loaded = false;
+bool nRFjprog::connectedToDevice = false;
+errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
+uint32_t nRFjprog::emulatorSpeed = 1000;
+std::string nRFjprog::logMessage;
 
 v8::Local<v8::Object> ProbeInfo::ToJs()
 {
@@ -73,23 +73,23 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
     return scope.Escape(obj);
 }
 
-NAN_MODULE_INIT(DebugProbe::Init)
+NAN_MODULE_INIT(nRFjprog::Init)
 {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-    tpl->SetClassName(Nan::New("DebugProbe").ToLocalChecked());
+    tpl->SetClassName(Nan::New("nRFjprog").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     init(tpl);
 
     constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());
-    Nan::Set(target, Nan::New("DebugProbe").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+    Nan::Set(target, Nan::New("nRFjprog").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
-NAN_METHOD(DebugProbe::New)
+NAN_METHOD(nRFjprog::New)
 {
     if (info.IsConstructCall())
     {
-        auto obj = new DebugProbe();
+        auto obj = new nRFjprog();
         obj->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
     }
@@ -100,7 +100,7 @@ NAN_METHOD(DebugProbe::New)
     }
 }
 
-DebugProbe::DebugProbe()
+nRFjprog::nRFjprog()
 {
     finderror = errorcodes::JsSuccess;
 
@@ -117,7 +117,7 @@ DebugProbe::DebugProbe()
     }
 }
 
-void DebugProbe::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret)
+void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret)
 {
     if (parse == nullptr ||
         execute == nullptr ||
@@ -128,7 +128,7 @@ void DebugProbe::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_f
         return;
     }
 
-    auto obj = Nan::ObjectWrap::Unwrap<DebugProbe>(info.Holder());
+    auto obj = Nan::ObjectWrap::Unwrap<nRFjprog>(info.Holder());
     auto argumentCount = 0;
     v8::Local<v8::Function> callback;
 
@@ -161,7 +161,7 @@ void DebugProbe::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_f
     uv_queue_work(uv_default_loop(), baton->req, ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
 }
 
-void DebugProbe::ExecuteFunction(uv_work_t *req)
+void nRFjprog::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<Baton *>(req->data);
     Probe_handle_t probe;
@@ -178,7 +178,7 @@ void DebugProbe::ExecuteFunction(uv_work_t *req)
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError = dll_function.dll_open(&DebugProbe::logCallback);
+        nrfjprogdll_err_t openError = dll_function.dll_open(&nRFjprog::logCallback);
 
         if (openError != SUCCESS)
         {
@@ -219,7 +219,7 @@ void DebugProbe::ExecuteFunction(uv_work_t *req)
     }
 }
 
-void DebugProbe::ReturnFunction(uv_work_t *req)
+void nRFjprog::ReturnFunction(uv_work_t *req)
 {
     Nan::HandleScope scope;
 
@@ -252,13 +252,13 @@ void DebugProbe::ReturnFunction(uv_work_t *req)
     delete baton;
 }
 
-void DebugProbe::logCallback(const char * msg)
+void nRFjprog::logCallback(const char * msg)
 {
     logMessage = logMessage.append(msg);
 }
 NrfjprogErrorCodesType dll_load_result;
 
-errorcodes DebugProbe::loadDll()
+errorcodes nRFjprog::loadDll()
 {
     if (loaded)
     {
@@ -282,10 +282,10 @@ errorcodes DebugProbe::loadDll()
     return errorcodes::JsSuccess;
 }
 
-DebugProbe::~DebugProbe()
+nRFjprog::~nRFjprog()
 {}
 
-void DebugProbe::unloadDll()
+void nRFjprog::unloadDll()
 {
     if (loaded)
     {
@@ -294,14 +294,14 @@ void DebugProbe::unloadDll()
     }
 }
 
-void DebugProbe::closeBeforeExit()
+void nRFjprog::closeBeforeExit()
 {
     dll_function.dll_close();
 
     unloadDll();
 }
 
-void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
+void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 {
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
@@ -309,10 +309,10 @@ void DebugProbe::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "read", Read);
 }
 
-NAN_METHOD(DebugProbe::GetDllVersion)
+NAN_METHOD(nRFjprog::GetDllVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetDllVersionBaton(0, 1, "get dll version");
+        auto baton = new GetDllVersionBaton(0, "get dll version");
 
         return baton;
     };
@@ -339,10 +339,10 @@ NAN_METHOD(DebugProbe::GetDllVersion)
     CallFunction(info, p, e, r);
 }
 
-NAN_METHOD(DebugProbe::GetConnectedDevices)
+NAN_METHOD(nRFjprog::GetConnectedDevices)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        return new GetConnectedDevicesBaton(0, 1, "get connected devices");
+        return new GetConnectedDevicesBaton(0, "get connected devices");
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
@@ -394,13 +394,13 @@ NAN_METHOD(DebugProbe::GetConnectedDevices)
     CallFunction(info, p, e, r);
 }
 
-NAN_METHOD(DebugProbe::GetFamily)
+NAN_METHOD(nRFjprog::GetFamily)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
         uint32_t serialNumber = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
 
-        auto baton = new GetFamilyBaton(serialNumber, 1, "get device family");
+        auto baton = new GetFamilyBaton(serialNumber, "get device family");
 
         return baton;
     };
@@ -422,13 +422,13 @@ NAN_METHOD(DebugProbe::GetFamily)
     CallFunction(info, p, e, r);
 }
 
-NAN_METHOD(DebugProbe::Read)
+NAN_METHOD(nRFjprog::Read)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
         uint32_t serialNumber = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
 
-        auto baton = new ReadBaton(serialNumber, 1, "read");
+        auto baton = new ReadBaton(serialNumber, "read");
 
         baton->address = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
@@ -591,7 +591,7 @@ extern "C" {
     NAN_MODULE_INIT(init)
     {
         initConsts(target);
-        DebugProbe::Init(target);
+        nRFjprog::Init(target);
     }
 }
 

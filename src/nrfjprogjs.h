@@ -43,6 +43,13 @@
 
 #include "utility/errormessage.h"
 
+struct Baton;
+
+typedef std::vector<v8::Local<v8::Value> > returnType;
+typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_function_t;
+typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
+typedef std::function<returnType(Baton*)> return_function_t;
+
 class ProbeInfo
 {
 public:
@@ -56,14 +63,14 @@ public:
     v8::Local<v8::Object> ToJs();
 };
 
-class DebugProbe : public Nan::ObjectWrap
+class nRFjprog : public Nan::ObjectWrap
 {
 public:
     static NAN_MODULE_INIT(Init);
 
 private:
-    explicit DebugProbe();
-    ~DebugProbe();
+    explicit nRFjprog();
+    ~nRFjprog();
 
     static Nan::Persistent<v8::Function> constructor;
 
@@ -79,8 +86,8 @@ private:
     static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, family)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret);
-    static void DebugProbe::ExecuteFunction(uv_work_t *req);
-    static void DebugProbe::ReturnFunction(uv_work_t *req);
+    static void nRFjprog::ExecuteFunction(uv_work_t *req);
+    static void nRFjprog::ReturnFunction(uv_work_t *req);
 
     static errorcodes loadDll();
     static void unloadDll();

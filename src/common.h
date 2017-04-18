@@ -46,53 +46,11 @@
 #include <functional>
 #include "dllfunc.h"
 
-struct Baton;
-
-typedef std::vector<v8::Local<v8::Value> > returnType;
-typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_function_t;
-typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
-typedef std::function<returnType(Baton*)> return_function_t;
-
 #define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
-
-#define BATON_CONSTRUCTOR(BatonType) BatonType(uint32_t serialNumber, uint32_t parameterCount, std::string name) : Baton(serialNumber, parameterCount, name) {}
-#define BATON_DESTRUCTOR(BatonType) ~BatonType()
-
-#define METHOD_DEFINITIONS(MainName) \
-    NAN_METHOD(MainName); \
-    void MainName(uv_work_t *req); \
-    void After##MainName(uv_work_t *req);
 
 // Typedef of name to string with enum name, covers most cases
 typedef std::map<uint16_t, const char*> name_map_t;
 typedef std::map<uint16_t, const char*>::iterator name_map_it_t;
-
-struct Baton {
-public:
-    explicit Baton(const uint32_t _serialNumber, const uint32_t _returnParameterCount, std::string _name) {
-        req = new uv_work_t();
-        req->data = static_cast<void*>(this);
-        serialNumber = _serialNumber;
-        returnParameterCount = _returnParameterCount;
-        name = _name;
-    }
-
-    ~Baton()
-    {
-        delete callback;
-    }
-
-    uv_work_t *req;
-    Nan::Callback *callback;
-    uint32_t serialNumber;
-    uint32_t returnParameterCount;
-
-    execute_function_t executeFunction;
-    return_function_t returnFunction;
-    std::string name;
-
-    uint32_t result;
-};
 
 const std::string getCurrentTimeInMilliseconds();
 

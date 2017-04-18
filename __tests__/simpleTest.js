@@ -38,12 +38,12 @@
 
 const nrfjprog = require('../index.js');
 
-let debugProbe;
+let nRFjprog;
 let device;
 
 describe('Test nrfjprog integration', () => {
     beforeEach(() => {
-        debugProbe = new nrfjprog.DebugProbe();
+        nRFjprog = new nrfjprog.nRFjprog();
     });
 
     describe('Generic functionality', () => {
@@ -56,7 +56,7 @@ describe('Test nrfjprog integration', () => {
                 done();
             };
 
-            debugProbe.getDllVersion(callback);
+            nRFjprog.getDllVersion(callback);
         });
 
         it('finds all connected devices', done => {
@@ -67,11 +67,11 @@ describe('Test nrfjprog integration', () => {
                 done();
             };
 
-            debugProbe.getConnectedDevices(callback);
+            nRFjprog.getConnectedDevices(callback);
         });
 
         it('throws when wrong parameters are sent in', () => {
-            expect(() => { debugProbe.getDllVersion(); }).toThrowErrorMatchingSnapshot();
+            expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
         });
     });
 
@@ -82,7 +82,7 @@ describe('Test nrfjprog integration', () => {
                 done();
             };
 
-            debugProbe.getConnectedDevices(callback);
+            nRFjprog.getConnectedDevices(callback);
         });
 
         describe('Non-destructive functionality', () => {
@@ -93,7 +93,7 @@ describe('Test nrfjprog integration', () => {
                     done();
                 }
 
-                debugProbe.getFamily(device.serialNumber, callback);
+                nRFjprog.getFamily(device.serialNumber, callback);
             });
 
             it('throws an error when device do not exist', done => {
@@ -103,7 +103,7 @@ describe('Test nrfjprog integration', () => {
                     done();
                 }
 
-                debugProbe.getFamily(1, callback);
+                nRFjprog.getFamily(1, callback);
             });
 
             it('reads from specified address', done => {
@@ -113,7 +113,7 @@ describe('Test nrfjprog integration', () => {
                     done();
                 }
 
-                debugProbe.read(device.serialNumber, 0x0, 1, callback);
+                nRFjprog.read(device.serialNumber, 0x0, 1, callback);
             });
         });
     });
@@ -121,8 +121,8 @@ describe('Test nrfjprog integration', () => {
 
 
 /*
-let probe = new nrfjprog.DebugProbe();
-let probe2 = new nrfjprog.DebugProbe();
+let probe = new nrfjprog.nRFjprog();
+let probe2 = new nrfjprog.nRFjprog();
 
 probe.getDllVersion((err, dllVersion) => {
     if (err) {

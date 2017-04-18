@@ -40,34 +40,64 @@
 #include "nrfjprogjs.h"
 #include <memory>
 
-class GetDllVersionBaton : public Baton
+#define BATON_CONSTRUCTOR(BatonType, returnParameterCount) BatonType(uint32_t serialNumber, std::string name) : Baton(serialNumber, returnParameterCount, name) {}
+#define BATON_DESTRUCTOR(BatonType) ~BatonType()
+
+struct Baton {
+public:
+    explicit Baton(const uint32_t _serialNumber, const uint32_t _returnParameterCount, std::string _name) {
+        req = new uv_work_t();
+        req->data = static_cast<void*>(this);
+        serialNumber = _serialNumber;
+        returnParameterCount = _returnParameterCount;
+        name = _name;
+    }
+
+    ~Baton()
+    {
+        delete callback;
+    }
+
+    uv_work_t *req;
+    Nan::Callback *callback;
+    uint32_t serialNumber;
+    uint32_t returnParameterCount;
+
+    execute_function_t executeFunction;
+    return_function_t returnFunction;
+    std::string name;
+
+    uint32_t result;
+};
+
+struct GetDllVersionBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetDllVersionBaton);
+    BATON_CONSTRUCTOR(GetDllVersionBaton, 1);
     uint32_t major;
     uint32_t minor;
     uint32_t revision;
 };
 
-class GetConnectedDevicesBaton : public Baton
+struct GetConnectedDevicesBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetConnectedDevicesBaton);
+    BATON_CONSTRUCTOR(GetConnectedDevicesBaton, 1);
     std::vector<ProbeInfo *> probes;
 };
 
-class GetFamilyBaton : public Baton
+struct GetFamilyBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetFamilyBaton);
+    BATON_CONSTRUCTOR(GetFamilyBaton, 1);
     uint32_t serialNumber;
     device_family_t family;
 };
 
-class ReadBaton : public Baton
+struct ReadBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(ReadBaton);
+    BATON_CONSTRUCTOR(ReadBaton, 1);
     uint32_t address;
     uint32_t length;
     uint8_t *data;

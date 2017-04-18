@@ -34,6 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const debugProbe = require('bindings')('pc-nrfjprog-js');
+const nRFjprog = require('bindings')('pc-nrfjprog-js');
 
-module.exports = debugProbe;
+module.exports = nRFjprog;
