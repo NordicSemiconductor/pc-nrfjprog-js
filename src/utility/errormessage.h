@@ -33,7 +33,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef __ERRORMESSAGE_H__
 #define __ERRORMESSAGE_H__
 
@@ -55,6 +55,8 @@ typedef enum errorcodes
     CouldNotFindJprogDLL,
     CouldNotLoadDLL,
     CouldNotOpenDevice,
+    CouldNotResetDevice,
+    CouldNotCloseDevice,
     CouldNotOpenDLL,
     CouldNotConnectToDevice,
     CouldNotCallFunction,
@@ -72,6 +74,8 @@ static name_map_t nrfjprog_js_err_map = {
     { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
     { errorcodes::CouldNotOpenDLL, "CouldNotOpenDLL" },
     { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
+    { errorcodes::CouldNotResetDevice, "CouldNotResetDevice" },
+    { errorcodes::CouldNotCloseDevice, "CouldNotCloseDevice" },
     { errorcodes::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
     { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" },
     { errorcodes::CouldNotErase, "CouldNotErase" },

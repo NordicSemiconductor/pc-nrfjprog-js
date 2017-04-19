@@ -200,11 +200,19 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0)
     {
+        nrfjprogdll_err_t resetError = dll_function.reset(&probe, SYSTEM_RESET);
+
+        if (resetError != SUCCESS)
+        {
+            baton->result = errorcodes::CouldNotResetDevice;
+            return;
+        }
+
         nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe);
 
         if (uninitError != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotOpenDevice;
+            baton->result = errorcodes::CouldNotCloseDevice;
             return;
         }
     }
