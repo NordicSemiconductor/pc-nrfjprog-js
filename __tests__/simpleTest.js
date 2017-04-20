@@ -150,7 +150,14 @@ describe('Test nrfjprog integration', () => {
                 nRFjprog.erase(device.serialNumber, {}, callback);
             });
 
+            it('reads device content', done => {
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                }
 
+                nRFjprog.readToFile(device.serialNumber, "./test.hex", { readcode: true, readuicr: true }, callback);
+            });
         });
     });
 });

@@ -60,7 +60,6 @@ char nRFjprog::jlink_path[COMMON_MAX_PATH] = {'\0'};
 bool nRFjprog::loaded = false;
 bool nRFjprog::connectedToDevice = false;
 errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
-uint32_t nRFjprog::emulatorSpeed = 1000;
 std::string nRFjprog::logMessage;
 
 NAN_MODULE_INIT(nRFjprog::Init)
@@ -117,6 +116,8 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
         Nan::ThrowError(message);
         return;
     }
+
+    logMessage.clear();
 
     auto obj = Nan::ObjectWrap::Unwrap<nRFjprog>(info.Holder());
     auto argumentCount = 0;
@@ -181,6 +182,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
         if (openError != SUCCESS)
         {
             baton->result = errorcodes::CouldNotOpenDLL;
+            baton->lowlevelError = openError;
             return;
         }
     }
@@ -192,6 +194,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
         if (initError != SUCCESS)
         {
             baton->result = errorcodes::CouldNotOpenDevice;
+            baton->lowlevelError = initError;
             return;
         }
     }
@@ -200,19 +203,22 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0)
     {
+        /*
         nrfjprogdll_err_t resetError = dll_function.reset(&probe, SYSTEM_RESET);
 
         if (resetError != SUCCESS)
         {
             baton->result = errorcodes::CouldNotResetDevice;
+            baton->lowlevelError = resetError;
             return;
         }
-
+*/
         nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe);
 
         if (uninitError != SUCCESS)
         {
             baton->result = errorcodes::CouldNotCloseDevice;
+            baton->lowlevelError = uninitError;
             return;
         }
     }
@@ -222,6 +228,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
     if (excuteError != SUCCESS)
     {
         baton->result = errorcodes::CouldNotCallFunction;
+        baton->lowlevelError = excuteError;
     }
 }
 
@@ -235,7 +242,7 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
 
     if (baton->result != errorcodes::JsSuccess)
     {
-        argv[0] = ErrorMessage::getErrorMessage(baton->result, baton->name);
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, baton->name, logMessage, baton->lowlevelError);
 
         for (uint32_t i = 0; i < baton->returnParameterCount; i++)
         {
@@ -262,7 +269,6 @@ void nRFjprog::logCallback(const char * msg)
 {
     logMessage = logMessage.append(msg);
 }
-NrfjprogErrorCodesType dll_load_result;
 
 errorcodes nRFjprog::loadDll()
 {
@@ -276,7 +282,7 @@ errorcodes nRFjprog::loadDll()
         return finderror;
     }
 
-    dll_load_result = DllLoad(dll_path, &dll_function);
+    NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
     loaded = false;
 
     if (dll_load_result != Success)
@@ -316,6 +322,7 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "readU32", ReadU32);
 
     Nan::SetPrototypeMethod(tpl, "erase", Erase);
+    Nan::SetPrototypeMethod(tpl, "readToFile", ReadToFile);
 }
 
 NAN_METHOD(nRFjprog::GetDllVersion)
@@ -511,7 +518,6 @@ NAN_METHOD(nRFjprog::Erase)
     };
 
     return_function_t r = [&] (Baton *b) -> returnType {
-        auto baton = static_cast<EraseBaton*>(b);
         returnType vector;
 
         return vector;
@@ -519,6 +525,37 @@ NAN_METHOD(nRFjprog::Erase)
 
     CallFunction(info, p, e, r, true);
 }
+
+NAN_METHOD(nRFjprog::ReadToFile)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new ReadToFileBaton("read to file");
+
+        baton->filename = Convert::getNativeString(info[argumentCount]);
+        argumentCount++;
+
+        v8::Local<v8::Object> readOptions = Convert::getJsObject(info[argumentCount]);
+        ReadToFileOptions options(readOptions);
+        baton->options = options.options;
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<ReadToFileBaton*>(b);
+        return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options , 0);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        returnType vector;
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r, true);
+}
+
 
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)

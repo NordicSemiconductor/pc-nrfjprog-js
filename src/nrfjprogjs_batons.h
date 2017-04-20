@@ -51,6 +51,7 @@ public:
         req->data = static_cast<void*>(this);
         returnParameterCount = _returnParameterCount;
         name = _name;
+        lowlevelError = SUCCESS;
     }
 
     ~Baton()
@@ -68,6 +69,8 @@ public:
     std::string name;
 
     uint32_t result;
+
+    nrfjprogdll_err_t lowlevelError;
 };
 
 class GetDllVersionBaton : public Baton
@@ -128,6 +131,14 @@ public:
     erase_mode_t erase_mode;
     uint32_t start_address;
     uint32_t end_address;
+};
+
+class ReadToFileBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(ReadToFileBaton, 0);
+    std::string filename;
+    read_options_t options;
 };
 
 #endif

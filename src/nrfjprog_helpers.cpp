@@ -70,3 +70,31 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
         endAddress = (erase_mode_t)Convert::getNativeUint32(obj, "end_address");
     }
 }
+
+ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
+{
+    options.readram = false;
+    options.readcode = false;
+    options.readuicr = false;
+    options.readqspi = false;
+
+    if (Utility::Has(obj, "readram"))
+    {
+        options.readram = Convert::getBool(obj, "readram");
+    }
+
+    if (Utility::Has(obj, "readcode"))
+    {
+        options.readcode = Convert::getBool(obj, "readcode");
+    }
+
+    if (Utility::Has(obj, "readuicr"))
+    {
+        options.readuicr = Convert::getBool(obj, "readuicr");
+    }
+
+    if (Utility::Has(obj, "readqspi"))
+    {
+        options.readqspi = Convert::getBool(obj, "readqspi");
+    }
+}

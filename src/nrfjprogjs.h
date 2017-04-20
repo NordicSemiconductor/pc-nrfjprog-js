@@ -72,7 +72,9 @@ private:
     static NAN_METHOD(GetFamily); // Params: serialnumber, callback(error, family)
     static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, family)
     static NAN_METHOD(ReadU32); // Params: serialnumber, address, callback(error, family)
+
     static NAN_METHOD(Erase); // Params: serialnumber, options {erasse_mode, start_address, end_address}, callback(error, family)
+    static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode, readuicr, readqspi}, callback(error)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                              const parse_parameters_function_t parse,
@@ -91,7 +93,6 @@ private:
 
     static void logCallback(const char * msg);
 
-    static uint32_t emulatorSpeed;
     static DllFunctionPointersType dll_function;
     static char dll_path[COMMON_MAX_PATH];
     static char jlink_path[COMMON_MAX_PATH];

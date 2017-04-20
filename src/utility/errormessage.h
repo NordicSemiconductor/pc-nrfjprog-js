@@ -43,7 +43,7 @@
 class ErrorMessage
 {
 public:
-    static v8::Local<v8::Value> getErrorMessage(const int errorCode, const std::string customMessage);
+    static v8::Local<v8::Value> getErrorMessage(const int errorCode, const std::string customMessage, const std::string logmessage = std::string(), const nrfjprogdll_err_t lowlevelError = SUCCESS);
     static v8::Local<v8::String> getTypeErrorMessage(const int argumentNumber, const std::string message);
     static v8::Local<v8::String> getStructErrorMessage(const std::string name, const std::string message);
 };
@@ -66,23 +66,5 @@ typedef enum errorcodes
     CouldNotOpenHexFile,
     WrongMagicNumber
 } errorcodes;
-
-static name_map_t nrfjprog_js_err_map = {
-    { errorcodes::JsSuccess, "Success" },
-    { errorcodes::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL" },
-    { errorcodes::CouldNotFindJprogDLL, "CouldNotFindJprogDLL" },
-    { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
-    { errorcodes::CouldNotOpenDLL, "CouldNotOpenDLL" },
-    { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
-    { errorcodes::CouldNotResetDevice, "CouldNotResetDevice" },
-    { errorcodes::CouldNotCloseDevice, "CouldNotCloseDevice" },
-    { errorcodes::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
-    { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" },
-    { errorcodes::CouldNotErase, "CouldNotErase" },
-    { errorcodes::CouldNotProgram, "CouldNotProgram" },
-    { errorcodes::CouldNotRead, "CouldNotRead" },
-    { errorcodes::CouldNotOpenHexFile, "CouldNotOpenHexFile" },
-    { errorcodes::WrongMagicNumber, "WrongMagicNumber" }
-};
 
 #endif

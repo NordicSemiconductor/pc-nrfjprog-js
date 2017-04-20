@@ -63,4 +63,12 @@ public:
     uint32_t endAddress;
 };
 
+class ReadToFileOptions
+{
+public:
+    ReadToFileOptions(v8::Local<v8::Object> obj);
+
+    read_options_t options;
+};
+
 #endif
