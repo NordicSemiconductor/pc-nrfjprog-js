@@ -75,6 +75,7 @@ private:
 
     static NAN_METHOD(Erase); // Params: serialnumber, options {erasse_mode, start_address, end_address}, callback(error, family)
     static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode, readuicr, readqspi}, callback(error)
+    static NAN_METHOD(Program); // Params: serialnumber, filename, options {verify, chip_erase_mode, qspi_erase_mode, reset}, callback(error)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                              const parse_parameters_function_t parse,

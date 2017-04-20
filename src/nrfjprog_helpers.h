@@ -71,4 +71,12 @@ public:
     read_options_t options;
 };
 
+class ProgramOptions
+{
+public:
+    ProgramOptions(v8::Local<v8::Object> obj);
+
+    program_options_t options;
+};
+
 #endif

@@ -158,6 +158,24 @@ describe('Test nrfjprog integration', () => {
 
                 nRFjprog.readToFile(device.serialNumber, "./test.hex", { readcode: true, readuicr: true }, callback);
             });
+
+            it('programs a hex file', done => {
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                }
+
+                nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, callback);
+            });
+
+            it('reads device content after program', done => {
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                }
+
+                nRFjprog.readToFile(device.serialNumber, "./test2.hex", { readcode: true, readuicr: true }, callback);
+            });
         });
     });
 });

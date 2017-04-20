@@ -109,10 +109,9 @@ nRFjprog::nRFjprog()
 void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
 {
     if (parse == nullptr ||
-        execute == nullptr ||
-        ret == nullptr)
+        execute == nullptr)
     {
-        auto message = ErrorMessage::getErrorMessage(1, std::string("One or more of the parse, execute, or return functions is missing for this function"));
+        auto message = ErrorMessage::getErrorMessage(1, std::string("One or more of the parse, or execute functions is missing for this function"));
         Nan::ThrowError(message);
         return;
     }
@@ -150,6 +149,14 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
             delete baton;
         }
 
+        return;
+    }
+
+    if (ret == nullptr &&
+        baton->returnParameterCount > 0)
+    {
+        auto message = ErrorMessage::getErrorMessage(1, std::string("The return function has more than one parameter and is required for this function, but is missing"));
+        Nan::ThrowError(message);
         return;
     }
 
@@ -252,11 +259,15 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
     else
     {
         argv[0] = Nan::Undefined();
-        std::vector<v8::Local<v8::Value> > vector = baton->returnFunction(baton);
 
-        for (uint32_t i = 0; i < vector.size(); ++i)
+        if (baton->returnFunction != nullptr)
         {
-            argv[i + 1] = vector[i];
+            std::vector<v8::Local<v8::Value> > vector = baton->returnFunction(baton);
+
+            for (uint32_t i = 0; i < vector.size(); ++i)
+            {
+                argv[i + 1] = vector[i];
+            }
         }
     }
 
@@ -323,6 +334,7 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 
     Nan::SetPrototypeMethod(tpl, "erase", Erase);
     Nan::SetPrototypeMethod(tpl, "readToFile", ReadToFile);
+    Nan::SetPrototypeMethod(tpl, "program", Program);
 }
 
 NAN_METHOD(nRFjprog::GetDllVersion)
@@ -517,13 +529,7 @@ NAN_METHOD(nRFjprog::Erase)
         return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address, 0);
     };
 
-    return_function_t r = [&] (Baton *b) -> returnType {
-        returnType vector;
-
-        return vector;
-    };
-
-    CallFunction(info, p, e, r, true);
+    CallFunction(info, p, e, nullptr, true);
 }
 
 NAN_METHOD(nRFjprog::ReadToFile)
@@ -547,15 +553,32 @@ NAN_METHOD(nRFjprog::ReadToFile)
         return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options , 0);
     };
 
-    return_function_t r = [&] (Baton *b) -> returnType {
-        returnType vector;
-
-        return vector;
-    };
-
-    CallFunction(info, p, e, r, true);
+    CallFunction(info, p, e, nullptr, true);
 }
 
+NAN_METHOD(nRFjprog::Program)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new ProgramBaton("program file");
+
+        baton->filename = Convert::getNativeString(info[argumentCount]);
+        argumentCount++;
+
+        v8::Local<v8::Object> programOptions = Convert::getJsObject(info[argumentCount]);
+        ProgramOptions options(programOptions);
+        baton->options = options.options;
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<ProgramBaton*>(b);
+        return dll_function.program(probe, baton->filename.c_str(), &baton->options , 0);
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
 
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)

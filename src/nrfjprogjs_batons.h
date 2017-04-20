@@ -141,4 +141,12 @@ public:
     read_options_t options;
 };
 
+class ProgramBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(ProgramBaton, 0);
+    std::string filename;
+    program_options_t options;
+};
+
 #endif

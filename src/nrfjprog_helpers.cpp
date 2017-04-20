@@ -98,3 +98,31 @@ ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
         options.readqspi = Convert::getBool(obj, "readqspi");
     }
 }
+
+ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
+{
+    options.verify = true;
+    options.chip_erase_mode = ERASE_ALL;
+    options.qspi_erase_mode = ERASE_NONE;
+    options.reset = SYSTEM_RESET;
+
+    if (Utility::Has(obj, "verify"))
+    {
+        options.verify = Convert::getBool(obj, "verify");
+    }
+
+    if (Utility::Has(obj, "chip_erase_mode"))
+    {
+        options.chip_erase_mode = (erase_mode_t)Convert::getNativeUint32(obj, "chip_erase_mode");
+    }
+
+    if (Utility::Has(obj, "qspi_erase_mode"))
+    {
+        options.qspi_erase_mode = (erase_mode_t)Convert::getNativeUint32(obj, "qspi_erase_mode");
+    }
+
+    if (Utility::Has(obj, "reset"))
+    {
+        options.reset = (reset_action_t)Convert::getNativeUint32(obj, "reset");
+    }
+}
