@@ -104,7 +104,7 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
     options.verify = true;
     options.chip_erase_mode = ERASE_ALL;
     options.qspi_erase_mode = ERASE_NONE;
-    options.reset = SYSTEM_RESET;
+    options.reset = true;
 
     if (Utility::Has(obj, "verify"))
     {
@@ -123,6 +123,6 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 
     if (Utility::Has(obj, "reset"))
     {
-        options.reset = (reset_action_t)Convert::getNativeUint32(obj, "reset");
+        options.reset = Convert::getBool(obj, "reset");
     }
 }

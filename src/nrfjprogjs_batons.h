@@ -97,6 +97,14 @@ public:
     device_family_t family;
 };
 
+class GetDeviceVersionBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetDeviceVersionBaton, 1);
+    uint32_t serialNumber;
+    device_version_t deviceVersion;
+};
+
 class ReadBaton : public Baton
 {
 public:
@@ -124,13 +132,19 @@ public:
     uint32_t data;
 };
 
-class EraseBaton : public Baton
+class ProgramBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(EraseBaton, 0);
-    erase_mode_t erase_mode;
-    uint32_t start_address;
-    uint32_t end_address;
+    BATON_CONSTRUCTOR(ProgramBaton, 0);
+    std::string filename;
+    program_options_t options;
+};
+
+class VerifyBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(VerifyBaton, 0);
+    std::string filename;
 };
 
 class ReadToFileBaton : public Baton
@@ -141,12 +155,30 @@ public:
     read_options_t options;
 };
 
-class ProgramBaton : public Baton
+class EraseBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(ProgramBaton, 0);
-    std::string filename;
-    program_options_t options;
+    BATON_CONSTRUCTOR(EraseBaton, 0);
+    erase_mode_t erase_mode;
+    uint32_t start_address;
+    uint32_t end_address;
+};
+
+class WriteBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(WriteBaton, 0);
+    uint32_t address;
+    uint8_t *data;
+    uint32_t length;
+};
+
+class WriteU32Baton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(WriteU32Baton, 0);
+    uint32_t address;
+    uint32_t data;
 };
 
 #endif

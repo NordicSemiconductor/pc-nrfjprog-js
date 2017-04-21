@@ -33,7 +33,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include <windows.h>
 
 #include "nrfjprog.h"
@@ -94,16 +94,20 @@ NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_
     if (!load_func_ptr(&dll_function->get_device_family, "HiLvlnRFJ_get_device_family", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-/*
+
     if (!load_func_ptr(&dll_function->get_device_version, "HiLvlnRFJ_get_device_version", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-*/
+
     if (!load_func_ptr(&dll_function->program, "HiLvlnRFJ_program", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
     if (!load_func_ptr(&dll_function->read_to_file, "HiLvlnRFJ_read_to_file", dll)) {
+        return NrfjprogDllFunctionLoadFailedError;
+    }
+
+    if (!load_func_ptr(&dll_function->verify, "HiLvlnRFJ_verify", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
 
@@ -134,11 +138,11 @@ NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_
     if (!load_func_ptr(&dll_function->reset, "HiLvlnRFJ_reset", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-/*
-    if (!load_func_ptr(&dll_function->go, "HiLvlnRFJ_go", dll)) {
+
+    if (!load_func_ptr(&dll_function->run, "HiLvlnRFJ_run", dll)) {
         return NrfjprogDllFunctionLoadFailedError;
     }
-*/
+
     return Success;
 }
 

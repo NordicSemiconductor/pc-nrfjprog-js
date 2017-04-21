@@ -42,8 +42,9 @@ let nRFjprog;
 let device;
 
 describe('Test nrfjprog integration', () => {
-    beforeEach(() => {
+    beforeEach(done => {
         nRFjprog = new nrfjprog.nRFjprog();
+        done();
     });
 
     describe('Generic functionality', () => {
@@ -91,9 +92,19 @@ describe('Test nrfjprog integration', () => {
                     expect(err).toBeUndefined();
                     expect(family).toBe(device.family);
                     done();
-                }
+                };
 
                 nRFjprog.getFamily(device.serialNumber, callback);
+            });
+
+            it('finds device version', done => {
+                const callback = (err, deviceVersion) => {
+                    expect(err).toBeUndefined();
+                    expect(deviceVersion).toBe(5);
+                    done();
+                };
+
+                nRFjprog.getDeviceVersion(device.serialNumber, callback);
             });
 
             it('throws an error when device do not exist', done => {
@@ -101,7 +112,7 @@ describe('Test nrfjprog integration', () => {
                     expect(err).toMatchSnapshot();
                     expect(family).toBeUndefined();
                     done();
-                }
+                };
 
                 nRFjprog.getFamily(1, callback);
             });
@@ -111,7 +122,7 @@ describe('Test nrfjprog integration', () => {
                     expect(err).toBeUndefined();
                     expect(contents).toBeDefined();
                     done();
-                }
+                };
 
                 nRFjprog.read(device.serialNumber, 0x0, 1, callback);
             });
@@ -124,7 +135,7 @@ describe('Test nrfjprog integration', () => {
                     expect(contents).toBeDefined();
                     expect(contents.length).toBe(readLength);
                     done();
-                }
+                };
 
                 nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
             });
@@ -134,18 +145,18 @@ describe('Test nrfjprog integration', () => {
                     expect(err).toBeUndefined();
                     expect(contents).toBeDefined();
                     done();
-                }
+                };
 
                 nRFjprog.readU32(device.serialNumber, 0x0, callback);
             });
         });
 
-        describe('Destructive functionality', () => {
+        describe.skip('Destructive functionality', () => {
             it('erases the whole device', done => {
                 const callback = (err) => {
                     expect(err).toBeUndefined();
                     done();
-                }
+                };
 
                 nRFjprog.erase(device.serialNumber, {}, callback);
             });
@@ -154,27 +165,108 @@ describe('Test nrfjprog integration', () => {
                 const callback = (err) => {
                     expect(err).toBeUndefined();
                     done();
-                }
+                };
 
-                nRFjprog.readToFile(device.serialNumber, "./test.hex", { readcode: true, readuicr: true }, callback);
+                nRFjprog.readToFile(device.serialNumber, "./after_readToFile.hex", { readcode: true, readuicr: true }, callback);
             });
 
             it('programs a hex file', done => {
                 const callback = (err) => {
                     expect(err).toBeUndefined();
+
+                    if (err) {
+                        done();
+                        return;
+                    }
+
+                    nRFjprog.readToFile(device.serialNumber, "./after_program.hex", { readcode: true, readuicr: true }, readToFileCallback);
+                };
+
+                const readToFileCallback = (err) => {
+                    expect(err).toBeUndefined();
                     done();
-                }
+                };
 
                 nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, callback);
             });
 
-            it('reads device content after program', done => {
+            it('verifies a hex file', done => {
                 const callback = (err) => {
                     expect(err).toBeUndefined();
                     done();
-                }
+                };
 
-                nRFjprog.readToFile(device.serialNumber, "./test2.hex", { readcode: true, readuicr: true }, callback);
+                nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", callback);
+            });
+
+            it('recovers a device', done => {
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+
+                    if (err) {
+                        done();
+                        return;
+                    }
+
+                    nRFjprog.readToFile(device.serialNumber, "./after_recover.hex", { readcode: true, readuicr: true }, readToFileCallback);
+                };
+
+                const readToFileCallback = (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                };
+
+                nRFjprog.recover(device.serialNumber, callback);
+            });
+
+            it('writes an array to a device', done => {
+                const address = 0x1028;
+                const data = [0, 1, 2, 3, 4, 5, 6];
+
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+
+                    if (err) {
+                        done();
+                        return;
+                    }
+
+                    nRFjprog.read(device.serialNumber, address, data.length, readCallback);
+                };
+
+                const readCallback = (err, contents) => {
+                    expect(err).toBeUndefined();
+                    expect(contents).toBeDefined();
+                    expect(content.toEqual(expect.arrayContaining(data)));
+                    done();
+                };
+
+                nRFjprog.write(device.serialNumber, address, data, callback);
+            });
+
+            it('writes a 32 bit value to a device', done => {
+                const address = 0x1024;
+                const data = 0x12345678;
+
+                const callback = (err) => {
+                    expect(err).toBeUndefined();
+
+                    if (err) {
+                        done();
+                        return;
+                    }
+
+                    nRFjprog.readU32(device.serialNumber, address, readCallback);
+                };
+
+                const readCallback = (err, contents) => {
+                    expect(err).toBeUndefined();
+                    expect(contents).toBeDefined();
+                    expect(content.toEqual(expect.arrayContaining(data)));
+                    done();
+                };
+
+                nRFjprog.writeU32(device.serialNumber, address, data, callback);
             });
         });
     });

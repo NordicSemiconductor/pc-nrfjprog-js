@@ -33,7 +33,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef DLL_FUNC_PTRS_H
 #define DLL_FUNC_PTRS_H
 
@@ -51,14 +51,15 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_device_family)   (Probe_handle_t debu
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_device_version)  (Probe_handle_t debug_probe, device_version_t * device);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_program)             (Probe_handle_t debug_probe, const char * hex_path, program_options_t * program_options, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_read_to_file)        (Probe_handle_t debug_probe, const char * hex_path, read_options_t * read_options, progress_callback * fp);
+typedef nrfjprogdll_err_t (*HiLVL_nRFJ_verify)              (Probe_handle_t debug_probe, const char * hex_path, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_erase)               (Probe_handle_t debug_probe, erase_mode_t erase_mode, uint32_t start_adress, uint32_t end_adress, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_recover)             (Probe_handle_t debug_probe, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_read)                (Probe_handle_t debug_probe, uint32_t addr, uint8_t * data, uint32_t data_len, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_read_u32)            (Probe_handle_t debug_probe, uint32_t addr, uint32_t * data, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_write)               (Probe_handle_t debug_probe, uint32_t addr, const uint8_t * data, uint32_t data_len, progress_callback * fp);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_write_u32)           (Probe_handle_t debug_probe, uint32_t addr, const uint32_t data, progress_callback * fp);
-typedef nrfjprogdll_err_t (*HILVL_nRFJ_reset)               (Probe_handle_t debug_probe, reset_action_t reset_action);
-typedef nrfjprogdll_err_t (*HILVL_nRFJ_go)                  (Probe_handle_t debug_probe);
+typedef nrfjprogdll_err_t (*HILVL_nRFJ_reset)               (Probe_handle_t debug_probe);
+typedef nrfjprogdll_err_t (*HILVL_nRFJ_run)                 (Probe_handle_t debug_probe);
 
 struct DllFunctionPointersType {
     HILVL_nRFJ_dll_get_version      dll_get_version;
@@ -73,6 +74,7 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_get_device_version   get_device_version;
     HILVL_nRFJ_program              program;
     HILVL_nRFJ_read_to_file         read_to_file;
+    HiLVL_nRFJ_verify               verify;
     HILVL_nRFJ_erase                erase;
     HILVL_nRFJ_recover              recover;
     HILVL_nRFJ_read                 read;
@@ -80,7 +82,7 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_write                write;
     HILVL_nRFJ_write_u32            write_u32;
     HILVL_nRFJ_reset                reset;
-    HILVL_nRFJ_go                   go;
+    HILVL_nRFJ_run                  run;
 };
 
 

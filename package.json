@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "jshint api/ test/ && jscs api/ test/",
     "install": "node build.js",
-    "test": "jest",
-    "test-watch": "jest --watch"
+    "test": "jest --runInBand --verbose",
+    "test-watch": "jest --watch --runInBand"
   },
   "repository": {
     "type": "git",

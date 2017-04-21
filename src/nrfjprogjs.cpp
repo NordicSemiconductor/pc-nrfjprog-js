@@ -160,6 +160,13 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
         return;
     }
 
+    logCallback("===============================================\n");
+    logCallback("Start of ");
+    logCallback(baton->name.c_str());
+    logCallback("\n");
+    logCallback("===============================================\n");
+
+
     baton->executeFunction = execute;
     baton->returnFunction = ret;
     baton->serialNumber = serialNumber;
@@ -210,8 +217,8 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0)
     {
-        /*
-        nrfjprogdll_err_t resetError = dll_function.reset(&probe, SYSTEM_RESET);
+/*
+        nrfjprogdll_err_t resetError = dll_function.reset(&probe);
 
         if (resetError != SUCCESS)
         {
@@ -329,12 +336,19 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
+    Nan::SetPrototypeMethod(tpl, "getDeviceVersion", GetDeviceVersion);
     Nan::SetPrototypeMethod(tpl, "read", Read);
     Nan::SetPrototypeMethod(tpl, "readU32", ReadU32);
 
-    Nan::SetPrototypeMethod(tpl, "erase", Erase);
-    Nan::SetPrototypeMethod(tpl, "readToFile", ReadToFile);
     Nan::SetPrototypeMethod(tpl, "program", Program);
+    Nan::SetPrototypeMethod(tpl, "readToFile", ReadToFile);
+    Nan::SetPrototypeMethod(tpl, "verify", Verify);
+    Nan::SetPrototypeMethod(tpl, "erase", Erase);
+
+    Nan::SetPrototypeMethod(tpl, "recover", Recover);
+
+    Nan::SetPrototypeMethod(tpl, "write", Write);
+    Nan::SetPrototypeMethod(tpl, "writeU32", WriteU32);
 }
 
 NAN_METHOD(nRFjprog::GetDllVersion)
@@ -422,6 +436,13 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
     CallFunction(info, p, e, r, false);
 }
 
+#include <sstream>
+#include <iostream>
+static name_map_t device_family_map = {
+    NAME_MAP_ENTRY(NRF51_FAMILY),
+    NAME_MAP_ENTRY(NRF52_FAMILY),
+    NAME_MAP_ENTRY(UNKNOWN_FAMILY)
+};
 NAN_METHOD(nRFjprog::GetFamily)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
@@ -432,7 +453,17 @@ NAN_METHOD(nRFjprog::GetFamily)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<GetFamilyBaton*>(b);
-        return dll_function.get_device_family(probe, &baton->family);
+        nrfjprogdll_err_t err =  dll_function.get_device_family(probe, &baton->family);
+
+        std::ostringstream errorStringStream;
+        errorStringStream << Convert::valueToString(baton->family, device_family_map) << " " << baton->family << std::endl;
+        logCallback("===============================================\n");
+        logCallback("\n\nResult from get family: ");
+        logCallback(errorStringStream.str().c_str());
+        logCallback("\n\n");
+        logCallback("===============================================\n");
+
+        return err;
     };
 
     return_function_t r = [&] (Baton *b) -> returnType {
@@ -440,6 +471,31 @@ NAN_METHOD(nRFjprog::GetFamily)
         returnType vector;
 
         vector.push_back(Convert::toJsNumber(baton->family));
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r, true);
+}
+
+NAN_METHOD(nRFjprog::GetDeviceVersion)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new GetDeviceVersionBaton("get device version");
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<GetDeviceVersionBaton*>(b);
+        return dll_function.get_device_version(probe, &baton->deviceVersion);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        auto baton = static_cast<GetDeviceVersionBaton*>(b);
+        returnType vector;
+
+        vector.push_back(Convert::toJsNumber(baton->deviceVersion));
 
         return vector;
     };
@@ -484,7 +540,7 @@ NAN_METHOD(nRFjprog::Read)
 NAN_METHOD(nRFjprog::ReadU32)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ReadU32Baton("readU32");
+        auto baton = new ReadU32Baton("read 32 bit");
 
         baton->address = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
@@ -507,6 +563,74 @@ NAN_METHOD(nRFjprog::ReadU32)
     };
 
     CallFunction(info, p, e, r, true);
+}
+
+
+NAN_METHOD(nRFjprog::Program)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new ProgramBaton("program file");
+
+        baton->filename = Convert::getNativeString(info[argumentCount]);
+        argumentCount++;
+
+        v8::Local<v8::Object> programOptions = Convert::getJsObject(info[argumentCount]);
+        ProgramOptions options(programOptions);
+        baton->options = options.options;
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<ProgramBaton*>(b);
+        return dll_function.program(probe, baton->filename.c_str(), &baton->options, 0);
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(nRFjprog::ReadToFile)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new ReadToFileBaton("read to file");
+
+        baton->filename = Convert::getNativeString(info[argumentCount]);
+        argumentCount++;
+
+        v8::Local<v8::Object> readOptions = Convert::getJsObject(info[argumentCount]);
+        ReadToFileOptions options(readOptions);
+        baton->options = options.options;
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<ReadToFileBaton*>(b);
+        return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options, 0);
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(nRFjprog::Verify)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new VerifyBaton("verify");
+
+        baton->filename = Convert::getNativeString(info[argumentCount]);
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<VerifyBaton*>(b);
+        return dll_function.verify(probe, baton->filename.c_str(),  0);
+    };
+
+    CallFunction(info, p, e, nullptr, true);
 }
 
 NAN_METHOD(nRFjprog::Erase)
@@ -532,49 +656,60 @@ NAN_METHOD(nRFjprog::Erase)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::ReadToFile)
+NAN_METHOD(nRFjprog::Recover)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ReadToFileBaton("read to file");
-
-        baton->filename = Convert::getNativeString(info[argumentCount]);
-        argumentCount++;
-
-        v8::Local<v8::Object> readOptions = Convert::getJsObject(info[argumentCount]);
-        ReadToFileOptions options(readOptions);
-        baton->options = options.options;
-        argumentCount++;
-
-        return baton;
+        return new Baton(0, "recover");
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        auto baton = static_cast<ReadToFileBaton*>(b);
-        return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options , 0);
+        return dll_function.recover(probe, 0);
     };
 
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::Program)
+NAN_METHOD(nRFjprog::Write)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ProgramBaton("program file");
+        auto baton = new WriteBaton("write");
+        baton->data = nullptr;
 
-        baton->filename = Convert::getNativeString(info[argumentCount]);
+        baton->address = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
 
-        v8::Local<v8::Object> programOptions = Convert::getJsObject(info[argumentCount]);
-        ProgramOptions options(programOptions);
-        baton->options = options.options;
+        baton->data = Convert::getNativePointerToUint8(info[argumentCount]);
+        baton->length = Convert::getLengthOfArray(info[argumentCount]);
         argumentCount++;
 
         return baton;
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        auto baton = static_cast<ProgramBaton*>(b);
-        return dll_function.program(probe, baton->filename.c_str(), &baton->options , 0);
+        auto baton = static_cast<WriteBaton*>(b);
+        return dll_function.write(probe, baton->address, baton->data, baton->length, 0);
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(nRFjprog::WriteU32)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+        auto baton = new WriteU32Baton("write 32 bit");
+
+        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        baton->data = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        return baton;
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<WriteU32Baton*>(b);
+        return dll_function.write_u32(probe, baton->address, baton->data, 0);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -582,50 +717,23 @@ NAN_METHOD(nRFjprog::Program)
 
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
-    {/*
-     NODE_DEFINE_CONSTANT(target, R0);
-     NODE_DEFINE_CONSTANT(target, R1);
-     NODE_DEFINE_CONSTANT(target, R2);
-     NODE_DEFINE_CONSTANT(target, R3);
-     NODE_DEFINE_CONSTANT(target, R4);
-     NODE_DEFINE_CONSTANT(target, R5);
-     NODE_DEFINE_CONSTANT(target, R6);
-     NODE_DEFINE_CONSTANT(target, R7);
-     NODE_DEFINE_CONSTANT(target, R8);
-     NODE_DEFINE_CONSTANT(target, R9);
-     NODE_DEFINE_CONSTANT(target, R10);
-     NODE_DEFINE_CONSTANT(target, R11);
-     NODE_DEFINE_CONSTANT(target, R12);
-     NODE_DEFINE_CONSTANT(target, R13);
-     NODE_DEFINE_CONSTANT(target, R14);
-     NODE_DEFINE_CONSTANT(target, R15);
-     NODE_DEFINE_CONSTANT(target, XPSR);
-     NODE_DEFINE_CONSTANT(target, MSP);
-     NODE_DEFINE_CONSTANT(target, PSP);
+    {
+        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1);
+        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2);
+        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3);
+        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3);
+        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);
+        NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);
+        NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_FUTURE);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE);
+        NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);
+        NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);
 
-     NODE_DEFINE_CONSTANT(target, RAM_OFF);
-     NODE_DEFINE_CONSTANT(target, RAM_ON);
-
-     NODE_DEFINE_CONSTANT(target, NONE);
-     NODE_DEFINE_CONSTANT(target, REGION_0);
-     NODE_DEFINE_CONSTANT(target, ALL);
-     NODE_DEFINE_CONSTANT(target, BOTH);
-
-     NODE_DEFINE_CONSTANT(target, NO_REGION_0);
-     NODE_DEFINE_CONSTANT(target, FACTORY);
-     NODE_DEFINE_CONSTANT(target, USER);
-
-     NODE_DEFINE_CONSTANT(target, UNKNOWN);
-     NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
-     NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
-     NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
-     NODE_DEFINE_CONSTANT(target, NRF51_L3);
-     NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
-     NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
-     NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
-     NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
-     NODE_DEFINE_CONSTANT(target, NRF52_FP1);
-     */
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
         NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY);
@@ -634,71 +742,6 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, ERASE_ALL);
         NODE_DEFINE_CONSTANT(target, ERASE_SECTOR);
         NODE_DEFINE_CONSTANT(target, ERASE_SECTOR_AND_UICR);
-        /*
-        NODE_DEFINE_CONSTANT(target, UP_DIRECTION);
-        NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION);
-
-        NODE_DEFINE_CONSTANT(target, SUCCESS);
-        NODE_DEFINE_CONSTANT(target, OUT_OF_MEMORY);
-        NODE_DEFINE_CONSTANT(target, INVALID_OPERATION);
-        NODE_DEFINE_CONSTANT(target, INVALID_PARAMETER);
-        NODE_DEFINE_CONSTANT(target, INVALID_DEVICE_FOR_OPERATION);
-        NODE_DEFINE_CONSTANT(target, WRONG_FAMILY_FOR_DEVICE);
-        NODE_DEFINE_CONSTANT(target, EMULATOR_NOT_CONNECTED);
-        NODE_DEFINE_CONSTANT(target, CANNOT_CONNECT);
-        NODE_DEFINE_CONSTANT(target, LOW_VOLTAGE);
-        NODE_DEFINE_CONSTANT(target, NO_EMULATOR_CONNECTED);
-        NODE_DEFINE_CONSTANT(target, NVMC_ERROR);
-        NODE_DEFINE_CONSTANT(target, NOT_AVAILABLE_BECAUSE_PROTECTION);
-        NODE_DEFINE_CONSTANT(target, JLINKARM_DLL_NOT_FOUND);
-        NODE_DEFINE_CONSTANT(target, JLINKARM_DLL_COULD_NOT_BE_OPENED);
-        NODE_DEFINE_CONSTANT(target, JLINKARM_DLL_ERROR);
-        NODE_DEFINE_CONSTANT(target, JLINKARM_DLL_TOO_OLD);
-        NODE_DEFINE_CONSTANT(target, NRFJPROG_SUB_DLL_NOT_FOUND);
-        NODE_DEFINE_CONSTANT(target, NRFJPROG_SUB_DLL_COULD_NOT_BE_OPENED);
-        NODE_DEFINE_CONSTANT(target, NOT_IMPLEMENTED_ERROR);
-
-        NODE_DEFINE_CONSTANT(target, Success);
-        NODE_DEFINE_CONSTANT(target, NrfjprogError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogOutdatedError);
-        NODE_DEFINE_CONSTANT(target, MemoryAllocationError);
-        NODE_DEFINE_CONSTANT(target, InvalidArgumentError);
-        NODE_DEFINE_CONSTANT(target, InsufficientArgumentsError);
-        NODE_DEFINE_CONSTANT(target, IncompatibleArgumentsError);
-        NODE_DEFINE_CONSTANT(target, DuplicatedArgumentsError);
-        NODE_DEFINE_CONSTANT(target, NoOperationError);
-        NODE_DEFINE_CONSTANT(target, UnavailableOperationBecauseProtectionError);
-        NODE_DEFINE_CONSTANT(target, UnavailableOperationInFamilyError);
-        NODE_DEFINE_CONSTANT(target, WrongFamilyForDeviceError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogDllNotFoundError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogDllLoadFailedError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogDllFunctionLoadFailedError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogDllNotImplementedError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogIniNotFoundError);
-        NODE_DEFINE_CONSTANT(target, NrfjprogIniFormatError);
-        NODE_DEFINE_CONSTANT(target, JLinkARMDllNotFoundError);
-        NODE_DEFINE_CONSTANT(target, JLinkARMDllInvalidError);
-        NODE_DEFINE_CONSTANT(target, JLinkARMDllFailedToOpenError);
-        NODE_DEFINE_CONSTANT(target, JLinkARMDllError);
-        NODE_DEFINE_CONSTANT(target, JLinkARMDllTooOldError);
-        NODE_DEFINE_CONSTANT(target, InvalidSerialNumberError);
-        NODE_DEFINE_CONSTANT(target, NoDebuggersError);
-        NODE_DEFINE_CONSTANT(target, NotPossibleToConnectError);
-        NODE_DEFINE_CONSTANT(target, LowVoltageError);
-        NODE_DEFINE_CONSTANT(target, FileNotFoundError);
-        NODE_DEFINE_CONSTANT(target, InvalidHexFileError);
-        NODE_DEFINE_CONSTANT(target, FicrReadError);
-        NODE_DEFINE_CONSTANT(target, WrongArgumentError);
-        NODE_DEFINE_CONSTANT(target, VerifyError);
-        NODE_DEFINE_CONSTANT(target, NoWritePermissionError);
-        NODE_DEFINE_CONSTANT(target, NVMCOperationError);
-        NODE_DEFINE_CONSTANT(target, FlashNotErasedError);
-        NODE_DEFINE_CONSTANT(target, RamIsOffError);
-        NODE_DEFINE_CONSTANT(target, FicrOperationWarning);
-        NODE_DEFINE_CONSTANT(target, UnalignedPageEraseWarning);
-        NODE_DEFINE_CONSTANT(target, NoLogWarning);
-        NODE_DEFINE_CONSTANT(target, UicrWriteOperationWithoutEraseWarning);
-        */
 
         NODE_DEFINE_CONSTANT(target, JsSuccess);
         NODE_DEFINE_CONSTANT(target, CouldNotFindJlinkDLL);

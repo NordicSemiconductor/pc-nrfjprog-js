@@ -21,12 +21,15 @@
  *  nrfjprogdll_err_t HiLvlnRFJ_get_device_version  (Probe_handle_t debug_probe, device_version_t * device);
  *  nrfjprogdll_err_t HiLvlnRFJ_program             (Probe_handle_t debug_probe, const char * hex_path, program_options_t * program_options, progress_callback * fp);
  *  nrfjprogdll_err_t HiLvlnRFJ_read_to_file        (Probe_handle_t debug_probe, const char * hex_path, read_options_t * read_options, progress_callback * fp);
+ *  nrfjprogdll_err_t HiLvlnRFJ_verify              (Probe_handle_t debug_probe, const char * hex_path, progress_callback * fp);
  *  nrfjprogdll_err_t HiLvlnRFJ_erase               (Probe_handle_t debug_probe, erase_mode_t erase_mode, uint32_t start_adress, uint32_t end_adress, progress_callback * fp);
  *  nrfjprogdll_err_t HiLvlnRFJ_recover             (Probe_handle_t debug_probe, progress_callback * fp);
+ *  
  *  nrfjprogdll_err_t HiLvlnRFJ_read                (Probe_handle_t debug_probe, uint32_t addr, uint8_t * data, uint32_t data_len, progress_callback * fp);
  *  nrfjprogdll_err_t HiLvlnRFJ_read_u32            (Probe_handle_t debug_probe, uint32_t addr, uint32_t * data, progress_callback * fp);
  *  nrfjprogdll_err_t HiLvlnRFJ_write               (Probe_handle_t debug_probe, uint32_t addr, const uint8_t * data, uint32_t data_len, progress_callback * fp);
  *  nrfjprogdll_err_t HiLvlnRFJ_write_u32           (Probe_handle_t debug_probe, uint32_t addr, const uint32_t data, progress_callback * fp);
+ *  
  *  nrfjprogdll_err_t HiLvlnRFJ_reset               (Probe_handle_t debug_probe, reset_action_t reset_action);
  *  nrfjprogdll_err_t HiLvlnRFJ_go                  (Probe_handle_t debug_probe);
  */
@@ -42,13 +45,6 @@ typedef void log_callback(const char * msg);
 typedef void * Probe_handle_t;  // forward declare to "something_t", hide void *
 
 typedef enum {
-    NO_RESET = 0,               /* Do nothing */
-    SYSTEM_RESET = 1,
-    DEBUG_RESET = 2,
-    PIN_RESET = 3
-}reset_action_t;
-
-typedef enum {
     ERASE_NONE = 0,                 /* Do nothing. */
     ERASE_ALL = 1,                  /* Erase whole chip. */
     ERASE_SECTOR = 2,               /* Erase specified sectors, excluding UICR. */
@@ -59,7 +55,7 @@ typedef struct program_options_s {
     bool verify;                    /* Should the memory be verified? */
     erase_mode_t chip_erase_mode;   /* Select pre-program erase mode for internal flash memories. */
     erase_mode_t qspi_erase_mode;   /* Select pre-program erase mode for external QSPI memories. */
-    reset_action_t reset;           /* Select post-program Reset action. */
+    bool reset;                     /* Select whether program should do post-program Reset. */
 } program_options_t;
 
 typedef struct read_options_s {
@@ -327,6 +323,7 @@ nrfjprogdll_err_t HiLvlnRFJ_get_device_version  (Probe_handle_t debug_probe, dev
  * @retval  EMULATOR_NOT_CONNECTED              The emulator serial_number is not connected to the PC.
  * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  * @retval  NVMC_ERROR                          Flash operation failed.
+ * @retval  VERIFY_ERROR                        Program verification failed.
  */
 nrfjprogdll_err_t HiLvlnRFJ_program             (Probe_handle_t debug_probe, const char * hex_path, program_options_t * program_options, progress_callback * fp);
 
@@ -367,6 +364,39 @@ nrfjprogdll_err_t HiLvlnRFJ_program             (Probe_handle_t debug_probe, con
 *                                              Could not save the hex file.
 */
 nrfjprogdll_err_t HiLvlnRFJ_read_to_file        (Probe_handle_t debug_probe, const char * hex_path, read_options_t * read_options, progress_callback * fp);
+
+
+/**
+* @brief   Reads the specified memory to the provided .hex file.
+*
+* @pre     Before the execution of this function, the debug_probe handle must be initialized. To initialize the probe, see HiLvlnRFJ_probe_init(). 
+* @pre     Before the execution of this function, the emulator must be physically connected to a powered board.
+* @pre     If a QSPI operation is to be performed, QSPI must be enabled in the probe. To enable QSPI, see HiLvlnRFJ_probe_setup_qspi().
+* @pre     Before the execution of this function, the dll must be open. To open the dll, see HiLvlnRFJ_dll_open() function.
+* @pre     Before the execution of this function, access port protection must be disabled. To disable access port protection, see HiLvlnRFJ_recover() function.
+* 
+* @post    After the execution of this function, the device will be in debug interface mode. To exit debug interface mode, see HiLvlnRFJ_reset() function.
+* @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see HiLvlnRFJ_reset(), HiLvlnRFJ_go() functions.
+*
+* @param   debug_probe                         Probe handle.
+* @param   hex_path                            Path to file to verify against.
+*
+* @retval  SUCCESS
+* @retval  INVALID_PARAMETER                   The hex file path is an empty string.
+*                                              The hex file cannot be read.
+*                                              The debug_probe pointer is NULL.
+* @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+* @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
+* @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
+*                                              A required function could not be loaded from the DLL.
+* @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
+*                                              The address to read is in unpowered RAM.
+* @retval  NOT_AVAILABLE_BECAUSE_PROTECTION    The operation is not available because the device is readback protected.
+* @retval  INVALID_DEVICE_FOR_OPERATION        The connected device does not support an attempted operation.
+* @retval  OUT_OF_MEMORY                       Could not allocate program buffers.
+* @retval  VERIFY_ERROR                        Program verification failed.
+*/
+nrfjprogdll_err_t HiLvlnRFJ_verify              (Probe_handle_t debug_probe, const char * hex_path, progress_callback * fp);
 
 
 /**
@@ -590,13 +620,7 @@ nrfjprogdll_err_t HiLvlnRFJ_write_u32           (Probe_handle_t debug_probe, uin
 /**
  * @brief   Executes a given reset request.
  *
- * @details Executes one of three reset requests depending on reset_action parameter.
- *          PIN_RESET:   Executes a pin reset by lowering to GND the nReset pin in the SWD connector for 20 ms.
- *                       - Exits debug interface mode.
- *                       - Leaves CPU running.
- *          SYS_RESET:   Executes a cortex-M standard sys reset request by the use of SCB.AIRCR register.
- *          DEBUG_RESET: Executes a soft reset by the use of the core's AIRCR register.
- *                       - Leaves CPU running.
+ * @details Executes a system reset, and starts the processor.
  *
  * @pre     Before the execution of this function, the debug_probe handle must be initialized. To initialize the probe, see HiLvlnRFJ_probe_init(). 
  * @pre     Before the execution of this function, the emulator must be physically connected to a powered board.
@@ -604,11 +628,9 @@ nrfjprogdll_err_t HiLvlnRFJ_write_u32           (Probe_handle_t debug_probe, uin
  *  
  * @during  During the execution of this function, the emulator mode may be changed to JTAG. If the execution fails, the emulator might be left in JTAG mode. If the execution fails, try again to return to SWD mode.
  *
- * @post    After the execution of this function, the device may be in debug interface mode. To exit debug interface mode, perform a PIN_RESET.
- * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see HiLvlnRFJ_go() function, or perform a PIN_RESET or DEBUG_RESET.
+ * @post    After the execution of this function, the device CPU will be running.
  *
  * @param   debug_probe                         Probe handle.
- * @param   reset_action                        Type of reset to perform.
  *
  * @retval  SUCCESS
  * @retval  INVALID_PARAMETER                   The debug_probe pointer is NULL.
@@ -620,22 +642,23 @@ nrfjprogdll_err_t HiLvlnRFJ_write_u32           (Probe_handle_t debug_probe, uin
  * @retval  NOT_AVAILABLE_BECAUSE_PROTECTION    The operation is not available due to readback protection.
  * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  */
-nrfjprogdll_err_t HiLvlnRFJ_reset               (Probe_handle_t debug_probe, reset_action_t reset_action);
+nrfjprogdll_err_t HiLvlnRFJ_reset               (Probe_handle_t debug_probe);
 
 
 /**
  * @brief   Starts the device CPU.
  *
- * @details Starts the device CPU.
+ * @details Starts the device CPU with sp and pc as stack pointer and program counter.
  *
  * @pre     Before the execution of this function, the debug_probe handle must be initialized. To initialize the probe, see HiLvlnRFJ_probe_init(). 
  * @pre     Before the execution of this function, the emulator must be physically connected to a powered board.
  * @pre     Before the execution of this function, the dll must be open. To open the dll, see HiLvlnRFJ_dll_open() function.   
  *  
- * @post    After the execution of this function, the device will be in debug interface mode. To exit debug interface mode, see HiLvlnRFJ_reset() functions.
  * @post    After the execution of this function, the device CPU will be running.
  *
  * @param   debug_probe                         Probe handle.
+ * @param   sp                                  New stack pointer.
+ * @param   pc                                  New program counter.
  *
  * @retval  SUCCESS
  * @retval  INVALID_PARAMETER                   The debug_probe pointer is NULL.
@@ -645,7 +668,7 @@ nrfjprogdll_err_t HiLvlnRFJ_reset               (Probe_handle_t debug_probe, res
  *                                              A required function could not be loaded from the DLL.
  * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  */
-nrfjprogdll_err_t HiLvlnRFJ_go                  (Probe_handle_t debug_probe);
+nrfjprogdll_err_t HiLvlnRFJ_run                  (Probe_handle_t debug_probe, uint32_t pc, uint32_t sp);
 
 #if defined(__cplusplus)
 }

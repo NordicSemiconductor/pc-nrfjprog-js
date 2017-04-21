@@ -33,7 +33,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include "conversion.h"
 
 #include <sstream>
@@ -257,6 +257,19 @@ uint16_t *Convert::getNativePointerToUint16(v8::Local<v8::Value>js)
     }
 
     return string;
+}
+
+uint32_t Convert::getLengthOfArray(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getLengthOfArray(value));
+}
+
+uint32_t Convert::getLengthOfArray(v8::Local<v8::Value>js)
+{
+    v8::Local<v8::Array> jsarray = v8::Local<v8::Array>::Cast(js);
+    return (uint32_t)jsarray->Length();
 }
 
 v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Value>js)

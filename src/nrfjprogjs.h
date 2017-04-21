@@ -70,12 +70,20 @@ private:
     static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
 
     static NAN_METHOD(GetFamily); // Params: serialnumber, callback(error, family)
-    static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, family)
-    static NAN_METHOD(ReadU32); // Params: serialnumber, address, callback(error, family)
+    static NAN_METHOD(GetDeviceVersion); // Params: serialnumber, callback(error, family)
 
-    static NAN_METHOD(Erase); // Params: serialnumber, options {erasse_mode, start_address, end_address}, callback(error, family)
-    static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode, readuicr, readqspi}, callback(error)
+    static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, data)
+    static NAN_METHOD(ReadU32); // Params: serialnumber, address, callback(error, data)
+
     static NAN_METHOD(Program); // Params: serialnumber, filename, options {verify, chip_erase_mode, qspi_erase_mode, reset}, callback(error)
+    static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode, readuicr, readqspi}, callback(error)
+    static NAN_METHOD(Verify); // Params: serialnumber, filename, callback(error)
+    static NAN_METHOD(Erase); // Params: serialnumber, options {erasse_mode, start_address, end_address}, callback(error)
+
+    static NAN_METHOD(Recover); // Params: serialnumber, callback(error)
+
+    static NAN_METHOD(Write); // Params: serialnumber, address, dataarray, callback(error)
+    static NAN_METHOD(WriteU32); // Params: serialnumber, address, data, callback(error)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                              const parse_parameters_function_t parse,
