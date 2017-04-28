@@ -217,8 +217,8 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0)
     {
-/*
-        nrfjprogdll_err_t resetError = dll_function.reset(&probe);
+
+        nrfjprogdll_err_t resetError = dll_function.reset(probe);
 
         if (resetError != SUCCESS)
         {
@@ -226,7 +226,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
             baton->lowlevelError = resetError;
             return;
         }
-*/
+
         nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe);
 
         if (uninitError != SUCCESS)
