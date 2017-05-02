@@ -151,7 +151,7 @@ describe('Test nrfjprog integration', () => {
             });
         });
 
-        describe.skip('Destructive functionality', () => {
+        describe('Destructive functionality', () => {
             it('erases the whole device', done => {
                 const callback = (err) => {
                     expect(err).toBeUndefined();
@@ -271,44 +271,3 @@ describe('Test nrfjprog integration', () => {
         });
     });
 });
-
-
-/*
-let probe = new nrfjprog.nRFjprog();
-let probe2 = new nrfjprog.nRFjprog();
-
-probe.getDllVersion((err, dllVersion) => {
-    if (err) {
-        console.log(err, dllVersion);
-        return;
-    }
-
-    console.log(dllVersion);
-
-    probe.GetConnectedDevices((err, connectedDevices) => {
-        if (err) {
-            console.log(err);
-            return;
-        }
-
-        console.log(connectedDevices);
-    });
-});
-probe2.getDllVersion((err, dllVersion) => {
-    if (err) {
-        console.log(2, err, dllVersion);
-        return;
-    }
-
-    console.log(2, dllVersion);
-
-    probe2.GetConnectedDevices((err, connectedDevices) => {
-        if (err) {
-            console.log(2, err);
-            return;
-        }
-
-        console.log(2, connectedDevices);
-    });
-});
-*/
