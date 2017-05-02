@@ -41,36 +41,78 @@ const nrfjprog = require('../index.js');
 let nRFjprog;
 let device;
 
-describe('Generic functionality', () => {
+describe('Single device - non-destructive', () => {
     beforeAll(done => {
         nRFjprog = new nrfjprog.nRFjprog();
-        done();
-    });
 
-    it('gets dll version', done => {
-        const callback = (err, version) => {
-            expect(err).toBeUndefined();
-            expect(version).toHaveProperty('major');
-            expect(version).toHaveProperty('minor');
-            expect(version).toHaveProperty('revision');
-            done();
-        };
-
-        nRFjprog.getDllVersion(callback);
-    });
-
-    it('finds all connected devices', done => {
         const callback = (err, connectedDevices) => {
-            expect(err).toBeUndefined();
-            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
-            expect(connectedDevices[0]).toHaveProperty('serialNumber');
+            device = connectedDevices[0];
             done();
         };
 
         nRFjprog.getConnectedDevices(callback);
     });
 
-    it('throws when wrong parameters are sent in', () => {
-        expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
+    it('finds correct family', done => {
+        const callback = (err, family) => {
+            expect(err).toBeUndefined();
+            expect(family).toBe(device.family);
+            done();
+        };
+
+        nRFjprog.getFamily(device.serialNumber, callback);
+    });
+
+    it('finds device version', done => {
+        const callback = (err, deviceVersion) => {
+            expect(err).toBeUndefined();
+            expect(deviceVersion).toBe(5);
+            done();
+        };
+
+        nRFjprog.getDeviceVersion(device.serialNumber, callback);
+    });
+
+    it('throws an error when device do not exist', done => {
+        const callback = (err, family) => {
+            expect(err).toMatchSnapshot();
+            expect(family).toBeUndefined();
+            done();
+        };
+
+        nRFjprog.getFamily(1, callback);
+    });
+
+    it('reads from specified address', done => {
+        const callback = (err, contents) => {
+            expect(err).toBeUndefined();
+            expect(contents).toBeDefined();
+            done();
+        };
+
+        nRFjprog.read(device.serialNumber, 0x0, 1, callback);
+    });
+
+    it('reads 5 bytes from specified address', done => {
+        const readLength = 5;
+
+        const callback = (err, contents) => {
+            expect(err).toBeUndefined();
+            expect(contents).toBeDefined();
+            expect(contents.length).toBe(readLength);
+            done();
+        };
+
+        nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
+    });
+
+    it('reads unsigned 32 from specified address', done => {
+        const callback = (err, contents) => {
+            expect(err).toBeUndefined();
+            expect(contents).toBeDefined();
+            done();
+        };
+
+        nRFjprog.readU32(device.serialNumber, 0x0, callback);
     });
 });
