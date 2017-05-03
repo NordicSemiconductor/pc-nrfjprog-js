@@ -41,30 +41,20 @@ const nrfjprog = require('../index.js');
 const nRFjprog = new nrfjprog.nRFjprog();
 
 describe('Generic functionality', () => {
-    it('gets dll version', done => {
+    it('adds and calls logcallback', done => {
+        const mockLogCallback = jest.fn();
+        nRFjprog.setLogCallback(mockLogCallback);
+
         const callback = (err, version) => {
             expect(err).toBeUndefined();
-            expect(version).toHaveProperty('major');
-            expect(version).toHaveProperty('minor');
-            expect(version).toHaveProperty('revision');
+            expect(mockLogCallback).toBeCalled();
             done();
         };
 
         nRFjprog.getDllVersion(callback);
     });
 
-    it('finds all connected devices', done => {
-        const callback = (err, connectedDevices) => {
-            expect(err).toBeUndefined();
-            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
-            expect(connectedDevices[0]).toHaveProperty('serialNumber');
-            done();
-        };
-
-        nRFjprog.getConnectedDevices(callback);
-    });
-
-    it('throws when wrong parameters are sent in', () => {
-        expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
+    it('remove and do not call logcallback', () => {
+        nRFjprog.setLogCallback();
     });
 });

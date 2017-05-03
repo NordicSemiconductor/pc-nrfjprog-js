@@ -40,6 +40,7 @@ const nrfjprog = require('../index.js');
 
 let nRFjprog;
 let device;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
 describe('Single device - destructive', () => {
     beforeAll(done => {
@@ -72,6 +73,7 @@ describe('Single device - destructive', () => {
     });
 
     it('programs a hex file', done => {
+
         const callback = (err) => {
             expect(err).toBeUndefined();
 
@@ -91,7 +93,7 @@ describe('Single device - destructive', () => {
         nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, callback);
     });
 
-    it.only('verifies a hex file', done => {
+    it('verifies a hex file', done => {
         const callback = (err) => {
             expect(err).toBeUndefined();
             done();
@@ -138,7 +140,7 @@ describe('Single device - destructive', () => {
         const readCallback = (err, contents) => {
             expect(err).toBeUndefined();
             expect(contents).toBeDefined();
-            expect(content.toEqual(expect.arrayContaining(data)));
+            expect(contents).toEqual(expect.arrayContaining(data));
             done();
         };
 
@@ -163,7 +165,7 @@ describe('Single device - destructive', () => {
         const readCallback = (err, contents) => {
             expect(err).toBeUndefined();
             expect(contents).toBeDefined();
-            expect(content.toEqual(expect.arrayContaining(data)));
+            expect(contents).toEqual(data);
             done();
         };
 

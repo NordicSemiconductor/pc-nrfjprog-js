@@ -61,6 +61,7 @@ bool nRFjprog::loaded = false;
 bool nRFjprog::connectedToDevice = false;
 errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
 std::string nRFjprog::logMessage;
+Nan::Callback *nRFjprog::jsLogCallback = nullptr;
 
 NAN_MODULE_INIT(nRFjprog::Init)
 {
@@ -237,7 +238,9 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
         }
     }
 
-    closeBeforeExit();
+    dll_function.dll_close();
+
+    unloadDll();
 
     if (excuteError != SUCCESS)
     {
@@ -283,9 +286,38 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
     delete baton;
 }
 
+NAN_METHOD(nRFjprog::SetLogCallback)
+{
+    if (info.Length() == 0)
+    {
+        jsLogCallback = nullptr;
+        return;
+    }
+
+    auto argumentCount = 0;
+
+    try
+    {
+        jsLogCallback = new Nan::Callback(Convert::getCallbackFunction(info[argumentCount]));
+        argumentCount++;
+    }
+    catch (std::string error)
+    {
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+    }
+}
+
 void nRFjprog::logCallback(const char * msg)
 {
     logMessage = logMessage.append(msg);
+
+    if (jsLogCallback != nullptr)
+    {
+        v8::Local<v8::Value> argv[1];
+        argv[0] = Convert::toJsString(msg);
+        jsLogCallback->Call(1, argv);
+    }
 }
 
 errorcodes nRFjprog::loadDll()
@@ -324,15 +356,10 @@ void nRFjprog::unloadDll()
     }
 }
 
-void nRFjprog::closeBeforeExit()
-{
-    dll_function.dll_close();
-
-    unloadDll();
-}
-
 void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 {
+    Nan::SetPrototypeMethod(tpl, "setLogCallback", SetLogCallback);
+
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);

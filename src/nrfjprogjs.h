@@ -64,6 +64,7 @@ private:
     static NAN_METHOD(New);
 
     // Sync methods
+    static NAN_METHOD(SetLogCallback); // Params: callback(message)
 
     // Async methods
     static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)
@@ -98,9 +99,8 @@ private:
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
-    static void closeBeforeExit();
-
     static void logCallback(const char * msg);
+    static Nan::Callback *jsLogCallback;
 
     static DllFunctionPointersType dll_function;
     static char dll_path[COMMON_MAX_PATH];
