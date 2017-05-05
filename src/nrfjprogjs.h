@@ -100,11 +100,15 @@ private:
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
     static void logCallback(const char * msg);
-    static Nan::Callback *jsLogCallback;
+    static void progressCallback(uint32_t step, uint32_t total_steps, const char * process);
+    static Nan::Callback *jsProgressCallback;
+    static int lastReportedProgress;
+    static bool shouldProgressBeReported(const int progress);
+    static void sendProgress(uv_async_t *handle);
+    static uv_async_t *progressEvent;
 
     static DllFunctionPointersType dll_function;
     static char dll_path[COMMON_MAX_PATH];
-    static char jlink_path[COMMON_MAX_PATH];
 
     static bool loaded;
     static bool connectedToDevice;

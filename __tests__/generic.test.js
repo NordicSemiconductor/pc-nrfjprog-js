@@ -64,7 +64,18 @@ describe('Generic functionality', () => {
         nRFjprog.getConnectedDevices(callback);
     });
 
-    it('throws when wrong parameters are sent in', () => {
+    it('throws when too few parameters are sent in', () => {
         expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
+    });
+
+    it('throws when too many parameters are sent in', () => {
+        const callback = (err, connectedDevices) => {
+        };
+
+        expect(() => { nRFjprog.getDllVersion(callback, callback); }).toThrowErrorMatchingSnapshot();
+    });
+
+    it('throws when wrong type of parameters are sent in', () => {
+        expect(() => { nRFjprog.getDllVersion(1); }).toThrowErrorMatchingSnapshot();
     });
 });

@@ -251,6 +251,9 @@ typedef enum
     NRFJPROG_SUB_DLL_NOT_FOUND                  = -150,
     NRFJPROG_SUB_DLL_COULD_NOT_BE_OPENED        = -151,
     NRFJPROG_SUB_DLL_COULD_NOT_LOAD_FUNCTIONS   = -152,
+
+    /* High Level DLL */
+    VERIFY_ERROR                                = -160,
         
     /* Not implemented. */
     NOT_IMPLEMENTED_ERROR                       = -255,

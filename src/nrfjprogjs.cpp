@@ -52,16 +52,27 @@
 #include <iostream>
 
 #define MAX_SERIAL_NUMBERS 100
+#define REPORTABLE_PROGESS 5
 
 Nan::Persistent<v8::Function> nRFjprog::constructor;
 DllFunctionPointersType nRFjprog::dll_function;
 char nRFjprog::dll_path[COMMON_MAX_PATH] = {'\0'};
-char nRFjprog::jlink_path[COMMON_MAX_PATH] = {'\0'};
 bool nRFjprog::loaded = false;
 bool nRFjprog::connectedToDevice = false;
 errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
 std::string nRFjprog::logMessage;
-Nan::Callback *nRFjprog::jsLogCallback = nullptr;
+Nan::Callback *nRFjprog::jsProgressCallback = nullptr;
+int nRFjprog::lastReportedProgress = -1;
+uv_async_t *nRFjprog::progressEvent = nullptr;
+
+struct ProgressData {
+    int step;
+    int steps;
+    std::string process;
+    int percent;
+};
+
+ProgressData progress;
 
 NAN_MODULE_INIT(nRFjprog::Init)
 {
@@ -93,17 +104,14 @@ NAN_METHOD(nRFjprog::New)
 nRFjprog::nRFjprog()
 {
     finderror = errorcodes::JsSuccess;
+    progressEvent = new uv_async_t();
+    uv_async_init(uv_default_loop(), progressEvent, sendProgress);
 
     NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
-    NrfjprogErrorCodesType jlink_dll_find_result = OSFilesFindJLink(jlink_path, COMMON_MAX_PATH);
 
     if (dll_find_result != Success)
     {
         finderror = errorcodes::CouldNotFindJprogDLL;
-    }
-    else if (jlink_dll_find_result != Success)
-    {
-        finderror = errorcodes::CouldNotFindJlinkDLL;
     }
 }
 
@@ -119,12 +127,15 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 
     logMessage.clear();
 
-    auto obj = Nan::ObjectWrap::Unwrap<nRFjprog>(info.Holder());
     auto argumentCount = 0;
-    v8::Local<v8::Function> callback;
-
     Baton *baton = nullptr;
     uint32_t serialNumber = 0;
+
+    if (jsProgressCallback != nullptr)
+    {
+        delete jsProgressCallback;
+        jsProgressCallback = nullptr;
+    }
 
     try
     {
@@ -136,9 +147,21 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 
         baton = parse(info, argumentCount);
 
-        callback = Convert::getCallbackFunction(info[argumentCount]);
+        if (baton->mayHaveProgressCallback && (argumentCount + 1) < info.Length())
+        {
+            v8::Local<v8::Function> callback = Convert::getCallbackFunction(info[argumentCount]);
+            jsProgressCallback = new Nan::Callback(callback);
+            argumentCount++;
+        }
+
+        v8::Local<v8::Function> callback = Convert::getCallbackFunction(info[argumentCount]);
         baton->callback = new Nan::Callback(callback);
         argumentCount++;
+
+        if (info.Length() > argumentCount)
+        {
+            throw std::string("too many parameters");
+        }
     }
     catch (std::string error)
     {
@@ -148,6 +171,12 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
         if (baton != nullptr)
         {
             delete baton;
+        }
+
+        if (jsProgressCallback != nullptr)
+        {
+            delete jsProgressCallback;
+            jsProgressCallback = 0;
         }
 
         return;
@@ -281,42 +310,69 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
         }
     }
 
+    if (jsProgressCallback != nullptr)
+    {
+        delete jsProgressCallback;
+        jsProgressCallback = nullptr;
+    }
+
     baton->callback->Call(baton->returnParameterCount + 1, argv);
 
     delete baton;
 }
 
-NAN_METHOD(nRFjprog::SetLogCallback)
-{
-    if (info.Length() == 0)
-    {
-        jsLogCallback = nullptr;
-        return;
-    }
-
-    auto argumentCount = 0;
-
-    try
-    {
-        jsLogCallback = new Nan::Callback(Convert::getCallbackFunction(info[argumentCount]));
-        argumentCount++;
-    }
-    catch (std::string error)
-    {
-        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
-        Nan::ThrowTypeError(message);
-    }
-}
-
 void nRFjprog::logCallback(const char * msg)
 {
     logMessage = logMessage.append(msg);
+}
 
-    if (jsLogCallback != nullptr)
+bool nRFjprog::shouldProgressBeReported(const int progress)
+{
+    if ((progress < lastReportedProgress) ||
+        (progress > (lastReportedProgress + REPORTABLE_PROGESS)) ||
+        (progress >= 100))
     {
-        v8::Local<v8::Value> argv[1];
-        argv[0] = Convert::toJsString(msg);
-        jsLogCallback->Call(1, argv);
+        lastReportedProgress = progress;
+        return true;
+    }
+
+    return false;
+}
+
+void nRFjprog::progressCallback(uint32_t step, uint32_t total_steps, const char * process)
+{
+    const int percent = (int)((step * 100) / total_steps);
+
+    const bool shouldCallback = shouldProgressBeReported(percent);
+
+    if (jsProgressCallback != nullptr && shouldCallback)
+    {
+        progress.step = step;
+        progress.steps = total_steps;
+        progress.process = std::string(process);
+        progress.percent = percent;
+
+        uv_async_send(progressEvent);
+    }
+}
+
+void nRFjprog::sendProgress(uv_async_t *handle)
+{
+    Nan::HandleScope scope;
+
+    v8::Local<v8::Value> argv[1];
+
+    v8::Local<v8::Object> progressObj = Nan::New<v8::Object>();
+    Utility::Set(progressObj, "process", Convert::toJsString(progress.process));
+    Utility::Set(progressObj, "step", Convert::toJsNumber(progress.step));
+    Utility::Set(progressObj, "steps", Convert::toJsNumber(progress.steps));
+    Utility::Set(progressObj, "percent", Convert::toJsNumber(progress.percent));
+
+    argv[0] = progressObj;
+
+    if (jsProgressCallback != nullptr)
+    {
+        jsProgressCallback->Call(1, argv);
     }
 }
 
@@ -484,11 +540,6 @@ NAN_METHOD(nRFjprog::GetFamily)
 
         std::ostringstream errorStringStream;
         errorStringStream << Convert::valueToString(baton->family, device_family_map) << " " << baton->family << std::endl;
-        logCallback("===============================================\n");
-        logCallback("\n\nResult from get family: ");
-        logCallback(errorStringStream.str().c_str());
-        logCallback("\n\n");
-        logCallback("===============================================\n");
 
         return err;
     };
@@ -611,7 +662,7 @@ NAN_METHOD(nRFjprog::Program)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ProgramBaton*>(b);
-        return dll_function.program(probe, baton->filename.c_str(), &baton->options, 0);
+        return dll_function.program(probe, baton->filename.c_str(), &baton->options, nRFjprog::progressCallback);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -635,7 +686,7 @@ NAN_METHOD(nRFjprog::ReadToFile)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadToFileBaton*>(b);
-        return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options, 0);
+        return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options, nRFjprog::progressCallback);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -654,7 +705,7 @@ NAN_METHOD(nRFjprog::Verify)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<VerifyBaton*>(b);
-        return dll_function.verify(probe, baton->filename.c_str(),  0);
+        return dll_function.verify(probe, baton->filename.c_str(), nRFjprog::progressCallback);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -677,7 +728,7 @@ NAN_METHOD(nRFjprog::Erase)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<EraseBaton*>(b);
-        return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address, 0);
+        return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address, nRFjprog::progressCallback);
     };
 
     CallFunction(info, p, e, nullptr, true);

@@ -63,15 +63,6 @@ describe('Single device - destructive', () => {
         nRFjprog.erase(device.serialNumber, {}, callback);
     });
 
-    it('reads device content', done => {
-        const callback = (err) => {
-            expect(err).toBeUndefined();
-            done();
-        };
-
-        nRFjprog.readToFile(device.serialNumber, "./after_readToFile.hex", { readcode: true, readuicr: true }, callback);
-    });
-
     it('programs a hex file', done => {
 
         const callback = (err) => {
@@ -82,7 +73,7 @@ describe('Single device - destructive', () => {
                 return;
             }
 
-            nRFjprog.readToFile(device.serialNumber, "./after_program.hex", { readcode: true, readuicr: true }, readToFileCallback);
+            nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", readToFileCallback);
         };
 
         const readToFileCallback = (err) => {
@@ -93,6 +84,15 @@ describe('Single device - destructive', () => {
         nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, callback);
     });
 
+    it('reads device content', done => {
+        const callback = (err) => {
+            expect(err).toBeUndefined();
+            done();
+        };
+
+        nRFjprog.readToFile(device.serialNumber, "./after_readToFile.hex", { readcode: true, readuicr: true }, callback);
+    });
+
     it('verifies a hex file', done => {
         const callback = (err) => {
             expect(err).toBeUndefined();
@@ -100,6 +100,18 @@ describe('Single device - destructive', () => {
         };
 
         nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", callback);
+    });
+
+    it('verifies a hex file with progress callback', done => {
+        const mockProgressCallback = jest.fn();
+
+        const callback = (err) => {
+            expect(err).toBeUndefined();
+            expect(mockProgressCallback).toBeCalled();
+            done();
+        };
+
+        nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", mockProgressCallback, callback);
     });
 
     it('recovers a device', done => {
