@@ -41,42 +41,53 @@
 #include "nrfjprogjs.h"
 #include "nrfjprog_helpers.h"
 
-#define BATON_CONSTRUCTOR(BatonType, returnParameterCount) BatonType(std::string name) : Baton(returnParameterCount, name) {}
+#define BATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, false) {}
+#define BATON_WITH_PROGRESS_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, true) {}
 #define BATON_DESTRUCTOR(BatonType) ~BatonType()
 
 class Baton {
 public:
-    explicit Baton(const uint32_t _returnParameterCount, std::string _name) {
+    explicit Baton(const uint32_t _returnParameterCount, const std::string _name, const bool _mayHaveProgressCallback) :
+        returnParameterCount(_returnParameterCount),
+        name(_name),
+        mayHaveProgressCallback(_mayHaveProgressCallback),
+        serialNumber(0),
+        result(JsSuccess),
+        lowlevelError(SUCCESS)
+    {
         req = new uv_work_t();
         req->data = static_cast<void*>(this);
-        returnParameterCount = _returnParameterCount;
-        name = _name;
-        lowlevelError = SUCCESS;
+        callback = nullptr;
     }
 
-    ~Baton()
+    virtual ~Baton()
     {
-        delete callback;
+        if (callback != nullptr)
+        {
+            delete callback;
+            callback = nullptr;
+        }
     }
+
+    const uint32_t returnParameterCount;
+    const std::string name;
+    const bool mayHaveProgressCallback;
+
+    uint32_t serialNumber;
+    uint32_t result;
+    nrfjprogdll_err_t lowlevelError;
 
     uv_work_t *req;
     Nan::Callback *callback;
-    uint32_t serialNumber;
-    uint32_t returnParameterCount;
 
     execute_function_t executeFunction;
     return_function_t returnFunction;
-    std::string name;
-
-    uint32_t result;
-
-    nrfjprogdll_err_t lowlevelError;
 };
 
 class GetDllVersionBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetDllVersionBaton, 1);
+    BATON_CONSTRUCTOR(GetDllVersionBaton, "get dll version", 1);
     uint32_t major;
     uint32_t minor;
     uint32_t revision;
@@ -85,14 +96,14 @@ public:
 class GetConnectedDevicesBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetConnectedDevicesBaton, 1);
+    BATON_CONSTRUCTOR(GetConnectedDevicesBaton, "get connected devices", 1);
     std::vector<ProbeInfo *> probes;
 };
 
 class GetFamilyBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetFamilyBaton, 1);
+    BATON_CONSTRUCTOR(GetFamilyBaton, "get family", 1);
     uint32_t serialNumber;
     device_family_t family;
 };
@@ -100,7 +111,7 @@ public:
 class GetDeviceVersionBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetDeviceVersionBaton, 1);
+    BATON_CONSTRUCTOR(GetDeviceVersionBaton, "get device version", 1);
     uint32_t serialNumber;
     device_version_t deviceVersion;
 };
@@ -108,7 +119,7 @@ public:
 class ReadBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(ReadBaton, 1);
+    BATON_CONSTRUCTOR(ReadBaton, "read", 1);
     BATON_DESTRUCTOR(ReadBaton)
     {
         if (data != nullptr)
@@ -126,7 +137,7 @@ public:
 class ReadU32Baton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(ReadU32Baton, 1);
+    BATON_CONSTRUCTOR(ReadU32Baton, "read u32", 1);
     uint32_t address;
     uint32_t length;
     uint32_t data;
@@ -135,7 +146,7 @@ public:
 class ProgramBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(ProgramBaton, 0);
+    BATON_WITH_PROGRESS_CONSTRUCTOR(ProgramBaton, "program", 0);
     std::string filename;
     program_options_t options;
 };
@@ -143,14 +154,14 @@ public:
 class VerifyBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(VerifyBaton, 0);
+    BATON_WITH_PROGRESS_CONSTRUCTOR(VerifyBaton, "verify", 0);
     std::string filename;
 };
 
 class ReadToFileBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(ReadToFileBaton, 0);
+    BATON_WITH_PROGRESS_CONSTRUCTOR(ReadToFileBaton, "read to file", 0);
     std::string filename;
     read_options_t options;
 };
@@ -158,16 +169,22 @@ public:
 class EraseBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(EraseBaton, 0);
+    BATON_WITH_PROGRESS_CONSTRUCTOR(EraseBaton, "erase", 0);
     erase_mode_t erase_mode;
     uint32_t start_address;
     uint32_t end_address;
 };
 
+class RecoverBaton : public Baton
+{
+public:
+    BATON_WITH_PROGRESS_CONSTRUCTOR(RecoverBaton, "recover", 0);
+};
+
 class WriteBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(WriteBaton, 0);
+    BATON_CONSTRUCTOR(WriteBaton, "write", 0);
     uint32_t address;
     uint8_t *data;
     uint32_t length;
@@ -176,7 +193,7 @@ public:
 class WriteU32Baton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(WriteU32Baton, 0);
+    BATON_CONSTRUCTOR(WriteU32Baton, "write u32", 0);
     uint32_t address;
     uint32_t data;
 };

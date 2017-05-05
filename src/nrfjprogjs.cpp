@@ -414,8 +414,6 @@ void nRFjprog::unloadDll()
 
 void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 {
-    Nan::SetPrototypeMethod(tpl, "setLogCallback", SetLogCallback);
-
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
@@ -437,7 +435,7 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 NAN_METHOD(nRFjprog::GetDllVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetDllVersionBaton("get dll version");
+        auto baton = new GetDllVersionBaton();
 
         return baton;
     };
@@ -467,7 +465,7 @@ NAN_METHOD(nRFjprog::GetDllVersion)
 NAN_METHOD(nRFjprog::GetConnectedDevices)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        return new GetConnectedDevicesBaton("get connected devices");
+        return new GetConnectedDevicesBaton();
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
@@ -526,10 +524,11 @@ static name_map_t device_family_map = {
     NAME_MAP_ENTRY(NRF52_FAMILY),
     NAME_MAP_ENTRY(UNKNOWN_FAMILY)
 };
+
 NAN_METHOD(nRFjprog::GetFamily)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetFamilyBaton("get device family");
+        auto baton = new GetFamilyBaton();
 
         return baton;
     };
@@ -559,7 +558,7 @@ NAN_METHOD(nRFjprog::GetFamily)
 NAN_METHOD(nRFjprog::GetDeviceVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetDeviceVersionBaton("get device version");
+        auto baton = new GetDeviceVersionBaton();
 
         return baton;
     };
@@ -584,7 +583,7 @@ NAN_METHOD(nRFjprog::GetDeviceVersion)
 NAN_METHOD(nRFjprog::Read)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ReadBaton("read");
+        auto baton = new ReadBaton();
 
         baton->data = nullptr;
 
@@ -618,7 +617,7 @@ NAN_METHOD(nRFjprog::Read)
 NAN_METHOD(nRFjprog::ReadU32)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ReadU32Baton("read 32 bit");
+        auto baton = new ReadU32Baton();
 
         baton->address = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
@@ -647,7 +646,7 @@ NAN_METHOD(nRFjprog::ReadU32)
 NAN_METHOD(nRFjprog::Program)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ProgramBaton("program file");
+        auto baton = new ProgramBaton();
 
         baton->filename = Convert::getNativeString(info[argumentCount]);
         argumentCount++;
@@ -671,7 +670,7 @@ NAN_METHOD(nRFjprog::Program)
 NAN_METHOD(nRFjprog::ReadToFile)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new ReadToFileBaton("read to file");
+        auto baton = new ReadToFileBaton();
 
         baton->filename = Convert::getNativeString(info[argumentCount]);
         argumentCount++;
@@ -695,7 +694,7 @@ NAN_METHOD(nRFjprog::ReadToFile)
 NAN_METHOD(nRFjprog::Verify)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new VerifyBaton("verify");
+        auto baton = new VerifyBaton();
 
         baton->filename = Convert::getNativeString(info[argumentCount]);
         argumentCount++;
@@ -714,7 +713,7 @@ NAN_METHOD(nRFjprog::Verify)
 NAN_METHOD(nRFjprog::Erase)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new EraseBaton("erase");
+        auto baton = new EraseBaton();
 
         v8::Local<v8::Object> eraseOptions = Convert::getJsObject(info[argumentCount]);
         EraseOptions options(eraseOptions);
@@ -737,11 +736,11 @@ NAN_METHOD(nRFjprog::Erase)
 NAN_METHOD(nRFjprog::Recover)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        return new Baton(0, "recover");
+        return new RecoverBaton();
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        return dll_function.recover(probe, 0);
+        return dll_function.recover(probe, nRFjprog::progressCallback);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -750,7 +749,7 @@ NAN_METHOD(nRFjprog::Recover)
 NAN_METHOD(nRFjprog::Write)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new WriteBaton("write");
+        auto baton = new WriteBaton();
         baton->data = nullptr;
 
         baton->address = Convert::getNativeUint32(info[argumentCount]);
@@ -774,7 +773,7 @@ NAN_METHOD(nRFjprog::Write)
 NAN_METHOD(nRFjprog::WriteU32)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new WriteU32Baton("write 32 bit");
+        auto baton = new WriteU32Baton();
 
         baton->address = Convert::getNativeUint32(info[argumentCount]);
         argumentCount++;
