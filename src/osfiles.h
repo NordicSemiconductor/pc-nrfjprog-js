@@ -44,8 +44,6 @@
 #define COMMON_MAX_INI_LINE (1024)
 
 NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len);
-NrfjprogErrorCodesType OSFilesFindJLink(char * jlink_path, int jlink_path_len);
-NrfjprogErrorCodesType OSFilesFindIni(char * ini_path, int ini_path_len);
 
 bool OSFilesExists(char * path);
 
