@@ -45,7 +45,41 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
-    Utility::Set(obj, "family", Convert::toJsNumber(family));
+    Utility::Set(obj, "deviceInfo", DeviceInfo(device_info).ToJs());
+
+    return scope.Escape(obj);
+}
+
+v8::Local<v8::Object> DeviceInfo::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+
+    Utility::Set(obj, "family", Convert::toJsNumber(device_info.device_family));
+    Utility::Set(obj, "deviceType", Convert::toJsNumber(device_info.device_type));
+
+    /* Code flash info. */
+    Utility::Set(obj, "codeAddress", Convert::toJsNumber(device_info.code_address));
+    Utility::Set(obj, "codePageSize", Convert::toJsNumber(device_info.code_page_size));
+    Utility::Set(obj, "codeSize", Convert::toJsNumber(device_info.code_size));
+
+    /* Info flash info. */
+    Utility::Set(obj, "uicrAddress", Convert::toJsNumber(device_info.uicr_address));
+    Utility::Set(obj, "infoPageSize", Convert::toJsNumber(device_info.info_page_size));
+
+    /* RAM info. */
+    Utility::Set(obj, "codeRamPresent", Convert::toJsBool(device_info.code_ram_present));
+    Utility::Set(obj, "codeRamAddress", Convert::toJsNumber(device_info.code_ram_address));
+    Utility::Set(obj, "dataRamAddress", Convert::toJsNumber(device_info.data_ram_address));
+    Utility::Set(obj, "ramSize", Convert::toJsNumber(device_info.ram_size));
+
+    /* QSPI info. */
+    Utility::Set(obj, "qspiPresent", Convert::toJsBool(device_info.qspi_present));
+    Utility::Set(obj, "xipAddress", Convert::toJsNumber(device_info.xip_address));
+    Utility::Set(obj, "xipSize", Convert::toJsNumber(device_info.xip_size));
+
+    /* Pin reset. */
+    Utility::Set(obj, "pinResetPin", Convert::toJsNumber(device_info.pin_reset_pin));
 
     return scope.Escape(obj);
 }
@@ -57,17 +91,17 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
 {
     if (Utility::Has(obj, "erase_mode"))
     {
-        eraseMode = (erase_mode_t)Convert::getNativeUint32(obj, "erase_mode");
+        eraseMode = (erase_action_t)Convert::getNativeUint32(obj, "erase_mode");
     }
 
     if (Utility::Has(obj, "start_adress"))
     {
-        startAddress = (erase_mode_t)Convert::getNativeUint32(obj, "erase_mode");
+        startAddress = Convert::getNativeUint32(obj, "start_adress");
     }
 
     if (Utility::Has(obj, "end_address"))
     {
-        endAddress = (erase_mode_t)Convert::getNativeUint32(obj, "end_address");
+        endAddress = Convert::getNativeUint32(obj, "end_address");
     }
 }
 
@@ -101,28 +135,30 @@ ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
 
 ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 {
-    options.verify = true;
+    options.verify = VERIFY_READ;
     options.chip_erase_mode = ERASE_ALL;
     options.qspi_erase_mode = ERASE_NONE;
-    options.reset = true;
+    options.reset = RESET_SYSTEM;
 
     if (Utility::Has(obj, "verify"))
     {
-        options.verify = Convert::getBool(obj, "verify");
+        const bool verify = Convert::getBool(obj, "verify");
+        options.verify = verify ? VERIFY_READ : VERIFY_NONE;
     }
 
     if (Utility::Has(obj, "chip_erase_mode"))
     {
-        options.chip_erase_mode = (erase_mode_t)Convert::getNativeUint32(obj, "chip_erase_mode");
+        options.chip_erase_mode = (erase_action_t)Convert::getNativeUint32(obj, "chip_erase_mode");
     }
 
     if (Utility::Has(obj, "qspi_erase_mode"))
     {
-        options.qspi_erase_mode = (erase_mode_t)Convert::getNativeUint32(obj, "qspi_erase_mode");
+        options.qspi_erase_mode = (erase_action_t)Convert::getNativeUint32(obj, "qspi_erase_mode");
     }
 
     if (Utility::Has(obj, "reset"))
     {
-        options.reset = Convert::getBool(obj, "reset");
+        const bool reset = Convert::getBool(obj, "reset");
+        options.reset = reset ? RESET_SYSTEM : RESET_NONE;
     }
 }

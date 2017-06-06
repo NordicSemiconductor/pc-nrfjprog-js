@@ -38,19 +38,33 @@
 #define __NRFJPROG_HELPERS_H__
 
 #include <nan.h>
-#include "nrfjprogjs.h"
+#include "highlevelnrfjprogdll.h"
 
 class ProbeInfo
 {
 public:
-    ProbeInfo(uint32_t serial_number, device_family_t family) :
-        serial_number(serial_number), family(family)
+    ProbeInfo(uint32_t serial_number, device_info_t device_info) :
+        serial_number(serial_number), device_info(device_info)
     {}
 
-    uint32_t serial_number;
-    device_family_t family;
+    v8::Local<v8::Object> ToJs();
+
+private:
+    const uint32_t serial_number;
+    const device_info_t device_info;
+};
+
+class DeviceInfo
+{
+public:
+    DeviceInfo(device_info_t device_info) :
+        device_info(device_info)
+    {}
 
     v8::Local<v8::Object> ToJs();
+
+private:
+    const device_info_t device_info;
 };
 
 class EraseOptions
@@ -58,7 +72,7 @@ class EraseOptions
 public:
     EraseOptions(v8::Local<v8::Object> obj);
 
-    erase_mode_t eraseMode;
+    erase_action_t eraseMode;
     uint32_t startAddress;
     uint32_t endAddress;
 };

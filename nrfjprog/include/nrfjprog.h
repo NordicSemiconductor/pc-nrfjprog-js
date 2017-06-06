@@ -13,7 +13,7 @@
 #define NRFJPROG_H
 
 #define major_version (9) 
-#define minor_version (4) 
+#define minor_version (5) 
 #define micro_version (0) 
 
 

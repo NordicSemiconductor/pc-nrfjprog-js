@@ -103,6 +103,10 @@ typedef enum {
     /* See http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52/dita/nrf52/compatibility_matrix/nrf52840_comp_matrix.html */
     NRF52840_xxAA_ENGA                  = 10,
     NRF52840_xxAA_FUTURE                = 12,
+    
+    /* nRF52810 versions. */
+    NRF52810_xxAA_REV1                  = 13,
+    NRF52810_xxAA_FUTURE                = 14,
 
     /* Deprecated nRF52 enumerators. */
     NRF52_FP1_ENGA                      = 7,  /* Please do not use in new code. Kept for backwards compatibility. */
@@ -110,7 +114,7 @@ typedef enum {
     NRF52_FP1                           = 9,  /* Please do not use in new code. Kept for backwards compatibility. */
     NRF52_FP1_FUTURE                    = 11, /* Please do not use in new code. Kept for backwards compatibility. */
     NRF52_FP2_ENGA                      = 10, /* Please do not use in new code. Kept for backwards compatibility. */
-
+ 
 } device_version_t;
 
 /* Identified types of nRF devices */
@@ -260,6 +264,8 @@ typedef enum
 
 } nrfjprogdll_err_t;
 
+/* Expected log function prototype for logging operations. */
+typedef void msg_callback(const char * msg_str);
 
 #if defined(__cplusplus)
 }

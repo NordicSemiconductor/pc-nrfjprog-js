@@ -39,7 +39,6 @@
 #include <libgen.h>
 #include <dlfcn.h>
 
-
 #include "nrfjprog.h"
 
 #include <sys/types.h>

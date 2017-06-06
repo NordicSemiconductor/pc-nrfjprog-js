@@ -39,6 +39,5 @@
 
 #include "DllCommonDefinitions.h"
 #include "nrfjprog.h"
-#include "nrfjprogdll.h"
 
 #endif // __NRFJPROG_COMMON_H__

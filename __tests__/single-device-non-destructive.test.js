@@ -46,41 +46,34 @@ describe('Single device - non-destructive', () => {
         nRFjprog = new nrfjprog.nRFjprog();
 
         const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             device = connectedDevices[0];
+
             done();
         };
 
         nRFjprog.getConnectedDevices(callback);
     });
 
-    it('finds correct family', done => {
-        const callback = (err, family) => {
+    it('finds correct device info', done => {
+        const callback = (err, deviceInfo) => {
             expect(err).toBeUndefined();
-            expect(family).toBe(device.family);
+            expect(deviceInfo).toMatchObject(device.deviceInfo);
             done();
         };
 
-        nRFjprog.getFamily(device.serialNumber, callback);
-    });
-
-    it('finds device version', done => {
-        const callback = (err, deviceVersion) => {
-            expect(err).toBeUndefined();
-            expect(deviceVersion).toBe(5);
-            done();
-        };
-
-        nRFjprog.getDeviceVersion(device.serialNumber, callback);
+        nRFjprog.getDeviceInfo(device.serialNumber, callback);
     });
 
     it('throws an error when device do not exist', done => {
-        const callback = (err, family) => {
+        const callback = (err, deviceInfo) => {
             expect(err).toMatchSnapshot();
-            expect(family).toBeUndefined();
+            expect(deviceInfo).toBeUndefined();
             done();
         };
 
-        nRFjprog.getFamily(1, callback);
+        nRFjprog.getDeviceInfo(1, callback);
     });
 
     it('reads from specified address', done => {

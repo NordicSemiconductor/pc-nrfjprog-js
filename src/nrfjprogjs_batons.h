@@ -100,12 +100,12 @@ public:
     std::vector<ProbeInfo *> probes;
 };
 
-class GetFamilyBaton : public Baton
+class GetDeviceInfoBaton : public Baton
 {
 public:
-    BATON_CONSTRUCTOR(GetFamilyBaton, "get family", 1);
+    BATON_CONSTRUCTOR(GetDeviceInfoBaton, "get device info", 1);
     uint32_t serialNumber;
-    device_family_t family;
+    device_info_t deviceInfo;
 };
 
 class GetDeviceVersionBaton : public Baton
@@ -170,7 +170,7 @@ class EraseBaton : public Baton
 {
 public:
     BATON_WITH_PROGRESS_CONSTRUCTOR(EraseBaton, "erase", 0);
-    erase_mode_t erase_mode;
+    erase_action_t erase_mode;
     uint32_t start_address;
     uint32_t end_address;
 };

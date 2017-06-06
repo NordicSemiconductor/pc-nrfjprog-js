@@ -40,13 +40,15 @@ const nrfjprog = require('../index.js');
 
 let nRFjprog;
 let device;
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 describe('Single device - destructive', () => {
     beforeAll(done => {
         nRFjprog = new nrfjprog.nRFjprog();
 
         const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             device = connectedDevices[0];
             done();
         };
@@ -73,7 +75,7 @@ describe('Single device - destructive', () => {
                 return;
             }
 
-            nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", readToFileCallback);
+            nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", readToFileCallback);
         };
 
         const readToFileCallback = (err) => {
@@ -81,7 +83,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, callback);
+        nRFjprog.program(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
     });
 
     it('reads device content', done => {
@@ -99,7 +101,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", callback);
+        nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", callback);
     });
 
     it('verifies a hex file with progress callback', done => {
@@ -111,7 +113,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.verify(device.serialNumber, "./__tests__/hex/program.hex", mockProgressCallback, callback);
+        nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", mockProgressCallback, callback);
     });
 
     it('recovers a device', done => {

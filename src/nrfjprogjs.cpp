@@ -43,7 +43,6 @@
 #include "nrfjprogjs_batons.h"
 #include "nrfjprog_helpers.h"
 
-#include "keilhexfile.h"
 #include "dllfunc.h"
 
 #include "utility/utility.h"
@@ -62,14 +61,10 @@ bool nRFjprog::connectedToDevice = false;
 errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
 std::string nRFjprog::logMessage;
 Nan::Callback *nRFjprog::jsProgressCallback = nullptr;
-int nRFjprog::lastReportedProgress = -1;
 uv_async_t *nRFjprog::progressEvent = nullptr;
 
 struct ProgressData {
-    int step;
-    int steps;
     std::string process;
-    int percent;
 };
 
 ProgressData progress;
@@ -176,7 +171,7 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
         if (jsProgressCallback != nullptr)
         {
             delete jsProgressCallback;
-            jsProgressCallback = 0;
+            jsProgressCallback = nullptr;
         }
 
         return;
@@ -221,7 +216,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError = dll_function.dll_open(&nRFjprog::logCallback);
+        nrfjprogdll_err_t openError = dll_function.dll_open(nullptr, &nRFjprog::logCallback, &nRFjprog::progressCallback);
 
         if (openError != SUCCESS)
         {
@@ -233,7 +228,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0)
     {
-        nrfjprogdll_err_t initError = dll_function.probe_init(&probe, baton->serialNumber, 0, 0);
+        nrfjprogdll_err_t initError = dll_function.probe_init(&probe, baton->serialNumber, nullptr);
 
         if (initError != SUCCESS)
         {
@@ -248,7 +243,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
     if (baton->serialNumber != 0)
     {
 
-        nrfjprogdll_err_t resetError = dll_function.reset(probe);
+        nrfjprogdll_err_t resetError = dll_function.reset(probe, RESET_SYSTEM);
 
         if (resetError != SUCCESS)
         {
@@ -326,31 +321,11 @@ void nRFjprog::logCallback(const char * msg)
     logMessage = logMessage.append(msg);
 }
 
-bool nRFjprog::shouldProgressBeReported(const int progress)
+void nRFjprog::progressCallback(const char * process)
 {
-    if ((progress < lastReportedProgress) ||
-        (progress > (lastReportedProgress + REPORTABLE_PROGESS)) ||
-        (progress >= 100))
+    if (jsProgressCallback != nullptr)
     {
-        lastReportedProgress = progress;
-        return true;
-    }
-
-    return false;
-}
-
-void nRFjprog::progressCallback(uint32_t step, uint32_t total_steps, const char * process)
-{
-    const int percent = (int)((step * 100) / total_steps);
-
-    const bool shouldCallback = shouldProgressBeReported(percent);
-
-    if (jsProgressCallback != nullptr && shouldCallback)
-    {
-        progress.step = step;
-        progress.steps = total_steps;
         progress.process = std::string(process);
-        progress.percent = percent;
 
         uv_async_send(progressEvent);
     }
@@ -364,9 +339,6 @@ void nRFjprog::sendProgress(uv_async_t *handle)
 
     v8::Local<v8::Object> progressObj = Nan::New<v8::Object>();
     Utility::Set(progressObj, "process", Convert::toJsString(progress.process));
-    Utility::Set(progressObj, "step", Convert::toJsNumber(progress.step));
-    Utility::Set(progressObj, "steps", Convert::toJsNumber(progress.steps));
-    Utility::Set(progressObj, "percent", Convert::toJsNumber(progress.percent));
 
     argv[0] = progressObj;
 
@@ -416,8 +388,7 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 {
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
-    Nan::SetPrototypeMethod(tpl, "getFamily", GetFamily);
-    Nan::SetPrototypeMethod(tpl, "getDeviceVersion", GetDeviceVersion);
+    Nan::SetPrototypeMethod(tpl, "getDeviceInfo", GetDeviceInfo);
     Nan::SetPrototypeMethod(tpl, "read", Read);
     Nan::SetPrototypeMethod(tpl, "readU32", ReadU32);
 
@@ -472,7 +443,7 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
         auto baton = static_cast<GetConnectedDevicesBaton*>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
         uint32_t available = 0;
-        nrfjprogdll_err_t error = dll_function.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available, 0);
+        nrfjprogdll_err_t error = dll_function.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
         {
@@ -482,18 +453,18 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
         for (uint32_t i = 0; i < available; i++)
         {
             Probe_handle_t getFamilyProbe;
-            nrfjprogdll_err_t initError = dll_function.probe_init(&getFamilyProbe, serialNumbers[i], 0, 0);
+            nrfjprogdll_err_t initError = dll_function.probe_init(&getFamilyProbe, serialNumbers[i], nullptr);
 
-            device_family_t family = UNKNOWN_FAMILY;
+            device_info_t device_info;
 
             if (initError == SUCCESS)
             {
-                dll_function.get_device_family(getFamilyProbe, &family);
+                dll_function.get_device_info(getFamilyProbe, &device_info);
 
                 dll_function.probe_uninit(&getFamilyProbe);
             }
 
-            baton->probes.push_back(new ProbeInfo(serialNumbers[i], family));
+            baton->probes.push_back(new ProbeInfo(serialNumbers[i], device_info));
         }
 
         return SUCCESS;
@@ -525,54 +496,22 @@ static name_map_t device_family_map = {
     NAME_MAP_ENTRY(UNKNOWN_FAMILY)
 };
 
-NAN_METHOD(nRFjprog::GetFamily)
+NAN_METHOD(nRFjprog::GetDeviceInfo)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetFamilyBaton();
-
-        return baton;
+        return new GetDeviceInfoBaton();
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        auto baton = static_cast<GetFamilyBaton*>(b);
-        nrfjprogdll_err_t err =  dll_function.get_device_family(probe, &baton->family);
-
-        std::ostringstream errorStringStream;
-        errorStringStream << Convert::valueToString(baton->family, device_family_map) << " " << baton->family << std::endl;
-
-        return err;
+        auto baton = static_cast<GetDeviceInfoBaton*>(b);
+        return dll_function.get_device_info(probe, &baton->deviceInfo);
     };
 
     return_function_t r = [&] (Baton *b) -> returnType {
-        auto baton = static_cast<GetFamilyBaton*>(b);
+        auto baton = static_cast<GetDeviceInfoBaton*>(b);
         returnType vector;
 
-        vector.push_back(Convert::toJsNumber(baton->family));
-
-        return vector;
-    };
-
-    CallFunction(info, p, e, r, true);
-}
-
-NAN_METHOD(nRFjprog::GetDeviceVersion)
-{
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
-        auto baton = new GetDeviceVersionBaton();
-
-        return baton;
-    };
-
-    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        auto baton = static_cast<GetDeviceVersionBaton*>(b);
-        return dll_function.get_device_version(probe, &baton->deviceVersion);
-    };
-
-    return_function_t r = [&] (Baton *b) -> returnType {
-        auto baton = static_cast<GetDeviceVersionBaton*>(b);
-        returnType vector;
-
-        vector.push_back(Convert::toJsNumber(baton->deviceVersion));
+        vector.push_back(DeviceInfo(baton->deviceInfo).ToJs());
 
         return vector;
     };
@@ -599,7 +538,7 @@ NAN_METHOD(nRFjprog::Read)
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadBaton*>(b);
         baton->data = new uint8_t[baton->length];
-        return dll_function.read(probe, baton->address, baton->data, baton->length, 0);
+        return dll_function.read(probe, baton->address, baton->data, baton->length);
     };
 
     return_function_t r = [&] (Baton *b) -> returnType {
@@ -627,7 +566,7 @@ NAN_METHOD(nRFjprog::ReadU32)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadU32Baton*>(b);
-        return dll_function.read_u32(probe, baton->address, &baton->data, 0);
+        return dll_function.read_u32(probe, baton->address, &baton->data);
     };
 
     return_function_t r = [&] (Baton *b) -> returnType {
@@ -641,7 +580,6 @@ NAN_METHOD(nRFjprog::ReadU32)
 
     CallFunction(info, p, e, r, true);
 }
-
 
 NAN_METHOD(nRFjprog::Program)
 {
@@ -661,7 +599,7 @@ NAN_METHOD(nRFjprog::Program)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ProgramBaton*>(b);
-        return dll_function.program(probe, baton->filename.c_str(), &baton->options, nRFjprog::progressCallback);
+        return dll_function.program(probe, baton->filename.c_str(), baton->options);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -685,7 +623,7 @@ NAN_METHOD(nRFjprog::ReadToFile)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadToFileBaton*>(b);
-        return dll_function.read_to_file(probe, baton->filename.c_str(), &baton->options, nRFjprog::progressCallback);
+        return dll_function.read_to_file(probe, baton->filename.c_str(), baton->options);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -704,7 +642,7 @@ NAN_METHOD(nRFjprog::Verify)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<VerifyBaton*>(b);
-        return dll_function.verify(probe, baton->filename.c_str(), nRFjprog::progressCallback);
+        return dll_function.verify(probe, baton->filename.c_str(), VERIFY_READ);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -727,7 +665,7 @@ NAN_METHOD(nRFjprog::Erase)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<EraseBaton*>(b);
-        return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address, nRFjprog::progressCallback);
+        return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -740,7 +678,7 @@ NAN_METHOD(nRFjprog::Recover)
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        return dll_function.recover(probe, nRFjprog::progressCallback);
+        return dll_function.recover(probe);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -764,7 +702,7 @@ NAN_METHOD(nRFjprog::Write)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<WriteBaton*>(b);
-        return dll_function.write(probe, baton->address, baton->data, baton->length, 0);
+        return dll_function.write(probe, baton->address, baton->data, baton->length);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -786,7 +724,7 @@ NAN_METHOD(nRFjprog::WriteU32)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<WriteU32Baton*>(b);
-        return dll_function.write_u32(probe, baton->address, baton->data, 0);
+        return dll_function.write_u32(probe, baton->address, baton->data);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -810,6 +748,8 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE);
         NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);
         NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);
+        NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);
+        NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE);
 
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
@@ -817,8 +757,8 @@ extern "C" {
 
         NODE_DEFINE_CONSTANT(target, ERASE_NONE);
         NODE_DEFINE_CONSTANT(target, ERASE_ALL);
-        NODE_DEFINE_CONSTANT(target, ERASE_SECTOR);
-        NODE_DEFINE_CONSTANT(target, ERASE_SECTOR_AND_UICR);
+        NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
+        NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
 
         NODE_DEFINE_CONSTANT(target, JsSuccess);
         NODE_DEFINE_CONSTANT(target, CouldNotFindJlinkDLL);
@@ -832,6 +772,19 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, CouldNotProgram);
         NODE_DEFINE_CONSTANT(target, CouldNotRead);
         NODE_DEFINE_CONSTANT(target, CouldNotOpenHexFile);
+
+        NODE_DEFINE_CONSTANT(target, RESET_NONE);
+        NODE_DEFINE_CONSTANT(target, RESET_SYSTEM);
+        NODE_DEFINE_CONSTANT(target, RESET_DEBUG);
+        NODE_DEFINE_CONSTANT(target, RESET_PIN);
+
+        NODE_DEFINE_CONSTANT(target, ERASE_NONE);
+        NODE_DEFINE_CONSTANT(target, ERASE_ALL);
+        NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
+        NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
+
+        NODE_DEFINE_CONSTANT(target, VERIFY_NONE);
+        NODE_DEFINE_CONSTANT(target, VERIFY_READ);
     }
 
     NAN_MODULE_INIT(init)

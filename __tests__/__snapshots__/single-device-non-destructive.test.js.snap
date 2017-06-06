@@ -1,25 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Single device - non-destructive throws an error when device do not exist 1`] = `
-[Error: Error occured when get family. Errorcode: CouldNotOpenDevice (0x4)
+[Error: Error occured when get device info. Errorcode: CouldNotOpenDevice (0x4)
 Lowlevel error: EMULATOR_NOT_CONNECTED (fffffff6)
 ===============================================
-Start of get family
+Start of get device info
 ===============================================
-HiLvlnRFJ_dll_open: HiLvlnRFJ_dll_open: C:\\Program Files (x86)\\Nordic Semiconductor\\nrf5x\\bin\\NRFJPROG.dll found.
-HiLvlnRFJ_dll_open: nrfjprog.dll opened and loaded successfully.
-HiLvlnRFJ_probe_init: HiLvlnRFJ_probe_init: jlink_path parameter is NULL, latest SEGGER DLL from Windows registry will be looked for and used.
-HiLvlnRFJ_probe_init: Use JLINKARM DLL at C:\\Program Files (x86)\\SEGGER\\JLink_V612a\\JLinkARM.dll.
-HiLvlnRFJ_get_connected_probes: HiLvlnRFJ_get_connected_probes: Use JLINKARM DLL at C:\\Program Files (x86)\\SEGGER\\JLink_V612a\\JLinkARM.dll
-HiLvlnRFJ_get_connected_probes:   NRFJPROG: FUNCTION: open_dll.
-HiLvlnRFJ_get_connected_probes:   NRFJPROG: FUNCTION: open_dll.
-HiLvlnRFJ_get_connected_probes: DLL opened.
-HiLvlnRFJ_get_connected_probes:   NRFJPROG: FUNCTION: enum_emu_snr.
-HiLvlnRFJ_get_connected_probes:   NRFJPROG: FUNCTION: enum_emu_snr.
-HiLvlnRFJ_get_connected_probes: Closing DLL.
-HiLvlnRFJ_get_connected_probes:   NRFJPROG: FUNCTION: close_dll.
-HiLvlnRFJ_get_connected_probes:   NRFJPROG: FUNCTION: close_dll.
-HiLvlnRFJ_probe_init: HiLvlnRFJ_probe_init: Emulator is not connected.
+HIGHLEVELNRFJPROG_dll_open: HIGHLEVELNRFJPROG_dll_open: default_jlink_path parameter is NULL, latest JLINKARM DLL will be looked for and used.
+HIGHLEVELNRFJPROG_dll_open: C:\\Program Files (x86)\\Nordic Semiconductor\\nrf5x\\bin\\NRFJPROG.dll found.
+HIGHLEVELNRFJPROG_dll_open: nrfjprog.dll loaded successfully.
+HIGHLEVELNRFJPROG_dll_open:   NRFJPROG: FUNCTION: open_dll.
+HIGHLEVELNRFJPROG_dll_open:   NRFJPROG: FUNCTION: open_dll.
+HIGHLEVELNRFJPROG_dll_open:   NRFJPROG: FUNCTION: close_dll.
+HIGHLEVELNRFJPROG_dll_open:   NRFJPROG: FUNCTION: close_dll.
+HIGHLEVELNRFJPROG_dll_open: Use JLINKARM DLL at C:\\Program Files (x86)\\SEGGER\\JLink_V612a\\\\JLinkARM.dll as default.
+HIGHLEVELNRFJPROG_probe_init: HIGHLEVELNRFJPROG_probe_init: jlink_path parameter is NULL, using default JLINKARM DLL path given with or obtained in NRFJPROG_dll_open() function.
+HIGHLEVELNRFJPROG_probe_init: Using JLINKARM DLL at C:\\Program Files (x86)\\SEGGER\\JLink_V612a\\\\JLinkARM.dll.
+HIGHLEVELNRFJPROG_get_connected_probes: HIGHLEVELNRFJPROG_get_connected_probes:   NRFJPROG: FUNCTION: open_dll.
+HIGHLEVELNRFJPROG_get_connected_probes:   NRFJPROG: FUNCTION: open_dll.
+HIGHLEVELNRFJPROG_get_connected_probes: nrfjprog DLL opened.
+HIGHLEVELNRFJPROG_get_connected_probes:   NRFJPROG: FUNCTION: enum_emu_snr.
+HIGHLEVELNRFJPROG_get_connected_probes:   NRFJPROG: FUNCTION: enum_emu_snr.
+HIGHLEVELNRFJPROG_get_connected_probes: Closing nrfjprog DLL.
+HIGHLEVELNRFJPROG_get_connected_probes:   NRFJPROG: FUNCTION: close_dll.
+HIGHLEVELNRFJPROG_get_connected_probes:   NRFJPROG: FUNCTION: close_dll.
+HIGHLEVELNRFJPROG_probe_init: HIGHLEVELNRFJPROG_probe_init: Emulator is not connected.
 
 ]
 `;

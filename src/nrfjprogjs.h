@@ -70,8 +70,7 @@ private:
     static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)
     static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
 
-    static NAN_METHOD(GetFamily); // Params: serialnumber, callback(error, family)
-    static NAN_METHOD(GetDeviceVersion); // Params: serialnumber, callback(error, family)
+    static NAN_METHOD(GetDeviceInfo); // Params: serialnumber, callback(error, family)
 
     static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, data)
     static NAN_METHOD(ReadU32); // Params: serialnumber, address, callback(error, data)
@@ -100,10 +99,8 @@ private:
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
     static void logCallback(const char * msg);
-    static void progressCallback(uint32_t step, uint32_t total_steps, const char * process);
+    static void progressCallback(const char * process);
     static Nan::Callback *jsProgressCallback;
-    static int lastReportedProgress;
-    static bool shouldProgressBeReported(const int progress);
     static void sendProgress(uv_async_t *handle);
     static uv_async_t *progressEvent;
 
