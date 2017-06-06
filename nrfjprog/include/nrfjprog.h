@@ -1,33 +1,58 @@
-/* Copyright (c) 2009 Nordic Semiconductor. All Rights Reserved.
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
  *
- * The information contained herein is property of Nordic Semiconductor ASA.
- * Terms and conditions of usage are described in detail in NORDIC
- * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ * All rights reserved.
  *
- * Licensees are granted free, non-transferable use of the information. NO
- * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
- * the file.
+ * Use in source and binary forms, redistribution in binary form only, with
+ * or without modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions in binary form, except as embedded into a Nordic
+ *    Semiconductor ASA integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ *
+ * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * 3. This software, with or without modification, must only be used with a Nordic
+ *    Semiconductor ASA integrated circuit.
+ *
+ * 4. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef NRFJPROG_H
 #define NRFJPROG_H
 
-#define major_version (9) 
-#define minor_version (5) 
-#define micro_version (0) 
+#define major_version (9)
+#define minor_version (5)
+#define micro_version (0)
 
 
  enum NrfjprogErrorCodesType {
-    
+
 	Success                                     = 0,				// Requested operation (operations) were successfully completed.
-    
+
 	/* nrfjprog.exe or PC errors */
-	NrfjprogError								= 1,		        // An error condition that should not occur has happened. 
-                                                                    // It is most probably a bug in nrfjprog.exe or nrfjprog.dll. 
-	NrfjprogOutdatedError						= 2,				// Nrfjprog version is too old for the device 
+	NrfjprogError								= 1,		        // An error condition that should not occur has happened.
+                                                                    // It is most probably a bug in nrfjprog.exe or nrfjprog.dll.
+	NrfjprogOutdatedError						= 2,				// Nrfjprog version is too old for the device
 	MemoryAllocationError						= 3,				// Memory allocation for nrfjprog failed failed.
-	
-	
+
+
 	/* Command line input errors */
     InvalidArgumentError						= 11,				// Invalid arguments passed to the application.
     InsufficientArgumentsError					= 12,				// Needed arguments not passed to the application.
@@ -38,7 +63,7 @@
 	UnavailableOperationInFamilyError			= 17,				// The operation attempted can not be performed in the device because the feature is lacking in your device.
 	WrongFamilyForDeviceError					= 18,				// The --family option given with the command (or the default from nrfjprog.ini) does not match the device connected.
     UnavailableOperationBecauseMpuConfiguration = 19,               // For nRF51, --eraseuicr is unavailable unless the device came with an ANT softdevice programmed at Nordic factory.
-    
+
 
 	/* nrfjprog.dll errors */
     NrfjprogDllNotFoundError					= 20,				// Unable to find nrfjprog.dll in the installation folder. Reinstall nrfjprog.
@@ -53,20 +78,20 @@
     NrfjprogIniFamilyMissingError               = 27,               // Family parameter cannot be parsed from ini file. Line might be deleted or invalid format.
     NrfjprogIniClockspeedMissingError           = 28,               // Clockspeed parameter cannot be parsed from ini file. Line might be deleted or invalid format.
     NrfjprogIniQspiIniFileMissingError          = 29,               // DefaultQspiIni parameter cannot be parsed from ini file. Line might be deleted or invalid format.
-    
+
 	/* JLinkARM.dll errors */
     JLinkARMDllNotFoundError					= 30,				// Unable to find install path for JLink software
 	JLinkARMDllInvalidError						= 31,				// Dll found does not seem a valid dll.
 	JLinkARMDllFailedToOpenError				= 32,				// Dll could not be opened.
 	JLinkARMDllError							= 33,				// Dll reported error.
 	JLinkARMDllTooOldError						= 34,				// Dll is too old for functionality. Install a newer version of JLinkARM.dll
- 
+
 	/* Emulator errors */
     InvalidSerialNumberError					= 40,				// Serial number provided is not among those connected.
     NoDebuggersError							= 41,				// There are no debuggers connected to the PC.
  	NotPossibleToConnectError					= 42,				// Not possible to connect to the NRF device.
 	LowVoltageError								= 43,				// Low voltage detected at target device.
-	
+
 	/* General errors */
     FileNotFoundError							= 51,				// Unable to find the given file.
 	InvalidHexFileError							= 52,				// File specified does not seem a valid hex file.

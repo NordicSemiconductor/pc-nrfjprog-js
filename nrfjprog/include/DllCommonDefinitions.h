@@ -1,3 +1,39 @@
+/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+ *
+ * All rights reserved.
+ *
+ * Use in source and binary forms, redistribution in binary form only, with
+ * or without modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions in binary form, except as embedded into a Nordic
+ *    Semiconductor ASA integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ *
+ * 2. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * 3. This software, with or without modification, must only be used with a Nordic
+ *    Semiconductor ASA integrated circuit.
+ *
+ * 4. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ *
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+ 
 #ifndef DLL_COMMON_DEFINITIONS_H
 #define DLL_COMMON_DEFINITIONS_H
 
@@ -14,10 +50,10 @@ extern "C" {
 #define JLINKARM_SWD_MIN_SPEED_KHZ                      (125UL)
 #define JLINKARM_SWD_DEFAULT_SPEED_KHZ                  (2000UL)
 #define JLINKARM_SWD_MAX_SPEED_KHZ                      (50000UL)
-    
+
 /* Deprecated Macro. Use result of NRFJPROG_read_ram_sections_count() function instead. */
 #define MAX_RAM_BLOCKS      (16)
-    
+
 typedef enum {
     RAM_OFF = 0,
     RAM_ON,
@@ -44,7 +80,7 @@ typedef enum {
     R15,
     XPSR,
     MSP,
-    PSP 
+    PSP
 } cpu_registers_t;
 
 
@@ -68,42 +104,42 @@ typedef enum {
 /* Identified device versions of nRF devices. */
 typedef enum {
     UNKNOWN                             = 0,
-    
+
     /* nRF51 versions. */
     /* See http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf51/dita/nrf51/pdflinks/nrf51_comp_matrix.html */
-    NRF51xxx_xxAA_REV1                  = 1, 
-    NRF51xxx_xxAA_REV2                  = 2, 
-    
-    NRF51xxx_xxAA_REV3                  = 3, 
-    NRF51xxx_xxAB_REV3                  = 4, 
-    NRF51xxx_xxAC_REV3                  = 5, 
+    NRF51xxx_xxAA_REV1                  = 1,
+    NRF51xxx_xxAA_REV2                  = 2,
 
-    NRF51802_xxAA_REV3                  = 6, 
+    NRF51xxx_xxAA_REV3                  = 3,
+    NRF51xxx_xxAB_REV3                  = 4,
+    NRF51xxx_xxAC_REV3                  = 5,
+
+    NRF51802_xxAA_REV3                  = 6,
     NRF51801_xxAB_REV3                  = 17,
 
     /* Deprecated NRF51 enumerators. */
     NRF51_XLR1                          = 1,  /* Please do not use in new code. Kept for backwards compatibility. */
-    NRF51_XLR2                          = 2,  /* Please do not use in new code. Kept for backwards compatibility. */ 
-    NRF51_XLR3                          = 3,  /* Please do not use in new code. Kept for backwards compatibility. */ 
-    NRF51_L3                            = 4,  /* Please do not use in new code. Kept for backwards compatibility. */ 
-    NRF51_XLR3P                         = 5,  /* Please do not use in new code. Kept for backwards compatibility. */ 
-    NRF51_XLR3LC                        = 6,  /* Please do not use in new code. Kept for backwards compatibility. */ 
-    
+    NRF51_XLR2                          = 2,  /* Please do not use in new code. Kept for backwards compatibility. */
+    NRF51_XLR3                          = 3,  /* Please do not use in new code. Kept for backwards compatibility. */
+    NRF51_L3                            = 4,  /* Please do not use in new code. Kept for backwards compatibility. */
+    NRF51_XLR3P                         = 5,  /* Please do not use in new code. Kept for backwards compatibility. */
+    NRF51_XLR3LC                        = 6,  /* Please do not use in new code. Kept for backwards compatibility. */
+
     /* nRF52832 versions. */
     /* See http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52/dita/nrf52/compatibility_matrix/nrf52832_comp_matrix.html */
     NRF52832_xxAA_ENGA                  = 7,
     NRF52832_xxAA_ENGB                  = 8,
-    NRF52832_xxAA_REV1                  = 9, 
+    NRF52832_xxAA_REV1                  = 9,
     NRF52832_xxAB_REV1                  = 15,
 
     NRF52832_xxAA_FUTURE                = 11,
-    NRF52832_xxAB_FUTURE                = 16,   
+    NRF52832_xxAB_FUTURE                = 16,
 
     /* nRF52840 versions. */
     /* See http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52/dita/nrf52/compatibility_matrix/nrf52840_comp_matrix.html */
     NRF52840_xxAA_ENGA                  = 10,
     NRF52840_xxAA_FUTURE                = 12,
-    
+
     /* nRF52810 versions. */
     NRF52810_xxAA_REV1                  = 13,
     NRF52810_xxAA_FUTURE                = 14,
@@ -114,7 +150,7 @@ typedef enum {
     NRF52_FP1                           = 9,  /* Please do not use in new code. Kept for backwards compatibility. */
     NRF52_FP1_FUTURE                    = 11, /* Please do not use in new code. Kept for backwards compatibility. */
     NRF52_FP2_ENGA                      = 10, /* Please do not use in new code. Kept for backwards compatibility. */
- 
+
 } device_version_t;
 
 /* Identified types of nRF devices */
@@ -213,16 +249,16 @@ typedef struct {
 typedef enum
 {
     SUCCESS                                     = 0,
-    
+
     /* PC Issues */
-    OUT_OF_MEMORY                               = -1, 
-    
+    OUT_OF_MEMORY                               = -1,
+
     /* Wrong use of dll errors. */
     INVALID_OPERATION                           = -2,
     INVALID_PARAMETER                           = -3,
     INVALID_DEVICE_FOR_OPERATION                = -4,
     WRONG_FAMILY_FOR_DEVICE                     = -5,
-    
+
     /* Connection issues. */
     EMULATOR_NOT_CONNECTED                      = -10,
     CANNOT_CONNECT                              = -11,
@@ -244,7 +280,7 @@ typedef enum
     /* Operation not available. */
     NOT_AVAILABLE_BECAUSE_PROTECTION            = -90,
     NOT_AVAILABLE_BECAUSE_MPU_CONFIG            = -91,
-    
+
     /* JlinkARM DLL errors. */
     JLINKARM_DLL_NOT_FOUND                      = -100,
     JLINKARM_DLL_COULD_NOT_BE_OPENED            = -101,
@@ -258,7 +294,7 @@ typedef enum
 
     /* High Level DLL */
     VERIFY_ERROR                                = -160,
-        
+
     /* Not implemented. */
     NOT_IMPLEMENTED_ERROR                       = -255,
 
