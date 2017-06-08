@@ -48,6 +48,7 @@
 #include "utility/utility.h"
 #include "utility/conversion.h"
 
+#include <sstream>
 #include <iostream>
 
 #define MAX_SERIAL_NUMBERS 100
@@ -158,7 +159,10 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 
         if (info.Length() > argumentCount)
         {
-            throw std::string("too many parameters");
+            argumentCount = CUSOTOM_ARGUMENT_PARSE_ERROR;
+            std::ostringstream errorStringStream;
+            errorStringStream << "Too many parameters. The function " << baton->name << " do not take " << info.Length() << " parameters.";
+            throw errorStringStream.str();
         }
     }
     catch (std::string error)

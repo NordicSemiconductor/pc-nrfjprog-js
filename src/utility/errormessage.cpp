@@ -137,7 +137,14 @@ v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber
 {
     std::ostringstream stream;
 
-    stream << Convert::valueToString(argumentNumber, argumentCountMap, "Unknown") << " argument must be a " << message;
+    if (argumentNumber != CUSOTOM_ARGUMENT_PARSE_ERROR)
+    {
+        stream << Convert::valueToString(argumentNumber, argumentCountMap, "Unknown") << " argument must be a " << message;
+    }
+    else
+    {
+        stream << message;
+    }
 
     return Convert::toJsString(stream.str())->ToString();
 }

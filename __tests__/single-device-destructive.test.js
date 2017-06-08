@@ -70,11 +70,6 @@ describe('Single device - destructive', () => {
         const callback = (err) => {
             expect(err).toBeUndefined();
 
-            if (err) {
-                done();
-                return;
-            }
-
             nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", readToFileCallback);
         };
 
@@ -120,11 +115,6 @@ describe('Single device - destructive', () => {
         const callback = (err) => {
             expect(err).toBeUndefined();
 
-            if (err) {
-                done();
-                return;
-            }
-
             nRFjprog.readToFile(device.serialNumber, "./after_recover.hex", { readcode: true, readuicr: true }, readToFileCallback);
         };
 
@@ -142,11 +132,6 @@ describe('Single device - destructive', () => {
 
         const callback = (err) => {
             expect(err).toBeUndefined();
-
-            if (err) {
-                done();
-                return;
-            }
 
             nRFjprog.read(device.serialNumber, address, data.length, readCallback);
         };
@@ -167,11 +152,6 @@ describe('Single device - destructive', () => {
 
         const callback = (err) => {
             expect(err).toBeUndefined();
-
-            if (err) {
-                done();
-                return;
-            }
 
             nRFjprog.readU32(device.serialNumber, address, readCallback);
         };

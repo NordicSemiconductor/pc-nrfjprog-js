@@ -40,6 +40,8 @@
 #include <nan.h>
 #include "../common.h"
 
+#define CUSOTOM_ARGUMENT_PARSE_ERROR -1
+
 class ErrorMessage
 {
 public:
