@@ -34,17 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
 #include <nan.h>
 #include <map>
 #include <mutex>
 #include <string>
-
-#include "nrfjprog_common.h"
-#include <functional>
-#include "dllfunc.h"
 
 #define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
 

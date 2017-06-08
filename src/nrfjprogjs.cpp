@@ -45,8 +45,9 @@
 
 #include "dllfunc.h"
 
-#include "utility/utility.h"
 #include "utility/conversion.h"
+#include "utility/errormessage.h"
+#include "utility/utility.h"
 
 #include <sstream>
 #include <iostream>
@@ -159,7 +160,7 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 
         if (info.Length() > argumentCount)
         {
-            argumentCount = CUSOTOM_ARGUMENT_PARSE_ERROR;
+            argumentCount = CUSTOM_ARGUMENT_PARSE_ERROR;
             std::ostringstream errorStringStream;
             errorStringStream << "Too many parameters. The function " << baton->name << " do not take " << info.Length() << " parameters.";
             throw errorStringStream.str();
@@ -497,14 +498,6 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
     CallFunction(info, p, e, r, false);
 }
 
-#include <sstream>
-#include <iostream>
-static name_map_t device_family_map = {
-    NAME_MAP_ENTRY(NRF51_FAMILY),
-    NAME_MAP_ENTRY(NRF52_FAMILY),
-    NAME_MAP_ENTRY(UNKNOWN_FAMILY)
-};
-
 NAN_METHOD(nRFjprog::GetDeviceInfo)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
@@ -749,6 +742,12 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);
         NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);
         NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);
+        NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
+        NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
+        NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
+        NODE_DEFINE_CONSTANT(target, NRF51_L3);
+        NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
+        NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);
@@ -759,6 +758,11 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);
         NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);
         NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE);
+        NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
+        NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
+        NODE_DEFINE_CONSTANT(target, NRF52_FP1);
+        NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE);
+        NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA);
 
         NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
         NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);

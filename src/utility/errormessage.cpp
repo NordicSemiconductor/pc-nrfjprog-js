@@ -137,7 +137,7 @@ v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber
 {
     std::ostringstream stream;
 
-    if (argumentNumber != CUSOTOM_ARGUMENT_PARSE_ERROR)
+    if (argumentNumber != CUSTOM_ARGUMENT_PARSE_ERROR)
     {
         stream << Convert::valueToString(argumentNumber, argumentCountMap, "Unknown") << " argument must be a " << message;
     }

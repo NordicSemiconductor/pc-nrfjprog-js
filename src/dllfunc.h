@@ -38,6 +38,7 @@
 #define DLL_FUNC_PTRS_H
 
 #include "highlevelnrfjprogdll.h"
+#include "nrfjprog_common.h"
 
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_get_version)     (uint32_t * major, uint32_t * minor, uint32_t * micro);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_open)            (const char * default_jlink_path, log_callback * log_cb, progress_callback * prog_cb);

@@ -34,10 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../dllfunc.h"
+
 #include <windows.h>
 
 #include "nrfjprog.h"
-#include "../dllfunc.h"
 
 static HMODULE dll = NULL;
 

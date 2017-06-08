@@ -39,8 +39,9 @@
 
 #include <nan.h>
 #include "../common.h"
+#include "DllCommonDefinitions.h"
 
-#define CUSOTOM_ARGUMENT_PARSE_ERROR -1
+#define CUSTOM_ARGUMENT_PARSE_ERROR -1
 
 class ErrorMessage
 {
