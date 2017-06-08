@@ -100,16 +100,10 @@ NAN_METHOD(nRFjprog::New)
 
 nRFjprog::nRFjprog()
 {
-    finderror = errorcodes::JsSuccess;
     progressEvent = new uv_async_t();
     uv_async_init(uv_default_loop(), progressEvent, sendProgress);
 
-    NrfjprogErrorCodesType dll_find_result = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
-
-    if (dll_find_result != Success)
-    {
-        finderror = errorcodes::CouldNotFindJprogDLL;
-    }
+    finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
 }
 
 void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
@@ -370,16 +364,10 @@ errorcodes nRFjprog::loadDll()
         return finderror;
     }
 
-    NrfjprogErrorCodesType dll_load_result = DllLoad(dll_path, &dll_function);
-    loaded = false;
+    errorcodes dll_load_result = DllLoad(dll_path, &dll_function);
+    loaded = dll_load_result == errorcodes::JsSuccess;
 
-    if (dll_load_result != Success)
-    {
-        return errorcodes::CouldNotLoadDLL;
-    }
-
-    loaded = true;
-    return errorcodes::JsSuccess;
+    return dll_load_result;
 }
 
 nRFjprog::~nRFjprog()

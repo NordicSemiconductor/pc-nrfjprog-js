@@ -39,6 +39,7 @@
 
 #include "highlevelnrfjprogdll.h"
 #include "nrfjprog_common.h"
+#include "utility/errormessage.h"
 
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_get_version)     (uint32_t * major, uint32_t * minor, uint32_t * micro);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_open)            (const char * default_jlink_path, log_callback * log_cb, progress_callback * prog_cb);
@@ -86,7 +87,7 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_run                  run;
 };
 
-NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_function);
+errorcodes DllLoad(const char * path, DllFunctionPointersType * dll_function);
 
 void DllFree(void);
 

@@ -39,7 +39,6 @@
 
 #include "common.h"
 #include "DllCommonDefinitions.h"
-#include "nrfjprog.h"
 
 static name_map_t device_version_map = {
     NAME_MAP_ENTRY(UNKNOWN),
@@ -109,48 +108,6 @@ static name_map_t nrfjprogdll_err_map = {
     NAME_MAP_ENTRY(NRFJPROG_SUB_DLL_COULD_NOT_LOAD_FUNCTIONS),
     NAME_MAP_ENTRY(VERIFY_ERROR),
     NAME_MAP_ENTRY(NOT_IMPLEMENTED_ERROR)
-};
-
-static name_map_t NrfjprogErrorCodesTypeMap = {
-    NAME_MAP_ENTRY(Success),
-    NAME_MAP_ENTRY(NrfjprogError),
-    NAME_MAP_ENTRY(NrfjprogOutdatedError),
-    NAME_MAP_ENTRY(MemoryAllocationError),
-    NAME_MAP_ENTRY(InvalidArgumentError),
-    NAME_MAP_ENTRY(InsufficientArgumentsError),
-    NAME_MAP_ENTRY(IncompatibleArgumentsError),
-    NAME_MAP_ENTRY(DuplicatedArgumentsError),
-    NAME_MAP_ENTRY(NoOperationError),
-    NAME_MAP_ENTRY(UnavailableOperationBecauseProtectionError),
-    NAME_MAP_ENTRY(UnavailableOperationInFamilyError),
-    NAME_MAP_ENTRY(WrongFamilyForDeviceError),
-    NAME_MAP_ENTRY(NrfjprogDllNotFoundError),
-    NAME_MAP_ENTRY(NrfjprogDllLoadFailedError),
-    NAME_MAP_ENTRY(NrfjprogDllFunctionLoadFailedError),
-    NAME_MAP_ENTRY(NrfjprogDllNotImplementedError),
-    NAME_MAP_ENTRY(NrfjprogIniNotFoundError),
-    NAME_MAP_ENTRY(JLinkARMDllNotFoundError),
-    NAME_MAP_ENTRY(JLinkARMDllInvalidError),
-    NAME_MAP_ENTRY(JLinkARMDllFailedToOpenError),
-    NAME_MAP_ENTRY(JLinkARMDllError),
-    NAME_MAP_ENTRY(JLinkARMDllTooOldError),
-    NAME_MAP_ENTRY(InvalidSerialNumberError),
-    NAME_MAP_ENTRY(NoDebuggersError),
-    NAME_MAP_ENTRY(NotPossibleToConnectError),
-    NAME_MAP_ENTRY(LowVoltageError),
-    NAME_MAP_ENTRY(FileNotFoundError),
-    NAME_MAP_ENTRY(InvalidHexFileError),
-    NAME_MAP_ENTRY(FicrReadError),
-    NAME_MAP_ENTRY(WrongArgumentError),
-    NAME_MAP_ENTRY(VerifyError),
-    NAME_MAP_ENTRY(NoWritePermissionError),
-    NAME_MAP_ENTRY(NVMCOperationError),
-    NAME_MAP_ENTRY(FlashNotErasedError),
-    NAME_MAP_ENTRY(RamIsOffError),
-    NAME_MAP_ENTRY(FicrOperationWarning),
-    NAME_MAP_ENTRY(UnalignedPageEraseWarning),
-    NAME_MAP_ENTRY(NoLogWarning),
-    NAME_MAP_ENTRY(UicrWriteOperationWithoutEraseWarning)
 };
 
 #endif // __NRFJPROG_COMMON_H__

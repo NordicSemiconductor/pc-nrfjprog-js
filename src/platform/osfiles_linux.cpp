@@ -41,8 +41,6 @@
 #include <libgen.h>
 #include <dlfcn.h>
 
-
-#include "nrfjprog.h"
 #include "../osfiles.h"
 
 #include <sys/types.h>
@@ -58,17 +56,16 @@ bool OSFilesExists(char * path)
     return ((0 == stat(path, &buffer)));
 }
 
-
-NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
 {
     char temp_dll_path[dll_path_len];
     memset(temp_dll_path, 0, dll_path_len);
 
     ssize_t len = readlink("/proc/self/exe", temp_dll_path, dll_path_len - 1);
-    
+
     if (len == -1)
     {
-        return NrfjprogDllNotFoundError;
+        return errorcodes::CouldNotFindJprogDLL;
     }
 
     strncpy(dll_path, dirname(temp_dll_path), dll_path_len - 1);
@@ -83,11 +80,11 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
         {
             dlclose(dll);
             strncpy(dll_path, "libnrfjprogdll.so", dll_path_len - 1);
-            return Success;
+            return errorcodes::JsSuccess;
         }
 
-        return NrfjprogDllNotFoundError;
+        return errorcodes::CouldNotFindJprogDLL;
     }
 
-    return Success;
+    return errorcodes::JsSuccess;
 }

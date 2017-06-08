@@ -39,7 +39,6 @@
 #include <chrono>
 
 #include "DllCommonDefinitions.h"
-#include "nrfjprog.h"
 
 const std::string getCurrentTimeInMilliseconds()
 {

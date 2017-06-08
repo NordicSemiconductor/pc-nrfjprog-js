@@ -38,17 +38,14 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "Shlwapi.h"
-#include <windows.h>
-
-
-#include "nrfjprog.h"
 #include "../osfiles.h"
+
+#include <windows.h>
+#include "Shlwapi.h"
 
 #include <iostream>
 
 #pragma comment(lib, "Shlwapi.lib")
-
 
 bool OSFilesExists(char * path)
 {
@@ -58,7 +55,7 @@ bool OSFilesExists(char * path)
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-NrfjprogErrorCodesType OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
+errorcodes OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
 {
     HKEY key;
     HKEY innerKey;
@@ -126,7 +123,7 @@ NrfjprogErrorCodesType OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path,
             RegCloseKey(key);
             if (OSFilesExists(dll_path))
             {
-                return Success;
+                return errorcodes::JsSuccess;
             }
         }
 
@@ -136,15 +133,14 @@ NrfjprogErrorCodesType OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path,
     }
 
     /* Search for JLinkARM in the Current User Key.  */
-
-    return NrfjprogDllNotFoundError;
+    return errorcodes::CouldNotFindJprogDLL;
 }
 
-NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
 {
-    NrfjprogErrorCodesType retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, dll_path_len);
+    errorcodes retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, dll_path_len);
 
-    if (retCode != Success) {
+    if (retCode != JsSuccess) {
         retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, dll_path_len);
     }
 

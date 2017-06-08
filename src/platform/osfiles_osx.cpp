@@ -39,8 +39,6 @@
 #include <libgen.h>
 #include <dlfcn.h>
 
-#include "nrfjprog.h"
-
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -69,7 +67,7 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
     if (ret <= 0)
     {
         // PID not found, error
-        return NrfjprogDllNotFoundError;
+        return errorcodes::CouldNotFindJprogDLL;
     }
 
     strncpy(dll_path, dirname(pathbuf), dll_path_len - 1);
@@ -84,11 +82,11 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
         {
             dlclose(dll);
             strncpy(dll_path, "libnrfjprogdll.dylib", dll_path_len - 1);
-            return Success;
+            return errorcodes::JsSuccess;
         }
 
-        return NrfjprogDllNotFoundError;
+        return errorcodes::CouldNotFindJprogDLL;
     }
 
-    return Success;
+    return errorcodes::JsSuccess;
 }

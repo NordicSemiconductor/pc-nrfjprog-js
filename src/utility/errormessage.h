@@ -66,8 +66,7 @@ typedef enum errorcodes
     CouldNotErase,
     CouldNotProgram,
     CouldNotRead,
-    CouldNotOpenHexFile,
-    WrongMagicNumber
+    CouldNotOpenHexFile
 } errorcodes;
 
 #endif

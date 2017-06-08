@@ -56,8 +56,7 @@ static name_map_t nrfjprog_js_err_map = {
     { errorcodes::CouldNotErase, "CouldNotErase" },
     { errorcodes::CouldNotProgram, "CouldNotProgram" },
     { errorcodes::CouldNotRead, "CouldNotRead" },
-    { errorcodes::CouldNotOpenHexFile, "CouldNotOpenHexFile" },
-    { errorcodes::WrongMagicNumber, "WrongMagicNumber" }
+    { errorcodes::CouldNotOpenHexFile, "CouldNotOpenHexFile" }
 };
 
 static name_map_t argumentCountMap = {
