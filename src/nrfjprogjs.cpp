@@ -112,6 +112,9 @@ nRFjprog::nRFjprog()
 
 void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
 {
+    // This is a check that there exists a parse- and execute function, both of which are
+    // needed to parse arguments and execute the function.
+    // If this shows up in production, it is due to missing functions in the relevant NAN_METHOD defining the functions.
     if (parse == nullptr ||
         execute == nullptr)
     {
@@ -160,9 +163,6 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
     }
     catch (std::string error)
     {
-        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
-        Nan::ThrowTypeError(message);
-
         if (baton != nullptr)
         {
             delete baton;
@@ -174,9 +174,14 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
             jsProgressCallback = nullptr;
         }
 
+        auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
+        Nan::ThrowTypeError(message);
+
         return;
     }
 
+    // This is a check that there exists a returnfunction when there are more returns
+    // than just err. If this shows up in production, it is due to missing return function
     if (ret == nullptr &&
         baton->returnParameterCount > 0)
     {

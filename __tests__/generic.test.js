@@ -69,10 +69,9 @@ describe('Generic functionality', () => {
     });
 
     it('throws when too many parameters are sent in', () => {
-        const callback = (err, connectedDevices) => {
-        };
+        const mockCallback = jest.fn();
 
-        expect(() => { nRFjprog.getDllVersion(callback, callback); }).toThrowErrorMatchingSnapshot();
+        expect(() => { nRFjprog.getDllVersion(mockCallback, mockCallback); }).toThrowErrorMatchingSnapshot();
     });
 
     it('throws when wrong type of parameters are sent in', () => {

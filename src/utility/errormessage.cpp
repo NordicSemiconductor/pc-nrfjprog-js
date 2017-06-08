@@ -60,6 +60,16 @@ static name_map_t nrfjprog_js_err_map = {
     { errorcodes::WrongMagicNumber, "WrongMagicNumber" }
 };
 
+static name_map_t argumentCountMap = {
+    { 0, "First" },
+    { 1, "Second"},
+    { 2, "Third"},
+    { 3, "Fourth"},
+    { 4, "Fifth"},
+    { 5, "Sixth"},
+    { 6, "Seventh"}
+};
+
 static name_map_t nrfjprogdll_err_t_map = {
     NAME_MAP_ENTRY(SUCCESS),
     NAME_MAP_ENTRY(OUT_OF_MEMORY),
@@ -95,76 +105,39 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const st
 {
     Nan::EscapableHandleScope scope;
 
-    switch (errorCode)
+    if (errorCode == errorcodes::JsSuccess)
     {
-        case errorcodes::JsSuccess:
-            return scope.Escape(Nan::Undefined());
-
-        default:
-        {
-            std::ostringstream errorStringStream;
-            errorStringStream << "Error occured when " << customMessage << ". "
-                << "Errorcode: " << Convert::valueToString(errorCode, nrfjprog_js_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
-
-            if (lowlevelError != SUCCESS)
-            {
-                errorStringStream << "Lowlevel error: " << Convert::valueToString(lowlevelError, nrfjprogdll_err_t_map) << " (" << lowlevelError << ")" << std::endl;
-            }
-
-            if (!logmessage.empty())
-            {
-                errorStringStream << logmessage << std::endl;
-            }
-
-            v8::Local<v8::Value> error = Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
-            v8::Local<v8::Object> errorObject = error.As<v8::Object>();
-
-            Utility::Set(errorObject, "errno", Convert::toJsNumber(errorCode));
-            Utility::Set(errorObject, "errcode", Convert::valueToString(errorCode, nrfjprog_js_err_map));
-            Utility::Set(errorObject, "erroperation", Convert::toJsString(customMessage));
-            Utility::Set(errorObject, "errmsg", Convert::toJsString(errorStringStream.str()));
-            Utility::Set(errorObject, "lowlevelErrorNo", Convert::toJsNumber(lowlevelError));
-            Utility::Set(errorObject, "lowlevelError", Convert::valueToString(lowlevelError, nrfjprogdll_err_t_map));
-            Utility::Set(errorObject, "output", Convert::toJsString(logmessage));
-
-            return scope.Escape(error);
-        }
+        return scope.Escape(Nan::Undefined());
     }
+
+    std::ostringstream errorStringStream;
+    errorStringStream << "Error occured when " << customMessage << ". "
+        << "Errorcode: " << Convert::valueToString(errorCode, nrfjprog_js_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
+
+    if (lowlevelError != SUCCESS)
+    {
+        errorStringStream << "Lowlevel error: " << Convert::valueToString(lowlevelError, nrfjprogdll_err_t_map) << " (" << lowlevelError << ")" << std::endl;
+    }
+
+    v8::Local<v8::Value> error = Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
+    v8::Local<v8::Object> errorObject = error.As<v8::Object>();
+
+    Utility::Set(errorObject, "errno", Convert::toJsNumber(errorCode));
+    Utility::Set(errorObject, "errcode", Convert::valueToString(errorCode, nrfjprog_js_err_map));
+    Utility::Set(errorObject, "erroperation", Convert::toJsString(customMessage));
+    Utility::Set(errorObject, "errmsg", Convert::toJsString(errorStringStream.str()));
+    Utility::Set(errorObject, "lowlevelErrorNo", Convert::toJsNumber(lowlevelError));
+    Utility::Set(errorObject, "lowlevelError", Convert::valueToString(lowlevelError, nrfjprogdll_err_t_map));
+    Utility::Set(errorObject, "log", Convert::toJsString(logmessage));
+
+    return scope.Escape(error);
 }
 
 v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber, const std::string message)
 {
     std::ostringstream stream;
 
-    switch (argumentNumber)
-    {
-        case 0:
-            stream << "First";
-            break;
-        case 1:
-            stream << "Second";
-            break;
-        case 2:
-            stream << "Third";
-            break;
-        case 3:
-            stream << "Fourth";
-            break;
-        case 4:
-            stream << "Fifth";
-            break;
-        case 5:
-            stream << "Sixth";
-            break;
-        case 6:
-            stream << "Seventh";
-            break;
-        default:
-            stream << "Unknown";
-            break;
-    }
-
-    stream << " argument must be a " << message;
+    stream << Convert::valueToString(argumentNumber, argumentCountMap, "Unknown") << " argument must be a " << message;
 
     return Convert::toJsString(stream.str())->ToString();
 }
