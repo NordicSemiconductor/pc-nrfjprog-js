@@ -138,6 +138,7 @@ typedef enum {
     /* nRF52840 versions. */
     /* See http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52/dita/nrf52/compatibility_matrix/nrf52840_comp_matrix.html */
     NRF52840_xxAA_ENGA                  = 10,
+    NRF52840_xxAA_REV1                  = 18,
     NRF52840_xxAA_FUTURE                = 12,
 
     /* nRF52810 versions. */
@@ -216,11 +217,14 @@ typedef enum {
     LEVEL_LOW = 0
 } qspi_custom_level_io_t;
 
+/* QSPI custom PPSize */
+typedef enum {
+    PAGE256 = 0,
+    PAGE512 = 1
+} qspi_page_program_size_t;
 
 /* QSPI initialization  */
 typedef struct {
-    bool mem_present;
-    uint32_t mem_size;
     qspi_read_mode_t read_mode;
     qspi_write_mode_t write_mode;
     qspi_address_mode_t address_mode;
@@ -242,6 +246,7 @@ typedef struct {
     uint32_t DIO3_pin;
     uint32_t DIO3_port;
     uint32_t WIP_index;
+    qspi_page_program_size_t pp_size;
 } qspi_init_params_t;
 
 
@@ -264,18 +269,10 @@ typedef enum
     CANNOT_CONNECT                              = -11,
     LOW_VOLTAGE                                 = -12,
     NO_EMULATOR_CONNECTED                       = -13,
-    FAMILY_UNKNOWN                              = -14,
 
     /* Device issues. */
     NVMC_ERROR                                  = -20,
     RECOVER_FAILED                              = -21,
-    RAM_IS_OFF_ERROR                            = -22,
-
-    /* QSPI ini parsing. */
-    QspiIniNotFoundError                        = 70,               // Unable to find QSPI ini file given as defualt or given with option --qspiini.
-    QspiIniCannotBeOpenedError                  = 71,               // Opening the QSPI ini file for read failed.
-    QspiSyntaxError                             = 72,               // The QSPI ini file has some syntax error.
-    QspiIniParsingError                         = 73,               // QSPI ini file parsed has one or more missing keys.
 
     /* Operation not available. */
     NOT_AVAILABLE_BECAUSE_PROTECTION            = -90,
@@ -294,7 +291,8 @@ typedef enum
 
     /* High Level DLL */
     VERIFY_ERROR                                = -160,
-
+    RAM_IS_OFF_ERROR                            = -161,
+        
     /* Not implemented. */
     NOT_IMPLEMENTED_ERROR                       = -255,
 

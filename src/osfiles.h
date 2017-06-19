@@ -47,4 +47,7 @@ errorcodes OSFilesFindDll(char * dll_path, int dll_path_len);
 
 bool OSFilesExists(char * path);
 
+std::string OSFilesWriteTempFile(std::string fileContent);
+void OSFilesDeleteFile(std::string path);
+
 #endif

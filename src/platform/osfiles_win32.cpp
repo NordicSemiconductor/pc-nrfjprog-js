@@ -44,16 +44,17 @@
 #include "Shlwapi.h"
 
 #include <iostream>
+#include <fstream>
 
 #pragma comment(lib, "Shlwapi.lib")
+
+#define MAX_KEY_LENGTH 1000
+#define MAX_VALUE_NAME 1000
 
 bool OSFilesExists(char * path)
 {
      return PathFileExists(path) == TRUE;
 }
-
-#define MAX_KEY_LENGTH 1000
-#define MAX_VALUE_NAME 1000
 
 errorcodes OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
 {
@@ -145,4 +146,52 @@ errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
     }
 
     return retCode;
+}
+
+std::string OSFilesConcatPaths(std::string base_path, std::string relative_path)
+{
+    char buffer[MAX_PATH] = "";
+
+    PathCombine(buffer, base_path.c_str(), relative_path.c_str());
+
+    return std::string(buffer);
+}
+
+bool OSFilesExists(const std::string &path)
+{
+    return PathFileExists(path.c_str()) == TRUE;
+}
+
+std::string OSFilesWriteTempFile(std::string fileContent)
+{
+    /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with GetTempFileName function. */
+    TCHAR temp_folder_path[MAX_PATH];
+    TCHAR temp_file_path[MAX_PATH];
+
+    DWORD pathLength = GetTempPath(MAX_PATH, temp_folder_path);
+
+    if (pathLength > MAX_PATH || (pathLength == 0))
+    {
+        return std::string("");
+    }
+
+    if (GetTempFileName(temp_folder_path, TEXT("NRF"), 0, temp_file_path) == 0)
+    {
+        return std::string("");
+    }
+
+    std::ofstream outputfile;
+    outputfile.open(temp_file_path);
+    outputfile << fileContent;
+    outputfile.close();
+
+    return std::string(temp_file_path);
+}
+
+void OSFilesDeleteFile(std::string file_path)
+{
+    if (OSFilesExists(file_path))
+    {
+        remove(file_path.c_str());
+    }
 }

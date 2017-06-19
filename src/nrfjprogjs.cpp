@@ -576,12 +576,13 @@ NAN_METHOD(nRFjprog::Program)
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
         auto baton = new ProgramBaton();
 
-        baton->filename = Convert::getNativeString(info[argumentCount]);
+        baton->file = Convert::getNativeString(info[argumentCount]);
         argumentCount++;
 
         v8::Local<v8::Object> programOptions = Convert::getJsObject(info[argumentCount]);
         ProgramOptions options(programOptions);
         baton->options = options.options;
+        baton->inputFormat = options.inputFormat;
         argumentCount++;
 
         return baton;
@@ -589,7 +590,39 @@ NAN_METHOD(nRFjprog::Program)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ProgramBaton*>(b);
-        return dll_function.program(probe, baton->filename.c_str(), baton->options);
+        nrfjprogdll_err_t programResult = SUCCESS;
+
+        if (baton->inputFormat == INPUT_FORMAT_HEX_STRING)
+        {
+            baton->filename = OSFilesWriteTempFile(baton->file);
+        }
+        else
+        {
+            baton->filename = baton->file;
+        }
+
+        programResult = dll_function.program(probe, baton->filename.c_str(), baton->options);
+
+        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION)
+        {
+            const nrfjprogdll_err_t recoverResult = dll_function.recover(probe);
+
+            if (recoverResult == SUCCESS)
+            {
+                programResult = dll_function.program(probe, baton->filename.c_str(), baton->options);
+            }
+            else
+            {
+                programResult = recoverResult;
+            }
+        }
+
+        if (baton->inputFormat == INPUT_FORMAT_HEX_STRING)
+        {
+            OSFilesDeleteFile(baton->filename);
+        }
+
+        return programResult;
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -625,6 +658,12 @@ NAN_METHOD(nRFjprog::Verify)
         auto baton = new VerifyBaton();
 
         baton->filename = Convert::getNativeString(info[argumentCount]);
+        argumentCount++;
+
+        // There are no verify options at the moment, but there will be options
+        // (like the option that the incomming content may be a string)
+        v8::Local<v8::Object> verifyOptions = Convert::getJsObject(info[argumentCount]);
+        VerifyOptions options(verifyOptions);
         argumentCount++;
 
         return baton;
@@ -786,6 +825,9 @@ extern "C" {
 
         NODE_DEFINE_CONSTANT(target, VERIFY_NONE);
         NODE_DEFINE_CONSTANT(target, VERIFY_READ);
+
+        NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_FILE);
+        NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_STRING);
     }
 
     NAN_MODULE_INIT(init)

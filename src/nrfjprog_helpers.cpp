@@ -139,6 +139,7 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
     options.chip_erase_mode = ERASE_ALL;
     options.qspi_erase_mode = ERASE_NONE;
     options.reset = RESET_SYSTEM;
+    inputFormat = INPUT_FORMAT_HEX_FILE;
 
     if (Utility::Has(obj, "verify"))
     {
@@ -161,4 +162,12 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
         const bool reset = Convert::getBool(obj, "reset");
         options.reset = reset ? RESET_SYSTEM : RESET_NONE;
     }
+
+    if (Utility::Has(obj, "input_format"))
+    {
+        inputFormat = (input_format_t)Convert::getNativeUint32(obj, "input_format");
+    }
 }
+
+VerifyOptions::VerifyOptions(v8::Local<v8::Object> obj)
+{}

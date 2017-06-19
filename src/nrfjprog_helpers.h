@@ -39,6 +39,7 @@
 
 #include <nan.h>
 #include "highlevelnrfjprogdll.h"
+#include "nrfjprog_common.h"
 
 class ProbeInfo
 {
@@ -91,6 +92,13 @@ public:
     ProgramOptions(v8::Local<v8::Object> obj);
 
     program_options_t options;
+    input_format_t inputFormat;
+};
+
+class VerifyOptions
+{
+public:
+    VerifyOptions(v8::Local<v8::Object> obj);    
 };
 
 #endif

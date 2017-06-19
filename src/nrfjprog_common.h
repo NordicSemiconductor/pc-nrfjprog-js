@@ -40,6 +40,16 @@
 #include "common.h"
 #include "DllCommonDefinitions.h"
 
+typedef enum {
+    INPUT_FORMAT_HEX_FILE,
+    INPUT_FORMAT_HEX_STRING
+} input_format_t;
+
+static name_map_t program_parameter_type_map = {
+    NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),
+    NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)
+};
+
 static name_map_t device_version_map = {
     NAME_MAP_ENTRY(UNKNOWN),
     NAME_MAP_ENTRY(NRF51xxx_xxAA_REV1),
@@ -89,14 +99,9 @@ static name_map_t nrfjprogdll_err_map = {
     NAME_MAP_ENTRY(CANNOT_CONNECT),
     NAME_MAP_ENTRY(LOW_VOLTAGE),
     NAME_MAP_ENTRY(NO_EMULATOR_CONNECTED),
-    NAME_MAP_ENTRY(FAMILY_UNKNOWN),
     NAME_MAP_ENTRY(NVMC_ERROR),
     NAME_MAP_ENTRY(RECOVER_FAILED),
     NAME_MAP_ENTRY(RAM_IS_OFF_ERROR),
-    NAME_MAP_ENTRY(QspiIniNotFoundError),
-    NAME_MAP_ENTRY(QspiIniCannotBeOpenedError),
-    NAME_MAP_ENTRY(QspiSyntaxError),
-    NAME_MAP_ENTRY(QspiIniParsingError),
     NAME_MAP_ENTRY(NOT_AVAILABLE_BECAUSE_PROTECTION),
     NAME_MAP_ENTRY(NOT_AVAILABLE_BECAUSE_MPU_CONFIG),
     NAME_MAP_ENTRY(JLINKARM_DLL_NOT_FOUND),

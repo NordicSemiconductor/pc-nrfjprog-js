@@ -64,7 +64,6 @@ private:
     static NAN_METHOD(New);
 
     // Sync methods
-    static NAN_METHOD(SetLogCallback); // Params: callback(message)
 
     // Async methods
     static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)

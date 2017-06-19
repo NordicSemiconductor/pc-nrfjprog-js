@@ -40,6 +40,7 @@
 #include <memory>
 #include "nrfjprogjs.h"
 #include "nrfjprog_helpers.h"
+#include "nrfjprog_common.h"
 
 #define BATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, false) {}
 #define BATON_WITH_PROGRESS_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, true) {}
@@ -147,8 +148,10 @@ class ProgramBaton : public Baton
 {
 public:
     BATON_WITH_PROGRESS_CONSTRUCTOR(ProgramBaton, "program", 0);
+    std::string file;
     std::string filename;
     program_options_t options;
+    input_format_t inputFormat;
 };
 
 class VerifyBaton : public Baton

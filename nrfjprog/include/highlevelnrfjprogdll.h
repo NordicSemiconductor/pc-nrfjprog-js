@@ -47,9 +47,9 @@
 #include "DllCommonDefinitions.h"
 
 
-#define major_version (9)
-#define minor_version (5)
-#define micro_version (0)
+#define major_version (9) 
+#define minor_version (6) 
+#define micro_version (0) 
 
 
 #if defined(__cplusplus)
@@ -101,11 +101,11 @@ typedef struct {
 } read_options_t;
 
 typedef struct {
-
+    
     /* Type of device we are dealing with. */
     device_family_t     device_family;
     device_version_t    device_type;
-
+    
     /* Code flash info. */
     uint32_t            code_address;
     uint32_t            code_page_size;
@@ -153,8 +153,8 @@ nrfjprogdll_err_t NRFJPROG_dll_version(uint32_t * major, uint32_t * minor, uint3
  * @details Opens the highlevelnrfjprogdll DLL and prepares it for use, loading the necessary functions from the nrfjprogdll DLL. If default_jlink_path is given,
  *          the provided path will be used as the default value for the jlink_path parameter in NRFJPROG_probe_init() function. Note that the path should include
  *          the name of the DLL itself (i.e. "JLinkARM.dll"). If default_jlink_path is not given, an automatic search for the latest installed DLL will be performed.
- *          Only JLinkARM DLLs whose versions are greater than a minimum version will be accepted. The minimum version for the JLinkARM DLL is defined in
- *          MIN_JLINK_MAJOR_VERSION and MIN_JLINK_MINOR_VERSION defines. If logging mechanism is desired, a function pointer can be passed in log_cb parameter or
+ *          Only JLinkARM DLLs whose versions are greater than a minimum version will be accepted. The minimum version for the JLinkARM DLL is defined in 
+ *          MIN_JLINK_MAJOR_VERSION and MIN_JLINK_MINOR_VERSION defines. If logging mechanism is desired, a function pointer can be passed in log_cb parameter or 
  *          prog_cb parameters. For details of the function type accepted by the function, see log_callback and progress_callback typedefs elsewhere in this file.
  *
  * @pre     Before the execution of this function the DLL must not be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function.
@@ -169,7 +169,7 @@ nrfjprogdll_err_t NRFJPROG_dll_version(uint32_t * major, uint32_t * minor, uint3
  * @retval  SUCCESS
  * @retval  INVALID_OPERATION                           The NRFJPROG_dll_open() function has already been called.
  * @retval  JLINKARM_DLL_NOT_FOUND                      The automatic search for the JLINKARM DLL did not yield a usable DLL.
- * @retval                                              The jlink_path provided did not yield a usable DLL.
+ *                                                      The jlink_path provided did not yield a usable DLL.
  * @retval  JLINKARM_DLL_TOO_OLD                        The version of JLinkARM is lower than the minimum version required.
  * @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED            An error occurred while opening the JLinkARM DLL.
  *                                                      A required function could not be loaded from the DLL.
@@ -183,7 +183,7 @@ nrfjprogdll_err_t NRFJPROG_dll_open(const char * default_jlink_path, log_callbac
 /**
  * @brief   Closes the highlevelnrfjprogdll DLL.
  *
- * @details Closes the highlevelnrfjprogdll DLL and frees allocated resources. NRFJPROG_dll_close must be called before unloading the
+ * @details Closes the highlevelnrfjprogdll DLL and frees allocated resources. NRFJPROG_dll_close must be called before unloading the 
  *          highlevelnrfjprogdll DLL if NRFJPROG_dll_open() has been called.
  *
  * @post    After the execution of this function the DLL will not be ready for use. To ready the DLL for use see NRFJPROG_dll_open() function.
@@ -195,7 +195,7 @@ void NRFJPROG_dll_close(void);
 /**
  * @brief   Checks if the highlevelnrfjprogdll DLL is ready for use.
  *
- * @details Checks if the NRFJPROG_dll_open() function has been called since the last call to NRFJPROG_dll_close() or since the loading
+ * @details Checks if the NRFJPROG_dll_open() function has been called since the last call to NRFJPROG_dll_close() or since the loading 
  *          of the highlevelnrfjprogdll DLL.
  *
  * @param   is_opened                           Pointer to store the state of the DLL.
@@ -209,7 +209,7 @@ nrfjprogdll_err_t NRFJPROG_is_dll_open(bool * is_opened);
 /**
  * @brief   Returns the serial numbers of the USB J-Link emulators connected to the PC.
  *
- * @details Returns the amount and serial numbers of the USB J-Link emulators connected to the PC. If serial_numbers_len is 0,
+ * @details Returns the amount and serial numbers of the USB J-Link emulators connected to the PC. If serial_numbers_len is 0, 
  *          only the amount of USB J-Link emulators connected to the PC is returned. Since NRFJPROG_get_connected_probes() function
  *          is a general function that does not receive a Probe_handle_t as first parameter but connects to the emulators, the default
  *          JLinkARM DLL passed or located in NRFJPROG_dll_open() will be used.
@@ -238,8 +238,8 @@ nrfjprogdll_err_t NRFJPROG_get_connected_probes(uint32_t serial_numbers[], uint3
 /**
  * @brief   Allocates and initializes a new probe connection handle.
  *
- * @details Allocates and initializes a new probe connection handle. The probe handle initialized and returned in the debug_probe pointer will
- *          be required in every function that performs a connection to a device. The used JLINKARM DLL in the afore mentioned operations requiring the
+ * @details Allocates and initializes a new probe connection handle. The probe handle initialized and returned in the debug_probe pointer will 
+ *          be required in every function that performs a connection to a device. The used JLINKARM DLL in the afore mentioned operations requiring the 
  *          handle can be provided in the jlink_path parameter. If not provided, the default JLinkARM DLL passed or located in NRFJPROG_dll_open() will be used.
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
@@ -295,6 +295,7 @@ nrfjprogdll_err_t NRFJPROG_probe_uninit(Probe_handle_t * debug_probe);
 * @post    After the execution of this function, the probe will be able to perform QSPI operations.
 *
 * @param   debug_probe                         Probe handle.
+* @param   memory_size                         Size of the attached qspi flash memory.
 * @param   qspi_ini_path                       Path to the .ini containing initialization parameters for the QSPI memory interface.
 *
 * @retval  SUCCESS
@@ -305,7 +306,7 @@ nrfjprogdll_err_t NRFJPROG_probe_uninit(Probe_handle_t * debug_probe);
 *                                              One of the QSPI parameters failed verification.
 * @retval  INVALID_DEVICE_FOR_OPERATION        The connected device does not support QSPI.
  */
-nrfjprogdll_err_t NRFJPROG_probe_setup_qspi(Probe_handle_t debug_probe, qspi_init_params_t qspi_init_params);
+nrfjprogdll_err_t NRFJPROG_probe_setup_qspi(Probe_handle_t debug_probe, uint32_t memory_size, qspi_init_params_t qspi_init_params);
 
 
 /**
@@ -318,7 +319,7 @@ nrfjprogdll_err_t NRFJPROG_probe_setup_qspi(Probe_handle_t debug_probe, qspi_ini
 *
 * @retval  SUCCESS
 * @retval  INVALID_PARAMETER                   The debug_probe parameter is null.
-* @retval                                      The serial_number parameter is null.
+*                                              The serial_number parameter is null.
  */
 nrfjprogdll_err_t NRFJPROG_get_snr(Probe_handle_t debug_probe, uint32_t * serial_number);
 
@@ -351,8 +352,8 @@ nrfjprogdll_err_t NRFJPROG_get_jlinkarm_version(Probe_handle_t debug_probe, uint
 /**
 * @brief   Reads information from the device connected to the provided debug_probe handle.
 *
-* @details Reads information from the device connected to the initialized probe. //@TODO: Need to chaeck what to say if protected.
-*
+* @details Reads information from the device connected to the initialized probe.
+*          
 * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
 *
 * @param   debug_probe                         Probe handle.
@@ -360,22 +361,74 @@ nrfjprogdll_err_t NRFJPROG_get_jlinkarm_version(Probe_handle_t debug_probe, uint
 *
 * @retval  SUCCESS
 * @retval  INVALID_PARAMETER                   The debug_probe parameter is null.
-* @retval                                      The device_info parameter is null.
+*                                              The device_info parameter is null.
+* @retval  NOT_AVAILABLE_BECAUSE_PROTECTION    The target device is readback protected.
+* @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+* @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
+* @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
+*                                              A required function could not be loaded from the DLL.
+* @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
  */
 nrfjprogdll_err_t NRFJPROG_get_device_info(Probe_handle_t debug_probe, device_info_t * device_info);
 
 
 /**
+* @brief   Reads readback protection level from the device connected to the provided debug_probe handle.
+*
+* @details Reads readback protection level from the device connected to the initialized probe.
+*          
+* @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
+*
+* @param   debug_probe                         Probe handle.
+* @param   protection                         Pointer to where the device's readback protection level should be stored.
+*
+* @retval  SUCCESS
+* @retval  INVALID_PARAMETER                   The dll is not open.
+*                                              The debug_probe parameter is null.
+*                                              The protection parameter is null.
+* @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+* @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
+* @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
+*                                              A required function could not be loaded from the DLL.
+* @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
+ */
+nrfjprogdll_err_t NRFJPROG_get_readback_protection(Probe_handle_t debug_probe, readback_protection_status_t * protection);
+
+
+/**
+* @brief   Enable readback protection in the device connected to the provided debug_probe handle.
+*
+* @details Protects the device connected to the initialized probe at the specified readback protection level.
+*          
+* @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
+*
+* @param   debug_probe                         Probe handle.
+* @param   device_info                         Pointer to where the device's info should be stored.
+*
+* @retval  SUCCESS
+* @retval  INVALID_PARAMETER                   The dll is not open.
+*                                              The debug_probe parameter is null.
+*                                              The protection_level parameter is not a valid protection level for this device.
+* @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+* @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
+* @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
+*                                              A required function could not be loaded from the DLL.
+* @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
+ */
+nrfjprogdll_err_t NRFJPROG_readback_protect(Probe_handle_t debug_probe, readback_protection_status_t protection_level);
+
+
+/**
  * @brief   Programs the provided .hex file onto the device connected to the provided debug_probe handle.
  *
- * @details Programs the provided .hex file onto the device connected to the provided debug_probe handle. By using the program_options parameter, the
+ * @details Programs the provided .hex file onto the device connected to the provided debug_probe handle. By using the program_options parameter, the 
  *          verification, pre-programming erase and post-programming reset can be configured. See the description of program_options_t for details.
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
  * @pre     If a QSPI operation is to be performed, QSPI must be enabled in the probe. To enable QSPI, see NRFJPROG_probe_setup_qspi().
  * @pre     Before the execution of this function, access port protection must be disabled. To disable access port protection, see NRFJPROG_recover() function.
- *
+ * 
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
@@ -391,7 +444,8 @@ nrfjprogdll_err_t NRFJPROG_get_device_info(Probe_handle_t debug_probe, device_in
  *                                              The debug_probe pointer is NULL.
  *                                              The hex file contains data in nonexistent regions.
  *                                              The hex file contains data that crosses memory barriers.
- * @retval  INVALID_OPERATION                   The hex file was not valid.
+ * @retval  INVALID_OPERATION                   The dll is not open.
+ *                                              The hex file was not valid.
  *                                              The hex file cannot be opened.
  *                                              UICR erase requested in ERASE_PAGES mode.
  *                                              ERASE_SECTOR_AND_UICR attempted on QSPI memory.
@@ -425,7 +479,7 @@ nrfjprogdll_err_t NRFJPROG_program(Probe_handle_t debug_probe, const char * hex_
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
  * @pre     If a QSPI operation is to be performed, QSPI must be enabled in the probe. To enable QSPI, see NRFJPROG_probe_setup_qspi().
  * @pre     Before the execution of this function, access port protection must be disabled. To disable access port protection, see NRFJPROG_recover() function.
- *
+ * 
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
@@ -459,13 +513,13 @@ nrfjprogdll_err_t NRFJPROG_read_to_file(Probe_handle_t debug_probe, const char *
  * @brief   Compares the contents of the provided .hex file against the contents of the memory of the device connected to the provided debug_probe handle.
  *
  * @details Compares the contents of the provided .hex file against the contents of the memory of the device connected to the provided debug_probe handle. The
- *          compare method can be configured with the verify_action parameter. See the description of verify_action_t for details.
+ *          compare method can be configured with the verify_action parameter. See the description of verify_action_t for details. 
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
  * @pre     If a QSPI operation is to be performed, QSPI must be enabled in the probe. To enable QSPI, see NRFJPROG_probe_setup_qspi().
  * @pre     Before the execution of this function, access port protection must be disabled. To disable access port protection, see NRFJPROG_recover() function.
- *
+ * 
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
@@ -496,10 +550,10 @@ nrfjprogdll_err_t NRFJPROG_verify(Probe_handle_t debug_probe, const char * hex_p
  *
  * @details Erases the flash of the device connected to the provided debug_probe handle. The target flash of the operation is determined by the start_address parameter.
  *          If the provided start_address parameter is in the XIP region of a device equiped with QSPI, the operation targets the externally QSPI-connected flash.
- *          Otherwise, the operation targets the internal flash of the device. The type of erase can be configured through the erase action parameter. If erase_action
- *          is ERASE_ALL, all the user available flash including the UICR region if the target is the internal flash will be erased. In this case, the provided
+ *          Otherwise, the operation targets the internal flash of the device. The type of erase can be configured through the erase action parameter. If erase_action 
+ *          is ERASE_ALL, all the user available flash including the UICR region if the target is the internal flash will be erased. In this case, the provided 
  *          end_address will be ignored. If erase_action is ERASE_PAGES, all pages between the provided start_address the provided end_address will be erased, including
- *          the UCIR if the start_address and end_address are in the UICR region. The possible erase_action_t ERASE_PAGES_INCLUDING_UICR is invalid for this operation.
+ *          the UCIR if the start_address and end_address are in the UICR region. The possible erase_action_t ERASE_PAGES_INCLUDING_UICR is invalid for this operation. 
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
@@ -536,13 +590,13 @@ nrfjprogdll_err_t NRFJPROG_erase(Probe_handle_t debug_probe, erase_action_t eras
  *
  * @details This operation attempts to recover the device and leave it as it was when it left Nordic factory. It will attempt to
  *          connect, erase all user available flash, halt and eliminate any protection. Note that this operation may take up to 30 s
- *          if the device was readback protected. Note as well that this function only affects internal flash and CPU, but does not
- *          erase, reset or stop any peripheral, oscillator source nor extarnally QSPI-connected flash. The operation will therefore
+ *          if the device was readback protected. Note as well that this function only affects internal flash and CPU, but does not 
+ *          erase, reset or stop any peripheral, oscillator source nor extarnally QSPI-connected flash. The operation will therefore 
  *          leave the watchdog still operational if it was running.
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  * @post    After the execution of this function all device RAM will be powered.
@@ -561,7 +615,7 @@ nrfjprogdll_err_t NRFJPROG_erase(Probe_handle_t debug_probe, erase_action_t eras
  *                                              A required function could not be loaded from the DLL.
  * @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
  * @retval  NVMC_ERROR                          Flash operation failed.
- * @retval  NOT_AVAILABLE_BECAUSE_MPU_CONFIG    The operation is not available due to the MPU configuration. The operation is not available due to the presence of Pre-Programmed Factory Code (PPFC).
+ * @retval  NOT_AVAILABLE_BECAUSE_MPU_CONFIG    The operation is not available due to the MPU configuration. The operation is not available due to the presence of Pre-Programmed Factory Code (PPFC). 
  * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  */
 nrfjprogdll_err_t NRFJPROG_recover(Probe_handle_t debug_probe);
@@ -570,12 +624,12 @@ nrfjprogdll_err_t NRFJPROG_recover(Probe_handle_t debug_probe);
 /**
  * @brief   Reads data_len bytes starting at the addr address from the device connected to the debug_probe handle.
  *
- * @details Reads data_len bytes starting at the addr address from the device connected to the debug_probe handle without verifying that the
+ * @details Reads data_len bytes starting at the addr address from the device connected to the debug_probe handle without verifying that the 
  *          addresses are accessible or even exist. Note that if the target address is in unpowered RAM, the operation will fail.
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
@@ -585,18 +639,18 @@ nrfjprogdll_err_t NRFJPROG_recover(Probe_handle_t debug_probe);
  * @param   data_len                            Number of bytes to read.
  *
  * @retval  SUCCESS
- * @retval  INVALID_PARAMETER                   The debug_probe pointer is NULL.
- *                                              The Data pointer is NULL.
+ * @retval  INVALID_OPERATION                   The NRFJPROG_dll_open() function has not been called.
+ *                                              Target area in in XIP region but NRFJPROG_probe_setup_qspi() has not been called.
+ * @retval  INVALID_PARAMETER                   The debug_probe pointer is null.
+ *                                              The data pointer is null.
  *                                              Attempted to read out of QSPI area.
- * @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+ * @retval  RAM_IS_OFF_ERROR                    Attempted to read powered-down RAM.
+ * @retval  NOT_AVAILABLE_BECAUSE_PROTECTION    The operation is not available due to read-back protection.
+ * @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
+ * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  * @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
  * @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
  *                                              A required function could not be loaded from the DLL.
- * @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
- * @retval  NVMC_ERROR                          Flash operation failed.
- * @retval  RAM_IS_OFF_ERROR                    Attempted to read powered-down RAM.
- * @retval  NOT_AVAILABLE_BECAUSE_MPU_CONFIG    The operation is not available due to the MPU configuration. The operation is not available due to the presence of Pre-Programmed Factory Code (PPFC).
- * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  */
 nrfjprogdll_err_t NRFJPROG_read(Probe_handle_t debug_probe, uint32_t addr, uint8_t * data, uint32_t data_len);
 
@@ -609,41 +663,42 @@ nrfjprogdll_err_t NRFJPROG_read(Probe_handle_t debug_probe, uint32_t addr, uint8
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
  * @param   debug_probe                         Probe handle.
- * @param   address                             Start address of the region to read.
+ * @param   addr                                Address of the word to read.
  * @param   data                                Pointer to where the read data should be written.
  *
  * @retval  SUCCESS
- * @retval  INVALID_PARAMETER                   The debug_probe pointer is NULL.
- *                                              The Data pointer is NULL.
- * @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+ * @retval  INVALID_OPERATION                   The NRFJPROG_dll_open() function has not been called.
+ *                                              Target area in in XIP region but NRFJPROG_probe_setup_qspi() has not been called.
+ * @retval  INVALID_PARAMETER                   The debug_probe pointer is null.
+ *                                              The data pointer is null.
+ *                                              The addr parameter is not word aligned.
+ * @retval  RAM_IS_OFF_ERROR                    Attempted to read powered-down RAM.
+ * @retval  NOT_AVAILABLE_BECAUSE_PROTECTION    The operation is not available due to read-back protection.
+ * @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
+ * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  * @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
  * @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
  *                                              A required function could not be loaded from the DLL.
- * @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
- * @retval  NVMC_ERROR                          Flash operation failed.
- * @retval  RAM_IS_OFF_ERROR                    Attempted to read powered-down RAM.
- * @retval  NOT_AVAILABLE_BECAUSE_MPU_CONFIG    The operation is not available due to the MPU configuration. The operation is not available due to the presence of Pre-Programmed Factory Code (PPFC).
- * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
  */
-nrfjprogdll_err_t NRFJPROG_read_u32(Probe_handle_t debug_probe, uint32_t address, uint32_t * data);
+nrfjprogdll_err_t NRFJPROG_read_u32(Probe_handle_t debug_probe, uint32_t addr, uint32_t * data);
 
 
 /**
  * @brief   Writes data_len bytes starting at the addr address into the device connected to the debug_probe handle.
  *
  * @details Writes data_len bytes starting at the addr address into the device connected to the debug_probe handle without verifying that the addresses
- *          are accessible or even exist. If address is in internal flash or UICR, it will control the NVMC in order to write into it. If the address
- *          is in the XIP region of the device and the device is equpped with a QSPI peripheral, the operation will control the QSPI in order to write
+ *          are accessible or even exist. If address is in internal flash or UICR, it will control the NVMC in order to write into it. If the address 
+ *          is in the XIP region of the device and the device is equpped with a QSPI peripheral, the operation will control the QSPI in order to write 
  *          into the external flash. Writes need to be 32-bit aligned. Note that if the target address is in unpowered RAM, the operation will fail.
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
@@ -675,13 +730,14 @@ nrfjprogdll_err_t NRFJPROG_write(Probe_handle_t debug_probe, uint32_t address, c
  * @brief   Writes one 32-bit word at the address address into the device connected to the debug_probe handle.
  *
  * @details Writes one 32-bit word at the address address into the device connected to the debug_probe handle without verifying that the address
- *          is accessible or even exists. If address is in internal flash or UICR, it will control the NVMC in order to write into it. If the address
+ *          is accessible or even exists. If address is in internal flash or UICR, it will control the NVMC in order to write into it. If the address 
  *          is in the XIP region of the device and the device is equpped with a QSPI peripheral, the operation will control the QSPI in order to write
- *          into the external flash. Writes need to be 32-bit aligned. Note that if the target address is in unpowered RAM, the operation will fail.
+ *          into the external flash. Writes need to be 32-bit aligned. Note that if the target address is in unpowered RAM, the operation will fail. If
+ *          the address is internal or external flash, it will read the contents before writing and fail if not erased.
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function, the device CPU will be halted. To unhalt the device CPU, see NRFJPROG_reset() and NRFJPROG_run() functions.
  *
@@ -714,14 +770,14 @@ nrfjprogdll_err_t NRFJPROG_write_u32(Probe_handle_t debug_probe, uint32_t addres
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @during  During the execution of this function the emulator mode may be changed to JTAG. If the execution fails the emulator might be left in JTAG mode. If the execution fails, try again to return to SWD mode.
  *
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51 and and reset_action was RESET_SYSTEM. To exit debug interface mode see NRFJPROG_reset().
  * @post    After the execution of this function the device CPU will be running.
  *
  * @param   debug_probe                         Probe handle.
- * @param   reset_action                        Type of reset to perform. See the description of reset_action_t for details.
+ * @param   reset_action                        Type of reset to perform. See the description of reset_action_t for details. 
  *
  * @retval  SUCCESS
  * @retval  INVALID_OPERATION                   The NRFJPROG_dll_open() function has not been called.
@@ -745,7 +801,7 @@ nrfjprogdll_err_t NRFJPROG_reset(Probe_handle_t debug_probe, reset_action_t rese
  *
  * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
  * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
- *
+ *  
  * @post    After the execution of this function the device will be in debug interface mode if the device was an nRF51. To exit debug interface mode see NRFJPROG_reset().
  *
  * @param   debug_probe                         Probe handle.
@@ -754,7 +810,7 @@ nrfjprogdll_err_t NRFJPROG_reset(Probe_handle_t debug_probe, reset_action_t rese
  *
  * @retval  SUCCESS
  * @retval  INVALID_OPERATION                   The NRFJPROG_dll_open() function has not been called.
- * @retval  INVALID_PARAMETER                   The debug_probe pointer is NULL.
+ * @retval  INVALID_PARAMETER                   The debug_probe pointer is null.
  * @retval  JLINKARM_DLL_ERROR                  The JLinkARM DLL function returned an error.
  * @retval  NOT_AVAILABLE_BECAUSE_PROTECTION    The operation is not available due to readback protection.
  * @retval  CANNOT_CONNECT                      It is impossible to connect to any nRF device.
@@ -764,8 +820,17 @@ nrfjprogdll_err_t NRFJPROG_reset(Probe_handle_t debug_probe, reset_action_t rese
  */
 nrfjprogdll_err_t NRFJPROG_run(Probe_handle_t debug_probe, uint32_t pc, uint32_t sp);
 
+
+char * NRFJPROG_file_resource_from_hex(const char * hex_path);
+char * NRFJPROG_file_resource_from_hex_string(const char * hex_string);
+
+char * NRFJPROG_file_resource_from_bin(const char * hex_path);
+char * NRFJPROG_file_resource_from_bin_string(const char * hex_string);
+
+
 #if defined(__cplusplus)
 }
 #endif
 
 #endif  /* highlevelnrfjprogdll_FUNC_H */
+
