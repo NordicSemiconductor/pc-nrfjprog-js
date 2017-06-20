@@ -111,6 +111,7 @@ std::string OSFilesGetTempFolderPath(void)
             return std::string(val);
         }
     }
+    
     return std::string("/tmp");
 }
 
