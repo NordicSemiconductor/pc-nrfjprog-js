@@ -43,9 +43,6 @@
 #include <windows.h>
 #include "Shlwapi.h"
 
-#include <iostream>
-#include <fstream>
-
 #pragma comment(lib, "Shlwapi.lib")
 
 #define MAX_KEY_LENGTH 1000
@@ -162,7 +159,7 @@ bool OSFilesExists(const std::string &path)
     return PathFileExists(path.c_str()) == TRUE;
 }
 
-std::string OSFilesWriteTempFile(std::string fileContent)
+std::string OSFilesGetTempFilePath()
 {
     /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with GetTempFileName function. */
     TCHAR temp_folder_path[MAX_PATH];
@@ -172,18 +169,13 @@ std::string OSFilesWriteTempFile(std::string fileContent)
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {
-        return std::string("");
+        return std::string();
     }
 
     if (GetTempFileName(temp_folder_path, TEXT("NRF"), 0, temp_file_path) == 0)
     {
-        return std::string("");
+        return std::string();
     }
-
-    std::ofstream outputfile;
-    outputfile.open(temp_file_path);
-    outputfile << fileContent;
-    outputfile.close();
 
     return std::string(temp_file_path);
 }
@@ -192,6 +184,6 @@ void OSFilesDeleteFile(std::string file_path)
 {
     if (OSFilesExists(file_path))
     {
-        remove(file_path.c_str());
+        DeleteFile(file_path.c_str());
     }
 }
