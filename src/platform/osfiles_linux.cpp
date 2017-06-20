@@ -56,7 +56,7 @@ bool OSFilesExists(char * path)
     return ((0 == stat(path, &buffer)));
 }
 
-errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
 {
     char temp_dll_path[dll_path_len];
     memset(temp_dll_path, 0, dll_path_len);
@@ -65,7 +65,7 @@ errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
 
     if (len == -1)
     {
-        return errorcodes::CouldNotFindJprogDLL;
+        return errorcode_t::CouldNotFindJprogDLL;
     }
 
     strncpy(dll_path, dirname(temp_dll_path), dll_path_len - 1);
@@ -80,11 +80,11 @@ errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
         {
             dlclose(dll);
             strncpy(dll_path, "libnrfjprogdll.so", dll_path_len - 1);
-            return errorcodes::JsSuccess;
+            return errorcode_t::JsSuccess;
         }
 
-        return errorcodes::CouldNotFindJprogDLL;
+        return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    return errorcodes::JsSuccess;
+    return errorcode_t::JsSuccess;
 }

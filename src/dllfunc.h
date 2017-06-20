@@ -87,7 +87,7 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_run                  run;
 };
 
-errorcodes DllLoad(const char * path, DllFunctionPointersType * dll_function);
+errorcode_t DllLoad(const char * path, DllFunctionPointersType * dll_function);
 
 void DllFree(void);
 

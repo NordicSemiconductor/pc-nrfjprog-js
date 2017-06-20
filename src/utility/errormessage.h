@@ -51,22 +51,4 @@ public:
     static v8::Local<v8::String> getStructErrorMessage(const std::string name, const std::string message);
 };
 
-typedef enum errorcodes
-{
-    JsSuccess,
-    CouldNotFindJlinkDLL,
-    CouldNotFindJprogDLL,
-    CouldNotLoadDLL,
-    CouldNotOpenDevice,
-    CouldNotResetDevice,
-    CouldNotCloseDevice,
-    CouldNotOpenDLL,
-    CouldNotConnectToDevice,
-    CouldNotCallFunction,
-    CouldNotErase,
-    CouldNotProgram,
-    CouldNotRead,
-    CouldNotOpenHexFile
-} errorcodes;
-
 #endif

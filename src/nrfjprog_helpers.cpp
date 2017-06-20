@@ -163,9 +163,9 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
         options.reset = reset ? RESET_SYSTEM : RESET_NONE;
     }
 
-    if (Utility::Has(obj, "input_format"))
+    if (Utility::Has(obj, "inputFormat"))
     {
-        inputFormat = (input_format_t)Convert::getNativeUint32(obj, "input_format");
+        inputFormat = (input_format_t)Convert::getNativeUint32(obj, "inputFormat");
     }
 }
 

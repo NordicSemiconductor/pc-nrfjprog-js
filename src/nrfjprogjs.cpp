@@ -60,7 +60,7 @@ DllFunctionPointersType nRFjprog::dll_function;
 char nRFjprog::dll_path[COMMON_MAX_PATH] = {'\0'};
 bool nRFjprog::loaded = false;
 bool nRFjprog::connectedToDevice = false;
-errorcodes nRFjprog::finderror = errorcodes::JsSuccess;
+errorcode_t nRFjprog::finderror = errorcode_t::JsSuccess;
 std::string nRFjprog::logMessage;
 Nan::Callback *nRFjprog::jsProgressCallback = nullptr;
 uv_async_t *nRFjprog::progressEvent = nullptr;
@@ -210,7 +210,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     baton->result = loadDll();
 
-    if (baton->result != errorcodes::JsSuccess)
+    if (baton->result != errorcode_t::JsSuccess)
     {
         return;
     }
@@ -224,7 +224,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
         if (openError != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotOpenDLL;
+            baton->result = errorcode_t::CouldNotOpenDLL;
             baton->lowlevelError = openError;
             return;
         }
@@ -236,7 +236,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
         if (initError != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotOpenDevice;
+            baton->result = errorcode_t::CouldNotOpenDevice;
             baton->lowlevelError = initError;
             return;
         }
@@ -251,7 +251,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
         if (resetError != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotResetDevice;
+            baton->result = errorcode_t::CouldNotResetDevice;
             baton->lowlevelError = resetError;
             return;
         }
@@ -260,7 +260,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
         if (uninitError != SUCCESS)
         {
-            baton->result = errorcodes::CouldNotCloseDevice;
+            baton->result = errorcode_t::CouldNotCloseDevice;
             baton->lowlevelError = uninitError;
             return;
         }
@@ -272,7 +272,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (excuteError != SUCCESS)
     {
-        baton->result = errorcodes::CouldNotCallFunction;
+        baton->result = errorcode_t::CouldNotCallFunction;
         baton->lowlevelError = excuteError;
     }
 }
@@ -285,7 +285,7 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
     //TODO: Create an arrary of correct size instead of a way to large one.
     v8::Local<v8::Value> argv[10];//baton->returnParameterCount + 1];
 
-    if (baton->result != errorcodes::JsSuccess)
+    if (baton->result != errorcode_t::JsSuccess)
     {
         argv[0] = ErrorMessage::getErrorMessage(baton->result, baton->name, logMessage, baton->lowlevelError);
 
@@ -352,20 +352,20 @@ void nRFjprog::sendProgress(uv_async_t *handle)
     }
 }
 
-errorcodes nRFjprog::loadDll()
+errorcode_t nRFjprog::loadDll()
 {
     if (loaded)
     {
-        return errorcodes::JsSuccess;
+        return errorcode_t::JsSuccess;
     }
 
-    if (finderror != errorcodes::JsSuccess)
+    if (finderror != errorcode_t::JsSuccess)
     {
         return finderror;
     }
 
-    errorcodes dll_load_result = DllLoad(dll_path, &dll_function);
-    loaded = dll_load_result == errorcodes::JsSuccess;
+    errorcode_t dll_load_result = DllLoad(dll_path, &dll_function);
+    loaded = dll_load_result == errorcode_t::JsSuccess;
 
     return dll_load_result;
 }

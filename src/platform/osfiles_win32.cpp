@@ -56,7 +56,7 @@ bool OSFilesExists(char * path)
      return PathFileExists(path) == TRUE;
 }
 
-errorcodes OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
 {
     HKEY key;
     HKEY innerKey;
@@ -124,7 +124,7 @@ errorcodes OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_pat
             RegCloseKey(key);
             if (OSFilesExists(dll_path))
             {
-                return errorcodes::JsSuccess;
+                return errorcode_t::JsSuccess;
             }
         }
 
@@ -134,12 +134,12 @@ errorcodes OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_pat
     }
 
     /* Search for JLinkARM in the Current User Key.  */
-    return errorcodes::CouldNotFindJprogDLL;
+    return errorcode_t::CouldNotFindJprogDLL;
 }
 
-errorcodes OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
 {
-    errorcodes retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, dll_path_len);
+    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, dll_path_len);
 
     if (retCode != JsSuccess) {
         retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, dll_path_len);

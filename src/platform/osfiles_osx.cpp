@@ -67,7 +67,7 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
     if (ret <= 0)
     {
         // PID not found, error
-        return errorcodes::CouldNotFindJprogDLL;
+        return errorcode_t::CouldNotFindJprogDLL;
     }
 
     strncpy(dll_path, dirname(pathbuf), dll_path_len - 1);
@@ -82,11 +82,11 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
         {
             dlclose(dll);
             strncpy(dll_path, "libnrfjprogdll.dylib", dll_path_len - 1);
-            return errorcodes::JsSuccess;
+            return errorcode_t::JsSuccess;
         }
 
-        return errorcodes::CouldNotFindJprogDLL;
+        return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    return errorcodes::JsSuccess;
+    return errorcode_t::JsSuccess;
 }

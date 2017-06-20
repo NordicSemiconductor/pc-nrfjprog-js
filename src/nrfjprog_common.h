@@ -45,6 +45,25 @@ typedef enum {
     INPUT_FORMAT_HEX_STRING
 } input_format_t;
 
+
+typedef enum
+{
+    JsSuccess,
+    CouldNotFindJlinkDLL,
+    CouldNotFindJprogDLL,
+    CouldNotLoadDLL,
+    CouldNotOpenDevice,
+    CouldNotResetDevice,
+    CouldNotCloseDevice,
+    CouldNotOpenDLL,
+    CouldNotConnectToDevice,
+    CouldNotCallFunction,
+    CouldNotErase,
+    CouldNotProgram,
+    CouldNotRead,
+    CouldNotOpenHexFile
+} errorcode_t;
+
 static name_map_t program_parameter_type_map = {
     NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),
     NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)

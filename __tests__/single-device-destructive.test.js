@@ -126,7 +126,7 @@ describe('Single device - destructive', () => {
 
         const filecontent = fs.readFileSync('./__tests__/hex/program.hex').toString('utf-8');
 
-        nRFjprog.program(device.serialNumber, filecontent, { input_format: nrfjprog.INPUT_FORMAT_HEX_STRING }, callback);
+        nRFjprog.program(device.serialNumber, filecontent, { inputFormat: nrfjprog.INPUT_FORMAT_HEX_STRING }, callback);
     });
 
     it('recovers a device', done => {

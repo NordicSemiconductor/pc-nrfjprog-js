@@ -44,20 +44,20 @@
 #include "../nrfjprog_common.h"
 
 static name_map_t nrfjprog_js_err_map = {
-    { errorcodes::JsSuccess, "Success" },
-    { errorcodes::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL" },
-    { errorcodes::CouldNotFindJprogDLL, "CouldNotFindJprogDLL" },
-    { errorcodes::CouldNotLoadDLL, "CouldNotLoadDLL" },
-    { errorcodes::CouldNotOpenDLL, "CouldNotOpenDLL" },
-    { errorcodes::CouldNotOpenDevice, "CouldNotOpenDevice" },
-    { errorcodes::CouldNotResetDevice, "CouldNotResetDevice" },
-    { errorcodes::CouldNotCloseDevice, "CouldNotCloseDevice" },
-    { errorcodes::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
-    { errorcodes::CouldNotCallFunction, "CouldNotCallFunction" },
-    { errorcodes::CouldNotErase, "CouldNotErase" },
-    { errorcodes::CouldNotProgram, "CouldNotProgram" },
-    { errorcodes::CouldNotRead, "CouldNotRead" },
-    { errorcodes::CouldNotOpenHexFile, "CouldNotOpenHexFile" }
+    { errorcode_t::JsSuccess, "Success" },
+    { errorcode_t::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL" },
+    { errorcode_t::CouldNotFindJprogDLL, "CouldNotFindJprogDLL" },
+    { errorcode_t::CouldNotLoadDLL, "CouldNotLoadDLL" },
+    { errorcode_t::CouldNotOpenDLL, "CouldNotOpenDLL" },
+    { errorcode_t::CouldNotOpenDevice, "CouldNotOpenDevice" },
+    { errorcode_t::CouldNotResetDevice, "CouldNotResetDevice" },
+    { errorcode_t::CouldNotCloseDevice, "CouldNotCloseDevice" },
+    { errorcode_t::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
+    { errorcode_t::CouldNotCallFunction, "CouldNotCallFunction" },
+    { errorcode_t::CouldNotErase, "CouldNotErase" },
+    { errorcode_t::CouldNotProgram, "CouldNotProgram" },
+    { errorcode_t::CouldNotRead, "CouldNotRead" },
+    { errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile" }
 };
 
 static name_map_t argumentCountMap = {
@@ -74,7 +74,7 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const st
 {
     Nan::EscapableHandleScope scope;
 
-    if (errorCode == errorcodes::JsSuccess)
+    if (errorCode == errorcode_t::JsSuccess)
     {
         return scope.Escape(Nan::Undefined());
     }

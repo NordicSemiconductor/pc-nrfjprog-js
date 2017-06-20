@@ -50,98 +50,98 @@ static bool load_func_ptr(T * func_ptr, const char * func_name, HMODULE dll_hand
     return true;
 }
 
-errorcodes DllLoad(const char * path, DllFunctionPointersType * dll_function)
+errorcode_t DllLoad(const char * path, DllFunctionPointersType * dll_function)
 {
     dll = LoadLibrary(path);
     if (!dll){
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->dll_get_version, "NRFJPROG_dll_version", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->dll_open, "NRFJPROG_dll_open", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->dll_close, "NRFJPROG_dll_close", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->is_dll_open, "NRFJPROG_is_dll_open", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->get_connected_probes, "NRFJPROG_get_connected_probes", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->probe_init, "NRFJPROG_probe_init", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->probe_uninit, "NRFJPROG_probe_uninit", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->probe_get_snr, "NRFJPROG_get_snr", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->get_jlinkarm_version, "NRFJPROG_get_jlinkarm_version", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->get_device_info, "NRFJPROG_get_device_info", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->program, "NRFJPROG_program", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->read_to_file, "NRFJPROG_read_to_file", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->verify, "NRFJPROG_verify", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->erase, "NRFJPROG_erase", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->recover, "NRFJPROG_recover", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->read, "NRFJPROG_read", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->read_u32, "NRFJPROG_read_u32", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->write, "NRFJPROG_write", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->write_u32, "NRFJPROG_write_u32", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->reset, "NRFJPROG_reset", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
     if (!load_func_ptr(&dll_function->run, "NRFJPROG_run", dll)) {
-        return errorcodes::CouldNotLoadDLL;
+        return errorcode_t::CouldNotLoadDLL;
     }
 
-    return errorcodes::JsSuccess;
+    return errorcode_t::JsSuccess;
 }
 
 void DllFree(void)

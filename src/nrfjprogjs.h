@@ -92,7 +92,7 @@ private:
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
 
-    static errorcodes loadDll();
+    static errorcode_t loadDll();
     static void unloadDll();
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
@@ -108,7 +108,7 @@ private:
 
     static bool loaded;
     static bool connectedToDevice;
-    static errorcodes finderror;
+    static errorcode_t finderror;
 
     static std::string logMessage;
 };
