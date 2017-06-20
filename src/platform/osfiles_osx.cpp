@@ -71,17 +71,17 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
     }
 
     strncpy(dll_path, dirname(pathbuf), dll_path_len - 1);
-    strncat(dll_path, "/libnrfjprogdll.dylib", dll_path_len - strlen(dll_path) - 1);
+    strncat(dll_path, "/libhighlevelnrfjprog.dylib", dll_path_len - strlen(dll_path) - 1);
 
     if (!OSFilesExists(dll_path))
     {
         /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * dll = dlopen("libnrfjprogdll.dylib", RTLD_LAZY);
+        void * dll = dlopen("libhighlevelnrfjprog.dylib", RTLD_LAZY);
 
         if (dll)
         {
             dlclose(dll);
-            strncpy(dll_path, "libnrfjprogdll.dylib", dll_path_len - 1);
+            strncpy(dll_path, "libhighlevelnrfjprog.dylib", dll_path_len - 1);
             return errorcode_t::JsSuccess;
         }
 
@@ -89,4 +89,59 @@ NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
     }
 
     return errorcode_t::JsSuccess;
+}
+
+/* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are valid, "/tmp" is returned. */
+std::string OSFilesGetTempFolderPath(void)
+{
+    std::string temp_keys[4] = {
+        "TMPDIR",
+        "TMP",
+        "TEMP",
+        "TEMPDIR"
+    };
+
+    for (uint32_t i = 0; i < 4; i++)
+    {
+        char * val = getenv(temp_keys[i].c_str());
+
+        if (val != NULL)
+        {
+            return std::string(val);
+        }
+    }
+
+    return std::string("/tmp");
+}
+
+/* Return a valid, unique file name in the temp folder.
+ * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
+std::string OSFilesGetTempFilePath(void)
+{
+    std::string temp_folder_path = OSFilesConcatPaths(OSFilesGetTempFolderPath(), "nRFJProg");
+    std::string temp_file_name_template = OSFilesConcatPaths(temp_folder_path, "nRFXXXXXX.hex");
+
+    char temp_file_name[COMMON_MAX_PATH];
+
+    strncpy(temp_file_name, temp_file_name_template, COMMON_MAX_PATH);
+
+    FILE * temp_file = mkstemps(temp_file_name, 4);
+
+    if (temp_file == -1)
+    {
+        return std::string();
+    }
+
+    /* mkstemps returns an opened file descriptor. */
+    fclose(temp_file);
+
+    return std::string(temp_file_path);
+}
+
+void ODFilesDeleteFile(std::string file_path)
+{
+    if (OSFilesExists(file_path))
+    {
+        remove(file_path.c_str());
+    }
 }
