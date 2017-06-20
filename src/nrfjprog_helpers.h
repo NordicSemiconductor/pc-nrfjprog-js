@@ -44,8 +44,8 @@
 class ProbeInfo
 {
 public:
-    ProbeInfo(uint32_t serial_number, device_info_t device_info) :
-        serial_number(serial_number), device_info(device_info)
+    ProbeInfo(uint32_t _serial_number, device_info_t _device_info) :
+        serial_number(_serial_number), device_info(_device_info)
     {}
 
     v8::Local<v8::Object> ToJs();
@@ -58,8 +58,8 @@ private:
 class DeviceInfo
 {
 public:
-    DeviceInfo(device_info_t device_info) :
-        device_info(device_info)
+    DeviceInfo(device_info_t _device_info) :
+        device_info(_device_info)
     {}
 
     v8::Local<v8::Object> ToJs();
@@ -98,7 +98,7 @@ public:
 class VerifyOptions
 {
 public:
-    VerifyOptions(v8::Local<v8::Object> obj);    
+    VerifyOptions(v8::Local<v8::Object> obj);
 };
 
 #endif

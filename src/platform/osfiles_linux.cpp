@@ -48,7 +48,12 @@
 
 #include <iostream>
 
-bool OSFilesExists(char * path)
+std::string OSFilesConcatPaths(std::string base_path, std::string relative_path)
+{
+    return base_path + '/' + relative_path;
+}
+
+bool OSFilesExists(const char * path)
 {
     struct stat buffer;
     return ((0 == stat(path, &buffer)));
@@ -113,14 +118,13 @@ std::string OSFilesGetTempFolderPath(void)
  * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
 std::string OSFilesGetTempFilePath(void)
 {
-    std::string temp_folder_path = OSFilesConcatPaths(OSFilesGetTempFolderPath(), "nRFJProg");
-    std::string temp_file_name_template = OSFilesConcatPaths(temp_folder_path, "nRFXXXXXX.hex");
+    std::string temp_file_name_template = OSFilesConcatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
     char temp_file_name[COMMON_MAX_PATH];
 
-    strncpy(temp_file_name, temp_file_name_template, COMMON_MAX_PATH);
+    strncpy(temp_file_name, temp_file_name_template.c_str(), COMMON_MAX_PATH);
 
-    FILE * temp_file = mkstemps(temp_file_name, 4);
+    int temp_file = mkstemps(temp_file_name, 4);
 
     if (temp_file == -1)
     {
@@ -128,14 +132,15 @@ std::string OSFilesGetTempFilePath(void)
     }
 
     /* mkstemps returns an opened file descriptor. */
-    fclose(temp_file);
+    close(temp_file);
 
-    return std::string(temp_file_path);
+    return std::string(temp_file_name);
 }
 
-void ODFilesDeleteFile(std::string file_path)
+
+void OSFilesDeleteFile(std::string file_path)
 {
-    if (OSFilesExists(file_path))
+    if (OSFilesExists(file_path.c_str()))
     {
         remove(file_path.c_str());
     }

@@ -3,10 +3,10 @@ add_compile_options(
     -Wno-effc++
     -Wno-unknown-pragmas
     -Wno-undef
-    -Wstrict-overflow=4
+    -Wstrict-overflow=2
     -Wno-long-long
     -Wfloat-equal
-    -Wshadow
+    #-Wshadow
     -Wpointer-arith
     #-H # Used for debugging header dependencies. See https://docs.freebsd.org/info/gcc/gcc.info.Preprocessor_Options.html
 )

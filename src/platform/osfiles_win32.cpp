@@ -48,7 +48,7 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-bool OSFilesExists(char * path)
+bool OSFilesExists(const char * path)
 {
      return PathFileExists(path) == TRUE;
 }

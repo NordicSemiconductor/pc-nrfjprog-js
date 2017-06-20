@@ -46,7 +46,7 @@
 
 errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len);
 
-bool OSFilesExists(char * path);
+bool OSFilesExists(const char * path);
 
 std::string OSFilesGetTempFilePath(void);
 void OSFilesDeleteFile(std::string path);
