@@ -36,15 +36,12 @@
 
 'use strict';
 
-const nrfjprog = require('../index.js');
+const nRFjprog = require('../index.js');
 
-let nRFjprog;
 let device;
 
 describe('Single device - non-destructive', () => {
     beforeAll(done => {
-        nRFjprog = new nrfjprog.nRFjprog();
-
         const callback = (err, connectedDevices) => {
             expect(err).toBeUndefined();
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);

@@ -36,17 +36,14 @@
 
 'use strict';
 
-const nrfjprog = require('../index.js');
+const nRFjprog = require('../index.js');
 const fs = require('fs');
 
-let nRFjprog;
 let device;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 describe('Single device - destructive', () => {
     beforeAll(done => {
-        nRFjprog = new nrfjprog.nRFjprog();
-
         const callback = (err, connectedDevices) => {
             expect(err).toBeUndefined();
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
@@ -55,7 +52,7 @@ describe('Single device - destructive', () => {
         };
 
         nRFjprog.getConnectedDevices(callback);
-    });
+});
 
     it('erases the whole device', done => {
         const callback = (err) => {
@@ -126,7 +123,7 @@ describe('Single device - destructive', () => {
 
         const filecontent = fs.readFileSync('./__tests__/hex/program.hex').toString('utf-8');
 
-        nRFjprog.program(device.serialNumber, filecontent, { inputFormat: nrfjprog.INPUT_FORMAT_HEX_STRING }, callback);
+        nRFjprog.program(device.serialNumber, filecontent, { inputFormat: nRFjprog.INPUT_FORMAT_HEX_STRING }, callback);
     });
 
     it('recovers a device', done => {

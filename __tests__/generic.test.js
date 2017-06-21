@@ -36,9 +36,7 @@
 
 'use strict';
 
-const nrfjprog = require('../index.js');
-
-const nRFjprog = new nrfjprog.nRFjprog();
+const nRFjprog = require('../index.js');
 
 describe('Generic functionality', () => {
     it('gets dll version', done => {
