@@ -98,7 +98,8 @@ private:
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
     static void logCallback(const char * msg);
-    static void logCallback(std::string msg);
+    static void log(std::string msg);
+    
     static void progressCallback(const char * process);
     static Nan::Callback *jsProgressCallback;
     static void sendProgress(uv_async_t *handle);

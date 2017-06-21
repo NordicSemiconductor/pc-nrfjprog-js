@@ -189,11 +189,11 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
         return;
     }
 
-    logCallback("===============================================\n");
-    logCallback("Start of ");
-    logCallback(baton->name);
-    logCallback("\n");
-    logCallback("===============================================\n");
+    log("===============================================\n");
+    log("Start of ");
+    log(baton->name);
+    log("\n");
+    log("===============================================\n");
 
 
     baton->executeFunction = execute;
@@ -322,10 +322,10 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
 
 void nRFjprog::logCallback(const char * msg)
 {
-    logMessage = logMessage.append(msg);
+    log(msg);
 }
 
-void nRFjprog::logCallback(std::string msg)
+void nRFjprog::log(std::string msg)
 {
     logMessage = logMessage.append(msg);
 }
@@ -601,8 +601,8 @@ NAN_METHOD(nRFjprog::Program)
 
         if (!file.exists())
         {
-            logCallback(file.errormessage());
-            logCallback("\n");
+            log(file.errormessage());
+            log("\n");
             return INVALID_PARAMETER;
         }
 
