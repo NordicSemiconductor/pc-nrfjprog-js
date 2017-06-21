@@ -408,7 +408,7 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 
 NAN_METHOD(nRFjprog::GetDllVersion)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new GetDllVersionBaton();
 
         return baton;
@@ -438,7 +438,7 @@ NAN_METHOD(nRFjprog::GetDllVersion)
 
 NAN_METHOD(nRFjprog::GetConnectedDevices)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new GetConnectedDevicesBaton();
     };
 
@@ -493,7 +493,7 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
 
 NAN_METHOD(nRFjprog::GetDeviceInfo)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new GetDeviceInfoBaton();
     };
 
@@ -516,15 +516,15 @@ NAN_METHOD(nRFjprog::GetDeviceInfo)
 
 NAN_METHOD(nRFjprog::Read)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadBaton();
 
         baton->data = nullptr;
 
-        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
-        baton->length = Convert::getNativeUint32(info[argumentCount]);
+        baton->length = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
         return baton;
@@ -550,10 +550,10 @@ NAN_METHOD(nRFjprog::Read)
 
 NAN_METHOD(nRFjprog::ReadU32)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadU32Baton();
 
-        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
         return baton;
@@ -578,13 +578,13 @@ NAN_METHOD(nRFjprog::ReadU32)
 
 NAN_METHOD(nRFjprog::Program)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ProgramBaton();
 
-        baton->file = Convert::getNativeString(info[argumentCount]);
+        baton->file = Convert::getNativeString(parameters[argumentCount]);
         argumentCount++;
 
-        v8::Local<v8::Object> programOptions = Convert::getJsObject(info[argumentCount]);
+        v8::Local<v8::Object> programOptions = Convert::getJsObject(parameters[argumentCount]);
         ProgramOptions options(programOptions);
         baton->options = options.options;
         baton->inputFormat = options.inputFormat;
@@ -632,13 +632,13 @@ NAN_METHOD(nRFjprog::Program)
 
 NAN_METHOD(nRFjprog::ReadToFile)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadToFileBaton();
 
-        baton->filename = Convert::getNativeString(info[argumentCount]);
+        baton->filename = Convert::getNativeString(parameters[argumentCount]);
         argumentCount++;
 
-        v8::Local<v8::Object> readOptions = Convert::getJsObject(info[argumentCount]);
+        v8::Local<v8::Object> readOptions = Convert::getJsObject(parameters[argumentCount]);
         ReadToFileOptions options(readOptions);
         baton->options = options.options;
         argumentCount++;
@@ -656,15 +656,15 @@ NAN_METHOD(nRFjprog::ReadToFile)
 
 NAN_METHOD(nRFjprog::Verify)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new VerifyBaton();
 
-        baton->filename = Convert::getNativeString(info[argumentCount]);
+        baton->filename = Convert::getNativeString(parameters[argumentCount]);
         argumentCount++;
 
         // There are no verify options at the moment, but there will be options
         // (like the option that the incomming content may be a string)
-        v8::Local<v8::Object> verifyOptions = Convert::getJsObject(info[argumentCount]);
+        v8::Local<v8::Object> verifyOptions = Convert::getJsObject(parameters[argumentCount]);
         VerifyOptions options(verifyOptions);
         argumentCount++;
 
@@ -681,10 +681,10 @@ NAN_METHOD(nRFjprog::Verify)
 
 NAN_METHOD(nRFjprog::Erase)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new EraseBaton();
 
-        v8::Local<v8::Object> eraseOptions = Convert::getJsObject(info[argumentCount]);
+        v8::Local<v8::Object> eraseOptions = Convert::getJsObject(parameters[argumentCount]);
         EraseOptions options(eraseOptions);
         baton->erase_mode = options.eraseMode;
         baton->start_address = options.startAddress;
@@ -704,7 +704,7 @@ NAN_METHOD(nRFjprog::Erase)
 
 NAN_METHOD(nRFjprog::Recover)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new RecoverBaton();
     };
 
@@ -717,15 +717,15 @@ NAN_METHOD(nRFjprog::Recover)
 
 NAN_METHOD(nRFjprog::Write)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new WriteBaton();
         baton->data = nullptr;
 
-        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
-        baton->data = Convert::getNativePointerToUint8(info[argumentCount]);
-        baton->length = Convert::getLengthOfArray(info[argumentCount]);
+        baton->data = Convert::getNativePointerToUint8(parameters[argumentCount]);
+        baton->length = Convert::getLengthOfArray(parameters[argumentCount]);
         argumentCount++;
 
         return baton;
@@ -741,13 +741,13 @@ NAN_METHOD(nRFjprog::Write)
 
 NAN_METHOD(nRFjprog::WriteU32)
 {
-    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE info, int &argumentCount) -> Baton* {
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new WriteU32Baton();
 
-        baton->address = Convert::getNativeUint32(info[argumentCount]);
+        baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
-        baton->data = Convert::getNativeUint32(info[argumentCount]);
+        baton->data = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
         return baton;

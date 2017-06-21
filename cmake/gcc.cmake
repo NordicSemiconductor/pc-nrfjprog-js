@@ -6,7 +6,7 @@ add_compile_options(
     -Wstrict-overflow=2
     -Wno-long-long
     -Wfloat-equal
-    #-Wshadow
+    -Wshadow
     -Wpointer-arith
     #-H # Used for debugging header dependencies. See https://docs.freebsd.org/info/gcc/gcc.info.Preprocessor_Options.html
 )
