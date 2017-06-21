@@ -52,7 +52,7 @@ static bool load_func_ptr(T * func_ptr, const char * func_name, void * dll_handl
 }
 
 
-NrfjprogErrorCodesType DllLoad(const char * path, DllFunctionPointersType * dll_function)
+errorcode_t DllLoad(const char * path, DllFunctionPointersType * dll_function)
 {
     dll = dlopen(path, RTLD_LAZY);
     if (!dll){
