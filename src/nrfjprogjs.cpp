@@ -62,8 +62,8 @@ bool nRFjprog::loaded = false;
 bool nRFjprog::connectedToDevice = false;
 errorcode_t nRFjprog::finderror = errorcode_t::JsSuccess;
 std::string nRFjprog::logMessage;
-std::unique_ptr<Nan::Callback> nRFjprog::jsProgressCallback;
-std::unique_ptr<uv_async_t> nRFjprog::progressEvent;
+Nan::Callback *nRFjprog::jsProgressCallback = nullptr;
+uv_async_t *nRFjprog::progressEvent = nullptr;
 
 struct ProgressData {
     std::string process;
@@ -100,14 +100,10 @@ NAN_METHOD(nRFjprog::New)
 
 nRFjprog::nRFjprog()
 {
-    progressEvent = std::make_unique<uv_async_t>();
-    uv_async_init(uv_default_loop(), progressEvent.get(), sendProgress);
+    progressEvent = new uv_async_t();
+    uv_async_init(uv_default_loop(), progressEvent, sendProgress);
 
     finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
-}
-
-nRFjprog::~nRFjprog()
-{
 }
 
 void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
@@ -129,7 +125,11 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
     Baton *baton = nullptr;
     uint32_t serialNumber = 0;
 
-    jsProgressCallback = nullptr;
+    if (jsProgressCallback != nullptr)
+    {
+        delete jsProgressCallback;
+        jsProgressCallback = nullptr;
+    }
 
     try
     {
@@ -144,12 +144,12 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
         if (baton->mayHaveProgressCallback && (argumentCount + 1) < info.Length())
         {
             v8::Local<v8::Function> callback = Convert::getCallbackFunction(info[argumentCount]);
-            jsProgressCallback = std::make_unique<Nan::Callback>(callback);
+            jsProgressCallback = new Nan::Callback(callback);
             argumentCount++;
         }
 
         v8::Local<v8::Function> callback = Convert::getCallbackFunction(info[argumentCount]);
-        baton->setCallback(callback);
+        baton->callback = new Nan::Callback(callback);
         argumentCount++;
 
         if (info.Length() > argumentCount)
@@ -167,7 +167,11 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
             delete baton;
         }
 
-        jsProgressCallback = nullptr;
+        if (jsProgressCallback != nullptr)
+        {
+            delete jsProgressCallback;
+            jsProgressCallback = nullptr;
+        }
 
         auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
         Nan::ThrowTypeError(message);
@@ -196,7 +200,7 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
     baton->returnFunction = ret;
     baton->serialNumber = serialNumber;
 
-    uv_queue_work(uv_default_loop(), baton->req.get(), ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
+    uv_queue_work(uv_default_loop(), baton->req, ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
 }
 
 void nRFjprog::ExecuteFunction(uv_work_t *req)
@@ -305,7 +309,11 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
         }
     }
 
-    jsProgressCallback = nullptr;
+    if (jsProgressCallback != nullptr)
+    {
+        delete jsProgressCallback;
+        jsProgressCallback = nullptr;
+    }
 
     baton->callback->Call(baton->returnParameterCount + 1, argv);
 
@@ -328,7 +336,7 @@ void nRFjprog::progressCallback(const char * process)
     {
         progress.process = std::string(process);
 
-        uv_async_send(progressEvent.get());
+        uv_async_send(progressEvent);
     }
 }
 
@@ -366,6 +374,9 @@ errorcode_t nRFjprog::loadDll()
 
     return dll_load_result;
 }
+
+nRFjprog::~nRFjprog()
+{}
 
 void nRFjprog::unloadDll()
 {
@@ -456,7 +467,7 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
                 dll_function.probe_uninit(&getFamilyProbe);
             }
 
-            baton->probes.push_back(std::make_unique<ProbeInfo>(serialNumbers[i], device_info));
+            baton->probes.push_back(new ProbeInfo(serialNumbers[i], device_info));
         }
 
         return SUCCESS;
@@ -508,6 +519,8 @@ NAN_METHOD(nRFjprog::Read)
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadBaton();
 
+        baton->data = nullptr;
+
         baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
@@ -519,15 +532,15 @@ NAN_METHOD(nRFjprog::Read)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadBaton*>(b);
-        baton->data = std::make_unique<uint8_t[]>(baton->length);
-        return dll_function.read(probe, baton->address, baton->data.get(), baton->length);
+        baton->data = new uint8_t[baton->length];
+        return dll_function.read(probe, baton->address, baton->data, baton->length);
     };
 
     return_function_t r = [&] (Baton *b) -> returnType {
         auto baton = static_cast<ReadBaton*>(b);
         returnType vector;
 
-        vector.push_back(Convert::toJsValueArray(baton->data.get(), baton->length));
+        vector.push_back(Convert::toJsValueArray(baton->data, baton->length));
 
         return vector;
     };
@@ -706,10 +719,12 @@ NAN_METHOD(nRFjprog::Write)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new WriteBaton();
+        baton->data = nullptr;
+
         baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
-        baton->data = std::unique_ptr<uint8_t[]>(Convert::getNativePointerToUint8(parameters[argumentCount]));
+        baton->data = Convert::getNativePointerToUint8(parameters[argumentCount]);
         baton->length = Convert::getLengthOfArray(parameters[argumentCount]);
         argumentCount++;
 
@@ -718,7 +733,7 @@ NAN_METHOD(nRFjprog::Write)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<WriteBaton*>(b);
-        return dll_function.write(probe, baton->address, baton->data.get(), baton->length);
+        return dll_function.write(probe, baton->address, baton->data, baton->length);
     };
 
     CallFunction(info, p, e, nullptr, true);

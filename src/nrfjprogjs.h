@@ -99,11 +99,11 @@ private:
 
     static void logCallback(const char * msg);
     static void log(std::string msg);
-
+    
     static void progressCallback(const char * process);
-    static std::unique_ptr<Nan::Callback> jsProgressCallback;
+    static Nan::Callback *jsProgressCallback;
     static void sendProgress(uv_async_t *handle);
-    static std::unique_ptr<uv_async_t> progressEvent;
+    static uv_async_t *progressEvent;
 
     static DllFunctionPointersType dll_function;
     static char dll_path[COMMON_MAX_PATH];
