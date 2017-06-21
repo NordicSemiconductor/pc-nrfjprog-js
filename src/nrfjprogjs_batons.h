@@ -44,7 +44,7 @@
 
 #define BATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, false) {}
 #define BATON_WITH_PROGRESS_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, true) {}
-#define BATON_DESTRUCTOR(BatonType) ~BatonType()
+#define BATON_DESTRUCTOR(BatonType) virtual ~BatonType() override
 
 class Baton {
 public:
@@ -56,18 +56,16 @@ public:
         result(JsSuccess),
         lowlevelError(SUCCESS)
     {
-        req = new uv_work_t();
+        req = std::make_unique<uv_work_t>();
         req->data = static_cast<void*>(this);
-        callback = nullptr;
     }
 
     virtual ~Baton()
+    { }
+
+    void setCallback(v8::Local<v8::Function> callbackFunction)
     {
-        if (callback != nullptr)
-        {
-            delete callback;
-            callback = nullptr;
-        }
+        callback = std::make_unique<Nan::Callback>(callbackFunction);
     }
 
     const uint32_t returnParameterCount;
@@ -78,8 +76,8 @@ public:
     uint32_t result;
     nrfjprogdll_err_t lowlevelError;
 
-    uv_work_t *req;
-    Nan::Callback *callback;
+    std::unique_ptr<uv_work_t> req;
+    std::unique_ptr<Nan::Callback> callback;
 
     execute_function_t executeFunction;
     return_function_t returnFunction;
@@ -98,7 +96,7 @@ class GetConnectedDevicesBaton : public Baton
 {
 public:
     BATON_CONSTRUCTOR(GetConnectedDevicesBaton, "get connected devices", 1);
-    std::vector<ProbeInfo *> probes;
+    std::vector<std::unique_ptr<ProbeInfo> > probes;
 };
 
 class GetDeviceInfoBaton : public Baton
@@ -121,18 +119,10 @@ class ReadBaton : public Baton
 {
 public:
     BATON_CONSTRUCTOR(ReadBaton, "read", 1);
-    BATON_DESTRUCTOR(ReadBaton)
-    {
-        if (data != nullptr)
-        {
-            delete[] data;
-            data = nullptr;
-        }
-    }
 
     uint32_t address;
     uint32_t length;
-    uint8_t *data;
+    std::unique_ptr<uint8_t[]> data;
 };
 
 class ReadU32Baton : public Baton
@@ -189,7 +179,7 @@ class WriteBaton : public Baton
 public:
     BATON_CONSTRUCTOR(WriteBaton, "write", 0);
     uint32_t address;
-    uint8_t *data;
+    std::unique_ptr<uint8_t[]>data;
     uint32_t length;
 };
 
