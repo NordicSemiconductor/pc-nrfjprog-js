@@ -39,16 +39,67 @@
 
 #include "nrfjprog_common.h"
 
+#include <memory>
+
 #define COMMON_MAX_PATH  (4096)   /* Arbitrarily selected MAX_PATH for every platform. */
 #define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
 #define COMMON_MAX_INI_LINE (1024)
 
 errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len);
 
-bool OSFilesExists(const char * path);
+class AbstractFile
+{
+public:
+    virtual ~AbstractFile() {};
 
-std::string OSFilesGetTempFilePath(void);
-void OSFilesDeleteFile(std::string path);
-std::string OSFilesWriteTempFile(std::string fileContent);
+    std::string getFileName();
+    virtual std::string errormessage() = 0;
+
+    static bool pathExists(const std::string &path);
+    static bool pathExists(const char *path);
+
+protected:
+    std::string filename;
+};
+
+class LocalFile : public AbstractFile
+{
+public:
+    LocalFile(std::string filename);
+    virtual std::string errormessage() override;
+};
+
+class TempFile : public AbstractFile
+{
+public:
+    TempFile(std::string fileContent);
+    virtual ~TempFile() override;
+    virtual std::string errormessage() override;
+
+private:
+    std::string writeTempFile(std::string fileContent);
+    std::string getTempFileName();
+    void deleteFile();
+    std::string concatPaths(std::string base_path, std::string relative_path);
+
+    enum TempFileErrorcode {
+        TempNoError,
+        TempPathNotFound,
+        TempCouldNotCreateFile
+    } error;
+};
+
+class FileFormatHandler
+{
+public:
+    FileFormatHandler(std::string fileinfo, input_format_t inputFormat);
+
+    std::string getFileName();
+    bool exists();
+    std::string errormessage();
+
+private:
+    std::unique_ptr<AbstractFile> file;
+};
 
 #endif

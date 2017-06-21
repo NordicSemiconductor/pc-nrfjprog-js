@@ -48,17 +48,6 @@
 
 #include <iostream>
 
-std::string OSFilesConcatPaths(std::string base_path, std::string relative_path)
-{
-    return base_path + '/' + relative_path;
-}
-
-bool OSFilesExists(const char * path)
-{
-    struct stat buffer;
-    return ((0 == stat(path, &buffer)));
-}
-
 errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
 {
     char temp_dll_path[dll_path_len];
@@ -74,7 +63,7 @@ errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
     strncpy(dll_path, dirname(temp_dll_path), dll_path_len - 1);
     strncat(dll_path, "/libhighlevelnrfjprog.so", dll_path_len - strlen(dll_path) - 1);
 
-    if (!OSFilesExists(dll_path))
+    if (!AbstractFile::pathExists(dll_path))
     {
         /* It is possible that the user might have place the .so in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
         void * dll = dlopen("libhighlevelnrfjprog.so", RTLD_LAZY);
@@ -90,6 +79,17 @@ errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
     }
 
     return errorcode_t::JsSuccess;
+}
+
+std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
+{
+    return base_path + '/' + relative_path;
+}
+
+bool AbstractFile::pathExists(const char * path)
+{
+    struct stat buffer;
+    return ((0 == stat(path, &buffer)));
 }
 
 /* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are valid, "/tmp" is returned. */
@@ -117,9 +117,9 @@ std::string OSFilesGetTempFolderPath(void)
 
 /* Return a valid, unique file name in the temp folder.
  * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
-std::string OSFilesGetTempFilePath(void)
+std::string TempFile::getTempFileName()
 {
-    std::string temp_file_name_template = OSFilesConcatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
+    std::string temp_file_name_template = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
     char temp_file_name[COMMON_MAX_PATH];
 
@@ -129,6 +129,7 @@ std::string OSFilesGetTempFilePath(void)
 
     if (temp_file == -1)
     {
+        error = TempCouldNotCreateFile;
         return std::string();
     }
 
@@ -139,10 +140,12 @@ std::string OSFilesGetTempFilePath(void)
 }
 
 
-void OSFilesDeleteFile(std::string file_path)
+void TempFile::deleteFile()
 {
-    if (OSFilesExists(file_path.c_str()))
+    if (pathExists(filename))
     {
-        remove(file_path.c_str());
+        remove(filename.c_str());
     }
+
+    filename.clear();
 }

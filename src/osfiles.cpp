@@ -39,9 +39,57 @@
 #include <iostream>
 #include <fstream>
 
-std::string OSFilesWriteTempFile(std::string fileContent)
+FileFormatHandler::FileFormatHandler(std::string fileinfo, input_format_t inputFormat)
 {
-    std::string filePath = OSFilesGetTempFilePath();
+    if (inputFormat == INPUT_FORMAT_HEX_STRING)
+    {
+        file = std::unique_ptr<AbstractFile>(new TempFile(fileinfo));
+    }
+    else
+    {
+        file = std::unique_ptr<AbstractFile>(new LocalFile(fileinfo));
+    }
+}
+
+std::string FileFormatHandler::getFileName()
+{
+    return file->getFileName();
+}
+
+bool FileFormatHandler::exists()
+{
+    return AbstractFile::pathExists(getFileName());
+}
+
+std::string FileFormatHandler::errormessage()
+{
+    return file->errormessage();
+}
+
+std::string AbstractFile::getFileName()
+{
+    return filename;
+}
+
+bool AbstractFile::pathExists(const std::string &path)
+{
+    return pathExists(path.c_str());
+}
+
+TempFile::TempFile(std::string fileContent) :
+    AbstractFile()
+{
+    filename = writeTempFile(fileContent);
+}
+
+TempFile::~TempFile()
+{
+    deleteFile();
+}
+
+std::string TempFile::writeTempFile(std::string fileContent)
+{
+    std::string filePath = getTempFileName();
 
     if (filePath.empty())
     {
@@ -54,4 +102,29 @@ std::string OSFilesWriteTempFile(std::string fileContent)
     outputfile.close();
 
     return filePath;
+}
+
+std::string TempFile::errormessage()
+{
+    switch (error)
+    {
+        default:
+        case TempNoError:
+            return "No error";
+        case TempPathNotFound:
+            return "Could not find a location to store the temp file";
+        case TempCouldNotCreateFile:
+            return "Could not create the temporary file";
+    }
+}
+
+LocalFile::LocalFile(std::string _filename) :
+    AbstractFile()
+{
+    filename = _filename;
+}
+
+std::string LocalFile::errormessage()
+{
+    return "Could not find the file " + filename;
 }

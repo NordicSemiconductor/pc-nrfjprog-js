@@ -191,7 +191,7 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 
     logCallback("===============================================\n");
     logCallback("Start of ");
-    logCallback(baton->name.c_str());
+    logCallback(baton->name);
     logCallback("\n");
     logCallback("===============================================\n");
 
@@ -321,6 +321,11 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
 }
 
 void nRFjprog::logCallback(const char * msg)
+{
+    logMessage = logMessage.append(msg);
+}
+
+void nRFjprog::logCallback(std::string msg)
 {
     logMessage = logMessage.append(msg);
 }
@@ -592,14 +597,16 @@ NAN_METHOD(nRFjprog::Program)
         auto baton = static_cast<ProgramBaton*>(b);
         nrfjprogdll_err_t programResult = SUCCESS;
 
-        if (baton->inputFormat == INPUT_FORMAT_HEX_STRING)
+        FileFormatHandler file(baton->file, baton->inputFormat);
+
+        if (!file.exists())
         {
-            baton->filename = OSFilesWriteTempFile(baton->file);
+            logCallback(file.errormessage());
+            logCallback("\n");
+            return INVALID_PARAMETER;
         }
-        else
-        {
-            baton->filename = baton->file;
-        }
+
+        baton->filename = file.getFileName();
 
         programResult = dll_function.program(probe, baton->filename.c_str(), baton->options);
 
@@ -615,11 +622,6 @@ NAN_METHOD(nRFjprog::Program)
             {
                 programResult = recoverResult;
             }
-        }
-
-        if (baton->inputFormat == INPUT_FORMAT_HEX_STRING)
-        {
-            OSFilesDeleteFile(baton->filename);
         }
 
         return programResult;

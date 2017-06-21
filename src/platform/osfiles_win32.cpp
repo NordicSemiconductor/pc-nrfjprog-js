@@ -48,11 +48,6 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-bool OSFilesExists(const char * path)
-{
-     return PathFileExists(path) == TRUE;
-}
-
 errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
 {
     HKEY key;
@@ -119,7 +114,7 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_pa
             strncat(dll_path, "highlevelnrfjprog.dll", dll_path_len - strlen(dll_path) - 1);
             RegCloseKey(innerKey);
             RegCloseKey(key);
-            if (OSFilesExists(dll_path))
+            if (TempFile::pathExists(dll_path))
             {
                 return errorcode_t::JsSuccess;
             }
@@ -145,7 +140,7 @@ errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
     return retCode;
 }
 
-std::string OSFilesConcatPaths(std::string base_path, std::string relative_path)
+std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
 {
     char buffer[MAX_PATH] = "";
 
@@ -154,12 +149,12 @@ std::string OSFilesConcatPaths(std::string base_path, std::string relative_path)
     return std::string(buffer);
 }
 
-bool OSFilesExists(const std::string &path)
+bool AbstractFile::pathExists(const char *path)
 {
-    return PathFileExists(path.c_str()) == TRUE;
+    return PathFileExists(path) == TRUE;
 }
 
-std::string OSFilesGetTempFilePath()
+std::string TempFile::getTempFileName()
 {
     /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with GetTempFileName function. */
     TCHAR temp_folder_path[MAX_PATH];
@@ -169,21 +164,25 @@ std::string OSFilesGetTempFilePath()
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {
+        error = TempPathNotFound;
         return std::string();
     }
 
     if (GetTempFileName(temp_folder_path, TEXT("NRF"), 0, temp_file_path) == 0)
     {
+        error = TempCouldNotCreateFile;
         return std::string();
     }
 
     return std::string(temp_file_path);
 }
 
-void OSFilesDeleteFile(std::string file_path)
+void TempFile::deleteFile()
 {
-    if (OSFilesExists(file_path))
+    if (pathExists(filename))
     {
-        DeleteFile(file_path.c_str());
+        DeleteFile(filename.c_str());
     }
+
+    filename.clear();
 }
