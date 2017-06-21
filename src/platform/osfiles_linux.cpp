@@ -34,12 +34,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../osfiles.h"
+
 #include <sys/stat.h>
 #include <string.h>
 #include <libgen.h>
 #include <dlfcn.h>
-
-#include "../osfiles.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -111,7 +111,7 @@ std::string OSFilesGetTempFolderPath(void)
             return std::string(val);
         }
     }
-    
+
     return std::string("/tmp");
 }
 

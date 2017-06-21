@@ -37,7 +37,6 @@
 #ifndef OS_FILES_H
 #define OS_FILES_H
 
-#include "utility/errormessage.h"
 #include "nrfjprog_common.h"
 
 #define COMMON_MAX_PATH  (4096)   /* Arbitrarily selected MAX_PATH for every platform. */

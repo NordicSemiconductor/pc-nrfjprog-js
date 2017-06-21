@@ -34,6 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../osfiles.h"
+
 #include <sys/stat.h>
 #include <string.h>
 #include <libgen.h>
@@ -46,13 +48,18 @@
 
 #include <libproc.h>  // proc pidpathinfo maxsize
 
+std::string OSFilesConcatPaths(std::string base_path, std::string relative_path)
+{
+    return base_path + '/' + relative_path;
+}
+
 bool OSFilesExists(const char * path)
 {
     struct stat buffer;
     return ((0 == stat(path, &buffer)));
 }
 
-NrfjprogErrorCodesType OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
 {
     char temp_dll_path[dll_path_len];
     memset(temp_dll_path, 0, dll_path_len);
