@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfjprog-js",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "scripts": {
