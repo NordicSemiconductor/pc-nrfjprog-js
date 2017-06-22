@@ -51,6 +51,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <thread>
 
 #define MAX_SERIAL_NUMBERS 100
 #define REPORTABLE_PROGESS 5
@@ -275,6 +276,8 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
         baton->result = errorcode_t::CouldNotCallFunction;
         baton->lowlevelError = excuteError;
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 void nRFjprog::ReturnFunction(uv_work_t *req)
