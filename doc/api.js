@@ -9,18 +9,18 @@
 
 /**
  *
- * The <tt>nrfjprogjs</tt> module exposes the functionality to the
+ * The <tt>pc-nrfjprog-js</tt> module exposes the functionality to the
  * nRF5x Command-line tools
  * to your nodeJS programs.
  *
  * @example
- * let nrfjprogjs = require('nrfjprogjs');
+ * let nrfjprogjs = require('pc-nrfjprog-js');
  *
  * nrfjprogjs.getConnectedDevices(function(err, devices) {
  *     console.log('There are ' + devices.length + ' nRF devices connected.');
- * })
+ * });
  *
- * @module nrfjprogjs
+ * @module pc-nrfjprog-js
  */
 
 /**
@@ -130,7 +130,7 @@
  * @typedef SerialNumberAndDeviceInformation
  *
  * @property {string} serialNumber
- * @property {module:nrfjprogjs~DeviceInformation} deviceInfo
+ * @property {module:pc-nrfjprog-js~DeviceInformation} deviceInfo
  */
 
 /**
@@ -184,7 +184,7 @@
  * } );
  *
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect two parameters: ({@link module:nrfjprogjs~Error|Error}, {@link module:nrfjprogjs~Version|Version}).
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~Version|Version}).
  */
 export function getDllVersion() {}
 
@@ -205,7 +205,7 @@ export function getDllVersion() {}
  * } );
  *
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect two parameters: ({@link module:nrfjprogjs~Error|Error}, Array of {@link module:nrfjprogjs~SerialNumberAndDeviceInformation|SerialNumberAndDeviceInformation}).
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of {@link module:pc-nrfjprog-js~SerialNumberAndDeviceInformation|SerialNumberAndDeviceInformation}).
  */
 export function getConnectedDevices(callback) {}
 
@@ -222,7 +222,7 @@ export function getConnectedDevices(callback) {}
  *
  * @param {integer} serialNumber The serial number of the device to query
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect two parameters: ({@link module:nrfjprogjs~Error|Error}, {@link module:nrfjprogjs~DeviceInformation|DeviceInformation}).
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~DeviceInformation|DeviceInformation}).
  */
 export function getDeviceInfo(serialNumber, callback) {}
 
@@ -246,11 +246,11 @@ export function getDeviceInfo(serialNumber, callback) {}
  *      console.log('The first 16 bytes of memory look like: ' + data.join(','));
  * } );
  *
- * @param {integer} serialNumber The serial number of the device to query
+ * @param {integer} serialNumber The serial number of the device to read memory from
  * @param {integer} address The start address of the block of memory to be read
  * @param {integer} length The amount of bytes to be read
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect two parameters: ({@link module:nrfjprogjs~Error|Error}, Array of integers).
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of integers).
  */
 export function read(serialNumber, address, length, callback) {}
 
@@ -273,10 +273,10 @@ export function read(serialNumber, address, length, callback) {}
  *      console.log('The first word of memory looks like: ' + data);
  * } );
  *
- * @param {integer} serialNumber The serial number of the device to query
+ * @param {integer} serialNumber The serial number of the device to read memory from
  * @param {integer} address The address of the word to be read
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect two parameters: ({@link module:nrfjprogjs~Error|Error}, integer).
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, integer).
  */
 export function readU32(serialNumber, address, callback) {}
 
@@ -293,11 +293,11 @@ export function readU32(serialNumber, address, callback) {}
  *      if (err) throw err;
  * } );
  *
- * @param {integer} serialNumber The serial number of the device to query
+ * @param {integer} serialNumber The serial number of the device to program
  * @param {string} filename Either the filename of the <tt>.hex</tt> file containing the program, or the contents of such a file.
- * @param {module:nrfjprogjs~ProgramOptions} options A plain object containing options about how to push the program.
+ * @param {module:pc-nrfjprog-js~ProgramOptions} options A plain object containing options about how to push the program.
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect one parameter: ({@link module:nrfjprogjs~Error|Error}).
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function program(serialNumber, filename, options, callback) {}
 
@@ -318,11 +318,11 @@ export function readToFile(serialNumber, filename, options) {}
  *      if (err) throw err;
  * } );
  *
- * @param {integer} serialNumber The serial number of the device to query
+ * @param {integer} serialNumber The serial number of the device
  * @param {string} filename The filename of the <tt>.hex</tt> file containing the program.
  * @param {Object} options={} Reserved for future use.
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect one parameter: ({@link module:nrfjprogjs~Error|Error}).
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function verify(serialNumber, filename, callback) {}
 
@@ -334,12 +334,12 @@ export function verify(serialNumber, filename, callback) {}
  *
  * This is the same functionality as running "<tt>nrfjprog --erasepage</tt>" in the command-line tools.<br/>
  *
- * Will not erase a locked device. To erase a locked device, use {@link module:nrfjprogjs~recover|recover}
+ * Will not erase a locked device. To erase a locked device, use {@link module:pc-nrfjprog-js~recover|recover}
  *
- * @param {integer} serialNumber The serial number of the device to query
- * @param {module:nrfjprogjs~EraseOptions} options Options on how to erase the device memory
+ * @param {integer} serialNumber The serial number of the device
+ * @param {module:pc-nrfjprog-js~EraseOptions} options Options on how to erase the device memory
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect one parameter: ({@link module:nrfjprogjs~Error|Error}).
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function erase(serialNumber, options, callback) {}
 
@@ -354,12 +354,12 @@ export function erase(serialNumber, options, callback) {}
  *
  * This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the command-line tools.
  *
- * @param {integer} serialNumber The serial number of the device to query
- * @param {module:nrfjprogjs~EraseOptions} filename The filename of the <tt>.hex</tt> file containing the program.
+ * @param {integer} serialNumber The serial number of the device to recover
+ * @param {module:pc-nrfjprog-js~EraseOptions} options Options on how to perform the memory recovery
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect one parameter: ({@link module:nrfjprogjs~Error|Error}).
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function recover(serialNumber, filename, callback) {}
+export function recover(serialNumber, options, callback) {}
 
 
 // TODO: Check that this equates to "--memwr" and not to "--ramwr"
@@ -372,11 +372,11 @@ export function recover(serialNumber, filename, callback) {}
  * most likely fail.
  * <br/>
  *
- * @param {integer} serialNumber The serial number of the device to query
- * @param {integer} address The filename of the <tt>.hex</tt> file containing the program.
+ * @param {integer} serialNumber The serial number of the device to write memory to
+ * @param {integer} address The start address of the block of memory to be written
  * @param {Array.integer} data Array of byte values to be written
- * @param {Function} callback A callback function to handle the async response.
- *   It shall expect one parameter: ({@link module:nrfjprogjs~Error|Error}).
+ * @param {Function} callback A callback function to handle the async response
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function write(serialNumber, address, data, callback) {}
 
@@ -391,11 +391,11 @@ export function write(serialNumber, address, data, callback) {}
  * or a {@link https://nodejs.org/api/buffer.html|Buffer}.
  * <br/>
  *
- * @param {integer} serialNumber The serial number of the device to query
- * @param {integer} address The filename of the <tt>.hex</tt> file containing the program.
- * @param {integer} data Array of byte values to be written
+ * @param {integer} serialNumber The serial number of the device to write memory to
+ * @param {integer} address Address of the memory word to be written
+ * @param {integer} data Value to be written
  * @param {Function} callback A callback function to handle the async response.
- *   It shall expect one parameter: ({@link module:nrfjprogjs~Error|Error}).
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function writeU32(serialNumber, address, data, callback) {}
 
