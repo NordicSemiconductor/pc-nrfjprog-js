@@ -66,6 +66,13 @@
  * });
  */
 
+/**
+ * Progress information.<br />
+ * Long running operations can indicate progress. If the optional progress callback is used, this object will be sent when progress is made.
+ * @typedef Progress
+ * @property {string} process An indication of what subprocess is performed.
+ */
+
 
 /**
  * Represents a semver-like version number, e.g. 9.6.0 as an object of the form
@@ -156,21 +163,30 @@
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/>
- * @property {boolean} reset Whether the device should be reset after programming
+ * @property {boolean} reset=true Whether the device should be reset after programming.
  */
 
 /**
- * Erase flags to be used when sending a program to the device.
+ * Option flags to be used when reading the content of the device.
+ * @typedef ReadToFileOptions
+ * @property {boolean} readram=false Read the contents of the ram
+ * @property {boolean} readcode=true Read the contents of the flash
+ * @property {boolean} readuicr=false Read the contents of the uicr
+ * @property {boolean} readqspi=false Read the contents of the qspi
+  */
+
+/**
+ * Flags to be used when erasing a device.
  * @typedef EraseOptions
- * @property {integer} erase_mode
+ * @property {integer} erase_mode=nrfjporgjs.ERASE_ALL
  *    How much of the memory should be erased. Value must be one of:<br/>
  *    <tt>nrfjprogjs.ERASE_NONE</tt><br/>
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/>
- * @property {integer} start_address
+ * @property {integer} start_address=0
  *    Start erasing from this address. Only relevant when using <tt>ERASE_PAGES</tt> or <tt>ERASE_PAGES_INCLUDING_UICR</tt> modes.
- * @property {integer} end_address
+ * @property {integer} end_address=0
  *    Erasing up to this address. Only relevant when using <tt>ERASE_PAGES</tt> or <tt>ERASE_PAGES_INCLUDING_UICR</tt> modes.
  */
 
@@ -186,7 +202,7 @@
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~Version|Version}).
  */
-export function getDllVersion() {}
+export function getDllVersion(callback) {}
 
 /**
  * Async function to get a list of all connected devices.
@@ -286,7 +302,9 @@ export function readU32(serialNumber, address, callback) {}
  * Async function to push a program to the device.
  * <br/>
  *
- * This is the same functionality as running "<tt>nrfjprog --program</tt>" in the command-line tools.
+ * This is the same functionality as running "<tt>nrfjprog --program</tt>" in the command-line tools.<br />
+ *
+ * If the {@link module:pc-nrfjprog-js~ProgramOptions|ProgramOption} chip_erase_mode is ERASE_ALL, this function will recover the device if it initially is not allowed to program the device due to protection.
  *
  * @example
  * nrfjprogjs.program(123456789, "/some/path/nrf52832_abcd.hex", {}, function(err) {
@@ -296,15 +314,31 @@ export function readU32(serialNumber, address, callback) {}
  * @param {integer} serialNumber The serial number of the device to program
  * @param {string} filename Either the filename of the <tt>.hex</tt> file containing the program, or the contents of such a file.
  * @param {module:pc-nrfjprog-js~ProgramOptions} options A plain object containing options about how to push the program.
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function program(serialNumber, filename, options, callback) {}
+export function program(serialNumber, filename, options, progressCallback, callback) {}
 
 
-// TODO
-//     static NAN_METHOD(ReadToFile); // Params: serialNumber, filename, options {readram, readcode, readuicr, readqspi}, callback(error)
-export function readToFile(serialNumber, filename, options) {}
+/**
+ * Async function to read a program from the device.
+ * <br />
+ *
+ * This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the command-line tools.
+ * @example
+ * nrfjprogjs.readToFile(123456789, "/some/path/to/store/file.hex", {}, function(err) {
+ *      if (err) throw err;
+ * } );
+ *
+ * @param {integer} serialNumber The serial number of the device to read
+ * @param {string} filename The filename of the <tt>.hex</tt> file where the content of the device should be stored.
+ * @param {module:pc-nrfjprog-js~ReadToFileOptions} options A plain object containing options about what to read.
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function readToFile(serialNumber, filename, options, progressCallback, callback) {}
 
 
 /**
@@ -321,10 +355,11 @@ export function readToFile(serialNumber, filename, options) {}
  * @param {integer} serialNumber The serial number of the device
  * @param {string} filename The filename of the <tt>.hex</tt> file containing the program.
  * @param {Object} options={} Reserved for future use.
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function verify(serialNumber, filename, callback) {}
+export function verify(serialNumber, filename, options, progressCallback, callback) {}
 
 
 
@@ -338,11 +373,11 @@ export function verify(serialNumber, filename, callback) {}
  *
  * @param {integer} serialNumber The serial number of the device
  * @param {module:pc-nrfjprog-js~EraseOptions} options Options on how to erase the device memory
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function erase(serialNumber, options, callback) {}
-
+export function erase(serialNumber, options, progressCallback, callback) {}
 
 
 /**
@@ -356,10 +391,11 @@ export function erase(serialNumber, options, callback) {}
  *
  * @param {integer} serialNumber The serial number of the device to recover
  * @param {module:pc-nrfjprog-js~EraseOptions} options Options on how to perform the memory recovery
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function recover(serialNumber, options, callback) {}
+export function recover(serialNumber, options, progressCallback, callback) {}
 
 
 // TODO: Check that this equates to "--memwr" and not to "--ramwr"

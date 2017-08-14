@@ -610,7 +610,8 @@ NAN_METHOD(nRFjprog::Program)
 
         programResult = dll_function.program(probe, baton->filename.c_str(), baton->options);
 
-        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION)
+        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION &&
+            baton->options.chip_erase_mode == ERASE_ALL)
         {
             const nrfjprogdll_err_t recoverResult = dll_function.recover(probe);
 
