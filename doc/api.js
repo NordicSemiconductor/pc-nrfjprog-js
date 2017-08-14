@@ -150,7 +150,7 @@
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/>
- * @property {boolean} qspi_erase_mose=nrfjprogjs.ERASE_NONE
+ * @property {boolean} qspi_erase_mode=nrfjprogjs.ERASE_NONE
  *    How much of the QSPI memory should be erased. Value must be one of:<br/>
  *    <tt>nrfjprogjs.ERASE_NONE</tt><br/>
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
@@ -398,10 +398,3 @@ export function write(serialNumber, address, data, callback) {}
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function writeU32(serialNumber, address, data, callback) {}
-
-
-
-
-
-
-
