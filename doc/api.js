@@ -150,7 +150,7 @@
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/>
- * @property {boolean} qspi_erase_mode=nrfjprogjs.ERASE_NONE
+ * @property {integer} qspi_erase_mode=nrfjprogjs.ERASE_NONE
  *    How much of the QSPI memory should be erased. Value must be one of:<br/>
  *    <tt>nrfjprogjs.ERASE_NONE</tt><br/>
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
@@ -162,15 +162,15 @@
 /**
  * Erase flags to be used when sending a program to the device.
  * @typedef EraseOptions
- * @property {boolean} erase_mode
+ * @property {integer} erase_mode
  *    How much of the memory should be erased. Value must be one of:<br/>
  *    <tt>nrfjprogjs.ERASE_NONE</tt><br/>
  *    <tt>nrfjprogjs.ERASE_ALL</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
  *    <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/>
- * @property {boolean} start_address
+ * @property {integer} start_address
  *    Start erasing from this address. Only relevant when using <tt>ERASE_PAGES</tt> or <tt>ERASE_PAGES_INCLUDING_UICR</tt> modes.
- * @property {boolean} end_address
+ * @property {integer} end_address
  *    Erasing up to this address. Only relevant when using <tt>ERASE_PAGES</tt> or <tt>ERASE_PAGES_INCLUDING_UICR</tt> modes.
  */
 
