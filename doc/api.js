@@ -434,3 +434,27 @@ export function write(serialNumber, address, data, callback) {}
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function writeU32(serialNumber, address, data, callback) {}
+
+/**
+ * Async function to open and keep open a connection to a device. This will reduce the time needed to set up and tear down
+ * connections between function calls to other device specific functions in the API.<br />
+ *
+ * You can only have a connection to one device open at a time.<br />
+ *
+ * You will need to close the connection with close.<br />
+ *
+ * @param {integer} serialNumber The serial number of the device to open
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function open(serialNumber, callback) {}
+
+/**
+ * Async function to close a connection to a device opened by open. This will reduce the time needed to set up and tear down
+ * connections between function calls to other device specific functions in the API.<br />
+ *
+ * @param {integer} serialNumber The serial number of the device to close
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function close(serialNumber, callback) {}
