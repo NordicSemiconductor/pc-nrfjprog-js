@@ -84,7 +84,12 @@
  */
 
 /**
- * Represents information of an individual device
+ * Represents information of an individual device.
+ *
+ * The fields in this data structure about non-volatile memory, RAM, UICR and QSPI can also
+ * be found in the product specifications available
+ * at http://infocenter.nordicsemi.com, under the "Memory" section of each product model.
+ *
  * @typedef DeviceInformation
  *
  * @property {integer} family
@@ -113,23 +118,32 @@
  *    <tt>nrfjprogjs.NRF52832_xxAB_FUTURE</tt><br/>
  *    <tt>nrfjprogjs.NRF51801_xxAB_REV3</tt><br/>
  *
- * @property {integer} codeAddress
- * @property {integer} codePageSize
- * @property {integer} codeSize
+ * @property {integer} codeAddress  Memory address for the start of the non-volatile (flash) memory block.
+ *   Typically <tt>0x0000 0000</tt>.
+ * @property {integer} codePageSize Size of each page of non-volatile (flash) memory.
+ * @property {integer} codeSize     Total size of the non-volatile (flash) memory
  *
- * @property {integer} uicrAddress
- * @property {integer} infoPageSize
+ * @property {integer} uicrAddress  Memory address for the start of the UICR
+ *   (User Information Configuration Registers). Typically <tt>0x1000 1000</tt>.
+ * @property {integer} infoPageSize Size of the FICR/UICR. Typically 4KiB.
  *
- * @property {boolean} codeRamPresent
- * @property {integer} codeRamAddress
- * @property {integer} dataRamAddress
- * @property {integer} ramSize
+ * @property {integer} dataRamAddress Memory address for the start of the volatile RAM.
+ *   Typically <tt>0x2000 0000</tt>, in the SRAM memory region.
+ * @property {integer} ramSize        Size of the volatile RAM, in bytes.
+ * @property {boolean} codeRamPresent Whether the volatile RAM is also mapped to a executable memory region or not.
+ * @property {integer} codeRamAddress Memory address for the volatile RAM, in the code memory region.
+ *   When <tt>codeRamPresent</tt> is true, both <tt>codeRamAddress</tt> and
+ *   <tt>dataRamAddress</tt> point to the same volatile RAM, but the hardware
+ *   uses a different data bus in each case.
  *
- * @property {boolean} qspiPresent
- * @property {integer} xipAddress
- * @property {integer} xipSize
+ * @property {boolean} qspiPresent  Whether QSPI (Quad Serial Peripheral Interface) is present or not.
+ * @property {integer} xipAddress   When <tt>qspiPresent</tt> is true, the memory address for the
+ *   XIP (eXecute In Place) feature. This memory address maps to the external flash
+ *   memory connected through QSPI.
+ * @property {integer} xipSize      Size of the XIP memory region.
  *
- * @property {integer} pinResetPin
+ * @property {integer} pinResetPin  Which pin acts as the reset pin. e.g. a value of <tt>21</tt>
+ *   means that the pin marked as "P0.21" acts as the reset pin.
  */
 
 /**
