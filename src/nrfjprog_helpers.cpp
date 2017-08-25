@@ -94,8 +94,14 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
         eraseMode = (erase_action_t)Convert::getNativeUint32(obj, "erase_mode");
     }
 
-    if (Utility::Has(obj, "start_adress"))
+    if (Utility::Has(obj, "start_address"))
     {
+        startAddress = Convert::getNativeUint32(obj, "start_address");
+    }
+    else if (Utility::Has(obj, "start_adress"))
+    {
+        // Legacy support - the right name for the option is "start aDDress". This
+        // code block is here to let software using the old (and wrong) spelling work still.
         startAddress = Convert::getNativeUint32(obj, "start_adress");
     }
 
