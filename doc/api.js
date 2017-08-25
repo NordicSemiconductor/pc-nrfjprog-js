@@ -264,6 +264,10 @@ export function getDeviceInfo(serialNumber, callback) {}
  * from 0 to 255).
  * <br/>
  *
+ * The read operation happens without verifying that the addresses are accessible or
+ * even exist. Note that if the target address is in unpowered RAM, the operation will fail.
+ * <br/>
+ *
  * Please note that the data is an array of numbers - it is NOT a {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array|UInt8Array},
  * and it is NOT a {@link https://nodejs.org/api/buffer.html|Buffer}.
  * <br/>
@@ -289,6 +293,11 @@ export function read(serialNumber, address, length, callback) {}
 // TODO: What is the endianness of this???
 /**
  * Async function to read a single 4-byte word from memory.
+ * <br/>
+ *
+ * The read operation happens without verifying that the addresses are accessible or
+ * even exist. The address parameter needs to be 32-bit aligned (must be a multiple of 4).
+ * Note that if the target address is in unpowered RAM, the operation will fail.
  * <br/>
  *
  * Please note that the data is a number - it is NOT a {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array|UInt32Array},
@@ -336,8 +345,12 @@ export function program(serialNumber, filename, options, progressCallback, callb
 
 
 /**
- * Async function to read a program from the device.
+ * Async function to read memory from the device and write the results into a file.
  * <br />
+ *
+ * The read operation happens without verifying that the addresses are accessible or
+ * even exist. Note that if the target address is in unpowered RAM, the operation will fail.
+ * <br/>
  *
  * This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the command-line tools.
  * @example
@@ -358,6 +371,8 @@ export function readToFile(serialNumber, filename, options, progressCallback, ca
 /**
  * Async function to verify the program in the device
  * <br/>
+ *
+ * Compares the contents of the provided .hex file against the contents of the memory of the device connected.<br/>
  *
  * This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the command-line tools.
  *
@@ -398,8 +413,11 @@ export function erase(serialNumber, options, progressCallback, callback) {}
  * Async function to recover a device
  * <br/>
  *
- * Recover the whole chip by removing all user accessible content.
- * <br/>
+ * This operation attempts to recover the device and leave it as it was when it left Nordic factory. It will attempt to
+ * connect, erase all user available flash, halt and eliminate any protection. Note that this operation may take up to 30 s
+ * if the device was readback protected. Note as well that this function only affects internal flash and CPU, but does not
+ * erase, reset or stop any peripheral, oscillator source nor extarnally QSPI-connected flash. The operation will therefore
+ * leave the watchdog still operational if it was running.<br/>
  *
  * This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the command-line tools.
  *
