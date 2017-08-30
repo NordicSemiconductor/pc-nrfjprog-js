@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "jshint api/ test/ && jscs api/ test/",
     "install": "node build.js",
+    "docs": "jsdoc doc/api.js -t node_modules/minami/ -d doc/",
     "test": "jest --runInBand --verbose",
     "test-watch": "jest --watch --runInBand"
   },
@@ -25,6 +26,8 @@
     "nan": "2.3.3"
   },
   "devDependencies": {
-    "jest": "^19.0.2"
+    "jest": "^19.0.2",
+    "jsdoc": "^3.5.4",
+    "minami": "^1.2.3"
   }
 }

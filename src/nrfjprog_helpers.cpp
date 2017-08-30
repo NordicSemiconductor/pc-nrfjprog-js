@@ -108,7 +108,7 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
 ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
 {
     options.readram = false;
-    options.readcode = false;
+    options.readcode = true;
     options.readuicr = false;
     options.readqspi = false;
 
