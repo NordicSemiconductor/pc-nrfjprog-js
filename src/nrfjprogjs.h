@@ -71,18 +71,18 @@ private:
 
     static NAN_METHOD(GetDeviceInfo); // Params: serialnumber, callback(error, family)
 
-    static NAN_METHOD(Read); // Params: serialnumber, address, length, callback(error, data)
-    static NAN_METHOD(ReadU32); // Params: serialnumber, address, callback(error, data)
+    static NAN_METHOD(Read);        // Params: serialnumber, address, length, callback(error, data)
+    static NAN_METHOD(ReadU32);     // Params: serialnumber, address, callback(error, data)
 
-    static NAN_METHOD(Program); // Params: serialnumber, filename, options {verify, chip_erase_mode, qspi_erase_mode, reset}, callback(progress), callback(error)
-    static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode, readuicr, readqspi}, callback(error)
-    static NAN_METHOD(Verify); // Params: serialnumber, filename, callback(error)
-    static NAN_METHOD(Erase); // Params: serialnumber, options {erase_mode, start_address, end_address}, callback(error)
+    static NAN_METHOD(Program);     // Params: serialnumber, filename, options {verify, chip_erase_mode, qspi_erase_mode, reset}, callback(progress), callback(error)
+    static NAN_METHOD(ReadToFile);  // Params: serialnumber, filename, options {readram, readcode, readuicr, readqspi}, callback(progress), callback(error)
+    static NAN_METHOD(Verify);      // Params: serialnumber, filename, callback(progress), callback(error)
+    static NAN_METHOD(Erase);       // Params: serialnumber, options {erase_mode, start_address, end_address}, callback(progress), callback(error)
 
-    static NAN_METHOD(Recover); // Params: serialnumber, callback(progress), callback(error)
+    static NAN_METHOD(Recover);     // Params: serialnumber, callback(progress), callback(error)
 
-    static NAN_METHOD(Write); // Params: serialnumber, address, dataarray, callback(error)
-    static NAN_METHOD(WriteU32); // Params: serialnumber, address, data, callback(error)
+    static NAN_METHOD(Write);       // Params: serialnumber, address, dataarray, callback(error)
+    static NAN_METHOD(WriteU32);    // Params: serialnumber, address, data, callback(error)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                              const parse_parameters_function_t parse,
@@ -99,7 +99,7 @@ private:
 
     static void logCallback(const char * msg);
     static void log(std::string msg);
-    
+
     static void progressCallback(const char * process);
     static Nan::Callback *jsProgressCallback;
     static void sendProgress(uv_async_t *handle);
