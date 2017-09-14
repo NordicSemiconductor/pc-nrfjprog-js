@@ -422,12 +422,11 @@ export function erase(serialNumber, options, progressCallback, callback) {}
  * This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the command-line tools.
  *
  * @param {integer} serialNumber The serial number of the device to recover
- * @param {module:pc-nrfjprog-js~EraseOptions} options Options on how to perform the memory recovery
  * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function recover(serialNumber, options, progressCallback, callback) {}
+export function recover(serialNumber, progressCallback, callback) {}
 
 
 // TODO: Check that this equates to "--memwr" and not to "--ramwr"
