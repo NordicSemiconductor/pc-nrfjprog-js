@@ -105,4 +105,17 @@ describe('Single device - non-destructive', () => {
 
         nRFjprog.readU32(device.serialNumber, 0x0, callback);
     });
+
+    it('reads more than 0x10000 bytes', done => {
+        const readLength = 0x10004;
+
+        const callback = (err, contents) => {
+            expect(err).toBeUndefined();
+            expect(contents).toBeDefined();
+            expect(contents.length).toBe(readLength);
+            done();
+        };
+
+        nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
+    });
 });

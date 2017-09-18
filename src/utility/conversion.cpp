@@ -361,7 +361,19 @@ v8::Handle<v8::Value> Convert::toJsNumber(uint32_t nativeValue)
     return scope.Escape(Nan::New<v8::Integer>(nativeValue));
 }
 
+v8::Handle<v8::Value> Convert::toJsNumber(int16_t nativeValue)
+{
+    Nan::EscapableHandleScope scope;
+    return scope.Escape(Nan::New<v8::Integer>(nativeValue));
+}
+
 v8::Handle<v8::Value> Convert::toJsNumber(uint16_t nativeValue)
+{
+    Nan::EscapableHandleScope scope;
+    return scope.Escape(Nan::New<v8::Integer>(nativeValue));
+}
+
+v8::Handle<v8::Value> Convert::toJsNumber(int8_t nativeValue)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::Integer>(nativeValue));
@@ -385,13 +397,13 @@ v8::Handle<v8::Value> Convert::toJsBool(uint8_t nativeValue)
     return scope.Escape(Nan::New<v8::Boolean>(nativeValue ? true : false));
 }
 
-v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t *nativeData, uint16_t length)
+v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t *nativeData, uint32_t length)
 {
     Nan::EscapableHandleScope scope;
 
     v8::Local<v8::Array> valueArray = Nan::New<v8::Array>(length);
 
-    for (int i = 0; i < length; ++i)
+    for (uint32_t i = 0; i < length; ++i)
     {
         valueArray->Set(i, Convert::toJsNumber(nativeData[i]));
     }
