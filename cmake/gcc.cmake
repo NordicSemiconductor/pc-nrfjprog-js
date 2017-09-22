@@ -12,7 +12,6 @@ add_compile_options(
 )
 
 add_compile_options(
-    -std=c++11
     -Wlogical-op
 )
 
