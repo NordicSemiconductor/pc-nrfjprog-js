@@ -36,10 +36,6 @@
 #ifndef __NRFJPROG_H__
 #define __NRFJPROG_H__
 
-#if __cplusplus <= 199711L
-  #error This library needs at least a C++11 compliant compiler
-#endif
-
 #include <nan.h>
 #include "common.h"
 #include "dllfunc.h"
