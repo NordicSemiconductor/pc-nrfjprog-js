@@ -43,6 +43,8 @@
 
 #include "utility/errormessage.h"
 
+#include <functional>
+
 class Baton;
 
 typedef std::vector<v8::Local<v8::Value> > returnType;
