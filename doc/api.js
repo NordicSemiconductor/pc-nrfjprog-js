@@ -84,7 +84,12 @@
  */
 
 /**
- * Represents information of an individual device
+ * Represents information of an individual device.
+ *
+ * The fields in this data structure about non-volatile memory, RAM, UICR and QSPI can also
+ * be found in the product specifications available
+ * at http://infocenter.nordicsemi.com, under the "Memory" section of each product model.
+ *
  * @typedef DeviceInformation
  *
  * @property {integer} family
@@ -113,23 +118,32 @@
  *    <tt>nrfjprogjs.NRF52832_xxAB_FUTURE</tt><br/>
  *    <tt>nrfjprogjs.NRF51801_xxAB_REV3</tt><br/>
  *
- * @property {integer} codeAddress
- * @property {integer} codePageSize
- * @property {integer} codeSize
+ * @property {integer} codeAddress  Memory address for the start of the non-volatile (flash) memory block.
+ *   Typically <tt>0x0000 0000</tt>.
+ * @property {integer} codePageSize Size of each page of non-volatile (flash) memory.
+ * @property {integer} codeSize     Total size of the non-volatile (flash) memory
  *
- * @property {integer} uicrAddress
- * @property {integer} infoPageSize
+ * @property {integer} uicrAddress  Memory address for the start of the UICR
+ *   (User Information Configuration Registers). Typically <tt>0x1000 1000</tt>.
+ * @property {integer} infoPageSize Size of the FICR/UICR. Typically 4KiB.
  *
- * @property {boolean} codeRamPresent
- * @property {integer} codeRamAddress
- * @property {integer} dataRamAddress
- * @property {integer} ramSize
+ * @property {integer} dataRamAddress Memory address for the start of the volatile RAM.
+ *   Typically <tt>0x2000 0000</tt>, in the SRAM memory region.
+ * @property {integer} ramSize        Size of the volatile RAM, in bytes.
+ * @property {boolean} codeRamPresent Whether the volatile RAM is also mapped to a executable memory region or not.
+ * @property {integer} codeRamAddress Memory address for the volatile RAM, in the code memory region.
+ *   When <tt>codeRamPresent</tt> is true, both <tt>codeRamAddress</tt> and
+ *   <tt>dataRamAddress</tt> point to the same volatile RAM, but the hardware
+ *   uses a different data bus in each case.
  *
- * @property {boolean} qspiPresent
- * @property {integer} xipAddress
- * @property {integer} xipSize
+ * @property {boolean} qspiPresent  Whether QSPI (Quad Serial Peripheral Interface) is present or not.
+ * @property {integer} xipAddress   When <tt>qspiPresent</tt> is true, the memory address for the
+ *   XIP (eXecute In Place) feature. This memory address maps to the external flash
+ *   memory connected through QSPI.
+ * @property {integer} xipSize      Size of the XIP memory region.
  *
- * @property {integer} pinResetPin
+ * @property {integer} pinResetPin  Which pin acts as the reset pin. e.g. a value of <tt>21</tt>
+ *   means that the pin marked as "P0.21" acts as the reset pin.
  */
 
 /**
@@ -250,6 +264,10 @@ export function getDeviceInfo(serialNumber, callback) {}
  * from 0 to 255).
  * <br/>
  *
+ * The read operation happens without verifying that the addresses are accessible or
+ * even exist. Note that if the target address is in unpowered RAM, the operation will fail.
+ * <br/>
+ *
  * Please note that the data is an array of numbers - it is NOT a {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array|UInt8Array},
  * and it is NOT a {@link https://nodejs.org/api/buffer.html|Buffer}.
  * <br/>
@@ -275,6 +293,11 @@ export function read(serialNumber, address, length, callback) {}
 // TODO: What is the endianness of this???
 /**
  * Async function to read a single 4-byte word from memory.
+ * <br/>
+ *
+ * The read operation happens without verifying that the addresses are accessible or
+ * even exist. The address parameter needs to be 32-bit aligned (must be a multiple of 4).
+ * Note that if the target address is in unpowered RAM, the operation will fail.
  * <br/>
  *
  * Please note that the data is a number - it is NOT a {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array|UInt32Array},
@@ -322,8 +345,12 @@ export function program(serialNumber, filename, options, progressCallback, callb
 
 
 /**
- * Async function to read a program from the device.
+ * Async function to read memory from the device and write the results into a file.
  * <br />
+ *
+ * The read operation happens without verifying that the addresses are accessible or
+ * even exist. Note that if the target address is in unpowered RAM, the operation will fail.
+ * <br/>
  *
  * This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the command-line tools.
  * @example
@@ -344,6 +371,8 @@ export function readToFile(serialNumber, filename, options, progressCallback, ca
 /**
  * Async function to verify the program in the device
  * <br/>
+ *
+ * Compares the contents of the provided .hex file against the contents of the memory of the device connected.<br/>
  *
  * This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the command-line tools.
  *
@@ -384,18 +413,20 @@ export function erase(serialNumber, options, progressCallback, callback) {}
  * Async function to recover a device
  * <br/>
  *
- * Recover the whole chip by removing all user accessible content.
- * <br/>
+ * This operation attempts to recover the device and leave it as it was when it left Nordic factory. It will attempt to
+ * connect, erase all user available flash, halt and eliminate any protection. Note that this operation may take up to 30 s
+ * if the device was readback protected. Note as well that this function only affects internal flash and CPU, but does not
+ * erase, reset or stop any peripheral, oscillator source nor extarnally QSPI-connected flash. The operation will therefore
+ * leave the watchdog still operational if it was running.<br/>
  *
  * This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the command-line tools.
  *
  * @param {integer} serialNumber The serial number of the device to recover
- * @param {module:pc-nrfjprog-js~EraseOptions} options Options on how to perform the memory recovery
  * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
-export function recover(serialNumber, options, progressCallback, callback) {}
+export function recover(serialNumber, progressCallback, callback) {}
 
 
 // TODO: Check that this equates to "--memwr" and not to "--ramwr"
