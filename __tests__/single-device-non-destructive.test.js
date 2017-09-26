@@ -110,6 +110,7 @@ describe('Single device - non-destructive', () => {
         const readLength = 10;
 
         const callback = (err, contents) => {
+            expect(err).toBeUndefined();
             nRFjprog.close(device.serialNumber, (err) => {
                 expect(err).toBeUndefined();
                 expect(contents.length).toBe(readLength);
@@ -118,6 +119,7 @@ describe('Single device - non-destructive', () => {
         };
 
         nRFjprog.open(device.serialNumber, (err) => {
+            expect(err).toBeUndefined();
             nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
         });
     });
