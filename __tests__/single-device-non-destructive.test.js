@@ -105,4 +105,21 @@ describe('Single device - non-destructive', () => {
 
         nRFjprog.readU32(device.serialNumber, 0x0, callback);
     });
+
+    it('keeps connection open when using open/close', done => {
+        const readLength = 10;
+
+        const callback = (err, contents) => {
+            nRFjprog.close(device.serialNumber, (err) => {
+
+                expect(contents.length).toBe(readLength);
+                done();
+            });
+        };
+
+        nRFjprog.open(device.serialNumber, (err) => {
+            nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
+        }
+        );
+    });
 });

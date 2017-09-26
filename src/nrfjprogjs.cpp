@@ -410,6 +410,9 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 
     Nan::SetPrototypeMethod(tpl, "write", Write);
     Nan::SetPrototypeMethod(tpl, "writeU32", WriteU32);
+
+    Nan::SetPrototypeMethod(tpl, "open", OpenDevice);
+    Nan::SetPrototypeMethod(tpl, "close", CloseDevice);
 }
 
 NAN_METHOD(nRFjprog::GetDllVersion)
