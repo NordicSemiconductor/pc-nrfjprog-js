@@ -111,7 +111,7 @@ describe('Single device - non-destructive', () => {
 
         const callback = (err, contents) => {
             nRFjprog.close(device.serialNumber, (err) => {
-
+                expect(err).toBeUndefined();
                 expect(contents.length).toBe(readLength);
                 done();
             });
