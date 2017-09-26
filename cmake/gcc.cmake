@@ -8,12 +8,8 @@ add_compile_options(
     -Wfloat-equal
     -Wshadow
     -Wpointer-arith
-    #-H # Used for debugging header dependencies. See https://docs.freebsd.org/info/gcc/gcc.info.Preprocessor_Options.html
-)
-
-add_compile_options(
-    -std=c++11
     -Wlogical-op
+    #-H # Used for debugging header dependencies. See https://docs.freebsd.org/info/gcc/gcc.info.Preprocessor_Options.html
 )
 
 file (GLOB PLATFORM_SOURCE_FILES
