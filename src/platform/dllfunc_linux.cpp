@@ -95,6 +95,14 @@ errorcode_t DllLoad(const char * path, DllFunctionPointersType * dll_function)
         return errorcode_t::CouldNotLoadDLL;
     }
 
+    if (!load_func_ptr(&dll_function->get_library_info, "NRFJPROG_get_library_info", dll)) {
+        return errorcode_t::CouldNotLoadDLL;
+    }
+
+    if (!load_func_ptr(&dll_function->get_probe_info, "NRFJPROG_get_probe_info", dll)) {
+        return errorcode_t::CouldNotLoadDLL;
+    }
+
     if (!load_func_ptr(&dll_function->get_device_info, "NRFJPROG_get_device_info", dll)) {
         return errorcode_t::CouldNotLoadDLL;
     }

@@ -55,6 +55,20 @@ private:
     const device_info_t device_info;
 };
 
+class ProbeInfo2
+{
+  public:
+    ProbeInfo2(probe_info_t _probe_info) :
+        probe_info(_probe_info)
+    {
+    }
+
+    v8::Local<v8::Object> ToJs();
+
+  private:
+    const probe_info_t probe_info;
+};
+
 class DeviceInfo
 {
 public:
@@ -66,6 +80,19 @@ public:
 
 private:
     const device_info_t device_info;
+};
+
+class LibraryInfo
+{
+public:
+    LibraryInfo(library_info_t _library_info) :
+        library_info(_library_info)
+    {}
+
+    v8::Local<v8::Object> ToJs();
+
+private:
+    const library_info_t library_info;
 };
 
 class EraseOptions

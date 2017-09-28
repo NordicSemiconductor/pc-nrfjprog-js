@@ -50,6 +50,18 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
     return scope.Escape(obj);
 }
 
+v8::Local<v8::Object> ProbeInfo2::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+
+    Utility::Set(obj, "serialNumber", Convert::toJsNumber(probe_info.serial_number));
+    Utility::Set(obj, "clockSpeedkHz", Convert::toJsNumber(probe_info.clockspeed_khz));
+    Utility::Set(obj, "firmwareString", Convert::toJsString(probe_info.firmware_string));
+
+    return scope.Escape(obj);
+}
+
 v8::Local<v8::Object> DeviceInfo::ToJs()
 {
     Nan::EscapableHandleScope scope;
@@ -80,6 +92,22 @@ v8::Local<v8::Object> DeviceInfo::ToJs()
 
     /* Pin reset. */
     Utility::Set(obj, "pinResetPin", Convert::toJsNumber(device_info.pin_reset_pin));
+
+    return scope.Escape(obj);
+}
+
+v8::Local<v8::Object> LibraryInfo::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+    v8::Local<v8::Object> versionObj = Nan::New<v8::Object>();
+
+    Utility::Set(versionObj, "major", Convert::toJsNumber(library_info.version_major));
+    Utility::Set(versionObj, "minor", Convert::toJsNumber(library_info.version_minor));
+    Utility::Set(versionObj, "revision", Convert::toJsString(library_info.version_revision));
+
+    Utility::Set(obj, "serialNumber", versionObj);
+    Utility::Set(obj, "parh", Convert::toJsString(library_info.file_path));
 
     return scope.Escape(obj);
 }

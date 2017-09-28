@@ -50,6 +50,8 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_init)          (Probe_handle_t * de
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_uninit)        (Probe_handle_t * debug_probe);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_get_snr)       (Probe_handle_t debug_probe, uint32_t * snr);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_jlinkarm_version)(Probe_handle_t debug_probe, uint32_t * major, uint32_t * minor, char * revision);
+typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_library_info)    (Probe_handle_t debug_probe, library_info_t * library_info);
+typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_probe_info)      (Probe_handle_t debug_probe, probe_info_t * probe_info);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_device_info)     (Probe_handle_t debug_probe, device_info_t * device_info);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_program)             (Probe_handle_t debug_probe, const char * hex_path, program_options_t program_options);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_read_to_file)        (Probe_handle_t debug_probe, const char * hex_path, read_options_t read_options);
@@ -73,6 +75,8 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_probe_uninit         probe_uninit;
     HILVL_nRFJ_probe_get_snr        probe_get_snr;
     HILVL_nRFJ_get_jlinkarm_version get_jlinkarm_version;
+    HILVL_nRFJ_get_library_info     get_library_info;
+    HILVL_nRFJ_get_probe_info       get_probe_info;
     HILVL_nRFJ_get_device_info      get_device_info;
     HILVL_nRFJ_program              program;
     HILVL_nRFJ_read_to_file         read_to_file;
