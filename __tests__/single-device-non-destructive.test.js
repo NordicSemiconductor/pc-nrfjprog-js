@@ -106,6 +106,24 @@ describe('Single device - non-destructive', () => {
         nRFjprog.readU32(device.serialNumber, 0x0, callback);
     });
 
+    it('keeps connection open when using open/close', done => {
+        const readLength = 10;
+
+        const callback = (err, contents) => {
+            expect(err).toBeUndefined();
+            nRFjprog.close(device.serialNumber, (err) => {
+                expect(err).toBeUndefined();
+                expect(contents.length).toBe(readLength);
+                done();
+            });
+        };
+
+        nRFjprog.open(device.serialNumber, (err) => {
+            expect(err).toBeUndefined();
+            nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
+        });
+    });
+
     it('reads more than 0x10000 bytes', done => {
         const readLength = 0x10004;
 

@@ -201,4 +201,16 @@ public:
     uint32_t data;
 };
 
+class OpenBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(OpenBaton, "open device long term", 0);
+};
+
+class CloseBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(CloseBaton, "close opened device", 0);
+};
+
 #endif

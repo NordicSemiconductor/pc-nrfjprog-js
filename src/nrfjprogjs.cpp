@@ -64,6 +64,8 @@ errorcode_t nRFjprog::finderror = errorcode_t::JsSuccess;
 std::string nRFjprog::logMessage;
 Nan::Callback *nRFjprog::jsProgressCallback = nullptr;
 uv_async_t *nRFjprog::progressEvent = nullptr;
+bool nRFjprog::keepDeviceOpen = false;
+Probe_handle_t nRFjprog::probe;
 
 struct ProgressData {
     std::string process;
@@ -104,6 +106,8 @@ nRFjprog::nRFjprog()
     uv_async_init(uv_default_loop(), progressEvent, sendProgress);
 
     finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
+
+    keepDeviceOpen = false;
 }
 
 void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
@@ -206,7 +210,6 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
 void nRFjprog::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<Baton *>(req->data);
-    Probe_handle_t probe;
 
     baton->result = loadDll();
 
@@ -230,7 +233,8 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
         }
     }
 
-    if (baton->serialNumber != 0)
+    if (baton->serialNumber != 0
+        && !keepDeviceOpen)
     {
         nrfjprogdll_err_t initError = dll_function.probe_init(&probe, baton->serialNumber, nullptr);
 
@@ -244,31 +248,33 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     nrfjprogdll_err_t excuteError = baton->executeFunction(baton, probe);
 
-    if (baton->serialNumber != 0)
+    if (!keepDeviceOpen)
     {
-
-        nrfjprogdll_err_t resetError = dll_function.reset(probe, RESET_SYSTEM);
-
-        if (resetError != SUCCESS)
+        if (baton->serialNumber != 0)
         {
-            baton->result = errorcode_t::CouldNotResetDevice;
-            baton->lowlevelError = resetError;
-            return;
+            nrfjprogdll_err_t resetError = dll_function.reset(probe, RESET_SYSTEM);
+
+            if (resetError != SUCCESS)
+            {
+                baton->result = errorcode_t::CouldNotResetDevice;
+                baton->lowlevelError = resetError;
+                return;
+            }
+
+            nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe);
+
+            if (uninitError != SUCCESS)
+            {
+                baton->result = errorcode_t::CouldNotCloseDevice;
+                baton->lowlevelError = uninitError;
+                return;
+            }
         }
 
-        nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe);
+        dll_function.dll_close();
 
-        if (uninitError != SUCCESS)
-        {
-            baton->result = errorcode_t::CouldNotCloseDevice;
-            baton->lowlevelError = uninitError;
-            return;
-        }
+        unloadDll();
     }
-
-    dll_function.dll_close();
-
-    unloadDll();
 
     if (excuteError != SUCCESS)
     {
@@ -404,6 +410,9 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
 
     Nan::SetPrototypeMethod(tpl, "write", Write);
     Nan::SetPrototypeMethod(tpl, "writeU32", WriteU32);
+
+    Nan::SetPrototypeMethod(tpl, "open", OpenDevice);
+    Nan::SetPrototypeMethod(tpl, "close", CloseDevice);
 }
 
 NAN_METHOD(nRFjprog::GetDllVersion)
@@ -762,6 +771,33 @@ NAN_METHOD(nRFjprog::WriteU32)
     CallFunction(info, p, e, nullptr, true);
 }
 
+NAN_METHOD(nRFjprog::OpenDevice)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
+        return new OpenBaton();
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        keepDeviceOpen = true;
+        return SUCCESS;
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(nRFjprog::CloseDevice)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
+        return new CloseBaton();
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        keepDeviceOpen = false;
+        return SUCCESS;
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     {

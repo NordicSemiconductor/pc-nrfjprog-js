@@ -86,6 +86,9 @@ private:
     static NAN_METHOD(Write);       // Params: serialnumber, address, dataarray, callback(error)
     static NAN_METHOD(WriteU32);    // Params: serialnumber, address, data, callback(error)
 
+    static NAN_METHOD(OpenDevice); // Params: serialnumber, callback(error)
+    static NAN_METHOD(CloseDevice); // Params: serialnumber, callback(error)
+
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                              const parse_parameters_function_t parse,
                              const execute_function_t execute,
@@ -113,6 +116,9 @@ private:
     static bool loaded;
     static bool connectedToDevice;
     static errorcode_t finderror;
+
+    static bool keepDeviceOpen;
+    static Probe_handle_t probe;
 
     static std::string logMessage;
 };

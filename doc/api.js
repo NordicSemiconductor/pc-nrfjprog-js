@@ -465,3 +465,52 @@ export function write(serialNumber, address, data, callback) {}
  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
  */
 export function writeU32(serialNumber, address, data, callback) {}
+
+/**
+ * Async function to open (and keep open) a connection to a device.
+ *
+ * By default, all other function calls implicitly open a connection, perform
+ * an operation, reset the device and close the connection to the device.<br/>
+ *
+ * This can impact performance negatively. In order to prevent the extra steps
+ * (open, reset, close), one can explicitly <tt>open()</tt> and <tt>close()</tt>
+ * a connection to a device. This will keep a connection open, allowing all other
+ * function calls to execute faster, and resetting the device only once (when
+ * the connection is closed).<br />
+ *
+ * Open connections shall be closed by calling {@link module:pc-nrfjprog-js~close|close}
+ *
+ * If a connection to a device is opened, then all subsequent calls will use the
+ * already-opened connection. Opening a connection twice has no effect. Closing
+ * a connection twice will close it on the first `close()` call: the second
+ * one will have no effect.<br />
+ *
+ * @example
+ * nrfjprogjs.read(123456789, 0, function(err, data) {
+ *
+ *   nrfjprogjs.read(123456789, 0x0000, 0x1000, function(err1, data1) {
+ *     if (err1) throw err;
+ *
+ *     nrfjprogjs.read(123456789, 0x1000, 0x1000, function(err2, data2) {
+ *       if (err2) throw err;
+ *
+ *       nrfjprogjs.close(123456789, function() {});
+ *     } );
+ *   } );
+ * } );
+ *
+ * @param {integer} serialNumber The serial number of the device to open
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function open(serialNumber, callback) {}
+
+/**
+ * Async function to close a connection to a device opened by
+ * {@link module:pc-nrfjprog-js~open|open}.<br />
+ *
+ * @param {integer} serialNumber The serial number of the device to close
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function close(serialNumber, callback) {}
