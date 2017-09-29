@@ -46,6 +46,8 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
     Utility::Set(obj, "deviceInfo", DeviceInfo(device_info).ToJs());
+    Utility::Set(obj, "probeInfo", ProbeInfo2(probe_info).ToJs());
+    Utility::Set(obj, "libraryInfo", LibraryInfo(library_info).ToJs());
 
     return scope.Escape(obj);
 }
@@ -106,8 +108,8 @@ v8::Local<v8::Object> LibraryInfo::ToJs()
     Utility::Set(versionObj, "minor", Convert::toJsNumber(library_info.version_minor));
     Utility::Set(versionObj, "revision", Convert::toJsString(&library_info.version_revision, 1));
 
-    Utility::Set(obj, "serialNumber", versionObj);
-    Utility::Set(obj, "parh", Convert::toJsString(library_info.file_path));
+    Utility::Set(obj, "version", versionObj);
+    Utility::Set(obj, "path", Convert::toJsString(library_info.file_path));
 
     return scope.Escape(obj);
 }

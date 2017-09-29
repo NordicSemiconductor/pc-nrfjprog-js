@@ -56,6 +56,9 @@ describe('Generic functionality', () => {
             expect(err).toBeUndefined();
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             expect(connectedDevices[0]).toHaveProperty('serialNumber');
+            expect(connectedDevices[0]).toHaveProperty('deviceInfo');
+            expect(connectedDevices[0]).toHaveProperty('probeInfo');
+            expect(connectedDevices[0]).toHaveProperty('libraryInfo');
             done();
         };
 

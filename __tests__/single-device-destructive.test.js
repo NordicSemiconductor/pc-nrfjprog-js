@@ -52,7 +52,7 @@ describe('Single device - destructive', () => {
         };
 
         nRFjprog.getConnectedDevices(callback);
-});
+    });
 
     it('erases the whole device', done => {
         const callback = (err) => {

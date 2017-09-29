@@ -109,6 +109,20 @@ public:
     device_info_t deviceInfo;
 };
 
+class GetProbeInfoBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetProbeInfoBaton, "get probe info", 1);
+    probe_info_t probeInfo;
+};
+
+class GetLibraryInfoBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetLibraryInfoBaton, "get library info", 1);
+    library_info_t libraryInfo;
+};
+
 class GetDeviceVersionBaton : public Baton
 {
 public:

@@ -63,6 +63,34 @@ describe('Single device - non-destructive', () => {
         nRFjprog.getDeviceInfo(device.serialNumber, callback);
     });
 
+    it('finds correct probe info', done => {
+        const callback = (err, probeInfo) => {
+            expect(err).toBeUndefined();
+            expect(probeInfo).toMatchObject(device.probeInfo);
+            expect(probeInfo).toHaveProperty('serialNumber');
+            expect(probeInfo).toHaveProperty('clockSpeedkHz');
+            expect(probeInfo).toHaveProperty('firmwareString');
+            done();
+        };
+
+        nRFjprog.getProbeInfo(device.serialNumber, callback);
+    });
+
+    it('finds correct library info', done => {
+        const callback = (err, libraryInfo) => {
+            expect(err).toBeUndefined();
+            expect(libraryInfo).toMatchObject(device.libraryInfo);
+            expect(libraryInfo).toHaveProperty('version');
+            expect(libraryInfo.version).toHaveProperty('major');
+            expect(libraryInfo.version).toHaveProperty('minor');
+            expect(libraryInfo.version).toHaveProperty('revision');
+            expect(libraryInfo).toHaveProperty('path');
+            done();
+        };
+
+        nRFjprog.getLibraryInfo(device.serialNumber, callback);
+    });
+
     it('throws an error when device do not exist', done => {
         const callback = (err, deviceInfo) => {
             expect(err).toMatchSnapshot();
