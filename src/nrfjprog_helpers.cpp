@@ -104,7 +104,7 @@ v8::Local<v8::Object> LibraryInfo::ToJs()
 
     Utility::Set(versionObj, "major", Convert::toJsNumber(library_info.version_major));
     Utility::Set(versionObj, "minor", Convert::toJsNumber(library_info.version_minor));
-    Utility::Set(versionObj, "revision", Convert::toJsString(library_info.version_revision));
+    Utility::Set(versionObj, "revision", Convert::toJsString(&library_info.version_revision, 1));
 
     Utility::Set(obj, "serialNumber", versionObj);
     Utility::Set(obj, "parh", Convert::toJsString(library_info.file_path));
