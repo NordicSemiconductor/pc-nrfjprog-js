@@ -157,7 +157,7 @@
  */
 
 /**
- * Represents the information about the interface library
+ * Represents the information about the J-link ARM interface library
  *
  * @typedef LibraryInformation
  *
