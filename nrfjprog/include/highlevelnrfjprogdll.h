@@ -48,7 +48,7 @@
 
 
 #define major_version (9) 
-#define minor_version (6) 
+#define minor_version (7) 
 #define micro_version (0) 
 
 #define FIRMWARE_STRING_LENGTH (256)
@@ -324,6 +324,49 @@ nrfjprogdll_err_t NRFJPROG_probe_uninit(Probe_handle_t * debug_probe);
 * @retval  INVALID_DEVICE_FOR_OPERATION        The connected device does not support QSPI.
  */
 nrfjprogdll_err_t NRFJPROG_probe_setup_qspi(Probe_handle_t debug_probe, uint32_t memory_size, qspi_init_params_t qspi_init_params);
+
+/**
+* @brief   Function deprecated in favor of NRFJPROG_get_probe_info(). Will be removed in a future version.
+* 
+* @details Reads back the serial number of the USB J-LINK emulator used to initialize the provided debug_probe handle.
+*
+* @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
+
+* @param   debug_probe                         Probe handle.
+* @param   serial_number                       Pointer to where serial number value should be stored.
+*
+* @retval  SUCCESS
+* @retval  INVALID_PARAMETER                   The debug_probe parameter is null.
+*                                              The serial_number parameter is null.
+ */
+nrfjprogdll_err_t NRFJPROG_get_snr(Probe_handle_t debug_probe, uint32_t * serial_number);
+
+
+/**
+ * @brief   Function deprecated in favor of NRFJPROG_get_library_info(). Will be removed in a future version.
+ * 
+ * @details Reads back the version of the JLINKARM DLL to be used with the provided debug_probe handle.
+ *
+ * @pre     Before the execution of this function the DLL must be ready for use. To query the state of the DLL see NRFJPROG_is_dll_open() function. To ready the DLL for use see NRFJPROG_dll_open() function.
+ * @pre     Before the execution of this function the provided debug_probe handle must be initialized. To initialize the probe, see NRFJPROG_probe_init().
+ *
+ * @param   debug_probe                         Probe handle.
+ * @param   major                               Pointer for storing the DLL major version.
+ * @param   minor                               Pointer for storing the DLL minor version.
+ * @param   revision                            Pointer for storing the DLL revision.
+ *
+ * @retval  SUCCESS
+ * @retval  INVALID_OPERATION                   The NRFJPROG_dll_open() function has not been called.
+ * @retval  INVALID_PARAMETER                   The debug_probe parameter is null.
+ *                                              The major parameter is NULL.
+ *                                              The minor parameter is NULL.
+ *                                              The revision parameter is NULL.
+ * @retval  JLINKARM_DLL_TOO_OLD                The version of JLinkARM is lower than the minimum version required.
+ * @retval  JLINKARM_DLL_NOT_FOUND              The jlink_path did not yield a usable DLL.
+ * @retval  JLINKARM_DLL_COULD_NOT_BE_OPENED    An error occurred while opening the JLinkARM DLL.
+ *                                              A required function could not be loaded from the DLL.
+ */
+nrfjprogdll_err_t NRFJPROG_get_jlinkarm_version(Probe_handle_t debug_probe, uint32_t * major, uint32_t * minor, char * revision);
 
 
 /**
