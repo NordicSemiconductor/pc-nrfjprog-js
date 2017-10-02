@@ -98,7 +98,7 @@ class GetConnectedDevicesBaton : public Baton
 {
 public:
     BATON_CONSTRUCTOR(GetConnectedDevicesBaton, "get connected devices", 1);
-    std::vector<ProbeInfo *> probes;
+    std::vector<ProbeDetails *> probes;
 };
 
 class GetDeviceInfoBaton : public Baton

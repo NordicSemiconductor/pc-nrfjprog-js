@@ -41,10 +41,10 @@
 #include "highlevelnrfjprogdll.h"
 #include "nrfjprog_common.h"
 
-class ProbeInfo
+class ProbeDetails
 {
 public:
-    ProbeInfo(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
+    ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
         serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
     {}
 
@@ -57,10 +57,10 @@ private:
     const library_info_t library_info;
 };
 
-class ProbeInfo2
+class ProbeInfo
 {
   public:
-    ProbeInfo2(probe_info_t _probe_info) :
+    ProbeInfo(probe_info_t _probe_info) :
         probe_info(_probe_info)
     {
     }

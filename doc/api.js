@@ -152,7 +152,7 @@
  * @typedef ProbeInformation
  *
  * @property {integer} serialNumber The serialnumber of the probe
- * @property {integer} clockSpeedkHz The programming speed
+ * @property {integer} clockSpeedkHz The clock speed of the probe interface
  * @property {string} firmwareString The version infomation about the J-Link firmware
  */
 

@@ -39,20 +39,20 @@
 #include "utility/utility.h"
 #include "utility/conversion.h"
 
-v8::Local<v8::Object> ProbeInfo::ToJs()
+v8::Local<v8::Object> ProbeDetails::ToJs()
 {
     Nan::EscapableHandleScope scope;
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
     Utility::Set(obj, "deviceInfo", DeviceInfo(device_info).ToJs());
-    Utility::Set(obj, "probeInfo", ProbeInfo2(probe_info).ToJs());
+    Utility::Set(obj, "probeInfo", ProbeInfo(probe_info).ToJs());
     Utility::Set(obj, "libraryInfo", LibraryInfo(library_info).ToJs());
 
     return scope.Escape(obj);
 }
 
-v8::Local<v8::Object> ProbeInfo2::ToJs()
+v8::Local<v8::Object> ProbeInfo::ToJs()
 {
     Nan::EscapableHandleScope scope;
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();

@@ -482,7 +482,7 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
                 dll_function.probe_uninit(&getInfoProbe);
             }
 
-            baton->probes.push_back(new ProbeInfo(serialNumbers[i], device_info, probe_info, library_info));
+            baton->probes.push_back(new ProbeDetails(serialNumbers[i], device_info, probe_info, library_info));
         }
 
         return SUCCESS;
@@ -521,7 +521,7 @@ NAN_METHOD(nRFjprog::GetProbeInfo)
         auto baton = static_cast<GetProbeInfoBaton*>(b);
         returnType vector;
 
-        vector.push_back(ProbeInfo2(baton->probeInfo).ToJs());
+        vector.push_back(ProbeInfo(baton->probeInfo).ToJs());
 
         return vector;
     };
