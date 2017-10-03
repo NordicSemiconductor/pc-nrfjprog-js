@@ -398,6 +398,8 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getDeviceInfo", GetDeviceInfo);
+    Nan::SetPrototypeMethod(tpl, "getProbeInfo", GetProbeInfo);
+    Nan::SetPrototypeMethod(tpl, "getLibraryInfo", GetLibraryInfo);
     Nan::SetPrototypeMethod(tpl, "read", Read);
     Nan::SetPrototypeMethod(tpl, "readU32", ReadU32);
 
@@ -464,19 +466,23 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
 
         for (uint32_t i = 0; i < available; i++)
         {
-            Probe_handle_t getFamilyProbe;
-            nrfjprogdll_err_t initError = dll_function.probe_init(&getFamilyProbe, serialNumbers[i], nullptr);
+            Probe_handle_t getInfoProbe;
+            nrfjprogdll_err_t initError = dll_function.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
 
             device_info_t device_info;
+            probe_info_t probe_info;
+            library_info_t library_info;
 
             if (initError == SUCCESS)
             {
-                dll_function.get_device_info(getFamilyProbe, &device_info);
+                dll_function.get_device_info(getInfoProbe, &device_info);
+                dll_function.get_probe_info(getInfoProbe, &probe_info);
+                dll_function.get_library_info(getInfoProbe, &library_info);
 
-                dll_function.probe_uninit(&getFamilyProbe);
+                dll_function.probe_uninit(&getInfoProbe);
             }
 
-            baton->probes.push_back(new ProbeInfo(serialNumbers[i], device_info));
+            baton->probes.push_back(new ProbeDetails(serialNumbers[i], device_info, probe_info, library_info));
         }
 
         return SUCCESS;
@@ -498,6 +504,52 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
     };
 
     CallFunction(info, p, e, r, false);
+}
+
+NAN_METHOD(nRFjprog::GetProbeInfo)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
+        return new GetProbeInfoBaton();
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<GetProbeInfoBaton*>(b);
+        return dll_function.get_probe_info(probe, &baton->probeInfo);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        auto baton = static_cast<GetProbeInfoBaton*>(b);
+        returnType vector;
+
+        vector.push_back(ProbeInfo(baton->probeInfo).ToJs());
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r, true);
+}
+
+NAN_METHOD(nRFjprog::GetLibraryInfo)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
+        return new GetLibraryInfoBaton();
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<GetLibraryInfoBaton*>(b);
+        return dll_function.get_library_info(probe, &baton->libraryInfo);
+    };
+
+    return_function_t r = [&] (Baton *b) -> returnType {
+        auto baton = static_cast<GetLibraryInfoBaton*>(b);
+        returnType vector;
+
+        vector.push_back(LibraryInfo(baton->libraryInfo).ToJs());
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r, true);
 }
 
 NAN_METHOD(nRFjprog::GetDeviceInfo)
@@ -817,8 +869,10 @@ extern "C" {
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV2);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_FUTURE);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1);
+        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV2);
         NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE);
         NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);
         NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);

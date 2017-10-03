@@ -41,11 +41,11 @@
 #include "highlevelnrfjprogdll.h"
 #include "nrfjprog_common.h"
 
-class ProbeInfo
+class ProbeDetails
 {
 public:
-    ProbeInfo(uint32_t _serial_number, device_info_t _device_info) :
-        serial_number(_serial_number), device_info(_device_info)
+    ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
+        serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
     {}
 
     v8::Local<v8::Object> ToJs();
@@ -53,6 +53,22 @@ public:
 private:
     const uint32_t serial_number;
     const device_info_t device_info;
+    const probe_info_t probe_info;
+    const library_info_t library_info;
+};
+
+class ProbeInfo
+{
+  public:
+    ProbeInfo(probe_info_t _probe_info) :
+        probe_info(_probe_info)
+    {
+    }
+
+    v8::Local<v8::Object> ToJs();
+
+  private:
+    const probe_info_t probe_info;
 };
 
 class DeviceInfo
@@ -66,6 +82,19 @@ public:
 
 private:
     const device_info_t device_info;
+};
+
+class LibraryInfo
+{
+public:
+    LibraryInfo(library_info_t _library_info) :
+        library_info(_library_info)
+    {}
+
+    v8::Local<v8::Object> ToJs();
+
+private:
+    const library_info_t library_info;
 };
 
 class EraseOptions

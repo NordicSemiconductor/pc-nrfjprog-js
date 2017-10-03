@@ -39,13 +39,27 @@
 #include "utility/utility.h"
 #include "utility/conversion.h"
 
-v8::Local<v8::Object> ProbeInfo::ToJs()
+v8::Local<v8::Object> ProbeDetails::ToJs()
 {
     Nan::EscapableHandleScope scope;
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
     Utility::Set(obj, "deviceInfo", DeviceInfo(device_info).ToJs());
+    Utility::Set(obj, "probeInfo", ProbeInfo(probe_info).ToJs());
+    Utility::Set(obj, "libraryInfo", LibraryInfo(library_info).ToJs());
+
+    return scope.Escape(obj);
+}
+
+v8::Local<v8::Object> ProbeInfo::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+
+    Utility::Set(obj, "serialNumber", Convert::toJsNumber(probe_info.serial_number));
+    Utility::Set(obj, "clockSpeedkHz", Convert::toJsNumber(probe_info.clockspeed_khz));
+    Utility::Set(obj, "firmwareString", Convert::toJsString(probe_info.firmware_string));
 
     return scope.Escape(obj);
 }
@@ -80,6 +94,22 @@ v8::Local<v8::Object> DeviceInfo::ToJs()
 
     /* Pin reset. */
     Utility::Set(obj, "pinResetPin", Convert::toJsNumber(device_info.pin_reset_pin));
+
+    return scope.Escape(obj);
+}
+
+v8::Local<v8::Object> LibraryInfo::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+    v8::Local<v8::Object> versionObj = Nan::New<v8::Object>();
+
+    Utility::Set(versionObj, "major", Convert::toJsNumber(library_info.version_major));
+    Utility::Set(versionObj, "minor", Convert::toJsNumber(library_info.version_minor));
+    Utility::Set(versionObj, "revision", Convert::toJsString(&library_info.version_revision, 1));
+
+    Utility::Set(obj, "version", versionObj);
+    Utility::Set(obj, "path", Convert::toJsString(library_info.file_path));
 
     return scope.Escape(obj);
 }

@@ -98,7 +98,7 @@ class GetConnectedDevicesBaton : public Baton
 {
 public:
     BATON_CONSTRUCTOR(GetConnectedDevicesBaton, "get connected devices", 1);
-    std::vector<ProbeInfo *> probes;
+    std::vector<ProbeDetails *> probes;
 };
 
 class GetDeviceInfoBaton : public Baton
@@ -107,6 +107,20 @@ public:
     BATON_CONSTRUCTOR(GetDeviceInfoBaton, "get device info", 1);
     uint32_t serialNumber;
     device_info_t deviceInfo;
+};
+
+class GetProbeInfoBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetProbeInfoBaton, "get probe info", 1);
+    probe_info_t probeInfo;
+};
+
+class GetLibraryInfoBaton : public Baton
+{
+public:
+    BATON_CONSTRUCTOR(GetLibraryInfoBaton, "get library info", 1);
+    library_info_t libraryInfo;
 };
 
 class GetDeviceVersionBaton : public Baton

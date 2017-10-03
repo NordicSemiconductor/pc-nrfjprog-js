@@ -71,7 +71,9 @@ private:
     static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)
     static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
 
-    static NAN_METHOD(GetDeviceInfo); // Params: serialnumber, callback(error, family)
+    static NAN_METHOD(GetDeviceInfo); // Params: serialnumber, callback(error, deviceinfo)
+    static NAN_METHOD(GetProbeInfo); // Params: serialnumber, callback(error, probeinfo)
+    static NAN_METHOD(GetLibraryInfo); // Params: serialnumber, callback(error, libraryinfo)
 
     static NAN_METHOD(Read);        // Params: serialnumber, address, length, callback(error, data)
     static NAN_METHOD(ReadU32);     // Params: serialnumber, address, callback(error, data)

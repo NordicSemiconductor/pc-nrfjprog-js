@@ -87,11 +87,11 @@ errorcode_t DllLoad(const char * path, DllFunctionPointersType * dll_function)
         return errorcode_t::CouldNotLoadDLL;
     }
 
-    if (!load_func_ptr(&dll_function->probe_get_snr, "NRFJPROG_get_snr", dll)) {
+    if (!load_func_ptr(&dll_function->get_library_info, "NRFJPROG_get_library_info", dll)) {
         return errorcode_t::CouldNotLoadDLL;
     }
 
-    if (!load_func_ptr(&dll_function->get_jlinkarm_version, "NRFJPROG_get_jlinkarm_version", dll)) {
+    if (!load_func_ptr(&dll_function->get_probe_info, "NRFJPROG_get_probe_info", dll)) {
         return errorcode_t::CouldNotLoadDLL;
     }
 

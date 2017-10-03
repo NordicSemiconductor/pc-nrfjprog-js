@@ -147,11 +147,35 @@
  */
 
 /**
+ * Represents the device information of the debug probe
+ *
+ * @typedef ProbeInformation
+ *
+ * @property {integer} serialNumber The serialnumber of the probe
+ * @property {integer} clockSpeedkHz The clock speed of the probe interface
+ * @property {string} firmwareString The version infomation about the J-Link firmware
+ */
+
+/**
+ * Represents the information about the J-link ARM interface library
+ *
+ * @typedef LibraryInformation
+ *
+ * @property {object} version The version of the interface library
+ * @property {integer} version.major The major version of the interface library
+ * @property {integer} version.minor The minor version of the interface library
+ * @property {string} version.revision The revision version of the interface library
+ * @property {string} path The path to the interface library
+ */
+
+/**
  * Represents the serial number and information of an individual device
  * @typedef SerialNumberAndDeviceInformation
  *
- * @property {string} serialNumber
+ * @property {integer} serialNumber
  * @property {module:pc-nrfjprog-js~DeviceInformation} deviceInfo
+ * @property {module:pc-nrfjprog-js~ProbeInformation} probeInfo
+ * @property {module:pc-nrfjprog-js~LibraryInformation} libraryInfo
  */
 
 /**
@@ -257,6 +281,38 @@ export function getConnectedDevices(callback) {}
 export function getDeviceInfo(serialNumber, callback) {}
 
 
+
+/**
+ * Async function to get information of a single device, given its serial number.
+ *
+ * @example
+ * nrfjprogjs.getProbeInfo(123456789, function(err, info) {
+ *      if (err) throw err;
+ *      console.log('Selected device has the following clockspeed ' + info.clockSpeedkHz + 'kHz');
+ * } );
+ *
+ * @param {integer} serialNumber The serial number of the device to query
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~ProbeInformation|ProbeInformation}).
+ */
+export function getProbeInfo(serialNumber, callback) {}
+
+
+
+/**
+ * Async function to get information about the low level library used by the device, given its serial number.
+ *
+ * @example
+ * nrfjprogjs.getLibrayInfo(123456789, function(err, info) {
+ *      if (err) throw err;
+ *      console.log('Selected device use ' + info.path + ' to connect');
+ * } );
+ *
+ * @param {integer} serialNumber The serial number of the device to query
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~LibraryInformation|LibraryInformation}).
+ */
+export function getLibraryInfo(serialNumber, callback) {}
 
 /**
  * Async function to read a chunk of memory. The data received by the callback
