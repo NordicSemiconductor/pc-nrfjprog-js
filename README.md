@@ -51,6 +51,6 @@ nrfjprogjs.getConnectedDevices(function(err, devices) {
 
 ## Tests
 
-The project has integration tests that runs against a devkit/dongle. Note that these tests will erase the contents on the connected devkit/dongle. To run the tests:
+The project has integration tests that run against a devkit/dongle. Note that these tests will erase the contents on the connected devkit/dongle. To run the tests:
 
     npm test
