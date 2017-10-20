@@ -51,9 +51,7 @@
     <div class="container-overview">
     
         
-            <div class="description">The <tt>pc-nrfjprog-js</tt> module exposes the functionality to the
-nRF5x Command-line tools
-to your nodeJS programs.</div>
+            <div class="description">The <tt>pc-nrfjprog-js</tt> module exposes the functionality to thenRF5x Command-line toolsto your nodeJS programs.</div>
         
 
         
@@ -131,11 +129,7 @@ to your nodeJS programs.</div>
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>let nrfjprogjs = require('pc-nrfjprog-js');
-
-nrfjprogjs.getConnectedDevices(function(err, devices) {
-    console.log('There are ' + devices.length + ' nRF devices connected.');
-});</code></pre>
+    <pre class="prettyprint"><code>let nrfjprogjs = require('pc-nrfjprog-js');nrfjprogjs.getConnectedDevices(function(err, devices) {    console.log('There are ' + devices.length + ' nRF devices connected.');});</code></pre>
 
 </div>
 
@@ -172,8 +166,7 @@ nrfjprogjs.getConnectedDevices(function(err, devices) {
 
 
 <div class="description">
-    Async function to close a connection to a device opened by
-open.<br />
+    Async function to close a connection to a device opened byopen.<br />
 </div>
 
 
@@ -296,8 +289,7 @@ open.<br />
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -335,12 +327,7 @@ open.<br />
 
 
 <div class="description">
-    Async function to erase a chunk of memory.
-<br/>
-
-This is the same functionality as running "<tt>nrfjprog --erasepage</tt>" in the command-line tools.<br/>
-
-Will not erase a locked device. To erase a locked device, use recover
+    Async function to erase a chunk of memory.<br/>This is the same functionality as running "<tt>nrfjprog --erasepage</tt>" in the command-line tools.<br/>Will not erase a locked device. To erase a locked device, use recover
 </div>
 
 
@@ -551,8 +538,7 @@ Will not erase a locked device. To erase a locked device, use recover
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -687,8 +673,7 @@ Will not erase a locked device. To erase a locked device, use recover
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, Array of <a href="module-pc-nrfjprog-js.html#~SerialNumberAndDeviceInformation">SerialNumberAndDeviceInformation</a>).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, Array of <a href="module-pc-nrfjprog-js.html#~SerialNumberAndDeviceInformation">SerialNumberAndDeviceInformation</a>).
                 
             </td>
         </tr>
@@ -715,17 +700,7 @@ Will not erase a locked device. To erase a locked device, use recover
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.getConnectedDevices( function(err, devices) {
-     if (err) throw err;
-     for (let i = 0; i &lt; devices.length; i++) {
-         console.log(
-             devices[i].serialNumber +
-             ' has ' +
-             devices[i].deviceInfo.ramSize +
-             ' bytes of RAM'
-         );
-     }
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.getConnectedDevices( function(err, devices) {     if (err) throw err;     for (let i = 0; i &lt; devices.length; i++) {         console.log(             devices[i].serialNumber +             ' has ' +             devices[i].deviceInfo.ramSize +             ' bytes of RAM'         );     }} );</code></pre>
 
 </div>
 
@@ -866,8 +841,7 @@ Will not erase a locked device. To erase a locked device, use recover
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~DeviceInformation">DeviceInformation</a>).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~DeviceInformation">DeviceInformation</a>).
                 
             </td>
         </tr>
@@ -894,10 +868,7 @@ Will not erase a locked device. To erase a locked device, use recover
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.getDeviceInfo(123456789, function(err, info) {
-     if (err) throw err;
-     console.log('Selected device has' + info.ramSize + ' bytes of RAM');
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.getDeviceInfo(123456789, function(err, info) {     if (err) throw err;     console.log('Selected device has' + info.ramSize + ' bytes of RAM');} );</code></pre>
 
 </div>
 
@@ -1012,8 +983,7 @@ Will not erase a locked device. To erase a locked device, use recover
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~Version">Version</a>).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~Version">Version</a>).
                 
             </td>
         </tr>
@@ -1040,10 +1010,7 @@ Will not erase a locked device. To erase a locked device, use recover
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.getDllVersion( function(err, version) {
-     if (err) throw err;
-     console.log( version.major + '.' + version.minor + '.' + version.revision ) // e.g. 9.6.0
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.getDllVersion( function(err, version) {     if (err) throw err;     console.log( version.major + '.' + version.minor + '.' + version.revision ) // e.g. 9.6.0} );</code></pre>
 
 </div>
 
@@ -1184,8 +1151,7 @@ Will not erase a locked device. To erase a locked device, use recover
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~LibraryInformation">LibraryInformation</a>).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~LibraryInformation">LibraryInformation</a>).
                 
             </td>
         </tr>
@@ -1212,10 +1178,7 @@ Will not erase a locked device. To erase a locked device, use recover
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.getLibrayInfo(123456789, function(err, info) {
-     if (err) throw err;
-     console.log('Selected device use ' + info.path + ' to connect');
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.getLibrayInfo(123456789, function(err, info) {     if (err) throw err;     console.log('Selected device use ' + info.path + ' to connect');} );</code></pre>
 
 </div>
 
@@ -1356,8 +1319,7 @@ Will not erase a locked device. To erase a locked device, use recover
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~ProbeInformation">ProbeInformation</a>).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, <a href="module-pc-nrfjprog-js.html#~ProbeInformation">ProbeInformation</a>).
                 
             </td>
         </tr>
@@ -1384,10 +1346,7 @@ Will not erase a locked device. To erase a locked device, use recover
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.getProbeInfo(123456789, function(err, info) {
-     if (err) throw err;
-     console.log('Selected device has the following clockspeed ' + info.clockSpeedkHz + 'kHz');
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.getProbeInfo(123456789, function(err, info) {     if (err) throw err;     console.log('Selected device has the following clockspeed ' + info.clockSpeedkHz + 'kHz');} );</code></pre>
 
 </div>
 
@@ -1405,23 +1364,7 @@ Will not erase a locked device. To erase a locked device, use recover
 
 
 <div class="description">
-    Async function to open (and keep open) a connection to a device.
-
-By default, all other function calls implicitly open a connection, perform
-an operation, reset the device and close the connection to the device.<br/>
-
-This can impact performance negatively. In order to prevent the extra steps
-(open, reset, close), one can explicitly <tt>open()</tt> and <tt>close()</tt>
-a connection to a device. This will keep a connection open, allowing all other
-function calls to execute faster, and resetting the device only once (when
-the connection is closed).<br />
-
-Open connections shall be closed by calling close
-
-If a connection to a device is opened, then all subsequent calls will use the
-already-opened connection. Opening a connection twice has no effect. Closing
-a connection twice will close it on the first `close()` call: the second
-one will have no effect.<br />
+    Async function to open (and keep open) a connection to a device.By default, all other function calls implicitly open a connection, performan operation, reset the device and close the connection to the device.<br/>This can impact performance negatively. In order to prevent the extra steps(open, reset, close), one can explicitly <tt>open()</tt> and <tt>close()</tt>a connection to a device. This will keep a connection open, allowing all otherfunction calls to execute faster, and resetting the device only once (whenthe connection is closed).<br />Open connections shall be closed by calling closeIf a connection to a device is opened, then all subsequent calls will use thealready-opened connection. Opening a connection twice has no effect. Closinga connection twice will close it on the first `close()` call: the secondone will have no effect.<br />
 </div>
 
 
@@ -1544,8 +1487,7 @@ one will have no effect.<br />
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -1572,18 +1514,7 @@ one will have no effect.<br />
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.read(123456789, 0, function(err, data) {
-
-  nrfjprogjs.read(123456789, 0x0000, 0x1000, function(err1, data1) {
-    if (err1) throw err;
-
-    nrfjprogjs.read(123456789, 0x1000, 0x1000, function(err2, data2) {
-      if (err2) throw err;
-
-      nrfjprogjs.close(123456789, function() {});
-    } );
-  } );
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.read(123456789, 0, function(err, data) {  nrfjprogjs.read(123456789, 0x0000, 0x1000, function(err1, data1) {    if (err1) throw err;    nrfjprogjs.read(123456789, 0x1000, 0x1000, function(err2, data2) {      if (err2) throw err;      nrfjprogjs.close(123456789, function() {});    } );  } );} );</code></pre>
 
 </div>
 
@@ -1601,12 +1532,7 @@ one will have no effect.<br />
 
 
 <div class="description">
-    Async function to push a program to the device.
-<br/>
-
-This is the same functionality as running "<tt>nrfjprog --program</tt>" in the command-line tools.<br />
-
-If the <a href="module-pc-nrfjprog-js.html#~ProgramOptions">ProgramOption</a> chip_erase_mode is ERASE_ALL, this function will recover the device if it initially is not allowed to program the device due to protection.
+    Async function to push a program to the device.<br/>This is the same functionality as running "<tt>nrfjprog --program</tt>" in the command-line tools.<br />If the <a href="module-pc-nrfjprog-js.html#~ProgramOptions">ProgramOption</a> chip_erase_mode is ERASE_ALL, this function will recover the device if it initially is not allowed to program the device due to protection.
 </div>
 
 
@@ -1851,8 +1777,7 @@ If the <a href="module-pc-nrfjprog-js.html#~ProgramOptions">ProgramOption</a> ch
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -1879,9 +1804,7 @@ If the <a href="module-pc-nrfjprog-js.html#~ProgramOptions">ProgramOption</a> ch
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.program(123456789, "/some/path/nrf52832_abcd.hex", {}, function(err) {
-     if (err) throw err;
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.program(123456789, "/some/path/nrf52832_abcd.hex", {}, function(err) {     if (err) throw err;} );</code></pre>
 
 </div>
 
@@ -1899,20 +1822,7 @@ If the <a href="module-pc-nrfjprog-js.html#~ProgramOptions">ProgramOption</a> ch
 
 
 <div class="description">
-    Async function to read a chunk of memory. The data received by the callback
-is an array of integers, each of them representing a single byte (with values
-from 0 to 255).
-<br/>
-
-The read operation happens without verifying that the addresses are accessible or
-even exist. Note that if the target address is in unpowered RAM, the operation will fail.
-<br/>
-
-Please note that the data is an array of numbers - it is NOT a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">UInt8Array</a>,
-and it is NOT a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.
-<br/>
-
-This is the same functionality as running "<tt>nrfjprog --memrd</tt>" in the command-line tools.
+    Async function to read a chunk of memory. The data received by the callbackis an array of integers, each of them representing a single byte (with valuesfrom 0 to 255).<br/>The read operation happens without verifying that the addresses are accessible oreven exist. Note that if the target address is in unpowered RAM, the operation will fail.<br/>Please note that the data is an array of numbers - it is NOT a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">UInt8Array</a>,and it is NOT a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.<br/>This is the same functionality as running "<tt>nrfjprog --memrd</tt>" in the command-line tools.
 </div>
 
 
@@ -2087,8 +1997,7 @@ This is the same functionality as running "<tt>nrfjprog --memrd</tt>" in the com
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, Array of integers).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, Array of integers).
                 
             </td>
         </tr>
@@ -2115,10 +2024,7 @@ This is the same functionality as running "<tt>nrfjprog --memrd</tt>" in the com
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.read(123456789, 0, 16, function(err, data) {
-     if (err) throw err;
-     console.log('The first 16 bytes of memory look like: ' + data.join(','));
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.read(123456789, 0, 16, function(err, data) {     if (err) throw err;     console.log('The first 16 bytes of memory look like: ' + data.join(','));} );</code></pre>
 
 </div>
 
@@ -2136,14 +2042,7 @@ This is the same functionality as running "<tt>nrfjprog --memrd</tt>" in the com
 
 
 <div class="description">
-    Async function to read memory from the device and write the results into a file.
-<br />
-
-The read operation happens without verifying that the addresses are accessible or
-even exist. Note that if the target address is in unpowered RAM, the operation will fail.
-<br/>
-
-This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the command-line tools.
+    Async function to read memory from the device and write the results into a file.<br />The read operation happens without verifying that the addresses are accessible oreven exist. Note that if the target address is in unpowered RAM, the operation will fail.<br/>This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the command-line tools.
 </div>
 
 
@@ -2388,8 +2287,7 @@ This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the 
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -2416,9 +2314,7 @@ This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the 
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.readToFile(123456789, "/some/path/to/store/file.hex", {}, function(err) {
-     if (err) throw err;
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.readToFile(123456789, "/some/path/to/store/file.hex", {}, function(err) {     if (err) throw err;} );</code></pre>
 
 </div>
 
@@ -2436,19 +2332,7 @@ This is the same functionality as running "<tt>nrfjprog --readcode</tt>" in the 
 
 
 <div class="description">
-    Async function to read a single 4-byte word from memory.
-<br/>
-
-The read operation happens without verifying that the addresses are accessible or
-even exist. The address parameter needs to be 32-bit aligned (must be a multiple of 4).
-Note that if the target address is in unpowered RAM, the operation will fail.
-<br/>
-
-Please note that the data is a number - it is NOT a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array">UInt32Array</a>,
-and it is NOT a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.
-<br/>
-
-This is the same functionality as running "<tt>nrfjprog --memrd -w</tt>" in the command-line tools.
+    Async function to read a single 4-byte word from memory.<br/>The read operation happens without verifying that the addresses are accessible oreven exist. The address parameter needs to be 32-bit aligned (must be a multiple of 4).Note that if the target address is in unpowered RAM, the operation will fail.<br/>Please note that the data is a number - it is NOT a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array">UInt32Array</a>,and it is NOT a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.<br/>This is the same functionality as running "<tt>nrfjprog --memrd -w</tt>" in the command-line tools.
 </div>
 
 
@@ -2597,8 +2481,7 @@ This is the same functionality as running "<tt>nrfjprog --memrd -w</tt>" in the 
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, integer).
+                A callback function to handle the async response.  It shall expect two parameters: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>, integer).
                 
             </td>
         </tr>
@@ -2625,10 +2508,7 @@ This is the same functionality as running "<tt>nrfjprog --memrd -w</tt>" in the 
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.read(123456789, 0, function(err, data) {
-     if (err) throw err;
-     console.log('The first word of memory looks like: ' + data);
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.read(123456789, 0, function(err, data) {     if (err) throw err;     console.log('The first word of memory looks like: ' + data);} );</code></pre>
 
 </div>
 
@@ -2646,16 +2526,7 @@ This is the same functionality as running "<tt>nrfjprog --memrd -w</tt>" in the 
 
 
 <div class="description">
-    Async function to recover a device
-<br/>
-
-This operation attempts to recover the device and leave it as it was when it left Nordic factory. It will attempt to
-connect, erase all user available flash, halt and eliminate any protection. Note that this operation may take up to 30 s
-if the device was readback protected. Note as well that this function only affects internal flash and CPU, but does not
-erase, reset or stop any peripheral, oscillator source nor extarnally QSPI-connected flash. The operation will therefore
-leave the watchdog still operational if it was running.<br/>
-
-This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the command-line tools.
+    Async function to recover a device<br/>This operation attempts to recover the device and leave it as it was when it left Nordic factory. It will attempt toconnect, erase all user available flash, halt and eliminate any protection. Note that this operation may take up to 30 sif the device was readback protected. Note as well that this function only affects internal flash and CPU, but does noterase, reset or stop any peripheral, oscillator source nor extarnally QSPI-connected flash. The operation will thereforeleave the watchdog still operational if it was running.<br/>This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the command-line tools.
 </div>
 
 
@@ -2832,8 +2703,7 @@ This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the c
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -2871,12 +2741,7 @@ This is the same functionality as running "<tt>nrfjprog --recover</tt>" in the c
 
 
 <div class="description">
-    Async function to verify the program in the device
-<br/>
-
-Compares the contents of the provided .hex file against the contents of the memory of the device connected.<br/>
-
-This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the command-line tools.
+    Async function to verify the program in the device<br/>Compares the contents of the provided .hex file against the contents of the memory of the device connected.<br/>This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the command-line tools.
 </div>
 
 
@@ -3145,8 +3010,7 @@ This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the co
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -3173,9 +3037,7 @@ This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the co
 <div class="section-examples">
 <h5>Example</h5>
 
-    <pre class="prettyprint"><code>nrfjprogjs.verify(123456789, "/some/path/nrf52832_abcd.hex", function(err) {
-     if (err) throw err;
-} );</code></pre>
+    <pre class="prettyprint"><code>nrfjprogjs.verify(123456789, "/some/path/nrf52832_abcd.hex", function(err) {     if (err) throw err;} );</code></pre>
 
 </div>
 
@@ -3193,13 +3055,7 @@ This is the same functionality as running "<tt>nrfjprog --verify</tt>" in the co
 
 
 <div class="description">
-    Async function to write data to a device's memory, given an array of byte values.
-<br/>
-
-Please use an array of numbers -  a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">UInt8Array</a>
-might work due to type casting, but a <a href="https://nodejs.org/api/buffer.html">Buffer</a> will
-most likely fail.
-<br/>
+    Async function to write data to a device's memory, given an array of byte values.<br/>Please use an array of numbers -  a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array">UInt8Array</a>might work due to type casting, but a <a href="https://nodejs.org/api/buffer.html">Buffer</a> willmost likely fail.<br/>
 </div>
 
 
@@ -3374,8 +3230,7 @@ most likely fail.
             
 
             <td class="description last">
-                A callback function to handle the async response
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -3413,13 +3268,7 @@ most likely fail.
 
 
 <div class="description">
-    Async function to write data to a device's memory, given the value for a single 4-byte word.
-<br/>
-
-Please use a single number as the parameter - do NOT use a
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array">UInt32Array</a>
-or a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.
-<br/>
+    Async function to write data to a device's memory, given the value for a single 4-byte word.<br/>Please use a single number as the parameter - do NOT use a<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array">UInt32Array</a>or a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.<br/>
 </div>
 
 
@@ -3594,8 +3443,7 @@ or a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.
             
 
             <td class="description last">
-                A callback function to handle the async response.
-  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
+                A callback function to handle the async response.  It shall expect one parameter: (<a href="module-pc-nrfjprog-js.html#~Error">Error</a>).
                 
             </td>
         </tr>
@@ -3635,11 +3483,7 @@ or a <a href="https://nodejs.org/api/buffer.html">Buffer</a>.
 
 
 <div class="description">
-    Represents information of an individual device.
-
-The fields in this data structure about non-volatile memory, RAM, UICR and QSPI can also
-be found in the product specifications available
-at http://infocenter.nordicsemi.com, under the "Memory" section of each product model.
+    Represents information of an individual device.The fields in this data structure about non-volatile memory, RAM, UICR and QSPI can alsobe found in the product specifications availableat http://infocenter.nordicsemi.com, under the "Memory" section of each product model.
 </div>
 
 
@@ -3688,10 +3532,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Device family. Value will be equal to one of the following predefined constants:<br/>
-   <tt>nrfjprogjs.NRF51_FAMILY</tt><br/>
-   <tt>nrfjprogjs.NRF52_FAMILY</tt><br/>
-   <tt>nrfjprogjs.UNKNOWN_FAMILY</tt><br/></td>
+            <td class="description last">Device family. Value will be equal to one of the following predefined constants:<br/>   <tt>nrfjprogjs.NRF51_FAMILY</tt><br/>   <tt>nrfjprogjs.NRF52_FAMILY</tt><br/>   <tt>nrfjprogjs.UNKNOWN_FAMILY</tt><br/></td>
         </tr>
 
         
@@ -3716,24 +3557,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Type of device. Value will be equal to one of the following predefined constants:<br/>
-   <tt>nrfjprogjs.NRF51xxx_xxAA_REV1</tt><br/>
-   <tt>nrfjprogjs.NRF51xxx_xxAA_REV2</tt><br/>
-   <tt>nrfjprogjs.NRF51xxx_xxAA_REV3</tt><br/>
-   <tt>nrfjprogjs.NRF51xxx_xxAB_REV3</tt><br/>
-   <tt>nrfjprogjs.NRF51xxx_xxAC_REV3</tt><br/>
-   <tt>nrfjprogjs.NRF51802_xxAA_REV3</tt><br/>
-   <tt>nrfjprogjs.NRF52832_xxAA_ENGA</tt><br/>
-   <tt>nrfjprogjs.NRF52832_xxAA_ENGB</tt><br/>
-   <tt>nrfjprogjs.NRF52832_xxAA_REV1</tt><br/>
-   <tt>nrfjprogjs.NRF52840_xxAA_ENGA</tt><br/>
-   <tt>nrfjprogjs.NRF52832_xxAA_FUTURE</tt><br/>
-   <tt>nrfjprogjs.NRF52840_xxAA_FUTURE</tt><br/>
-   <tt>nrfjprogjs.NRF52810_xxAA_REV1</tt><br/>
-   <tt>nrfjprogjs.NRF52810_xxAA_FUTURE</tt><br/>
-   <tt>nrfjprogjs.NRF52832_xxAB_REV1</tt><br/>
-   <tt>nrfjprogjs.NRF52832_xxAB_FUTURE</tt><br/>
-   <tt>nrfjprogjs.NRF51801_xxAB_REV3</tt><br/></td>
+            <td class="description last">Type of device. Value will be equal to one of the following predefined constants:<br/>   <tt>nrfjprogjs.NRF51xxx_xxAA_REV1</tt><br/>   <tt>nrfjprogjs.NRF51xxx_xxAA_REV2</tt><br/>   <tt>nrfjprogjs.NRF51xxx_xxAA_REV3</tt><br/>   <tt>nrfjprogjs.NRF51xxx_xxAB_REV3</tt><br/>   <tt>nrfjprogjs.NRF51xxx_xxAC_REV3</tt><br/>   <tt>nrfjprogjs.NRF51802_xxAA_REV3</tt><br/>   <tt>nrfjprogjs.NRF52832_xxAA_ENGA</tt><br/>   <tt>nrfjprogjs.NRF52832_xxAA_ENGB</tt><br/>   <tt>nrfjprogjs.NRF52832_xxAA_REV1</tt><br/>   <tt>nrfjprogjs.NRF52840_xxAA_ENGA</tt><br/>   <tt>nrfjprogjs.NRF52832_xxAA_FUTURE</tt><br/>   <tt>nrfjprogjs.NRF52840_xxAA_FUTURE</tt><br/>   <tt>nrfjprogjs.NRF52810_xxAA_REV1</tt><br/>   <tt>nrfjprogjs.NRF52810_xxAA_FUTURE</tt><br/>   <tt>nrfjprogjs.NRF52832_xxAB_REV1</tt><br/>   <tt>nrfjprogjs.NRF52832_xxAB_FUTURE</tt><br/>   <tt>nrfjprogjs.NRF51801_xxAB_REV3</tt><br/></td>
         </tr>
 
         
@@ -3758,8 +3582,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Memory address for the start of the non-volatile (flash) memory block.
-  Typically <tt>0x0000 0000</tt>.</td>
+            <td class="description last">Memory address for the start of the non-volatile (flash) memory block.  Typically <tt>0x0000 0000</tt>.</td>
         </tr>
 
         
@@ -3834,8 +3657,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Memory address for the start of the UICR
-  (User Information Configuration Registers). Typically <tt>0x1000 1000</tt>.</td>
+            <td class="description last">Memory address for the start of the UICR  (User Information Configuration Registers). Typically <tt>0x1000 1000</tt>.</td>
         </tr>
 
         
@@ -3885,8 +3707,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Memory address for the start of the volatile RAM.
-  Typically <tt>0x2000 0000</tt>, in the SRAM memory region.</td>
+            <td class="description last">Memory address for the start of the volatile RAM.  Typically <tt>0x2000 0000</tt>, in the SRAM memory region.</td>
         </tr>
 
         
@@ -3961,10 +3782,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Memory address for the volatile RAM, in the code memory region.
-  When <tt>codeRamPresent</tt> is true, both <tt>codeRamAddress</tt> and
-  <tt>dataRamAddress</tt> point to the same volatile RAM, but the hardware
-  uses a different data bus in each case.</td>
+            <td class="description last">Memory address for the volatile RAM, in the code memory region.  When <tt>codeRamPresent</tt> is true, both <tt>codeRamAddress</tt> and  <tt>dataRamAddress</tt> point to the same volatile RAM, but the hardware  uses a different data bus in each case.</td>
         </tr>
 
         
@@ -4014,9 +3832,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">When <tt>qspiPresent</tt> is true, the memory address for the
-  XIP (eXecute In Place) feature. This memory address maps to the external flash
-  memory connected through QSPI.</td>
+            <td class="description last">When <tt>qspiPresent</tt> is true, the memory address for the  XIP (eXecute In Place) feature. This memory address maps to the external flash  memory connected through QSPI.</td>
         </tr>
 
         
@@ -4066,8 +3882,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
             
 
-            <td class="description last">Which pin acts as the reset pin. e.g. a value of <tt>21</tt>
-  means that the pin marked as "P0.21" acts as the reset pin.</td>
+            <td class="description last">Which pin acts as the reset pin. e.g. a value of <tt>21</tt>  means that the pin marked as "P0.21" acts as the reset pin.</td>
         </tr>
 
         
@@ -4193,11 +4008,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
                 </td>
             
 
-            <td class="description last">How much of the memory should be erased. Value must be one of:<br/>
-   <tt>nrfjprogjs.ERASE_NONE</tt><br/>
-   <tt>nrfjprogjs.ERASE_ALL</tt><br/>
-   <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
-   <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/></td>
+            <td class="description last">How much of the memory should be erased. Value must be one of:<br/>   <tt>nrfjprogjs.ERASE_NONE</tt><br/>   <tt>nrfjprogjs.ERASE_ALL</tt><br/>   <tt>nrfjprogjs.ERASE_PAGES</tt><br/>   <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/></td>
         </tr>
 
         
@@ -4328,10 +4139,7 @@ at http://infocenter.nordicsemi.com, under the "Memory" section of each product 
 
 
 <div class="description">
-    Possible error.<br/>
-If an operation completed sucessfully, the error passed to the callback
-function will be <tt>undefined</tt> (and thus, falsy).<br/>
-This will be an instance of the built-in <a href="https://nodejs.org/dist/latest/docs/api/errors.html#errors_class_error">Error</a> class, with some extra properties:
+    Possible error.<br/>If an operation completed sucessfully, the error passed to the callbackfunction will be <tt>undefined</tt> (and thus, falsy).<br/>This will be an instance of the built-in <a href="https://nodejs.org/dist/latest/docs/api/errors.html#errors_class_error">Error</a> class, with some extra properties:
 </div>
 
 
@@ -4380,17 +4188,7 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
 
             
 
-            <td class="description last">The error number. Value will be one of the following predefined constants:<br/>
-   <tt>nrfjprogjs.CouldNotFindJlinkDLL</tt><br/>
-   <tt>nrfjprogjs.CouldNotFindJProgDLL</tt><br/>
-   <tt>nrfjprogjs.CouldNotOpenDevice</tt><br/>
-   <tt>nrfjprogjs.CouldNotOpenDLL</tt><br/>
-   <tt>nrfjprogjs.CouldNotConnectToDevice</tt><br/>
-   <tt>nrfjprogjs.CouldNotCallFunction</tt><br/>
-   <tt>nrfjprogjs.CouldNotErase</tt><br/>
-   <tt>nrfjprogjs.CouldNotProgram</tt><br/>
-   <tt>nrfjprogjs.CouldNotRead</tt><br/>
-   <tt>nrfjprogjs.CouldNotOpenHexFile</tt><br/></td>
+            <td class="description last">The error number. Value will be one of the following predefined constants:<br/>   <tt>nrfjprogjs.CouldNotFindJlinkDLL</tt><br/>   <tt>nrfjprogjs.CouldNotFindJProgDLL</tt><br/>   <tt>nrfjprogjs.CouldNotOpenDevice</tt><br/>   <tt>nrfjprogjs.CouldNotOpenDLL</tt><br/>   <tt>nrfjprogjs.CouldNotConnectToDevice</tt><br/>   <tt>nrfjprogjs.CouldNotCallFunction</tt><br/>   <tt>nrfjprogjs.CouldNotErase</tt><br/>   <tt>nrfjprogjs.CouldNotProgram</tt><br/>   <tt>nrfjprogjs.CouldNotRead</tt><br/>   <tt>nrfjprogjs.CouldNotOpenHexFile</tt><br/></td>
         </tr>
 
         
@@ -4610,19 +4408,9 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
 
     <h5>Examples</h5>
     
-    <pre class="prettyprint"><code>nrfprogjs.getDllVersion(function(err, version){
-    if (err) {
-        throw err;
-    } else {
-        // success
-    }
-});</code></pre>
+    <pre class="prettyprint"><code>nrfprogjs.getDllVersion(function(err, version){    if (err) {        throw err;    } else {        // success    }});</code></pre>
 
-    <pre class="prettyprint"><code>nrfprogjs.program(serialNumber, file, programmingOptions, function(err){
-    if (err &amp;&amp; err.errno === nrfprogjs.CouldNotOpenHexFile) {
-         console.error('.hex file not found');
-    }
-});</code></pre>
+    <pre class="prettyprint"><code>nrfprogjs.program(serialNumber, file, programmingOptions, function(err){    if (err &amp;&amp; err.errno === nrfprogjs.CouldNotOpenHexFile) {         console.error('.hex file not found');    }});</code></pre>
 
 
 </div>
@@ -5106,10 +4894,7 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
                 </td>
             
 
-            <td class="description last">How the <tt>filename</tt> string passed to <tt>program()</tt> shall be interpreted.
-   Value must be one of:<br/>
-   <tt>nrfjprogjs.INPUT_FORMAT_HEX_FILE</tt>: The string represents a filename for a .hex file<br/>
-   <tt>nrfjprogjs.INPUT_FORMAT_HEX_STRING</tt>: The string represents the contents of a .hex file<br/></td>
+            <td class="description last">How the <tt>filename</tt> string passed to <tt>program()</tt> shall be interpreted.   Value must be one of:<br/>   <tt>nrfjprogjs.INPUT_FORMAT_HEX_FILE</tt>: The string represents a filename for a .hex file<br/>   <tt>nrfjprogjs.INPUT_FORMAT_HEX_STRING</tt>: The string represents the contents of a .hex file<br/></td>
         </tr>
 
         
@@ -5140,8 +4925,7 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
                 </td>
             
 
-            <td class="description last">Whether verification should be performed as part of the programming.
-   Akin to <tt>nrfjprog --program --verify</tt> in the command-line tools</td>
+            <td class="description last">Whether verification should be performed as part of the programming.   Akin to <tt>nrfjprog --program --verify</tt> in the command-line tools</td>
         </tr>
 
         
@@ -5172,11 +4956,7 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
                 </td>
             
 
-            <td class="description last">How much of the flash memory should be erased. Value must be one of:<br/>
-   <tt>nrfjprogjs.ERASE_NONE</tt><br/>
-   <tt>nrfjprogjs.ERASE_ALL</tt><br/>
-   <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
-   <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/></td>
+            <td class="description last">How much of the flash memory should be erased. Value must be one of:<br/>   <tt>nrfjprogjs.ERASE_NONE</tt><br/>   <tt>nrfjprogjs.ERASE_ALL</tt><br/>   <tt>nrfjprogjs.ERASE_PAGES</tt><br/>   <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/></td>
         </tr>
 
         
@@ -5207,11 +4987,7 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
                 </td>
             
 
-            <td class="description last">How much of the QSPI memory should be erased. Value must be one of:<br/>
-   <tt>nrfjprogjs.ERASE_NONE</tt><br/>
-   <tt>nrfjprogjs.ERASE_ALL</tt><br/>
-   <tt>nrfjprogjs.ERASE_PAGES</tt><br/>
-   <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/></td>
+            <td class="description last">How much of the QSPI memory should be erased. Value must be one of:<br/>   <tt>nrfjprogjs.ERASE_NONE</tt><br/>   <tt>nrfjprogjs.ERASE_ALL</tt><br/>   <tt>nrfjprogjs.ERASE_PAGES</tt><br/>   <tt>nrfjprogjs.ERASE_PAGES_INCLUDING_UICR</tt><br/></td>
         </tr>
 
         
@@ -5311,8 +5087,7 @@ This will be an instance of the built-in <a href="https://nodejs.org/dist/latest
 
 
 <div class="description">
-    Progress information.<br />
-Long running operations can indicate progress. If the optional progress callback is used, this object will be sent when progress is made.
+    Progress information.<br />Long running operations can indicate progress. If the optional progress callback is used, this object will be sent when progress is made.
 </div>
 
 
@@ -5842,8 +5617,7 @@ Long running operations can indicate progress. If the optional progress callback
 
 
 <div class="description">
-    Represents a semver-like version number, e.g. 9.6.0 as an object of the form
-   <tt>{ major: 9, minor: 6, revision: 0 }</tt>
+    Represents a semver-like version number, e.g. 9.6.0 as an object of the form   <tt>{ major: 9, minor: 6, revision: 0 }</tt>
 </div>
 
 
@@ -6018,7 +5792,7 @@ Long running operations can indicate progress. If the optional progress callback
 <br class="clear">
 
 <footer>
-    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 19 2017 17:10:40 GMT+0200 (CEST) using the Minami theme.
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Oct 20 2017 14:55:02 GMT+0200 (W. Europe Daylight Time) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
