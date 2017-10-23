@@ -375,7 +375,7 @@ errorcode_t nRFjprog::loadDll()
         return finderror;
     }
 
-    errorcode_t dll_load_result = DllLoad(dll_path, &dll_function);
+    errorcode_t dll_load_result = loadFunctions(dll_path, &dll_function);
     loaded = dll_load_result == errorcode_t::JsSuccess;
 
     return dll_load_result;
@@ -389,7 +389,7 @@ void nRFjprog::unloadDll()
     if (loaded)
     {
         loaded = false;
-        DllFree();
+        release();
     }
 }
 
