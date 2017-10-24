@@ -34,14 +34,73 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- const nRFjprog = require('bindings')('pc-nrfjprog-js');
+#ifndef __RTT_BATONS_H__
+#define __RTT_BATONS_H__
 
- const instance = new nRFjprog.nRFjprog();
- Object.keys(nRFjprog).map(key => {
-     if (key !== 'nRFjprog') {
-         instance[key] = nRFjprog[key];
-     }
- });
+#include <memory>
+#include "rtt.h"
+#include "rtt_helpers.h"
 
- module.exports = instance;
- module.exports.RTT = nRFjprog.RTT;
+#define RTTBATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : RTTBaton(returnParameterCount, name) {}
+#define RTTBATON_DESTRUCTOR(BatonType) ~BatonType()
+
+class RTTBaton {
+public:
+    explicit RTTBaton(const uint32_t _returnParameterCount, const std::string _name) :
+        returnParameterCount(_returnParameterCount),
+        name(_name),
+        result(JsSuccess),
+        lowlevelError(SUCCESS)
+    {
+        req = new uv_work_t();
+        req->data = static_cast<void*>(this);
+        callback = nullptr;
+    }
+
+    virtual ~RTTBaton()
+    {
+        if (callback != nullptr)
+        {
+            delete callback;
+            callback = nullptr;
+        }
+    }
+
+    const uint32_t returnParameterCount;
+    const std::string name;
+
+    uint32_t result;
+    nrfjprogdll_err_t lowlevelError;
+
+    uv_work_t *req;
+    Nan::Callback *callback;
+
+    rtt_execute_function_t executeFunction;
+    rtt_return_function_t returnFunction;
+};
+
+class RTTStartBaton : public RTTBaton
+{
+public:
+    RTTBATON_CONSTRUCTOR(RTTStartBaton, "start rtt", 0);
+    uint32_t serialNumber;
+};
+
+class RTTStopBaton : public RTTBaton
+{
+public:
+    RTTBATON_CONSTRUCTOR(RTTStopBaton, "stop rtt", 0);
+};
+
+
+class RTTReadBaton : public RTTBaton
+{
+public:
+    RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 1);
+    uint32_t channelIndex;
+    uint32_t length;
+    char *data;
+};
+
+
+#endif

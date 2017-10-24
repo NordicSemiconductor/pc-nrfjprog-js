@@ -33,15 +33,61 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef __RTT_H__
+#define __RTT_H__
 
- const nRFjprog = require('bindings')('pc-nrfjprog-js');
+#include <nan.h>
+#include "common.h"
+#include "nrfjprogwrapper.h"
+#include "osfiles.h"
 
- const instance = new nRFjprog.nRFjprog();
- Object.keys(nRFjprog).map(key => {
-     if (key !== 'nRFjprog') {
-         instance[key] = nRFjprog[key];
-     }
- });
+#include "utility/errormessage.h"
 
- module.exports = instance;
- module.exports.RTT = nRFjprog.RTT;
+#include <functional>
+
+class RTTBaton;
+
+typedef std::vector<v8::Local<v8::Value> > returnType;
+typedef std::function<RTTBaton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> rtt_parse_parameters_function_t;
+typedef std::function<nrfjprogdll_err_t(RTTBaton*)> rtt_execute_function_t;
+typedef std::function<returnType(RTTBaton*)> rtt_return_function_t;
+
+class RTT : public Nan::ObjectWrap
+{
+public:
+    static NAN_MODULE_INIT(Init);
+
+private:
+    explicit RTT();
+    ~RTT();
+
+    static Nan::Persistent<v8::Function> constructor;
+
+    static NAN_METHOD(New);
+
+    static NAN_METHOD(Start); // Params: serialNumber, { location }, callback(error)
+    static NAN_METHOD(Stop); // Params: callback(error)
+
+    static NAN_METHOD(Read); // Params: channelIndex, callback(error, data)
+    static NAN_METHOD(Write); // Params: channelIndex, data, callback(error)
+
+    static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
+                            const rtt_parse_parameters_function_t parse,
+                            const rtt_execute_function_t execute,
+                            const rtt_return_function_t ret);
+    static void ExecuteFunction(uv_work_t *req);
+    static void ReturnFunction(uv_work_t *req);
+
+    static errorcode_t loadDll();
+    static void unloadDll();
+
+    static void init(v8::Local<v8::FunctionTemplate> tpl);
+
+    static void logCallback(const char * msg);
+    static void log(std::string msg);
+    static std::string logMessage;
+
+    static nRFjprogDllFunctionPointersType dll_function;
+};
+
+#endif

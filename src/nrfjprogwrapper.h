@@ -34,10 +34,10 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HIGHLEVELWRAPPER_H__
-#define __HIGHLEVELWRAPPER_H__
+#ifndef __NRFJPROGWRAPPER_H__
+#define __NRFJPROGWRAPPER_H__
 
-#include "nrfjprogdll.h"
+//#include "nrfjprogdll.h"
 #include "highlevel_common.h"
 #include "utility/errormessage.h"
 

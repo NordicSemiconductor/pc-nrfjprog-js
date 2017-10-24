@@ -34,16 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <nan.h>
+#include "highlevel.h"
 
 #include <vector>
 
-#include "highlevel.h"
 #include "highlevel_common.h"
 #include "highlevel_batons.h"
 #include "highlevel_helpers.h"
-
-#include "highlevelwrapper.h"
 
 #include "utility/conversion.h"
 #include "utility/errormessage.h"
@@ -850,6 +847,9 @@ NAN_METHOD(HighLevel::CloseDevice)
 
     CallFunction(info, p, e, nullptr, true);
 }
+
+#include "rtt.h"
+
 extern "C" {
     void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     {
@@ -927,6 +927,7 @@ extern "C" {
     {
         initConsts(target);
         HighLevel::Init(target);
+        RTT::Init(target);
     }
 }
 
