@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DLL_FUNC_PTRS_H
-#define DLL_FUNC_PTRS_H
+#ifndef __HIGHLEVELWRAPPER_H__
+#define __HIGHLEVELWRAPPER_H__
 
 #include "highlevelnrfjprogdll.h"
 #include "nrfjprog_common.h"

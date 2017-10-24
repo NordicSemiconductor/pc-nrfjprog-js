@@ -12,6 +12,8 @@ add_compile_options(
     #-H # Used for debugging header dependencies. See https://docs.freebsd.org/info/gcc/gcc.info.Preprocessor_Options.html
 )
 
+set(PLATFORM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/linux)
+
 file (GLOB PLATFORM_SOURCE_FILES
-    "src/platform/*_linux.cpp"
+    "src/platform/linux/*.cpp"
 )

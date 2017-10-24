@@ -43,7 +43,7 @@
 #include "nrfjprogjs_batons.h"
 #include "nrfjprog_helpers.h"
 
-#include "dllfunc.h"
+#include "highlevelwrapper.h"
 
 #include "utility/conversion.h"
 #include "utility/errormessage.h"

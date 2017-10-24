@@ -38,7 +38,7 @@
 
 #include <nan.h>
 #include "common.h"
-#include "dllfunc.h"
+#include "highlevelwrapper.h"
 #include "osfiles.h"
 
 #include "utility/errormessage.h"
