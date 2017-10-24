@@ -94,11 +94,19 @@ public:
     RTTBATON_CONSTRUCTOR(RTTStopBaton, "stop rtt", 0);
 };
 
-
 class RTTReadBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 1);
+    RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 2);
+    uint32_t channelIndex;
+    uint32_t length;
+    char *data;
+};
+
+class RTTWriteBaton : public RTTBaton
+{
+public:
+    RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 0);
     uint32_t channelIndex;
     uint32_t length;
     char *data;

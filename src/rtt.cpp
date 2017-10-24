@@ -373,9 +373,40 @@ NAN_METHOD(RTT::Read)
         returnType vector;
 
         vector.push_back(Convert::toJsString(baton->data, baton->length));
+        vector.push_back(Convert::toJsValueArray((uint8_t *)baton->data, baton->length));
 
         return vector;
     };
 
     CallFunction(info, p, e, r);
+}
+
+NAN_METHOD(RTT::Write)
+{
+    rtt_parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> RTTBaton* {
+        auto baton = new RTTWriteBaton();
+
+        baton->channelIndex = Convert::getNativeUint32(info[argumentCount]);
+        argumentCount++;
+
+        baton->data = (char *)Convert::getNativePointerToUint8(info[argumentCount]);
+        baton->length = Convert::getLengthOfArray(info[argumentCount]);
+        argumentCount++;
+
+        return baton;
+    };
+
+    rtt_execute_function_t e = [&] (RTTBaton *b) -> nrfjprogdll_err_t {
+        auto baton = static_cast<RTTWriteBaton*>(b);
+
+        uint32_t writeLength = 0;
+
+        dll_function.rtt_write(baton->channelIndex, baton->data, baton->length, &writeLength);
+
+        baton->length = writeLength;
+
+        return SUCCESS;
+    };
+
+    CallFunction(info, p, e, nullptr);
 }
