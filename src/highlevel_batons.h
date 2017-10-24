@@ -38,9 +38,9 @@
 #define __NRFJPROG_BATONS_H__
 
 #include <memory>
-#include "nrfjprogjs.h"
-#include "nrfjprog_helpers.h"
-#include "nrfjprog_common.h"
+#include "highlevel.h"
+#include "highlevel_helpers.h"
+#include "highlevel_common.h"
 
 #define BATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, false) {}
 #define BATON_WITH_PROGRESS_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, true) {}

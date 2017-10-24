@@ -38,7 +38,7 @@
 #define __HIGHLEVELWRAPPER_H__
 
 #include "highlevelnrfjprogdll.h"
-#include "nrfjprog_common.h"
+#include "highlevel_common.h"
 #include "utility/errormessage.h"
 
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_get_version)     (uint32_t * major, uint32_t * minor, uint32_t * micro);

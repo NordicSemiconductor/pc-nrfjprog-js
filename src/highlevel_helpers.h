@@ -39,7 +39,7 @@
 
 #include <nan.h>
 #include "highlevelnrfjprogdll.h"
-#include "nrfjprog_common.h"
+#include "highlevel_common.h"
 
 class ProbeDetails
 {
