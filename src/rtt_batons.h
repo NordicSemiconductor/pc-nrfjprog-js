@@ -82,8 +82,10 @@ public:
 class RTTStartBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTStartBaton, "start rtt", 0);
+    RTTBATON_CONSTRUCTOR(RTTStartBaton, "start rtt", 2);
     uint32_t serialNumber;
+    uint32_t upChannelNumber;
+    uint32_t downChannelNumber;
 };
 
 class RTTStopBaton : public RTTBaton

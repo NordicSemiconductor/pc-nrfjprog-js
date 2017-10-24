@@ -162,13 +162,13 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
         Nan::ThrowError(message);
         return;
     }
-/*
+
     log("===============================================\n");
     log("Start of ");
     log(baton->name);
     log("\n");
     log("===============================================\n");
-*/
+
 
     baton->executeFunction = execute;
     baton->returnFunction = ret;
@@ -180,11 +180,12 @@ void RTT::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<RTTBaton *>(req->data);
 
-    nrfjprogdll_err_t excuteError = baton->executeFunction(baton);
+    nrfjprogdll_err_t executeError = baton->executeFunction(baton);
 
-    if (excuteError != SUCCESS)
+    if (executeError != SUCCESS)
     {
         baton->result = errorcode_t::CouldNotCallFunction;
+        baton->lowlevelError = executeError;
     }
 }
 
@@ -231,6 +232,11 @@ void RTT::ReturnFunction(uv_work_t *req)
     delete baton;
 }
 
+void RTT::log(std::string msg)
+{
+    logMessage = logMessage.append(msg);
+}
+
 NAN_METHOD(RTT::Start)
 {
     rtt_parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> RTTBaton* {
@@ -250,25 +256,69 @@ NAN_METHOD(RTT::Start)
 
         loadnRFjprogFunctions("C:\\Program Files (x86)\\Nordic Semiconductor\\nrf5x\\bin\\nrfjprog.dll", &dll_function);
 
-        std::string jlinkarmlocation = "C:\\Program Files (x86)\\SEGGER\\JLink_V620f";
+        std::string jlinkarmlocation = "C:\\Program Files (x86)\\SEGGER\\JLink_V620f\\JLinkARM.dll";
 
-        dll_function.open_dll(jlinkarmlocation.c_str(), 0, NRF52_FAMILY);
+        const nrfjprogdll_err_t openStatus = dll_function.open_dll(jlinkarmlocation.c_str(), 0, NRF52_FAMILY);
 
-        dll_function.connect_to_emu_with_snr(baton->serialNumber, 2000);
-        dll_function.connect_to_device();
+        if (openStatus != SUCCESS)
+        {
+            return OUT_OF_MEMORY;
+        }
 
-        dll_function.rtt_start();
-/*
+        //log("Serialnumber: " + baton->serialNumber);
+        const nrfjprogdll_err_t connectToEmuStatus = dll_function.connect_to_emu_with_snr(baton->serialNumber, 4000);
+
+        if (connectToEmuStatus != SUCCESS)
+        {
+            log("connectToEmuStatus " + connectToEmuStatus);
+            return INVALID_OPERATION;
+        }
+        const nrfjprogdll_err_t conentToDeviceStatus = dll_function.connect_to_device();
+
+        if (conentToDeviceStatus != SUCCESS)
+        {
+            return INVALID_PARAMETER;
+        }
+        const nrfjprogdll_err_t startStatus = dll_function.rtt_start();
+
+        if (startStatus != SUCCESS)
+        {
+            return INVALID_DEVICE_FOR_OPERATION;
+        }
+
         bool controlBlockFound = false;
 
-        while (!controlBlockFound) {
+        for(int i = 0; i < 100; ++i) {
             dll_function.rtt_is_control_block_found(&controlBlockFound);
+
+            if (controlBlockFound) {
+                return SUCCESS;
+            }
         }
-*/
+
+        const nrfjprogdll_err_t channelCountStatus = dll_function.rtt_read_channel_count(&baton->downChannelNumber, &baton->upChannelNumber);
+
+        if (startStatus != SUCCESS)
+        {
+            return EMULATOR_NOT_CONNECTED;
+        }
+
+        log("Oops");
         return SUCCESS;
     };
 
-    CallFunction(info, p, e, nullptr);
+    rtt_return_function_t r = [&] (RTTBaton *b) -> returnType {
+        auto baton = static_cast<RTTStartBaton*>(b);
+
+        returnType vector;
+
+        vector.push_back(Convert::toJsNumber(baton->downChannelNumber));
+        vector.push_back(Convert::toJsNumber(baton->upChannelNumber));
+
+        return vector;
+    };
+
+    CallFunction(info, p, e, r);
 }
 
 NAN_METHOD(RTT::Stop)
@@ -322,7 +372,7 @@ NAN_METHOD(RTT::Read)
 
         returnType vector;
 
-        vector.push_back(Convert::toJsString(baton->data));
+        vector.push_back(Convert::toJsString(baton->data, baton->length));
 
         return vector;
     };
