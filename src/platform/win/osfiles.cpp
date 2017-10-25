@@ -140,11 +140,6 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     return retCode;
 }
 
-std::string platformLibraryName(std::string &basename)
-{
-    return basename + ".dll";
-}
-
 std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
 {
     char buffer[MAX_PATH] = "";
@@ -190,4 +185,14 @@ void TempFile::deleteFile()
     }
 
     filename.clear();
+}
+
+std::string getHighLevelLibraryName()
+{
+    return std::string("highlevelnrfjprog.dll");
+}
+
+std::string getnrfjprogLibraryName()
+{
+    return std::string("nrfjprog.dll");
 }

@@ -44,9 +44,7 @@ std::string highLevelPath;
 errorcode_t loadHighLevelFunctions(DllFunctionPointersType * dll_function)
 {
     if (highLevelPath.empty()) {
-        std::string libraryName("highlevelnrfjprog");
-        std::string wrappedLibraryName = platformLibraryName(libraryName);
-        const errorcode_t finderror = OSFilesFindDll(highLevelPath, wrappedLibraryName);
+        const errorcode_t finderror = OSFilesFindDll(highLevelPath, getHighLevelLibraryName());
 
         if (finderror != errorcode_t::JsSuccess) {
             return finderror;

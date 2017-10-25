@@ -85,15 +85,6 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     return errorcode_t::JsSuccess;
 }
 
-std::string platformLibraryName(std::string &basename)
-{
-    std::string wrappedName;
-    wrappedName.append("lib");
-    wrappedName.append(basename);
-    wrappedName.append(".dylib");
-    return wrappedName;
-}
-
 std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
 {
     return base_path + '/' + relative_path;
@@ -161,4 +152,14 @@ void TempFile::deleteFile()
     }
 
     filename.clear();
+}
+
+std::string getHighLevelLibraryName()
+{
+    return std::string("libhighlevelnrfjprog.dylib");
+}
+
+std::string getnrfjprogLibraryName()
+{
+    return std::string("libnrfjprogdll.dylib");
 }

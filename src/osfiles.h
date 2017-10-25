@@ -46,7 +46,8 @@
 #define COMMON_MAX_INI_LINE (1024)
 
 errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName);
-std::string platformLibraryName(std::string &basename);
+std::string getHighLevelLibraryName();
+std::string getnrfjprogLibraryName();
 
 class AbstractFile
 {
