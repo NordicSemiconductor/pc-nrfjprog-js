@@ -249,11 +249,6 @@ void RTT::log(std::string msg)
     logMessage = logMessage.append(msg);
 }
 
-#include <chrono>
-#include <thread>
-
-using namespace std::chrono_literals;
-
 NAN_METHOD(RTT::Start)
 {
     rtt_parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> RTTBaton* {
