@@ -48,30 +48,29 @@
 
 #include <iostream>
 
-errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 {
-    char temp_dll_path[dll_path_len];
-    memset(temp_dll_path, 0, dll_path_len);
+    char temp_dll_path[COMMON_MAX_PATH];
+    memset(temp_dll_path, 0, COMMON_MAX_PATH);
 
-    ssize_t len = readlink("/proc/self/exe", temp_dll_path, dll_path_len - 1);
+    ssize_t len = readlink("/proc/self/exe", temp_dll_path, COMMON_MAX_PATH - 1);
 
     if (len == -1)
     {
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    strncpy(dll_path, dirname(temp_dll_path), dll_path_len - 1);
-    strncat(dll_path, "/libhighlevelnrfjprog.so", dll_path_len - strlen(dll_path) - 1);
+    dll_path = dirname(temp_dll_path) + "/" + fileName;
 
     if (!AbstractFile::pathExists(dll_path))
     {
-        /* It is possible that the user might have place the .so in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * libraryHandle = dlopen("libhighlevelnrfjprog.so", RTLD_LAZY);
+        /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
+        void * libraryHandle = dlopen(fileName, RTLD_LAZY);
 
         if (libraryHandle)
         {
             dlclose(libraryHandle);
-            strncpy(dll_path, "libhighlevelnrfjprog.so", dll_path_len - 1);
+            dll_path = fileName;
             return errorcode_t::JsSuccess;
         }
 
@@ -79,6 +78,11 @@ errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
     }
 
     return errorcode_t::JsSuccess;
+}
+
+std::string platformLibraryName(std::string &basename)
+{
+    return "lib" + basename + ".so";
 }
 
 std::string TempFile::concatPaths(std::string base_path, std::string relative_path)

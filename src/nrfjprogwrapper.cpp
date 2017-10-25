@@ -44,7 +44,7 @@ std::string nrfjprogPath;
 errorcode_t loadnRFjprogFunctions(nRFjprogDllFunctionPointersType * dll_function)
 {
     if (nrfjprogPath.empty()) {
-        const errorcode_t finderror = OSFilesFindDll(nrfjprogPath, std::string("nrfjprog.dll"));
+        const errorcode_t finderror = OSFilesFindDll(nrfjprogPath, platformLibraryName(std::string("nrfjprog")));
 
         if (finderror != errorcode_t::JsSuccess) {
             return finderror;
