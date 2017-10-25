@@ -44,7 +44,8 @@ std::string highLevelPath;
 errorcode_t loadHighLevelFunctions(DllFunctionPointersType * dll_function)
 {
     if (highLevelPath.empty()) {
-        const errorcode_t finderror = OSFilesFindDll(highLevelPath, getHighLevelLibraryName());
+        std::string libraryName = getHighLevelLibraryName();
+        const errorcode_t finderror = OSFilesFindDll(highLevelPath, libraryName);
 
         if (finderror != errorcode_t::JsSuccess) {
             return finderror;
