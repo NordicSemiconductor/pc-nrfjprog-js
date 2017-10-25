@@ -43,9 +43,9 @@ LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *fun
     return GetProcAddress(libraryHandle, func_name);
 }
 
-LibraryHandleType LibraryLoad(const char *path)
+LibraryHandleType LibraryLoad(std::string &path)
 {
-    return LoadLibrary(path);
+    return LoadLibrary(path.c_str());
 }
 
 void LibraryFree(LibraryHandleType libraryHandle)

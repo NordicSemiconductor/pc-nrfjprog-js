@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_COMMON_H__
-#define __NRFJPROG_COMMON_H__
+#ifndef __HIGHLEVEL_COMMON_H__
+#define __HIGHLEVEL_COMMON_H__
 
 #include "common.h"
 #include "DllCommonDefinitions.h"

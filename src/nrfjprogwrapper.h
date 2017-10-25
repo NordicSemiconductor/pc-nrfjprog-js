@@ -173,7 +173,7 @@ struct nRFjprogDllFunctionPointersType {
     nRFjprog_qspi_custom                      qspi_custom;
 };
 
-errorcode_t loadnRFjprogFunctions(const char * path, nRFjprogDllFunctionPointersType * dll_function);
+errorcode_t loadnRFjprogFunctions(nRFjprogDllFunctionPointersType * dll_function);
 errorcode_t releasenRFjprog();
 
 #endif

@@ -38,6 +38,7 @@
 #define __LIBRARY_LOADER_H__
 
 #include "libraryloader_platform.h"
+#include <string>
 
 LoadedFunctionType LoadFunction(LibraryHandleType, const char *func_name);
 
@@ -53,7 +54,7 @@ static bool load_func_ptr(T * func_ptr, const char * func_name, LibraryHandleTyp
     return true;
 }
 
-LibraryHandleType LibraryLoad(const char *path);
+LibraryHandleType LibraryLoad(std::string &path);
 void LibraryFree(LibraryHandleType libraryHandle);
 
 #endif

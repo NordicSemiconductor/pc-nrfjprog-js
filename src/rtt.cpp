@@ -41,6 +41,7 @@
 #include "highlevel_common.h"
 #include "rtt_batons.h"
 #include "rtt_helpers.h"
+#include "highlevelwrapper.h"
 
 #include "utility/conversion.h"
 #include "utility/errormessage.h"
@@ -52,6 +53,15 @@
 Nan::Persistent<v8::Function> RTT::constructor;
 std::string RTT::logMessage;
 nRFjprogDllFunctionPointersType RTT::dll_function;
+
+#define RETURN_ERROR_ON_FAIL(function, error) do { \
+    const nrfjprogdll_err_t status = (function); \
+    \
+    if (status != SUCCESS) \
+    { \
+        return error; \
+    } \
+} while(0);
 
 NAN_MODULE_INIT(RTT::Init)
 {
@@ -81,7 +91,8 @@ NAN_METHOD(RTT::New)
 }
 
 RTT::RTT()
-{}
+{
+}
 
 RTT::~RTT()
 {}
@@ -209,6 +220,7 @@ void RTT::ReturnFunction(uv_work_t *req)
     else
     {
         argv[0] = Nan::Undefined();
+        //argv[0] = ErrorMessage::getErrorMessage(baton->result, baton->name, logMessage, baton->lowlevelError);
 
         if (baton->returnFunction != nullptr)
         {
@@ -237,6 +249,11 @@ void RTT::log(std::string msg)
     logMessage = logMessage.append(msg);
 }
 
+#include <chrono>
+#include <thread>
+
+using namespace std::chrono_literals;
+
 NAN_METHOD(RTT::Start)
 {
     rtt_parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> RTTBaton* {
@@ -254,56 +271,74 @@ NAN_METHOD(RTT::Start)
     rtt_execute_function_t e = [&] (RTTBaton *b) -> nrfjprogdll_err_t {
         auto baton = static_cast<RTTStartBaton*>(b);
 
-        loadnRFjprogFunctions("C:\\Program Files (x86)\\Nordic Semiconductor\\nrf5x\\bin\\nrfjprog.dll", &dll_function);
+        DllFunctionPointersType highLevelFunctions;
 
-        std::string jlinkarmlocation = "C:\\Program Files (x86)\\SEGGER\\JLink_V620f\\JLinkARM.dll";
+        RETURN_ERROR_ON_FAIL((nrfjprogdll_err_t)loadHighLevelFunctions(&highLevelFunctions), NO_EMULATOR_CONNECTED);
 
-        const nrfjprogdll_err_t openStatus = dll_function.open_dll(jlinkarmlocation.c_str(), 0, NRF52_FAMILY);
+        highLevelFunctions.dll_open(nullptr, nullptr, nullptr);
+        Probe_handle_t probe;
+        highLevelFunctions.probe_init(&probe, baton->serialNumber, nullptr);
 
-        if (openStatus != SUCCESS)
-        {
-            return OUT_OF_MEMORY;
-        }
+        probe_info_t probeInfo;
+        device_info_t deviceInfo;
+        library_info_t libraryInfo;
 
-        //log("Serialnumber: " + baton->serialNumber);
-        const nrfjprogdll_err_t connectToEmuStatus = dll_function.connect_to_emu_with_snr(baton->serialNumber, 4000);
+        highLevelFunctions.get_probe_info(probe, &probeInfo);
+        highLevelFunctions.get_device_info(probe, &deviceInfo);
+        highLevelFunctions.get_library_info(probe, &libraryInfo);
 
-        if (connectToEmuStatus != SUCCESS)
-        {
-            log("connectToEmuStatus " + connectToEmuStatus);
-            return INVALID_OPERATION;
-        }
-        const nrfjprogdll_err_t conentToDeviceStatus = dll_function.connect_to_device();
+        highLevelFunctions.reset(probe, RESET_SYSTEM);
+        highLevelFunctions.probe_uninit(&probe);
+        highLevelFunctions.dll_close();
 
-        if (conentToDeviceStatus != SUCCESS)
-        {
-            return INVALID_PARAMETER;
-        }
-        const nrfjprogdll_err_t startStatus = dll_function.rtt_start();
+        releaseHighLevel();
 
-        if (startStatus != SUCCESS)
-        {
-            return INVALID_DEVICE_FOR_OPERATION;
-        }
+        uint32_t clockSpeed = probeInfo.clockspeed_khz;
+        device_family_t family = deviceInfo.device_family;
+        std::string jlinkarmlocation = libraryInfo.file_path;
+
+        RETURN_ERROR_ON_FAIL((nrfjprogdll_err_t)loadnRFjprogFunctions(&dll_function), LOW_VOLTAGE);
+
+        RETURN_ERROR_ON_FAIL(dll_function.open_dll(jlinkarmlocation.c_str(), 0, family), OUT_OF_MEMORY);
+
+        RETURN_ERROR_ON_FAIL(dll_function.connect_to_emu_with_snr(baton->serialNumber, clockSpeed), INVALID_OPERATION);
+        RETURN_ERROR_ON_FAIL(dll_function.connect_to_device(), INVALID_PARAMETER);
+        RETURN_ERROR_ON_FAIL(dll_function.rtt_start(), INVALID_DEVICE_FOR_OPERATION);
 
         bool controlBlockFound = false;
 
-        for(int i = 0; i < 100; ++i) {
+        for(int i = 0; i < 100000; ++i) {
             dll_function.rtt_is_control_block_found(&controlBlockFound);
 
             if (controlBlockFound) {
-                return SUCCESS;
+                log("Found control block");
+                break;
             }
         }
 
-        const nrfjprogdll_err_t channelCountStatus = dll_function.rtt_read_channel_count(&baton->downChannelNumber, &baton->upChannelNumber);
+        uint32_t downChannelNumber;
+        uint32_t upChannelNumber;
 
-        if (startStatus != SUCCESS)
+        RETURN_ERROR_ON_FAIL(dll_function.rtt_read_channel_count(&downChannelNumber, &upChannelNumber), EMULATOR_NOT_CONNECTED);
+
+        for(uint32_t i = 0; i < downChannelNumber; ++i)
         {
-            return EMULATOR_NOT_CONNECTED;
+            char channelName[32];
+            uint32_t channelSize;
+            dll_function.rtt_read_channel_info(i, DOWN_DIRECTION, channelName, 32, &channelSize);
+
+            baton->downChannelInfo.push_back(new ChannelInfo(i, std::string(channelName), channelSize));
         }
 
-        log("Oops");
+        for(uint32_t i = 0; i < upChannelNumber; ++i)
+        {
+            char channelName[32];
+            uint32_t channelSize;
+            dll_function.rtt_read_channel_info(i, UP_DIRECTION, channelName, 32, &channelSize);
+
+            baton->upChannelInfo.push_back(new ChannelInfo(i, std::string(channelName), channelSize));
+        }
+
         return SUCCESS;
     };
 
@@ -312,8 +347,25 @@ NAN_METHOD(RTT::Start)
 
         returnType vector;
 
-        vector.push_back(Convert::toJsNumber(baton->downChannelNumber));
-        vector.push_back(Convert::toJsNumber(baton->upChannelNumber));
+        v8::Local<v8::Array> downChannelInfo = Nan::New<v8::Array>();
+        int i = 0;
+        for (auto element : baton->downChannelInfo)
+        {
+            Nan::Set(downChannelInfo, Convert::toJsNumber(i), element->ToJs());
+            i++;
+        }
+
+        vector.push_back(downChannelInfo);
+
+        v8::Local<v8::Array> upChannelInfo = Nan::New<v8::Array>();
+        i = 0;
+        for (auto element : baton->upChannelInfo)
+        {
+            Nan::Set(upChannelInfo, Convert::toJsNumber(i), element->ToJs());
+            i++;
+        }
+
+        vector.push_back(upChannelInfo);
 
         return vector;
     };

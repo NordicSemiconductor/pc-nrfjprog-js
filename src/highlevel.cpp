@@ -54,10 +54,8 @@
 
 Nan::Persistent<v8::Function> HighLevel::constructor;
 DllFunctionPointersType HighLevel::dll_function;
-char HighLevel::dll_path[COMMON_MAX_PATH] = {'\0'};
 bool HighLevel::loaded = false;
 bool HighLevel::connectedToDevice = false;
-errorcode_t HighLevel::finderror = errorcode_t::JsSuccess;
 std::string HighLevel::logMessage;
 Nan::Callback *HighLevel::jsProgressCallback = nullptr;
 uv_async_t *HighLevel::progressEvent = nullptr;
@@ -101,8 +99,6 @@ HighLevel::HighLevel()
 {
     progressEvent = new uv_async_t();
     uv_async_init(uv_default_loop(), progressEvent, sendProgress);
-
-    finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
 
     keepDeviceOpen = false;
 }
@@ -367,12 +363,7 @@ errorcode_t HighLevel::loadDll()
         return errorcode_t::JsSuccess;
     }
 
-    if (finderror != errorcode_t::JsSuccess)
-    {
-        return finderror;
-    }
-
-    errorcode_t dll_load_result = loadFunctions(dll_path, &dll_function);
+    errorcode_t dll_load_result = loadHighLevelFunctions(&dll_function);
     loaded = dll_load_result == errorcode_t::JsSuccess;
 
     return dll_load_result;
@@ -386,7 +377,7 @@ void HighLevel::unloadDll()
     if (loaded)
     {
         loaded = false;
-        release();
+        releaseHighLevel();
     }
 }
 

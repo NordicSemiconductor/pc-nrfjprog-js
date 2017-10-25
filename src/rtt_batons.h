@@ -84,8 +84,9 @@ class RTTStartBaton : public RTTBaton
 public:
     RTTBATON_CONSTRUCTOR(RTTStartBaton, "start rtt", 2);
     uint32_t serialNumber;
-    uint32_t upChannelNumber;
-    uint32_t downChannelNumber;
+
+    std::vector<ChannelInfo *> upChannelInfo;
+    std::vector<ChannelInfo *> downChannelInfo;
 };
 
 class RTTStopBaton : public RTTBaton

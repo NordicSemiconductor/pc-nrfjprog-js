@@ -87,7 +87,7 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_run                  run;
 };
 
-errorcode_t loadFunctions(const char * path, DllFunctionPointersType * dll_function);
-errorcode_t release();
+errorcode_t loadHighLevelFunctions(DllFunctionPointersType * dll_function);
+errorcode_t releaseHighLevel();
 
 #endif

@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OS_FILES_H
-#define OS_FILES_H
+#ifndef __OS_FILES_H__
+#define __OS_FILES_H__
 
 #include "highlevel_common.h"
 
@@ -45,7 +45,7 @@
 #define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
 #define COMMON_MAX_INI_LINE (1024)
 
-errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len);
+errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName);
 
 class AbstractFile
 {

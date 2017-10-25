@@ -44,9 +44,9 @@ LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *fun
     return dlsym(libraryHandle, func_name);
 }
 
-LibraryHandleType LibraryLoad(const char *path)
+LibraryHandleType LibraryLoad(std::string &path)
 {
-    return dlopen(path);
+    return dlopen(path.c_str());
 }
 
 void LibraryFree(LibraryHandleType libraryHandle)

@@ -33,8 +33,8 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __NRFJPROG_H__
-#define __NRFJPROG_H__
+#ifndef __HIGHLEVEL_H__
+#define __HIGHLEVEL_H__
 
 #include <nan.h>
 #include "common.h"
@@ -113,11 +113,9 @@ private:
     static uv_async_t *progressEvent;
 
     static DllFunctionPointersType dll_function;
-    static char dll_path[COMMON_MAX_PATH];
 
     static bool loaded;
     static bool connectedToDevice;
-    static errorcode_t finderror;
 
     static bool keepDeviceOpen;
     static Probe_handle_t probe;

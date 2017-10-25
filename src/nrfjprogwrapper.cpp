@@ -36,12 +36,22 @@
 
 #include "nrfjprogwrapper.h"
 #include "libraryloader.h"
+#include "osfiles.h"
 
 LibraryHandleType nrfJproglibraryHandle;
+std::string nrfjprogPath;
 
-errorcode_t loadnRFjprogFunctions(const char * path, nRFjprogDllFunctionPointersType * dll_function)
+errorcode_t loadnRFjprogFunctions(nRFjprogDllFunctionPointersType * dll_function)
 {
-    nrfJproglibraryHandle = LibraryLoad(path);
+    if (nrfjprogPath.empty()) {
+        const errorcode_t finderror = OSFilesFindDll(nrfjprogPath, std::string("nrfjprog.dll"));
+
+        if (finderror != errorcode_t::JsSuccess) {
+            return finderror;
+        }
+    }
+
+    nrfJproglibraryHandle = LibraryLoad(nrfjprogPath);
 
     if (!nrfJproglibraryHandle){
         return errorcode_t::CouldNotLoadDLL;
