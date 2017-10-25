@@ -60,7 +60,9 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    dll_path = dirname(temp_dll_path) + "/" + fileName;
+    dll_path.append(dirname(temp_dll_path));
+    dpp_path.append("/");
+    dll_path.append(fileName);
 
     if (!AbstractFile::pathExists(dll_path))
     {
