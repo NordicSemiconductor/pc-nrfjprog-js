@@ -327,7 +327,8 @@ NAN_METHOD(RTT::Start)
             uint32_t channelSize;
             dll_function.rtt_read_channel_info(i, DOWN_DIRECTION, channelName, 32, &channelSize);
 
-            baton->downChannelInfo.push_back(new ChannelInfo(i, std::string(channelName), channelSize));
+            std::string name(channelName);
+            baton->downChannelInfo.push_back(new ChannelInfo(i, name, channelSize));
         }
 
         for(uint32_t i = 0; i < upChannelNumber; ++i)
@@ -336,7 +337,8 @@ NAN_METHOD(RTT::Start)
             uint32_t channelSize;
             dll_function.rtt_read_channel_info(i, UP_DIRECTION, channelName, 32, &channelSize);
 
-            baton->upChannelInfo.push_back(new ChannelInfo(i, std::string(channelName), channelSize));
+            std::string name(channelName);
+            baton->upChannelInfo.push_back(new ChannelInfo(i, name, channelSize));
         }
 
         return SUCCESS;
@@ -380,8 +382,6 @@ NAN_METHOD(RTT::Stop)
     };
 
     rtt_execute_function_t e = [&] (RTTBaton *b) -> nrfjprogdll_err_t {
-        auto baton = static_cast<RTTStopBaton*>(b);
-
         dll_function.rtt_stop();
         dll_function.disconnect_from_device();
         dll_function.disconnect_from_emu();

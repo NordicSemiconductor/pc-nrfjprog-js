@@ -65,7 +65,7 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     if (!AbstractFile::pathExists(dll_path))
     {
         /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * libraryHandle = dlopen(fileName, RTLD_LAZY);
+        void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
         if (libraryHandle)
         {
@@ -82,7 +82,11 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 
 std::string platformLibraryName(std::string &basename)
 {
-    return "lib" + basename + ".so";
+    std::string wrappedName;
+    wrappedName.append("lib");
+    wrappedName.append(basename);
+    wrappedName.append(".so");
+    return wrappedName;
 }
 
 std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
