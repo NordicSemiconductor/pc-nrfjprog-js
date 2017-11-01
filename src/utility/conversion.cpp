@@ -208,6 +208,29 @@ bool Convert::getBool(v8::Local<v8::Value>js)
     return ConvUtil<bool>::getNativeBool(js);
 }
 
+char *Convert::getNativePointerToChar(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getNativePointerToChar(value));
+}
+
+char *Convert::getNativePointerToChar(v8::Local<v8::Value> js)
+{
+    if (!js->IsString())
+    {
+        throw std::string("array");
+    }
+
+    std::string content = Convert::getNativeString(js);
+
+    auto length = content.length();
+    auto string = new char[length];
+    strncpy(string, content.c_str(), length);
+
+    return string;
+}
+
 uint8_t *Convert::getNativePointerToUint8(v8::Local<v8::Object>js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);

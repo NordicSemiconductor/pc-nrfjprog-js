@@ -49,7 +49,7 @@ class RTTBaton;
 
 typedef std::vector<v8::Local<v8::Value> > returnType;
 typedef std::function<RTTBaton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> rtt_parse_parameters_function_t;
-typedef std::function<nrfjprogdll_err_t(RTTBaton*)> rtt_execute_function_t;
+typedef std::function<RTTErrorcodes_t(RTTBaton*)> rtt_execute_function_t;
 typedef std::function<returnType(RTTBaton*)> rtt_return_function_t;
 
 class RTT : public Nan::ObjectWrap
@@ -69,7 +69,7 @@ private:
     static NAN_METHOD(Stop); // Params: callback(error)
 
     static NAN_METHOD(Read); // Params: channelIndex, callback(error, data)
-    static NAN_METHOD(Write); // Params: channelIndex, data, callback(error)
+    static NAN_METHOD(Write); // Params: channelIndex, data, callback(error, writtenlength)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                             const rtt_parse_parameters_function_t parse,

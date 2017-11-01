@@ -111,7 +111,7 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fu
     if (parse == nullptr ||
         execute == nullptr)
     {
-        auto message = ErrorMessage::getErrorMessage(1, std::string("One or more of the parse, or execute functions is missing for this function"));
+        auto message = ErrorMessage::getErrorMessage(1, nrfjprog_js_err_map, std::string("One or more of the parse, or execute functions is missing for this function"));
         Nan::ThrowError(message);
         return;
     }
@@ -181,7 +181,7 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fu
     if (ret == nullptr &&
         baton->returnParameterCount > 0)
     {
-        auto message = ErrorMessage::getErrorMessage(1, std::string("The return function has more than one parameter and is required for this function, but is missing"));
+        auto message = ErrorMessage::getErrorMessage(1, nrfjprog_js_err_map, std::string("The return function has more than one parameter and is required for this function, but is missing"));
         Nan::ThrowError(message);
         return;
     }
@@ -286,7 +286,7 @@ void HighLevel::ReturnFunction(uv_work_t *req)
 
     if (baton->result != errorcode_t::JsSuccess)
     {
-        argv[0] = ErrorMessage::getErrorMessage(baton->result, baton->name, logMessage, baton->lowlevelError);
+        argv[0] = ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, logMessage, baton->lowlevelError);
 
         for (uint32_t i = 0; i < baton->returnParameterCount; i++)
         {

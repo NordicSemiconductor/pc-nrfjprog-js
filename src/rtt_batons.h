@@ -107,7 +107,7 @@ public:
 class RTTWriteBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 0);
+    RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 1);
     uint32_t channelIndex;
     uint32_t length;
     char *data;

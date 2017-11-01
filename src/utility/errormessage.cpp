@@ -43,23 +43,6 @@
 #include "utility.h"
 #include "../highlevel_common.h"
 
-static name_map_t nrfjprog_js_err_map = {
-    { errorcode_t::JsSuccess, "Success" },
-    { errorcode_t::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL" },
-    { errorcode_t::CouldNotFindJprogDLL, "CouldNotFindJprogDLL" },
-    { errorcode_t::CouldNotLoadDLL, "CouldNotLoadDLL" },
-    { errorcode_t::CouldNotOpenDLL, "CouldNotOpenDLL" },
-    { errorcode_t::CouldNotOpenDevice, "CouldNotOpenDevice" },
-    { errorcode_t::CouldNotResetDevice, "CouldNotResetDevice" },
-    { errorcode_t::CouldNotCloseDevice, "CouldNotCloseDevice" },
-    { errorcode_t::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
-    { errorcode_t::CouldNotCallFunction, "CouldNotCallFunction" },
-    { errorcode_t::CouldNotErase, "CouldNotErase" },
-    { errorcode_t::CouldNotProgram, "CouldNotProgram" },
-    { errorcode_t::CouldNotRead, "CouldNotRead" },
-    { errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile" }
-};
-
 static name_map_t argumentCountMap = {
     { 0, "First" },
     { 1, "Second"},
@@ -70,22 +53,29 @@ static name_map_t argumentCountMap = {
     { 6, "Seventh"}
 };
 
-v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const std::string customMessage, const std::string logmessage, const nrfjprogdll_err_t lowlevelError)
+v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const name_map_t errorcodeMapper, const std::string customMessage)
+{
+    return getErrorMessage(errorCode, errorcodeMapper, customMessage, std::string(), (nrfjprogdll_err_t)0);
+}
+
+v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const name_map_t errorcodeMapper, const std::string customMessage, const std::string logmessage, const nrfjprogdll_err_t lowlevelError)
 {
     Nan::EscapableHandleScope scope;
 
-    if (errorCode == errorcode_t::JsSuccess)
+    if (errorCode == 0)
     {
         return scope.Escape(Nan::Undefined());
     }
 
     std::ostringstream errorStringStream;
     errorStringStream << "Error occured when " << customMessage << ". "
-        << "Errorcode: " << Convert::valueToString(errorCode, nrfjprog_js_err_map) << " (0x" << std::hex << errorCode << ")" << std::endl;
+        << "Errorcode: " << Convert::valueToString(errorCode, errorcodeMapper) << " (0x" << std::hex << errorCode << ")" << std::endl;
+
+    std::string lowLevelMessage(Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
 
     if (lowlevelError != SUCCESS)
     {
-        errorStringStream << "Lowlevel error: " << Convert::valueToString(lowlevelError, nrfjprogdll_err_map) << " (" << lowlevelError << ")" << std::endl;
+        errorStringStream << "Lowlevel error: " << lowLevelMessage << " (" << lowlevelError << ")" << std::endl;
     }
 
     v8::Local<v8::Value> error = Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
@@ -96,7 +86,7 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const st
     Utility::Set(errorObject, "erroperation", Convert::toJsString(customMessage));
     Utility::Set(errorObject, "errmsg", Convert::toJsString(errorStringStream.str()));
     Utility::Set(errorObject, "lowlevelErrorNo", Convert::toJsNumber(lowlevelError));
-    Utility::Set(errorObject, "lowlevelError", Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
+    Utility::Set(errorObject, "lowlevelError", Convert::toJsString(lowLevelMessage));
     Utility::Set(errorObject, "log", Convert::toJsString(logmessage));
 
     return scope.Escape(error);
