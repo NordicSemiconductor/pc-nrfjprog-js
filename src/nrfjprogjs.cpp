@@ -102,13 +102,13 @@ NAN_METHOD(nRFjprog::New)
 
 nRFjprog::nRFjprog()
 {
-    progressEvent = new uv_async_t();
-    uv_async_init(uv_default_loop(), progressEvent, sendProgress);
-
     finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
 
     keepDeviceOpen = false;
 }
+
+nRFjprog::~nRFjprog()
+{}
 
 void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
 {
@@ -211,6 +211,13 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<Baton *>(req->data);
 
+    if (baton->mayHaveProgressCallback
+        && jsProgressCallback != nullptr)
+    {
+        progressEvent = new uv_async_t();
+        uv_async_init(uv_default_loop(), progressEvent, sendProgress);
+    }
+
     baton->result = loadDll();
 
     if (baton->result != errorcode_t::JsSuccess)
@@ -280,6 +287,18 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
     {
         baton->result = errorcode_t::CouldNotCallFunction;
         baton->lowlevelError = excuteError;
+    }
+
+    if (progressEvent != nullptr)
+    {
+        auto handle = reinterpret_cast<uv_handle_t *>(progressEvent);
+
+        uv_close(handle, [](uv_handle_t *handle)
+        {
+            free(handle);
+        });
+
+        progressEvent = nullptr;
     }
 }
 
@@ -380,9 +399,6 @@ errorcode_t nRFjprog::loadDll()
 
     return dll_load_result;
 }
-
-nRFjprog::~nRFjprog()
-{}
 
 void nRFjprog::unloadDll()
 {
