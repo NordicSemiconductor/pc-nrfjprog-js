@@ -102,13 +102,13 @@ NAN_METHOD(HighLevel::New)
 
 HighLevel::HighLevel()
 {
-    progressEvent = new uv_async_t();
-    uv_async_init(uv_default_loop(), progressEvent, sendProgress);
-
     finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
 
     keepDeviceOpen = false;
 }
+
+HighLevel::~HighLevel()
+{}
 
 void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
 {
@@ -399,9 +399,6 @@ errorcode_t HighLevel::loadDll()
 
     return dll_load_result;
 }
-
-HighLevel::~HighLevel()
-{}
 
 void HighLevel::unloadDll()
 {
