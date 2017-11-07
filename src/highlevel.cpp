@@ -283,7 +283,6 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
     if (progressEvent != nullptr)
     {
-        myfile << "progressEvent has a value" << std::endl;
         auto handle = reinterpret_cast<uv_handle_t *>(progressEvent);
 
         uv_close(handle, [](uv_handle_t *handle)
