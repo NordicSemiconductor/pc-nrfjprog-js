@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RTT opens and close as expected returns and error when wrong serialnumber 1`] = `
+[Error: Error occured when start rtt. Errorcode: Could Not Get Device Information (0x3)
+Lowlevel error: EMULATOR_NOT_CONNECTED (fffffff6)
+]
+`;
+
+exports[`RTT reads from device reads startmessage 1`] = `
+"Seconds since started: 0
+"
+`;
+
+exports[`RTT reads from device reads startmessage 2`] = `
+Array [
+  83,
+  101,
+  99,
+  111,
+  110,
+  100,
+  115,
+  32,
+  115,
+  105,
+  110,
+  99,
+  101,
+  32,
+  115,
+  116,
+  97,
+  114,
+  116,
+  101,
+  100,
+  58,
+  32,
+  48,
+  13,
+  10,
+]
+`;
