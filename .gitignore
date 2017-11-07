@@ -1,4 +1,7 @@
 /build/*
 /node_modules
 /CMakeFiles
-/docs
+*/docs/*
+*/fonts/*
+*/styles/*
+*/scripts/*

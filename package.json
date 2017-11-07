@@ -15,11 +15,6 @@
     "type": "git",
     "url": "https://github.com/NordicSemiconductor/pc-nrfjprog-js.git"
   },
-  "author": "ken.redergard@nordicsemi.no",
-  "contributors": {
-    "name": "Per Kristian Schanke",
-    "email": "per.kristian.schanke@nordicsemi.no"
-  },
   "license": "ISC",
   "dependencies": {
     "bindings": "^1.2.1",
