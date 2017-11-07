@@ -53,12 +53,14 @@
 Nan::Persistent<v8::Function> RTT::constructor;
 std::string RTT::logMessage;
 nRFjprogDllFunctionPointersType RTT::dll_function;
+bool RTT::libraryLoaded;
 
 #define RETURN_ERROR_ON_FAIL(function, error) do { \
     const nrfjprogdll_err_t status = (function); \
     \
     if (status != SUCCESS) \
     { \
+        handleStartFail(); \
         baton->lowlevelError = status; \
         return error; \
     } \
@@ -93,6 +95,7 @@ NAN_METHOD(RTT::New)
 
 RTT::RTT()
 {
+    libraryLoaded = false;
 }
 
 RTT::~RTT()
@@ -124,13 +127,7 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
 
     auto argumentCount = 0;
     RTTBaton *baton = nullptr;
-/*
-    if (jsProgressCallback != nullptr)
-    {
-        delete jsProgressCallback;
-        jsProgressCallback = nullptr;
-    }
-*/
+
     try
     {
         baton = parse(info, argumentCount);
@@ -153,13 +150,7 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
         {
             delete baton;
         }
-/*
-        if (jsProgressCallback != nullptr)
-        {
-            delete jsProgressCallback;
-            jsProgressCallback = nullptr;
-        }
-*/
+
         auto message = ErrorMessage::getTypeErrorMessage(argumentCount, error);
         Nan::ThrowTypeError(message);
 
@@ -221,7 +212,6 @@ void RTT::ReturnFunction(uv_work_t *req)
     else
     {
         argv[0] = Nan::Undefined();
-        //argv[0] = ErrorMessage::getErrorMessage(baton->result, baton->name, logMessage, baton->lowlevelError);
 
         if (baton->returnFunction != nullptr)
         {
@@ -233,13 +223,7 @@ void RTT::ReturnFunction(uv_work_t *req)
             }
         }
     }
-/*
-    if (jsProgressCallback != nullptr)
-    {
-        delete jsProgressCallback;
-        jsProgressCallback = nullptr;
-    }
-*/
+
     baton->callback->Call(baton->returnParameterCount + 1, argv);
 
     delete baton;
@@ -269,11 +253,33 @@ NAN_METHOD(RTT::Start)
 
         DllFunctionPointersType highLevelFunctions;
 
-        RETURN_ERROR_ON_FAIL((nrfjprogdll_err_t)loadHighLevelFunctions(&highLevelFunctions), RTTCouldNotLoadHighlevelLibrary);
+        const nrfjprogdll_err_t loadHighlevelStatus = (nrfjprogdll_err_t)loadHighLevelFunctions(&highLevelFunctions);
 
-        RETURN_ERROR_ON_FAIL(highLevelFunctions.dll_open(nullptr, nullptr, nullptr), RTTCouldNotOpenHighlevelLibrary);
+        if (loadHighlevelStatus != SUCCESS)
+        {
+            baton->lowlevelError = loadHighlevelStatus;
+            return RTTCouldNotOpenHighlevelLibrary;
+        }
+
+        const nrfjprogdll_err_t openHighlevelStatus = highLevelFunctions.dll_open(nullptr, nullptr, nullptr);
+
+        if (openHighlevelStatus != SUCCESS)
+        {
+            releaseHighLevel();
+            baton->lowlevelError = openHighlevelStatus;
+            return RTTCouldNotOpenHighlevelLibrary;
+        }
+
         Probe_handle_t probe;
-        RETURN_ERROR_ON_FAIL(highLevelFunctions.probe_init(&probe, baton->serialNumber, nullptr), RTTCouldNotGetDeviceInformation);
+        const nrfjprogdll_err_t initProbeStatus = highLevelFunctions.probe_init(&probe, baton->serialNumber, nullptr);
+
+        if (initProbeStatus != SUCCESS)
+        {
+            highLevelFunctions.dll_close();
+            releaseHighLevel();
+            baton->lowlevelError = initProbeStatus;
+            return RTTCouldNotGetDeviceInformation;
+        }
 
         probe_info_t probeInfo;
         device_info_t deviceInfo;
@@ -292,7 +298,10 @@ NAN_METHOD(RTT::Start)
         uint32_t clockSpeed = probeInfo.clockspeed_khz;
         device_family_t family = deviceInfo.device_family;
         std::string jlinkarmlocation = libraryInfo.file_path;
+
         RETURN_ERROR_ON_FAIL((nrfjprogdll_err_t)loadnRFjprogFunctions(&dll_function), RTTCouldNotLoadnRFjprogLibrary);
+
+        libraryLoaded = true;
 
         RETURN_ERROR_ON_FAIL(dll_function.open_dll(jlinkarmlocation.c_str(), 0, family), RTTCouldNotOpennRFjprogLibrary);
 
@@ -370,6 +379,38 @@ NAN_METHOD(RTT::Start)
     CallFunction(info, p, e, r);
 }
 
+void RTT::handleStartFail()
+{
+    if (!libraryLoaded)
+    {
+        return;
+    }
+
+    bool started;
+
+    dll_function.is_rtt_started(&started);
+
+    if (started)
+    {
+        dll_function.rtt_stop();
+    }
+
+    bool connected;
+
+    dll_function.is_connected_to_device(&connected);
+
+    if (connected)
+    {
+        dll_function.disconnect_from_emu();
+    }
+
+    dll_function.close_dll();
+
+    releasenRFjprog();
+
+    libraryLoaded = false;
+}
+
 NAN_METHOD(RTT::Stop)
 {
     rtt_parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> RTTBaton* {
@@ -383,6 +424,9 @@ NAN_METHOD(RTT::Stop)
         RETURN_ERROR_ON_FAIL(dll_function.rtt_stop(), RTTCouldNotCallFunction);
         RETURN_ERROR_ON_FAIL(dll_function.disconnect_from_emu(), RTTCouldNotCallFunction);
         dll_function.close_dll();
+
+        releasenRFjprog();
+        libraryLoaded = false;
 
         return RTTSuccess;
     };

@@ -59,6 +59,8 @@ public:
 
     virtual ~RTTBaton()
     {
+        delete req;
+
         if (callback != nullptr)
         {
             delete callback;
@@ -99,6 +101,10 @@ class RTTReadBaton : public RTTBaton
 {
 public:
     RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 2);
+    RTTReadBaton::~RTTReadBaton() {
+        delete[] data;
+    }
+
     uint32_t channelIndex;
     uint32_t length;
     char *data;
@@ -108,6 +114,10 @@ class RTTWriteBaton : public RTTBaton
 {
 public:
     RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 1);
+    RTTWriteBaton::~RTTWriteBaton() {
+        delete[] data;
+    }
+
     uint32_t channelIndex;
     uint32_t length;
     char *data;

@@ -78,14 +78,14 @@ private:
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
 
-    static errorcode_t loadDll();
-    static void unloadDll();
-
     static void init(v8::Local<v8::FunctionTemplate> tpl);
+
+    static void handleStartFail();
 
     static void logCallback(const char * msg);
     static void log(std::string msg);
     static std::string logMessage;
+    static bool libraryLoaded;
 
     static nRFjprogDllFunctionPointersType dll_function;
 };
