@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_HELPERS_H__
-#define __NRFJPROG_HELPERS_H__
+#ifndef NRFJPROG_HELPERS_H
+#define NRFJPROG_HELPERS_H
 
 #include <nan.h>
 #include "highlevelnrfjprogdll.h"

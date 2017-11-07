@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_BATONS_H__
-#define __NRFJPROG_BATONS_H__
+#ifndef NRFJPROG_BATONS_H
+#define NRFJPROG_BATONS_H
 
 #include <memory>
 #include "highlevel.h"

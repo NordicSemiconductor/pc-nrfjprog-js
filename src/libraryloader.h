@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBRARY_LOADER_H__
-#define __LIBRARY_LOADER_H__
+#ifndef LIBRARY_LOADER_H
+#define LIBRARY_LOADER_H
 
 #include "libraryloader_platform.h"
 

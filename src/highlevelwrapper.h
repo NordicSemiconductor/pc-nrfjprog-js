@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HIGHLEVELWRAPPER_H__
-#define __HIGHLEVELWRAPPER_H__
+#ifndef HIGHLEVELWRAPPER_H
+#define HIGHLEVELWRAPPER_H
 
 #include "highlevelnrfjprogdll.h"
 #include "highlevel_common.h"
