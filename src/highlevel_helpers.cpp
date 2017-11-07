@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "nrfjprog_helpers.h"
+#include "highlevel_helpers.h"
 
 #include "utility/utility.h"
 #include "utility/conversion.h"

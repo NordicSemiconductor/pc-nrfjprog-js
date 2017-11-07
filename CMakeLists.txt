@@ -21,7 +21,7 @@ endif()
 
 # Essential include files to build a node addon,
 # you should add this line in every CMake.js based project.
-include_directories(SYSTEM ${CMAKE_JS_INC} ${NRFJPROG_INCLUDE_DIR})
+include_directories(SYSTEM ${CMAKE_JS_INC} ${NRFJPROG_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
 
 # Specify source files
 file (GLOB SOURCE_FILES

@@ -37,7 +37,7 @@
 #ifndef OS_FILES_H
 #define OS_FILES_H
 
-#include "nrfjprog_common.h"
+#include "highlevel_common.h"
 
 #include <memory>
 

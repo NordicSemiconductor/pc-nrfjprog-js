@@ -34,100 +34,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_HELPERS_H__
-#define __NRFJPROG_HELPERS_H__
+#include "../../libraryloader.h"
 
-#include <nan.h>
-#include "highlevelnrfjprogdll.h"
-#include "nrfjprog_common.h"
+#include <dlfcn.h>
+#include <stddef.h>
 
-class ProbeDetails
+LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
 {
-public:
-    ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
-        serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
-    {}
+    return dlsym(libraryHandle, func_name);
+}
 
-    v8::Local<v8::Object> ToJs();
-
-private:
-    const uint32_t serial_number;
-    const device_info_t device_info;
-    const probe_info_t probe_info;
-    const library_info_t library_info;
-};
-
-class ProbeInfo
+LibraryHandleType LibraryLoad(const char *path)
 {
-  public:
-    ProbeInfo(probe_info_t _probe_info) :
-        probe_info(_probe_info)
-    {
+    return dlopen(path);
+}
+
+void LibraryFree(LibraryHandleType libraryHandle)
+{
+    if (libraryHandle) {
+        dlclose(libraryHandle);
     }
-
-    v8::Local<v8::Object> ToJs();
-
-  private:
-    const probe_info_t probe_info;
-};
-
-class DeviceInfo
-{
-public:
-    DeviceInfo(device_info_t _device_info) :
-        device_info(_device_info)
-    {}
-
-    v8::Local<v8::Object> ToJs();
-
-private:
-    const device_info_t device_info;
-};
-
-class LibraryInfo
-{
-public:
-    LibraryInfo(library_info_t _library_info) :
-        library_info(_library_info)
-    {}
-
-    v8::Local<v8::Object> ToJs();
-
-private:
-    const library_info_t library_info;
-};
-
-class EraseOptions
-{
-public:
-    EraseOptions(v8::Local<v8::Object> obj);
-
-    erase_action_t eraseMode;
-    uint32_t startAddress;
-    uint32_t endAddress;
-};
-
-class ReadToFileOptions
-{
-public:
-    ReadToFileOptions(v8::Local<v8::Object> obj);
-
-    read_options_t options;
-};
-
-class ProgramOptions
-{
-public:
-    ProgramOptions(v8::Local<v8::Object> obj);
-
-    program_options_t options;
-    input_format_t inputFormat;
-};
-
-class VerifyOptions
-{
-public:
-    VerifyOptions(v8::Local<v8::Object> obj);
-};
-
-#endif
+}

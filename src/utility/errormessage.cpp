@@ -41,7 +41,7 @@
 
 #include "conversion.h"
 #include "utility.h"
-#include "../nrfjprog_common.h"
+#include "../highlevel_common.h"
 
 static name_map_t nrfjprog_js_err_map = {
     { errorcode_t::JsSuccess, "Success" },
