@@ -63,8 +63,6 @@ public:
 
     virtual ~Baton()
     {
-        delete req;
-
         if (callback != nullptr)
         {
             delete callback;
