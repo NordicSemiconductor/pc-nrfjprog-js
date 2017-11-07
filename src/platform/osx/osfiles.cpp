@@ -72,11 +72,11 @@ errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
     if (!AbstractFile::pathExists(dll_path))
     {
         /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * dll = dlopen("libhighlevelnrfjprog.dylib", RTLD_LAZY);
+        void * libraryHandle = dlopen("libhighlevelnrfjprog.dylib", RTLD_LAZY);
 
-        if (dll)
+        if (libraryHandle)
         {
-            dlclose(dll);
+            dlclose(libraryHandle);
             strncpy(dll_path, "libhighlevelnrfjprog.dylib", dll_path_len - 1);
             return errorcode_t::JsSuccess;
         }

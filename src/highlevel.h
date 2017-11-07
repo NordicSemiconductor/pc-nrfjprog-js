@@ -33,12 +33,12 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __NRFJPROG_H__
-#define __NRFJPROG_H__
+#ifndef NRFJPROG_H
+#define NRFJPROG_H
 
 #include <nan.h>
 #include "common.h"
-#include "dllfunc.h"
+#include "highlevelwrapper.h"
 #include "osfiles.h"
 
 #include "utility/errormessage.h"
@@ -52,14 +52,14 @@ typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_
 typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
 typedef std::function<returnType(Baton*)> return_function_t;
 
-class nRFjprog : public Nan::ObjectWrap
+class HighLevel : public Nan::ObjectWrap
 {
 public:
     static NAN_MODULE_INIT(Init);
 
 private:
-    explicit nRFjprog();
-    ~nRFjprog();
+    explicit HighLevel();
+    ~HighLevel();
 
     static Nan::Persistent<v8::Function> constructor;
 

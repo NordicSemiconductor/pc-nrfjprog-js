@@ -38,7 +38,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "../osfiles.h"
+#include "../../osfiles.h"
 
 #include <windows.h>
 #include "Shlwapi.h"

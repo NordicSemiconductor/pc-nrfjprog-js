@@ -34,13 +34,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROG_BATONS_H__
-#define __NRFJPROG_BATONS_H__
+#ifndef NRFJPROG_BATONS_H
+#define NRFJPROG_BATONS_H
 
 #include <memory>
-#include "nrfjprogjs.h"
-#include "nrfjprog_helpers.h"
-#include "nrfjprog_common.h"
+#include "highlevel.h"
+#include "highlevel_helpers.h"
+#include "highlevel_common.h"
 
 #define BATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, false) {}
 #define BATON_WITH_PROGRESS_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : Baton(returnParameterCount, name, true) {}

@@ -38,12 +38,12 @@
 
 #include <vector>
 
-#include "nrfjprogjs.h"
-#include "nrfjprog_common.h"
-#include "nrfjprogjs_batons.h"
-#include "nrfjprog_helpers.h"
+#include "highlevel.h"
+#include "highlevel_common.h"
+#include "highlevel_batons.h"
+#include "highlevel_helpers.h"
 
-#include "dllfunc.h"
+#include "highlevelwrapper.h"
 
 #include "utility/conversion.h"
 #include "utility/errormessage.h"
@@ -55,17 +55,17 @@
 #define MAX_SERIAL_NUMBERS 100
 #define REPORTABLE_PROGESS 5
 
-Nan::Persistent<v8::Function> nRFjprog::constructor;
-DllFunctionPointersType nRFjprog::dll_function;
-char nRFjprog::dll_path[COMMON_MAX_PATH] = {'\0'};
-bool nRFjprog::loaded = false;
-bool nRFjprog::connectedToDevice = false;
-errorcode_t nRFjprog::finderror = errorcode_t::JsSuccess;
-std::string nRFjprog::logMessage;
-Nan::Callback *nRFjprog::jsProgressCallback = nullptr;
-uv_async_t *nRFjprog::progressEvent = nullptr;
-bool nRFjprog::keepDeviceOpen = false;
-Probe_handle_t nRFjprog::probe;
+Nan::Persistent<v8::Function> HighLevel::constructor;
+DllFunctionPointersType HighLevel::dll_function;
+char HighLevel::dll_path[COMMON_MAX_PATH] = {'\0'};
+bool HighLevel::loaded = false;
+bool HighLevel::connectedToDevice = false;
+errorcode_t HighLevel::finderror = errorcode_t::JsSuccess;
+std::string HighLevel::logMessage;
+Nan::Callback *HighLevel::jsProgressCallback = nullptr;
+uv_async_t *HighLevel::progressEvent = nullptr;
+bool HighLevel::keepDeviceOpen = false;
+Probe_handle_t HighLevel::probe;
 
 struct ProgressData {
     std::string process;
@@ -73,7 +73,7 @@ struct ProgressData {
 
 ProgressData progress;
 
-NAN_MODULE_INIT(nRFjprog::Init)
+NAN_MODULE_INIT(HighLevel::Init)
 {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("nRFjprog").ToLocalChecked());
@@ -85,11 +85,11 @@ NAN_MODULE_INIT(nRFjprog::Init)
     Nan::Set(target, Nan::New("nRFjprog").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
 }
 
-NAN_METHOD(nRFjprog::New)
+NAN_METHOD(HighLevel::New)
 {
     if (info.IsConstructCall())
     {
-        auto obj = new nRFjprog();
+        auto obj = new HighLevel();
         obj->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
     }
@@ -100,17 +100,17 @@ NAN_METHOD(nRFjprog::New)
     }
 }
 
-nRFjprog::nRFjprog()
+HighLevel::HighLevel()
 {
+    progressEvent = new uv_async_t();
+    uv_async_init(uv_default_loop(), progressEvent, sendProgress);
+
     finderror = OSFilesFindDll(dll_path, COMMON_MAX_PATH);
 
     keepDeviceOpen = false;
 }
 
-nRFjprog::~nRFjprog()
-{}
-
-void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
+void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
 {
     // This is a check that there exists a parse- and execute function, both of which are
     // needed to parse arguments and execute the function.
@@ -207,7 +207,7 @@ void nRFjprog::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_fun
     uv_queue_work(uv_default_loop(), baton->req, ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
 }
 
-void nRFjprog::ExecuteFunction(uv_work_t *req)
+void HighLevel::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<Baton *>(req->data);
 
@@ -230,7 +230,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError = dll_function.dll_open(nullptr, &nRFjprog::logCallback, &nRFjprog::progressCallback);
+        nrfjprogdll_err_t openError = dll_function.dll_open(nullptr, &HighLevel::logCallback, &HighLevel::progressCallback);
 
         if (openError != SUCCESS)
         {
@@ -302,7 +302,7 @@ void nRFjprog::ExecuteFunction(uv_work_t *req)
     }
 }
 
-void nRFjprog::ReturnFunction(uv_work_t *req)
+void HighLevel::ReturnFunction(uv_work_t *req)
 {
     Nan::HandleScope scope;
 
@@ -345,17 +345,17 @@ void nRFjprog::ReturnFunction(uv_work_t *req)
     delete baton;
 }
 
-void nRFjprog::logCallback(const char * msg)
+void HighLevel::logCallback(const char * msg)
 {
     log(msg);
 }
 
-void nRFjprog::log(std::string msg)
+void HighLevel::log(std::string msg)
 {
     logMessage = logMessage.append(msg);
 }
 
-void nRFjprog::progressCallback(const char * process)
+void HighLevel::progressCallback(const char * process)
 {
     if (jsProgressCallback != nullptr)
     {
@@ -365,7 +365,7 @@ void nRFjprog::progressCallback(const char * process)
     }
 }
 
-void nRFjprog::sendProgress(uv_async_t *handle)
+void HighLevel::sendProgress(uv_async_t *handle)
 {
     Nan::HandleScope scope;
 
@@ -382,7 +382,7 @@ void nRFjprog::sendProgress(uv_async_t *handle)
     }
 }
 
-errorcode_t nRFjprog::loadDll()
+errorcode_t HighLevel::loadDll()
 {
     if (loaded)
     {
@@ -394,22 +394,25 @@ errorcode_t nRFjprog::loadDll()
         return finderror;
     }
 
-    errorcode_t dll_load_result = DllLoad(dll_path, &dll_function);
+    errorcode_t dll_load_result = loadFunctions(dll_path, &dll_function);
     loaded = dll_load_result == errorcode_t::JsSuccess;
 
     return dll_load_result;
 }
 
-void nRFjprog::unloadDll()
+HighLevel::~HighLevel()
+{}
+
+void HighLevel::unloadDll()
 {
     if (loaded)
     {
         loaded = false;
-        DllFree();
+        release();
     }
 }
 
-void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
+void HighLevel::init(v8::Local<v8::FunctionTemplate> tpl)
 {
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
@@ -433,7 +436,7 @@ void nRFjprog::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "close", CloseDevice);
 }
 
-NAN_METHOD(nRFjprog::GetDllVersion)
+NAN_METHOD(HighLevel::GetDllVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new GetDllVersionBaton();
@@ -463,7 +466,7 @@ NAN_METHOD(nRFjprog::GetDllVersion)
     CallFunction(info, p, e, r, false);
 }
 
-NAN_METHOD(nRFjprog::GetConnectedDevices)
+NAN_METHOD(HighLevel::GetConnectedDevices)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new GetConnectedDevicesBaton();
@@ -522,7 +525,7 @@ NAN_METHOD(nRFjprog::GetConnectedDevices)
     CallFunction(info, p, e, r, false);
 }
 
-NAN_METHOD(nRFjprog::GetProbeInfo)
+NAN_METHOD(HighLevel::GetProbeInfo)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new GetProbeInfoBaton();
@@ -545,7 +548,7 @@ NAN_METHOD(nRFjprog::GetProbeInfo)
     CallFunction(info, p, e, r, true);
 }
 
-NAN_METHOD(nRFjprog::GetLibraryInfo)
+NAN_METHOD(HighLevel::GetLibraryInfo)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new GetLibraryInfoBaton();
@@ -568,7 +571,7 @@ NAN_METHOD(nRFjprog::GetLibraryInfo)
     CallFunction(info, p, e, r, true);
 }
 
-NAN_METHOD(nRFjprog::GetDeviceInfo)
+NAN_METHOD(HighLevel::GetDeviceInfo)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new GetDeviceInfoBaton();
@@ -591,7 +594,7 @@ NAN_METHOD(nRFjprog::GetDeviceInfo)
     CallFunction(info, p, e, r, true);
 }
 
-NAN_METHOD(nRFjprog::Read)
+NAN_METHOD(HighLevel::Read)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadBaton();
@@ -625,7 +628,7 @@ NAN_METHOD(nRFjprog::Read)
     CallFunction(info, p, e, r, true);
 }
 
-NAN_METHOD(nRFjprog::ReadU32)
+NAN_METHOD(HighLevel::ReadU32)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadU32Baton();
@@ -653,7 +656,7 @@ NAN_METHOD(nRFjprog::ReadU32)
     CallFunction(info, p, e, r, true);
 }
 
-NAN_METHOD(nRFjprog::Program)
+NAN_METHOD(HighLevel::Program)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ProgramBaton();
@@ -708,7 +711,7 @@ NAN_METHOD(nRFjprog::Program)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::ReadToFile)
+NAN_METHOD(HighLevel::ReadToFile)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new ReadToFileBaton();
@@ -732,7 +735,7 @@ NAN_METHOD(nRFjprog::ReadToFile)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::Verify)
+NAN_METHOD(HighLevel::Verify)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new VerifyBaton();
@@ -757,7 +760,7 @@ NAN_METHOD(nRFjprog::Verify)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::Erase)
+NAN_METHOD(HighLevel::Erase)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new EraseBaton();
@@ -780,7 +783,7 @@ NAN_METHOD(nRFjprog::Erase)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::Recover)
+NAN_METHOD(HighLevel::Recover)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new RecoverBaton();
@@ -793,7 +796,7 @@ NAN_METHOD(nRFjprog::Recover)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::Write)
+NAN_METHOD(HighLevel::Write)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new WriteBaton();
@@ -817,7 +820,7 @@ NAN_METHOD(nRFjprog::Write)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::WriteU32)
+NAN_METHOD(HighLevel::WriteU32)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         auto baton = new WriteU32Baton();
@@ -839,7 +842,7 @@ NAN_METHOD(nRFjprog::WriteU32)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::OpenDevice)
+NAN_METHOD(HighLevel::OpenDevice)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new OpenBaton();
@@ -853,7 +856,7 @@ NAN_METHOD(nRFjprog::OpenDevice)
     CallFunction(info, p, e, nullptr, true);
 }
 
-NAN_METHOD(nRFjprog::CloseDevice)
+NAN_METHOD(HighLevel::CloseDevice)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
         return new CloseBaton();
@@ -942,7 +945,7 @@ extern "C" {
     NAN_MODULE_INIT(init)
     {
         initConsts(target);
-        nRFjprog::Init(target);
+        HighLevel::Init(target);
     }
 }
 

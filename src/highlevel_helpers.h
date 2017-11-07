@@ -34,25 +34,100 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef NRFJPROG_HELPERS_H
+#define NRFJPROG_HELPERS_H
 
 #include <nan.h>
-#include <map>
-#include <mutex>
-#include <string>
+#include "highlevelnrfjprogdll.h"
+#include "highlevel_common.h"
 
-#define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
+class ProbeDetails
+{
+public:
+    ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
+        serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
+    {}
 
-// Typedef of name to string with enum name, covers most cases
-typedef std::map<uint16_t, const char*> name_map_t;
-typedef std::map<uint16_t, const char*>::iterator name_map_it_t;
+    v8::Local<v8::Object> ToJs();
 
-const std::string getCurrentTimeInMilliseconds();
+private:
+    const uint32_t serial_number;
+    const device_info_t device_info;
+    const probe_info_t probe_info;
+    const library_info_t library_info;
+};
 
-uint16_t uint16_decode(const uint8_t *p_encoded_data);
-uint32_t uint32_decode(const uint8_t *p_encoded_data);
+class ProbeInfo
+{
+  public:
+    ProbeInfo(probe_info_t _probe_info) :
+        probe_info(_probe_info)
+    {
+    }
 
-uint16_t fromNameToValue(name_map_t names, const char *name);
+    v8::Local<v8::Object> ToJs();
 
-#endif // COMMON_H
+  private:
+    const probe_info_t probe_info;
+};
+
+class DeviceInfo
+{
+public:
+    DeviceInfo(device_info_t _device_info) :
+        device_info(_device_info)
+    {}
+
+    v8::Local<v8::Object> ToJs();
+
+private:
+    const device_info_t device_info;
+};
+
+class LibraryInfo
+{
+public:
+    LibraryInfo(library_info_t _library_info) :
+        library_info(_library_info)
+    {}
+
+    v8::Local<v8::Object> ToJs();
+
+private:
+    const library_info_t library_info;
+};
+
+class EraseOptions
+{
+public:
+    EraseOptions(v8::Local<v8::Object> obj);
+
+    erase_action_t eraseMode;
+    uint32_t startAddress;
+    uint32_t endAddress;
+};
+
+class ReadToFileOptions
+{
+public:
+    ReadToFileOptions(v8::Local<v8::Object> obj);
+
+    read_options_t options;
+};
+
+class ProgramOptions
+{
+public:
+    ProgramOptions(v8::Local<v8::Object> obj);
+
+    program_options_t options;
+    input_format_t inputFormat;
+};
+
+class VerifyOptions
+{
+public:
+    VerifyOptions(v8::Local<v8::Object> obj);
+};
+
+#endif
