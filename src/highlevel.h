@@ -59,7 +59,6 @@ public:
 
 private:
     explicit HighLevel();
-    ~HighLevel();
 
     static Nan::Persistent<v8::Function> constructor;
 
