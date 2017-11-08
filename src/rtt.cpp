@@ -485,7 +485,7 @@ NAN_METHOD(RTT::Write)
         if (info[argumentCount]->IsString())
         {
             baton->data = Convert::getNativePointerToChar(info[argumentCount]);
-            baton->length = Convert::getNativeString(info[argumentCount]).length() - 1;
+            baton->length = Convert::getNativeString(info[argumentCount]).length();
         }
         else
         {
