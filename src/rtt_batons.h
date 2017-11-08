@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __RTT_BATONS_H__
-#define __RTT_BATONS_H__
+#ifndef RTT_BATONS_H
+#define RTT_BATONS_H
 
 #include <memory>
 #include "rtt.h"

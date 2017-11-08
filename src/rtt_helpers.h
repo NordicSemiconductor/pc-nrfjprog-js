@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __RTT_HELPERS_H__
-#define __RTT_HELPERS_H__
+#ifndef RTT_HELPERS_H
+#define RTT_HELPERS_H
 
 #include <nan.h>
 

@@ -33,8 +33,8 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __RTT_H__
-#define __RTT_H__
+#ifndef RTT_H
+#define RTT_H
 
 #include <nan.h>
 #include "common.h"

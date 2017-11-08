@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __OS_FILES_H__
-#define __OS_FILES_H__
+#ifndef OS_FILES_H
+#define OS_FILES_H
 
 #include "highlevel_common.h"
 

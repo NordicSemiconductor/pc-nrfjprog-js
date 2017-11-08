@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __NRFJPROGWRAPPER_H__
-#define __NRFJPROGWRAPPER_H__
+#ifndef NRFJPROGWRAPPER_H
+#define NRFJPROGWRAPPER_H
 
 //#include "nrfjprogdll.h"
 #include "highlevel_common.h"
