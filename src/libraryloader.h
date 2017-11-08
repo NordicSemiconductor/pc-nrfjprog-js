@@ -46,7 +46,7 @@ static bool load_func_ptr(T * func_ptr, const char * func_name, LibraryHandleTyp
 {
     *func_ptr = (T) LoadFunction(libraryHandle, func_name);
 
-    if (*func_ptr == NULL) {
+    if (*func_ptr == nullptr) {
         return false;
     }
 

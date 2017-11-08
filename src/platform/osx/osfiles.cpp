@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../osfiles.h"
+#include "../../osfiles.h"
 
 #include <sys/stat.h>
 #include <string.h>

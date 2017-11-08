@@ -46,7 +46,7 @@ LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *fun
 
 LibraryHandleType LibraryLoad(const char *path)
 {
-    return dlopen(path);
+    return dlopen(path, RTLD_LAZY);
 }
 
 void LibraryFree(LibraryHandleType libraryHandle)
