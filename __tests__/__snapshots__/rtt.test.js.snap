@@ -7,25 +7,32 @@ Lowlevel error: EMULATOR_NOT_CONNECTED (fffffff6)
 `;
 
 exports[`RTT reads from device reads startmessage 1`] = `
-"Seconds since started: 0
+"RTT Loopback Session started, DK connected
 "
 `;
 
 exports[`RTT reads from device reads startmessage 2`] = `
 Array [
+  82,
+  84,
+  84,
+  32,
+  76,
+  111,
+  111,
+  112,
+  98,
+  97,
+  99,
+  107,
+  32,
   83,
   101,
-  99,
-  111,
-  110,
-  100,
   115,
-  32,
   115,
   105,
+  111,
   110,
-  99,
-  101,
   32,
   115,
   116,
@@ -34,9 +41,20 @@ Array [
   116,
   101,
   100,
-  58,
+  44,
   32,
-  48,
+  68,
+  75,
+  32,
+  99,
+  111,
+  110,
+  110,
+  101,
+  99,
+  116,
+  101,
+  100,
   13,
   10,
 ]

@@ -56,7 +56,9 @@ describe('RTT', () => {
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             device = connectedDevices[0];
 
-            nRFjprog.program(device.serialNumber, "./__tests__/hex/rtt.hex", { }, programCallback);
+            done();
+
+            //nRFjprog.program(device.serialNumber, "./__tests__/hex/rtt.hex", { }, programCallback);
         };
 
         nRFjprog.getConnectedDevices(callback);
@@ -142,14 +144,21 @@ describe('RTT', () => {
         });
     });
 
-    describe('writes to device', () => {
+    describe.only('writes to device', () => {
         beforeEach(done => {
+            const readCallback = (err, data, raw) => {
+                expect(err).toBeUndefined();
+
+                done();
+            }
+
             const startCallback = (err, down, up) => {
                 expect(err).toBeUndefined();
                 expect(down).toBeDefined();
                 expect(up).toBeDefined();
 
-                done();
+                // Clear the read buffers
+                RTT.read(0, 100, readCallback);
             };
 
             //RTT = new nRFjprog.RTT();
@@ -170,6 +179,7 @@ describe('RTT', () => {
 
             const readCallback = (err, data, raw) => {
                 expect(err).toBeUndefined();
+                console.log(data, raw)
                 expect(data).toBe(writetext);
 
                 done();
@@ -178,10 +188,32 @@ describe('RTT', () => {
             const writeCallback = (err, length) => {
                 expect(err).toBeUndefined();
                 expect(length).toBe(writetext.length);
-                RTT.read(0, 100, readCallback);
+
+                setTimeout(RTT.read(0, 100, readCallback), 1000);
             };
 
             RTT.write(0, writetext, writeCallback);
+        });
+
+        it('writes a arry of integers to loopback and reads it back', done => {
+            const writearray = [0, 1, 2, 3, 4];
+
+            const readCallback = (err, data, raw) => {
+                expect(err).toBeUndefined();
+                console.log(data, raw)
+                expect(raw).toEqual(writearray);
+
+                done();
+            };
+
+            const writeCallback = (err, length) => {
+                expect(err).toBeUndefined();
+                expect(length).toBe(writearray.length);
+
+                setTimeout(RTT.read(0, 100, readCallback), 1000);
+            };
+
+            RTT.write(0, writearray, writeCallback);
         });
     });
 });
