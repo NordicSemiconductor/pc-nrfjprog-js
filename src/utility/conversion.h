@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __CONVERSION_H__
-#define __CONVERSION_H__
+#ifndef CONVERSION_H
+#define CONVERSION_H
 
 #include <nan.h>
 #include "../common.h"

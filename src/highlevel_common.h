@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __HIGHLEVEL_COMMON_H__
-#define __HIGHLEVEL_COMMON_H__
+#ifndef HIGHLEVEL_COMMON_H
+#define HIGHLEVEL_COMMON_H
 
 #include "common.h"
 #include "DllCommonDefinitions.h"

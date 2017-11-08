@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __ERRORMESSAGE_H__
-#define __ERRORMESSAGE_H__
+#ifndef ERRORMESSAGE_H
+#define ERRORMESSAGE_H
 
 #include <nan.h>
 #include "../common.h"

@@ -97,17 +97,19 @@ NAN_METHOD(HighLevel::New)
 
 HighLevel::HighLevel()
 {
-    progressEvent = new uv_async_t();
-    uv_async_init(uv_default_loop(), progressEvent, sendProgress);
-
     keepDeviceOpen = false;
 }
 
-void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, parse_parameters_function_t parse, execute_function_t execute, return_function_t ret, const bool hasSerialNumber)
+void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
+                            parse_parameters_function_t parse,
+                            execute_function_t execute,
+                            return_function_t ret,
+                            const bool hasSerialNumber)
 {
     // This is a check that there exists a parse- and execute function, both of which are
     // needed to parse arguments and execute the function.
-    // If this shows up in production, it is due to missing functions in the relevant NAN_METHOD defining the functions.
+    // If this shows up in production, it is due to missing functions in the relevant
+    // NAN_METHOD defining the functions.
     if (parse == nullptr ||
         execute == nullptr)
     {
@@ -204,6 +206,13 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<Baton *>(req->data);
 
+    if (baton->mayHaveProgressCallback
+        && jsProgressCallback != nullptr)
+    {
+        progressEvent = new uv_async_t();
+        uv_async_init(uv_default_loop(), progressEvent, sendProgress);
+    }
+
     baton->result = loadDll();
 
     if (baton->result != errorcode_t::JsSuccess)
@@ -239,7 +248,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         }
     }
 
-    nrfjprogdll_err_t excuteError = baton->executeFunction(baton, probe);
+    nrfjprogdll_err_t executeError = baton->executeFunction(baton, probe);
 
     if (!keepDeviceOpen)
     {
@@ -269,10 +278,22 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         unloadDll();
     }
 
-    if (excuteError != SUCCESS)
+    if (executeError != SUCCESS)
     {
         baton->result = errorcode_t::CouldNotCallFunction;
-        baton->lowlevelError = excuteError;
+        baton->lowlevelError = executeError;
+    }
+
+    if (progressEvent != nullptr)
+    {
+        auto handle = reinterpret_cast<uv_handle_t *>(progressEvent);
+
+        uv_close(handle, [](uv_handle_t *handle)
+        {
+            delete handle;
+        });
+
+        progressEvent = nullptr;
     }
 }
 
@@ -281,30 +302,26 @@ void HighLevel::ReturnFunction(uv_work_t *req)
     Nan::HandleScope scope;
 
     auto baton = static_cast<Baton *>(req->data);
-    //TODO: Create an arrary of correct size instead of a way to large one.
-    v8::Local<v8::Value> argv[10];//baton->returnParameterCount + 1];
+    std::vector<v8::Local<v8::Value> > argv;
 
     if (baton->result != errorcode_t::JsSuccess)
     {
-        argv[0] = ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, logMessage, baton->lowlevelError);
+        argv.push_back(ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, logMessage, baton->lowlevelError));
 
         for (uint32_t i = 0; i < baton->returnParameterCount; i++)
         {
-            argv[i + 1] = Nan::Undefined();
+            argv.push_back(Nan::Undefined());
         }
     }
     else
     {
-        argv[0] = Nan::Undefined();
+        argv.push_back(Nan::Undefined());
 
         if (baton->returnFunction != nullptr)
         {
             std::vector<v8::Local<v8::Value> > vector = baton->returnFunction(baton);
 
-            for (uint32_t i = 0; i < vector.size(); ++i)
-            {
-                argv[i + 1] = vector[i];
-            }
+            argv.insert(argv.end(), vector.begin(), vector.end());
         }
     }
 
@@ -314,7 +331,7 @@ void HighLevel::ReturnFunction(uv_work_t *req)
         jsProgressCallback = nullptr;
     }
 
-    baton->callback->Call(baton->returnParameterCount + 1, argv);
+    baton->callback->Call(baton->returnParameterCount + 1, argv.data());
 
     delete baton;
 }
@@ -368,9 +385,6 @@ errorcode_t HighLevel::loadDll()
 
     return dll_load_result;
 }
-
-HighLevel::~HighLevel()
-{}
 
 void HighLevel::unloadDll()
 {

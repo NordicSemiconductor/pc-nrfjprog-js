@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBRARY_LOADER_H__
-#define __LIBRARY_LOADER_H__
+#ifndef LIBRARY_LOADER_H
+#define LIBRARY_LOADER_H
 
 #include "libraryloader_platform.h"
 #include <string>
@@ -47,7 +47,7 @@ static bool load_func_ptr(T * func_ptr, const char * func_name, LibraryHandleTyp
 {
     *func_ptr = (T) LoadFunction(libraryHandle, func_name);
 
-    if (*func_ptr == NULL) {
+    if (*func_ptr == nullptr) {
         return false;
     }
 

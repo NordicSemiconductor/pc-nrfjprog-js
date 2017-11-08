@@ -33,8 +33,8 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __HIGHLEVEL_H__
-#define __HIGHLEVEL_H__
+#ifndef HIGHLEVEL_H
+#define HIGHLEVEL_H
 
 #include <nan.h>
 #include "common.h"
@@ -59,7 +59,6 @@ public:
 
 private:
     explicit HighLevel();
-    ~HighLevel();
 
     static Nan::Persistent<v8::Function> constructor;
 
