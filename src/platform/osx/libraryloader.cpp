@@ -34,25 +34,24 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#include "../../libraryloader.h"
 
-#include <nan.h>
-#include <map>
-#include <mutex>
-#include <string>
+#include <dlfcn.h>
+#include <stddef.h>
 
-#define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
+LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
+{
+    return dlsym(libraryHandle, func_name);
+}
 
-// Typedef of name to string with enum name, covers most cases
-typedef std::map<uint16_t, const char*> name_map_t;
-typedef std::map<uint16_t, const char*>::iterator name_map_it_t;
+LibraryHandleType LibraryLoad(const char *path)
+{
+    return dlopen(path, RTLD_LAZY);
+}
 
-const std::string getCurrentTimeInMilliseconds();
-
-uint16_t uint16_decode(const uint8_t *p_encoded_data);
-uint32_t uint32_decode(const uint8_t *p_encoded_data);
-
-uint16_t fromNameToValue(name_map_t names, const char *name);
-
-#endif // COMMON_H
+void LibraryFree(LibraryHandleType libraryHandle)
+{
+    if (libraryHandle) {
+        dlclose(libraryHandle);
+    }
+}

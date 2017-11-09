@@ -34,7 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../osfiles.h"
+#include "../../osfiles.h"
 
 #include <sys/stat.h>
 #include <string.h>
@@ -46,38 +46,32 @@
 
 #include <unistd.h>
 
-#include <libproc.h>  // proc pidpathinfo maxsize
+#include <iostream>
 
 errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
 {
     char temp_dll_path[dll_path_len];
     memset(temp_dll_path, 0, dll_path_len);
 
-    int ret;
-    pid_t pid;
-    char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+    ssize_t len = readlink("/proc/self/exe", temp_dll_path, dll_path_len - 1);
 
-    pid = getpid();
-    ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-
-    if (ret <= 0)
+    if (len == -1)
     {
-        // PID not found, error
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    strncpy(dll_path, dirname(pathbuf), dll_path_len - 1);
-    strncat(dll_path, "/libhighlevelnrfjprog.dylib", dll_path_len - strlen(dll_path) - 1);
+    strncpy(dll_path, dirname(temp_dll_path), dll_path_len - 1);
+    strncat(dll_path, "/libhighlevelnrfjprog.so", dll_path_len - strlen(dll_path) - 1);
 
     if (!AbstractFile::pathExists(dll_path))
     {
-        /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * dll = dlopen("libhighlevelnrfjprog.dylib", RTLD_LAZY);
+        /* It is possible that the user might have place the .so in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
+        void * libraryHandle = dlopen("libhighlevelnrfjprog.so", RTLD_LAZY);
 
-        if (dll)
+        if (libraryHandle)
         {
-            dlclose(dll);
-            strncpy(dll_path, "libhighlevelnrfjprog.dylib", dll_path_len - 1);
+            dlclose(libraryHandle);
+            strncpy(dll_path, "libhighlevelnrfjprog.so", dll_path_len - 1);
             return errorcode_t::JsSuccess;
         }
 

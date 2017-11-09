@@ -34,11 +34,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DLL_FUNC_PTRS_H
-#define DLL_FUNC_PTRS_H
+#ifndef HIGHLEVELWRAPPER_H
+#define HIGHLEVELWRAPPER_H
 
 #include "highlevelnrfjprogdll.h"
-#include "nrfjprog_common.h"
+#include "highlevel_common.h"
 #include "utility/errormessage.h"
 
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_get_version)     (uint32_t * major, uint32_t * minor, uint32_t * micro);
@@ -87,8 +87,7 @@ struct DllFunctionPointersType {
     HILVL_nRFJ_run                  run;
 };
 
-errorcode_t DllLoad(const char * path, DllFunctionPointersType * dll_function);
-
-void DllFree(void);
+errorcode_t loadFunctions(const char * path, DllFunctionPointersType * dll_function);
+errorcode_t release();
 
 #endif
