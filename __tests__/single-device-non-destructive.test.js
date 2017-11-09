@@ -39,6 +39,7 @@
 const nRFjprog = require('../index.js');
 
 let device;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 describe('Single device - non-destructive', () => {
     beforeAll(done => {

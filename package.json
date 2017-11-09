@@ -8,8 +8,7 @@
     "install": "node build.js",
     "docs": "jsdoc doc/api.js -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
-    "test": "jest --runInBand --verbose",
-    "test-watch": "jest --watch --runInBand"
+    "test": "node run-tests.js --runInBand --verbose"
   },
   "repository": {
     "type": "git",
@@ -30,6 +29,7 @@
     "gh-pages": "^1.0.0",
     "jest": "^19.0.2",
     "jsdoc": "^3.5.4",
-    "minami": "^1.2.3"
+    "minami": "^1.2.3",
+    "tar": "2.2.1"
   }
 }
