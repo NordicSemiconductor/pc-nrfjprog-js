@@ -86,6 +86,7 @@ private:
     static void log(std::string msg);
     static std::string logMessage;
     static bool libraryLoaded;
+    static std::chrono::time_point rttStartTime;
 
     static nRFjprogDllFunctionPointersType dll_function;
 };

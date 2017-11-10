@@ -54,13 +54,27 @@ Nan::Persistent<v8::Function> RTT::constructor;
 std::string RTT::logMessage;
 nRFjprogDllFunctionPointersType RTT::dll_function;
 bool RTT::libraryLoaded;
+std::chrono::time_point RTT::rttStartTime;
 
 #define RETURN_ERROR_ON_FAIL(function, error) do { \
     const nrfjprogdll_err_t status = (function); \
     \
     if (status != SUCCESS) \
     { \
-        handleStartFail(); \
+        cleanup(); \
+        baton->lowlevelError = status; \
+        return error; \
+    } \
+} while(0);
+
+#define TIMED_RETURN_ERROR_ON_FAIL(function, error, baton) do { \
+    baton->functionStart = std::chrono::system_clock::now(); \
+    const nrfjprogdll_err_t status = (function); \
+    baton->functionEnd = std::chrono::system_clock::now(); \
+    \
+    if (status != SUCCESS) \
+    { \
+        cleanup(); \
         baton->lowlevelError = status; \
         return error; \
     } \
@@ -200,10 +214,10 @@ void RTT::ReturnFunction(uv_work_t *req)
     //TODO: Create an arrary of correct size instead of a way to large one.
     v8::Local<v8::Value> argv[10];//baton->returnParameterCount + 1];
 
+    argv[0] = ErrorMessage::getErrorMessage(baton->result, rtt_err_map, baton->name, logMessage, baton->lowlevelError);
+
     if (baton->result != errorcode_t::JsSuccess)
     {
-        argv[0] = ErrorMessage::getErrorMessage(baton->result, rtt_err_map, baton->name, logMessage, baton->lowlevelError);
-
         for (uint32_t i = 0; i < baton->returnParameterCount; i++)
         {
             argv[i + 1] = Nan::Undefined();
@@ -211,8 +225,6 @@ void RTT::ReturnFunction(uv_work_t *req)
     }
     else
     {
-        argv[0] = Nan::Undefined();
-
         if (baton->returnFunction != nullptr)
         {
             std::vector<v8::Local<v8::Value> > vector = baton->returnFunction(baton);
@@ -224,7 +236,7 @@ void RTT::ReturnFunction(uv_work_t *req)
         }
     }
 
-    baton->callback->Call(baton->returnParameterCount + 1, argv);
+    baton->callback->Call(baton->returnParameterCount + 2, argv);
 
     delete baton;
 }
@@ -307,6 +319,8 @@ NAN_METHOD(RTT::Start)
 
         RETURN_ERROR_ON_FAIL(dll_function.connect_to_emu_with_snr(baton->serialNumber, clockSpeed), RTTCouldNotConnectToDevice);
         RETURN_ERROR_ON_FAIL(dll_function.connect_to_device(), RTTCouldNotConnectToDevice);
+
+        rttStart = std::chrono::system_clock::now();
         RETURN_ERROR_ON_FAIL(dll_function.rtt_start(), RTTCouldNotStartRTT);
 
         bool controlBlockFound = false;
@@ -345,6 +359,9 @@ NAN_METHOD(RTT::Start)
             baton->upChannelInfo.push_back(new ChannelInfo(i, name, channelSize));
         }
 
+        baton->functionEnd = std::chrono::system_clock::now();
+        baton->functionStart = rttStart;
+
         return RTTSuccess;
     };
 
@@ -379,7 +396,7 @@ NAN_METHOD(RTT::Start)
     CallFunction(info, p, e, r);
 }
 
-void RTT::handleStartFail()
+void RTT::clean()
 {
     if (!libraryLoaded)
     {
@@ -421,9 +438,11 @@ NAN_METHOD(RTT::Stop)
     rtt_execute_function_t e = [&] (RTTBaton *b) -> RTTErrorcodes_t {
         auto baton = static_cast<RTTStopBaton*>(b);
 
+        baton->functionStart = std::chrono::system_clock::now();
         RETURN_ERROR_ON_FAIL(dll_function.rtt_stop(), RTTCouldNotCallFunction);
         RETURN_ERROR_ON_FAIL(dll_function.disconnect_from_emu(), RTTCouldNotCallFunction);
         dll_function.close_dll();
+        baton->functionEnd = std::chrono::system_clock::now();
 
         releasenRFjprog();
         libraryLoaded = false;
@@ -453,7 +472,8 @@ NAN_METHOD(RTT::Read)
 
         baton->data = new char[baton->length];
         uint32_t readLength = 0;
-        RETURN_ERROR_ON_FAIL(dll_function.rtt_read(baton->channelIndex, baton->data, baton->length, &readLength), RTTCouldNotCallFunction);
+
+        TIMED_RETURN_ERROR_ON_FAIL(dll_function.rtt_read(baton->channelIndex, baton->data, baton->length, &readLength), RTTCouldNotCallFunction);
 
         baton->length = readLength;
 
@@ -502,7 +522,7 @@ NAN_METHOD(RTT::Write)
 
         uint32_t writeLength = 0;
 
-        RETURN_ERROR_ON_FAIL(dll_function.rtt_write(baton->channelIndex, baton->data, baton->length, &writeLength), RTTCouldNotCallFunction);
+        TIMED_RETURN_ERROR_ON_FAIL(dll_function.rtt_write(baton->channelIndex, baton->data, baton->length, &writeLength), RTTCouldNotCallFunction);
 
         baton->length = writeLength;
 
