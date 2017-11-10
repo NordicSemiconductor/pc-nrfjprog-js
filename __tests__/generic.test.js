@@ -38,6 +38,8 @@
 
 const nRFjprog = require('../index.js');
 
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
+
 describe('Generic functionality', () => {
     it('gets dll version', done => {
         const callback = (err, version) => {

@@ -2,3 +2,5 @@
 /node_modules
 /CMakeFiles
 /docs
+/nrfjprog/unpacked
+/jest.json
