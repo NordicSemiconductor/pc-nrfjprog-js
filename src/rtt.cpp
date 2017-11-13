@@ -67,19 +67,6 @@ std::chrono::high_resolution_clock::time_point RTT::rttStartTime;
     } \
 } while(0);
 
-#define TIMED_RETURN_ERROR_ON_FAIL(function, error, baton) do { \
-    baton->functionStart = std::chrono::high_resolution_clock::now(); \
-    const nrfjprogdll_err_t status = (function); \
-    baton->functionEnd = std::chrono::high_resolution_clock::now(); \
-    \
-    if (status != SUCCESS) \
-    { \
-        cleanup(); \
-        baton->lowlevelError = status; \
-        return error; \
-    } \
-} while(0);
-
 NAN_MODULE_INIT(RTT::Init)
 {
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
@@ -232,15 +219,7 @@ void RTT::ReturnFunction(uv_work_t *req)
         }
     }
 
-    v8::Local<v8::Object> timeObj = Nan::New<v8::Object>();
-
-    Utility::Set(timeObj, "timeSinceEpoch", Convert::toTimeDifference(std::chrono::high_resolution_clock::time_point(), baton->functionStart));
-    Utility::Set(timeObj, "timeSinceRTTStart", Convert::toTimeDifference(rttStartTime, baton->functionStart));
-    Utility::Set(timeObj, "functioncallTime", Convert::toTimeDifference(baton->functionStart, baton->functionEnd));
-
-    argv.push_back(timeObj);
-
-    baton->callback->Call(baton->returnParameterCount + 2, argv.data());
+    baton->callback->Call(baton->returnParamterCount(), argv.data());
 
     delete baton;
 }
@@ -363,9 +342,6 @@ NAN_METHOD(RTT::Start)
             baton->upChannelInfo.push_back(new ChannelInfo(i, name, channelSize));
         }
 
-        baton->functionEnd = std::chrono::high_resolution_clock::now();
-        baton->functionStart = rttStartTime;
-
         return RTTSuccess;
     };
 
@@ -442,11 +418,9 @@ NAN_METHOD(RTT::Stop)
     rtt_execute_function_t e = [&] (RTTBaton *b) -> RTTErrorcodes_t {
         auto baton = static_cast<RTTStopBaton*>(b);
 
-        baton->functionStart = std::chrono::high_resolution_clock::now();
         RETURN_ERROR_ON_FAIL(dll_function.rtt_stop(), RTTCouldNotCallFunction);
         RETURN_ERROR_ON_FAIL(dll_function.disconnect_from_emu(), RTTCouldNotCallFunction);
         dll_function.close_dll();
-        baton->functionEnd = std::chrono::high_resolution_clock::now();
 
         releasenRFjprog();
         libraryLoaded = false;
@@ -477,7 +451,8 @@ NAN_METHOD(RTT::Read)
         baton->data = new char[baton->length];
         uint32_t readLength = 0;
 
-        TIMED_RETURN_ERROR_ON_FAIL(dll_function.rtt_read(baton->channelIndex, baton->data, baton->length, &readLength), RTTCouldNotCallFunction, baton);
+        baton->functionStart = std::chrono::high_resolution_clock::now(); \
+        RETURN_ERROR_ON_FAIL(dll_function.rtt_read(baton->channelIndex, baton->data, baton->length, &readLength), RTTCouldNotCallFunction);
 
         baton->length = readLength;
 
@@ -491,6 +466,7 @@ NAN_METHOD(RTT::Read)
 
         vector.push_back(Convert::toJsString(baton->data, baton->length));
         vector.push_back(Convert::toJsValueArray((uint8_t *)baton->data, baton->length));
+        vector.push_back(Convert::toTimeDifferenceUS(rttStartTime, baton->functionStart));
 
         return vector;
     };
@@ -526,7 +502,8 @@ NAN_METHOD(RTT::Write)
 
         uint32_t writeLength = 0;
 
-        TIMED_RETURN_ERROR_ON_FAIL(dll_function.rtt_write(baton->channelIndex, baton->data, baton->length, &writeLength), RTTCouldNotCallFunction, baton);
+        baton->functionStart = std::chrono::high_resolution_clock::now(); \
+        RETURN_ERROR_ON_FAIL(dll_function.rtt_write(baton->channelIndex, baton->data, baton->length, &writeLength), RTTCouldNotCallFunction);
 
         baton->length = writeLength;
 
@@ -539,6 +516,7 @@ NAN_METHOD(RTT::Write)
         returnType vector;
 
         vector.push_back(Convert::toJsNumber(baton->length));
+        vector.push_back(Convert::toTimeDifferenceUS(rttStartTime, baton->functionStart));
 
         return vector;
     };

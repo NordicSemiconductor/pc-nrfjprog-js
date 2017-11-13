@@ -68,6 +68,11 @@ public:
         }
     }
 
+    virtual uint32_t returnParamterCount()
+    {
+        return returnParameterCount + 1;
+    }
+
     const uint32_t returnParameterCount;
     const std::string name;
 
@@ -78,7 +83,6 @@ public:
     Nan::Callback *callback;
 
     std::chrono::high_resolution_clock::time_point functionStart;
-    std::chrono::high_resolution_clock::time_point functionEnd;
 
     rtt_execute_function_t executeFunction;
     rtt_return_function_t returnFunction;
@@ -103,7 +107,7 @@ public:
 class RTTReadBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 2);
+    RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 3);
     RTTReadBaton::~RTTReadBaton() {
         delete[] data;
     }
@@ -116,7 +120,7 @@ public:
 class RTTWriteBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 1);
+    RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 2);
     RTTWriteBaton::~RTTWriteBaton() {
         delete[] data;
     }
