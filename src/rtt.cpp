@@ -211,16 +211,15 @@ void RTT::ReturnFunction(uv_work_t *req)
     Nan::HandleScope scope;
 
     auto baton = static_cast<RTTBaton *>(req->data);
-    //TODO: Create an arrary of correct size instead of a way to large one.
-    v8::Local<v8::Value> argv[10];//baton->returnParameterCount + 1];
+    std::vector<v8::Local<v8::Value> > argv;
 
-    argv[0] = ErrorMessage::getErrorMessage(baton->result, rtt_err_map, baton->name, logMessage, baton->lowlevelError);
+    argv.push_back(ErrorMessage::getErrorMessage(baton->result, rtt_err_map, baton->name, logMessage, baton->lowlevelError));
 
     if (baton->result != errorcode_t::JsSuccess)
     {
         for (uint32_t i = 0; i < baton->returnParameterCount; i++)
         {
-            argv[i + 1] = Nan::Undefined();
+            argv.push_back(Nan::Undefined());
         }
     }
     else
@@ -229,14 +228,11 @@ void RTT::ReturnFunction(uv_work_t *req)
         {
             std::vector<v8::Local<v8::Value> > vector = baton->returnFunction(baton);
 
-            for (uint32_t i = 0; i < vector.size(); ++i)
-            {
-                argv[i + 1] = vector[i];
-            }
+            argv.insert(argv.end(), vector.begin(), vector.end());
         }
     }
 
-    baton->callback->Call(baton->returnParameterCount + 2, argv);
+    baton->callback->Call(baton->returnParameterCount + 1, argv.data());
 
     delete baton;
 }

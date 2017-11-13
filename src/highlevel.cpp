@@ -304,10 +304,10 @@ void HighLevel::ReturnFunction(uv_work_t *req)
     auto baton = static_cast<Baton *>(req->data);
     std::vector<v8::Local<v8::Value> > argv;
 
+    argv.push_back(ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, logMessage, baton->lowlevelError));
+
     if (baton->result != errorcode_t::JsSuccess)
     {
-        argv.push_back(ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, logMessage, baton->lowlevelError));
-
         for (uint32_t i = 0; i < baton->returnParameterCount; i++)
         {
             argv.push_back(Nan::Undefined());
@@ -315,8 +315,6 @@ void HighLevel::ReturnFunction(uv_work_t *req)
     }
     else
     {
-        argv.push_back(Nan::Undefined());
-
         if (baton->returnFunction != nullptr)
         {
             std::vector<v8::Local<v8::Value> > vector = baton->returnFunction(baton);
