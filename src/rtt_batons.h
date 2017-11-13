@@ -77,8 +77,8 @@ public:
     uv_work_t *req;
     Nan::Callback *callback;
 
-    std::chrono::time_point functionStart;
-    std::chrono::time_point functionEnd;
+    std::chrono::high_resolution_clock::time_point functionStart;
+    std::chrono::high_resolution_clock::time_point functionEnd;
 
     rtt_execute_function_t executeFunction;
     rtt_return_function_t returnFunction;

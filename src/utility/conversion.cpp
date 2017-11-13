@@ -492,6 +492,69 @@ v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_m
     return scope.Escape(Nan::New<v8::String>(it->second).ToLocalChecked());
 }
 
+v8::Handle<v8::Value> Convert::toTimeDifference(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime)
+{
+    Nan::EscapableHandleScope scope;
+
+    v8::Local<v8::Object> timeObj = Nan::New<v8::Object>();
+    Utility::Set(timeObj, "min", Convert::toTimeDifferenceM(startTime, endTime));
+    Utility::Set(timeObj, "s", Convert::toTimeDifferenceS(startTime, endTime, true));
+    Utility::Set(timeObj, "ms", Convert::toTimeDifferenceMS(startTime, endTime, true));
+    Utility::Set(timeObj, "us", Convert::toTimeDifferenceUS(startTime, endTime, true));
+
+    return scope.Escape(timeObj);
+}
+
+v8::Handle<v8::Value> Convert::toTimeDifferenceM(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justMinutePart)
+{
+    uint32_t duration = (uint32_t)std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime).count();
+
+    if (justMinutePart)
+    {
+        duration = duration % 60;
+    }
+
+    return Convert::toJsNumber(duration);
+}
+
+v8::Handle<v8::Value> Convert::toTimeDifferenceS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justSecondPart)
+{
+    uint32_t duration = (uint32_t)std::chrono::duration_cast<std::chrono::seconds>(endTime - startTime).count();
+
+    if (justSecondPart)
+    {
+        duration = duration % 60;
+    }
+
+    return Convert::toJsNumber(duration);
+}
+
+v8::Handle<v8::Value> Convert::toTimeDifferenceMS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justMillisecondPart)
+{
+    uint32_t duration = (uint32_t)std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+
+    if (justMillisecondPart)
+    {
+        duration = duration % 1000;
+    }
+
+    return Convert::toJsNumber(duration);
+}
+
+v8::Handle<v8::Value> Convert::toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justMicrosecondPart)
+{
+    uint32_t duration = (uint32_t)std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+
+    if (justMicrosecondPart)
+    {
+        duration = duration % 1000;
+    }
+
+    return Convert::toJsNumber(duration);
+}
+
+
+
 v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);

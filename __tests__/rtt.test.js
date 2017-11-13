@@ -79,7 +79,7 @@ describe('RTT', () => {
                 RTT.stop(stopCallback);
             };
 
-            //RTT = new nRFjprog.RTT();
+            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, {}, startCallback);
         });
 
@@ -90,7 +90,7 @@ describe('RTT', () => {
                 done();
             };
 
-            //RTT = new nRFjprog.RTT();
+            RTT = new nRFjprog.RTT();
             RTT.start(0, {}, startCallback);
         });
     });
@@ -105,7 +105,7 @@ describe('RTT', () => {
                 done();
             };
 
-            //RTT = new nRFjprog.RTT();
+            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, {}, startCallback);
         });
 
@@ -161,7 +161,7 @@ describe('RTT', () => {
                 RTT.read(0, 100, readCallback);
             };
 
-            //RTT = new nRFjprog.RTT();
+            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, {}, startCallback);
         });
 

@@ -44,6 +44,7 @@
 #include "utility/errormessage.h"
 
 #include <functional>
+#include <chrono>
 
 class RTTBaton;
 
@@ -80,13 +81,13 @@ private:
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
-    static void handleStartFail();
+    static void cleanup();
 
     static void logCallback(const char * msg);
     static void log(std::string msg);
     static std::string logMessage;
     static bool libraryLoaded;
-    static std::chrono::time_point rttStartTime;
+    static std::chrono::high_resolution_clock::time_point rttStartTime;
 
     static nRFjprogDllFunctionPointersType dll_function;
 };
