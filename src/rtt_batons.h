@@ -120,7 +120,7 @@ class RTTWriteBaton : public RTTBaton
 {
 public:
     RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 2);
-    RTTWriteBaton::~RTTWriteBaton() {
+    ~RTTWriteBaton() {
         delete[] data;
     }
 

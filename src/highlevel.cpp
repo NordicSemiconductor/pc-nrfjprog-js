@@ -288,9 +288,9 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         auto handle = reinterpret_cast<uv_handle_t *>(progressEvent);
 
-        uv_close(handle, [](uv_handle_t *handle)
+        uv_close(handle, [](uv_handle_t *closeHandle)
         {
-            delete handle;
+            delete closeHandle;
         });
 
         progressEvent = nullptr;
