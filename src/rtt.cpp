@@ -52,6 +52,8 @@
 
 Nan::Persistent<v8::Function> RTT::constructor;
 std::string RTT::logMessage;
+bool RTT::appendToLog;
+int RTT::logItemCount;
 nRFjprogDllFunctionPointersType RTT::dll_function;
 bool RTT::libraryLoaded;
 std::chrono::high_resolution_clock::time_point RTT::rttStartTime;
@@ -97,6 +99,7 @@ NAN_METHOD(RTT::New)
 RTT::RTT()
 {
     libraryLoaded = false;
+    resetLog();
 }
 
 RTT::~RTT()
@@ -124,7 +127,7 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
         return;
     }
 
-    logMessage.clear();
+    resetLog();
 
     auto argumentCount = 0;
     RTTBaton *baton = nullptr;
@@ -224,9 +227,28 @@ void RTT::ReturnFunction(uv_work_t *req)
     delete baton;
 }
 
+void RTT::resetLog()
+{
+    logMessage.clear();
+    appendToLog = true;
+    logItemCount = 0;
+}
+
 void RTT::log(std::string msg)
 {
+    if (logItemCount > 10000)
+    {
+        if (appendToLog)
+        {
+            logMessage = logMessage.append("The log has more than 10000 items. No more items will be logged.");
+            appendToLog = false;
+        }
+
+        return;
+    }
+
     logMessage = logMessage.append(msg);
+    logItemCount++;
 }
 
 void RTT::logCallback(const char *msg)

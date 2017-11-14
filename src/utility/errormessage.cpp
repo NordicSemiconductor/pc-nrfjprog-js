@@ -67,9 +67,11 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const na
         return scope.Escape(Nan::Undefined());
     }
 
+    std::string errorcodeString(Convert::valueToString(errorCode, errorcodeMapper));
+
     std::ostringstream errorStringStream;
     errorStringStream << "Error occured when " << customMessage << ". "
-        << "Errorcode: " << Convert::valueToString(errorCode, errorcodeMapper) << " (0x" << std::hex << errorCode << ")" << std::endl;
+        << "Errorcode: " << errorcodeString << " (0x" << std::hex << errorCode << ")" << std::endl;
 
     std::string lowLevelMessage(Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
 
@@ -82,7 +84,7 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const na
     v8::Local<v8::Object> errorObject = error.As<v8::Object>();
 
     Utility::Set(errorObject, "errno", Convert::toJsNumber(errorCode));
-    Utility::Set(errorObject, "errcode", Convert::valueToString(errorCode, nrfjprog_js_err_map));
+    Utility::Set(errorObject, "errcode", Convert::toJsString(errorcodeString));
     Utility::Set(errorObject, "erroperation", Convert::toJsString(customMessage));
     Utility::Set(errorObject, "errmsg", Convert::toJsString(errorStringStream.str()));
     Utility::Set(errorObject, "lowlevelErrorNo", Convert::toJsNumber(lowlevelError));

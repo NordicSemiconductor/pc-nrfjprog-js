@@ -87,7 +87,10 @@ private:
 
     static void logCallback(const char * msg);
     static void log(std::string msg);
+    static void resetLog();
     static std::string logMessage;
+    static bool appendToLog;
+    static int logItemCount;
     static bool libraryLoaded;
     static std::chrono::high_resolution_clock::time_point rttStartTime;
 
