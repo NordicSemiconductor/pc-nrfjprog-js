@@ -50,3 +50,14 @@ v8::Local<v8::Object> ChannelInfo::ToJs()
 
     return scope.Escape(obj);
 }
+
+StartOptions::StartOptions(v8::Local<v8::Object> obj)
+{
+    hasControlBlockLocation = false;
+
+    if (Utility::Has(obj, "controlBlockLocation"))
+    {
+        hasControlBlockLocation = true;
+        controlBlockLocation = Convert::getNativeUint32(obj, "controlBlockLocation");
+    }
+}

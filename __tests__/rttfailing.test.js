@@ -33,65 +33,48 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef RTT_H
-#define RTT_H
 
-#include <nan.h>
-#include "common.h"
-#include "nrfjprogwrapper.h"
-#include "osfiles.h"
+'use strict';
 
-#include "utility/errormessage.h"
+const nRFjprog = require('../index.js');
 
-#include <functional>
-#include <chrono>
+let device;
+let RTT = new nRFjprog.RTT();
 
-class RTTBaton;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-typedef std::vector<v8::Local<v8::Value> > returnType;
-typedef std::function<RTTBaton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> rtt_parse_parameters_function_t;
-typedef std::function<RTTErrorcodes_t(RTTBaton*)> rtt_execute_function_t;
-typedef std::function<returnType(RTTBaton*)> rtt_return_function_t;
+describe('RTT without RTT firmware', () => {
+    beforeAll(done => {
+        const programCallback = err => {
+            expect(err).toBeUndefined();
 
-class RTT : public Nan::ObjectWrap
-{
-public:
-    static NAN_MODULE_INIT(Init);
+            done();
+        };
 
-private:
-    explicit RTT();
-    ~RTT();
+        const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
+            device = connectedDevices[0];
 
-    static Nan::Persistent<v8::Function> constructor;
+            nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, programCallback);
+        };
 
-    static NAN_METHOD(New);
+        nRFjprog.getConnectedDevices(callback);
+    });
 
-    static NAN_METHOD(Start); // Params: serialNumber, { location }, callback(error, down, up)
-    static NAN_METHOD(Stop); // Params: callback(error)
+    describe('can not start RTT', () => {
+        it('fails cleanly', (done) => {
+            const startCallback = (err, down, up) => {
+                expect(err).toBeDefined();
+                expect(err).toMatchSnapshot();
 
-    static NAN_METHOD(Read); // Params: channelIndex, callback(error, data, raw, time)
-    static NAN_METHOD(Write); // Params: channelIndex, data, callback(error, writtenlength, time)
+                done();
+            };
 
-    static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
-                            const rtt_parse_parameters_function_t parse,
-                            const rtt_execute_function_t execute,
-                            const rtt_return_function_t ret);
-    static void ExecuteFunction(uv_work_t *req);
-    static void ReturnFunction(uv_work_t *req);
+            RTT = new nRFjprog.RTT();
+            RTT.start(device.serialNumber, {}, startCallback);
+        });
+    });
+});
 
-    static void init(v8::Local<v8::FunctionTemplate> tpl);
 
-    static bool isStarted();
-
-    static void cleanup();
-
-    static void logCallback(const char * msg);
-    static void log(std::string msg);
-    static std::string logMessage;
-    static bool libraryLoaded;
-    static std::chrono::high_resolution_clock::time_point rttStartTime;
-
-    static nRFjprogDllFunctionPointersType dll_function;
-};
-
-#endif

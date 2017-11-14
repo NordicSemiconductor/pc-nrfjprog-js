@@ -41,7 +41,7 @@ const nRFjprog = require('../index.js');
 let device;
 let RTT = new nRFjprog.RTT();
 
-//jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 describe('RTT', () => {
     beforeAll(done => {
@@ -56,9 +56,7 @@ describe('RTT', () => {
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             device = connectedDevices[0];
 
-            done();
-
-            //nRFjprog.program(device.serialNumber, "./__tests__/hex/rtt.hex", { }, programCallback);
+            nRFjprog.program(device.serialNumber, "./__tests__/hex/rtt.hex", { }, programCallback);
         };
 
         nRFjprog.getConnectedDevices(callback);
@@ -83,8 +81,27 @@ describe('RTT', () => {
             RTT.start(device.serialNumber, {}, startCallback);
         });
 
-        it('returns and error when wrong serialnumber', done => {
+        it('starts a rtt session when using correct control block location', (done) => {
+            const stopCallback = (err) => {
+                expect(err).toBeUndefined();
+                done();
+            };
+
             const startCallback = (err, down, up) => {
+                expect(err).toBeUndefined();
+                expect(down).toBeDefined();
+                expect(up).toBeDefined();
+
+                RTT.stop(stopCallback);
+            };
+
+            RTT = new nRFjprog.RTT();
+            RTT.start(device.serialNumber, { controlBlockLocation: 0x200006E0 }, startCallback);
+        });
+
+        it('returns an error when wrong serialnumber', done => {
+            const startCallback = (err, down, up) => {
+                expect(err).toBeDefined();
                 expect(err).toMatchSnapshot();
 
                 done();
@@ -92,6 +109,53 @@ describe('RTT', () => {
 
             RTT = new nRFjprog.RTT();
             RTT.start(0, {}, startCallback);
+        });
+
+        it('returns an error when using wrong control block location', done => {
+            const startCallback = (err, down, up) => {
+                expect(err).toBeDefined();
+                expect(err).toMatchSnapshot();
+
+                done();
+            };
+
+            RTT = new nRFjprog.RTT();
+            RTT.start(device.serialNumber, { controlBlockLocation: 15 }, startCallback);
+        });
+    });
+
+    describe('fails cleanly when calling other functions before start', () => {
+        it('fails cleanly when calling read without start', (done) => {
+            const readCallback = (err, data, raw, time) => {
+                expect(err).toBeDefined();
+                expect(err).toMatchSnapshot();
+
+                done();
+            };
+
+            RTT.read(0, 100, readCallback);
+        });
+
+        it('fails cleanly when calling write without start', (done) => {
+            const writeCallback = (err, length, time) => {
+                expect(err).toBeDefined();
+                expect(err).toMatchSnapshot();
+
+                done();
+            };
+
+            RTT.write(0, "test", writeCallback);
+        });
+
+        it('fails cleanly when calling stop without start', (done) => {
+            const stopCallback = (err) => {
+                expect(err).toBeDefined();
+                expect(err).toMatchSnapshot();
+
+                done();
+            };
+
+            RTT.stop(stopCallback);
         });
     });
 
@@ -119,10 +183,11 @@ describe('RTT', () => {
         });
 
         it('reads startmessage', done => {
-            const readCallback = (err, data, raw) => {
+            const readCallback = (err, data, raw, time) => {
                 expect(err).toBeUndefined();
                 expect(data).toMatchSnapshot();
                 expect(raw).toMatchSnapshot();
+                expect(time).toBeDefined();
 
                 done();
             };
@@ -144,7 +209,7 @@ describe('RTT', () => {
         });
     });
 
-    describe.only('writes to device', () => {
+    describe('writes to device', () => {
         beforeEach(done => {
             const readCallback = (err, data, raw) => {
                 expect(err).toBeUndefined();
@@ -176,41 +241,59 @@ describe('RTT', () => {
 
         it('writes a text to loopback and reads it back', done => {
             const writetext = "this is a test";
+            let readStartTime = Date.now();
 
             const readCallback = (err, data, raw) => {
                 expect(err).toBeUndefined();
-                console.log(data, raw)
+
+                if (data.length === 0
+                    && Date.now() - readStartTime < 2000) {
+                    RTT.read(0, 100, readCallback);
+                    return;
+                }
+
                 expect(data).toBe(writetext);
 
                 done();
             };
 
-            const writeCallback = (err, length) => {
+            const writeCallback = (err, length, time) => {
                 expect(err).toBeUndefined();
                 expect(length).toBe(writetext.length);
+                expect(time).toBeDefined();
 
-                setTimeout(RTT.read(0, 100, readCallback), 1000);
+                readStartTime = Date.now();
+                RTT.read(0, 100, readCallback);
             };
 
             RTT.write(0, writetext, writeCallback);
         });
 
         it('writes a arry of integers to loopback and reads it back', done => {
-            const writearray = [0, 1, 2, 3, 4];
+            const writearray = [0, 1, 2, 3];
+            let readStartTime = Date.now();
 
             const readCallback = (err, data, raw) => {
                 expect(err).toBeUndefined();
-                console.log(data, raw)
+
+                if (raw.length === 0
+                    && Date.now() - readStartTime < 2000) {
+                    RTT.read(0, 100, readCallback);
+                    return;
+                }
+
                 expect(raw).toEqual(writearray);
 
                 done();
             };
 
-            const writeCallback = (err, length) => {
+            const writeCallback = (err, length, time) => {
                 expect(err).toBeUndefined();
                 expect(length).toBe(writearray.length);
+                expect(time).toBeDefined();
 
-                setTimeout(RTT.read(0, 100, readCallback), 1000);
+                readStartTime = Date.now();
+                RTT.read(0, 100, readCallback);
             };
 
             RTT.write(0, writearray, writeCallback);

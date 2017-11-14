@@ -57,4 +57,14 @@ private:
     const uint32_t size;
 };
 
+
+class StartOptions
+{
+public:
+    StartOptions(v8::Local<v8::Object> obj);
+
+    uint32_t controlBlockLocation;
+    bool hasControlBlockLocation;
+};
+
 #endif

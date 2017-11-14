@@ -229,6 +229,23 @@ void RTT::log(std::string msg)
     logMessage = logMessage.append(msg);
 }
 
+void RTT::logCallback(const char *msg)
+{
+    log(msg);
+}
+
+bool RTT::isStarted()
+{
+    if (!libraryLoaded) {
+        return false;
+    }
+
+    bool started;
+    dll_function.is_rtt_started(&started);
+
+    return started;
+}
+
 NAN_METHOD(RTT::Start)
 {
     rtt_parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> RTTBaton* {
@@ -238,6 +255,9 @@ NAN_METHOD(RTT::Start)
         argumentCount++;
 
         v8::Local<v8::Object> startOptions = Convert::getJsObject(parameters[argumentCount]);
+        StartOptions options(startOptions);
+        baton->hasControlBlockLocation = options.hasControlBlockLocation;
+        baton->controlBlockLocation = options.controlBlockLocation;
         argumentCount++;
 
         return baton;
@@ -298,22 +318,31 @@ NAN_METHOD(RTT::Start)
 
         libraryLoaded = true;
 
-        RETURN_ERROR_ON_FAIL(dll_function.open_dll(jlinkarmlocation.c_str(), 0, family), RTTCouldNotOpennRFjprogLibrary);
+        RETURN_ERROR_ON_FAIL(dll_function.open_dll(jlinkarmlocation.c_str(), &RTT::logCallback, family), RTTCouldNotOpennRFjprogLibrary);
 
         RETURN_ERROR_ON_FAIL(dll_function.connect_to_emu_with_snr(baton->serialNumber, clockSpeed), RTTCouldNotConnectToDevice);
         RETURN_ERROR_ON_FAIL(dll_function.connect_to_device(), RTTCouldNotConnectToDevice);
 
+        if (baton->hasControlBlockLocation) {
+            RETURN_ERROR_ON_FAIL(dll_function.rtt_set_control_block_address(baton->controlBlockLocation), RTTCouldNotFindControlBlock);
+        }
+
         rttStartTime = std::chrono::high_resolution_clock::now();
         RETURN_ERROR_ON_FAIL(dll_function.rtt_start(), RTTCouldNotStartRTT);
 
-        bool controlBlockFound = false;
 
-        for(int i = 0; i < 100000; ++i) {
+        while (true) {
+            bool controlBlockFound = false;
             RETURN_ERROR_ON_FAIL(dll_function.rtt_is_control_block_found(&controlBlockFound), RTTCouldNotCallFunction);
+            std::chrono::high_resolution_clock::time_point attemptedStartupTime = std::chrono::high_resolution_clock::now();
 
             if (controlBlockFound) {
-                log("Found control block");
                 break;
+            }
+
+            if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime - rttStartTime).count() > 10) {
+                cleanup();
+                return RTTCouldNotFindControlBlock;
             }
         }
 
@@ -418,6 +447,10 @@ NAN_METHOD(RTT::Stop)
     rtt_execute_function_t e = [&] (RTTBaton *b) -> RTTErrorcodes_t {
         auto baton = static_cast<RTTStopBaton*>(b);
 
+        if (!isStarted()) {
+            return RTTNotInitialized;
+        }
+
         RETURN_ERROR_ON_FAIL(dll_function.rtt_stop(), RTTCouldNotCallFunction);
         RETURN_ERROR_ON_FAIL(dll_function.disconnect_from_emu(), RTTCouldNotCallFunction);
         dll_function.close_dll();
@@ -448,11 +481,16 @@ NAN_METHOD(RTT::Read)
     rtt_execute_function_t e = [&] (RTTBaton *b) -> RTTErrorcodes_t {
         auto baton = static_cast<RTTReadBaton*>(b);
 
-        baton->data = new char[baton->length];
+        if (!isStarted()) {
+            return RTTNotInitialized;
+        }
+
+        baton->data.resize(baton->length, 0);
         uint32_t readLength = 0;
 
-        baton->functionStart = std::chrono::high_resolution_clock::now(); \
-        RETURN_ERROR_ON_FAIL(dll_function.rtt_read(baton->channelIndex, baton->data, baton->length, &readLength), RTTCouldNotCallFunction);
+        baton->functionStart = std::chrono::high_resolution_clock::now();
+
+        RETURN_ERROR_ON_FAIL(dll_function.rtt_read(baton->channelIndex, baton->data.data(), baton->length, &readLength), RTTCouldNotCallFunction);
 
         baton->length = readLength;
 
@@ -464,8 +502,8 @@ NAN_METHOD(RTT::Read)
 
         returnType vector;
 
-        vector.push_back(Convert::toJsString(baton->data, baton->length));
-        vector.push_back(Convert::toJsValueArray((uint8_t *)baton->data, baton->length));
+        vector.push_back(Convert::toJsString(baton->data.data(), baton->length));
+        vector.push_back(Convert::toJsValueArray((uint8_t *)baton->data.data(), baton->length));
         vector.push_back(Convert::toTimeDifferenceUS(rttStartTime, baton->functionStart));
 
         return vector;
@@ -499,6 +537,10 @@ NAN_METHOD(RTT::Write)
 
     rtt_execute_function_t e = [&] (RTTBaton *b) -> RTTErrorcodes_t {
         auto baton = static_cast<RTTWriteBaton*>(b);
+
+        if (!isStarted()) {
+            return RTTNotInitialized;
+        }
 
         uint32_t writeLength = 0;
 

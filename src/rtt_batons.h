@@ -93,6 +93,8 @@ class RTTStartBaton : public RTTBaton
 public:
     RTTBATON_CONSTRUCTOR(RTTStartBaton, "start rtt", 2);
     uint32_t serialNumber;
+    bool hasControlBlockLocation;
+    uint32_t controlBlockLocation;
 
     std::vector<ChannelInfo *> upChannelInfo;
     std::vector<ChannelInfo *> downChannelInfo;
@@ -108,13 +110,10 @@ class RTTReadBaton : public RTTBaton
 {
 public:
     RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 3);
-    RTTReadBaton::~RTTReadBaton() {
-        delete[] data;
-    }
 
     uint32_t channelIndex;
     uint32_t length;
-    char *data;
+    std::vector<char> data;
 };
 
 class RTTWriteBaton : public RTTBaton

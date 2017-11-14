@@ -1,15 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RTT opens and close as expected returns and error when wrong serialnumber 1`] = `
+exports[`RTT fails cleanly when calling other functions before start fails cleanly when calling read without start 1`] = `
+[Error: Error occured when rtt read. Errorcode: There is no RTT connection open (0xb)
+]
+`;
+
+exports[`RTT fails cleanly when calling other functions before start fails cleanly when calling stop without start 1`] = `
+[Error: Error occured when stop rtt. Errorcode: There is no RTT connection open (0xb)
+]
+`;
+
+exports[`RTT fails cleanly when calling other functions before start fails cleanly when calling write without start 1`] = `
+[Error: Error occured when rtt write. Errorcode: There is no RTT connection open (0xb)
+]
+`;
+
+exports[`RTT opens and close as expected returns an error when using wrong control block location 1`] = `
+[Error: Error occured when start rtt. Errorcode: Could Not Find Control Block (0x8)
+]
+`;
+
+exports[`RTT opens and close as expected returns an error when wrong serialnumber 1`] = `
 [Error: Error occured when start rtt. Errorcode: Could Not Get Device Information (0x3)
 Lowlevel error: EMULATOR_NOT_CONNECTED (fffffff6)
 ]
 `;
 
-exports[`RTT reads from device reads startmessage 1`] = `
-"RTT Loopback Session started, DK connected
-"
-`;
+exports[`RTT reads from device reads startmessage 1`] = `"RTT Loopback Session started, DK connected"`;
 
 exports[`RTT reads from device reads startmessage 2`] = `
 Array [
@@ -55,7 +72,5 @@ Array [
   116,
   101,
   100,
-  13,
-  10,
 ]
 `;

@@ -74,8 +74,10 @@ typedef enum RTTErrorcodes
     RTTCouldNotOpennRFjprogLibrary,
     RTTCouldNotConnectToDevice,
     RTTCouldNotStartRTT,
+    RTTCouldNotFindControlBlock,
     RTTCouldNotGetChannelInformation,
-    RTTCouldNotCallFunction
+    RTTCouldNotCallFunction,
+    RTTNotInitialized
 } RTTErrorcodes_t;
 
 
@@ -105,8 +107,10 @@ static name_map_t rtt_err_map = {
     { RTTCouldNotOpennRFjprogLibrary, "Could Not Open nRFjprog Library" },
     { RTTCouldNotConnectToDevice, "Could Not Connect To Device" },
     { RTTCouldNotStartRTT, "Could Not Start RTT" },
+    { RTTCouldNotFindControlBlock, "Could Not Find Control Block" },
     { RTTCouldNotGetChannelInformation, "Could Not Get Channel Information" },
-    { RTTCouldNotCallFunction, "Could Not Call Function" }
+    { RTTCouldNotCallFunction, "Could Not Call Function" },
+    { RTTNotInitialized, "There is no RTT connection open" }
 };
 
 static name_map_t program_parameter_type_map = {
