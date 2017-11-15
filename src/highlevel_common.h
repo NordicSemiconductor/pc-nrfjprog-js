@@ -61,7 +61,8 @@ typedef enum
     CouldNotErase,
     CouldNotProgram,
     CouldNotRead,
-    CouldNotOpenHexFile
+    CouldNotOpenHexFile,
+    CouldNotExecuteDueToLoad
 } errorcode_t;
 
 typedef enum RTTErrorcodes
@@ -96,7 +97,8 @@ static name_map_t nrfjprog_js_err_map = {
     { errorcode_t::CouldNotErase, "CouldNotErase" },
     { errorcode_t::CouldNotProgram, "CouldNotProgram" },
     { errorcode_t::CouldNotRead, "CouldNotRead" },
-    { errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile" }
+    { errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile" },
+    { errorcode_t::CouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line" }
 };
 
 static name_map_t rtt_err_map = {

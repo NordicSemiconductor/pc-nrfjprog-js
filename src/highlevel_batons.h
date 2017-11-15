@@ -75,7 +75,11 @@ public:
 
     execute_function_t executeFunction;
     return_function_t returnFunction;
+
+    static std::timed_mutex executionMutex;
 };
+
+std::timed_mutex Baton::executionMutex;
 
 class GetDllVersionBaton : public Baton
 {

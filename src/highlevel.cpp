@@ -198,6 +198,13 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<Baton *>(req->data);
 
+    std::unique_lock<std::timed_mutex> lock (baton->executionMutex, std::defer_lock);
+
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
+        baton->result = CouldNotExecuteDueToLoad;
+        return;
+    }
+
     if (baton->mayHaveProgressCallback
         && jsProgressCallback != nullptr)
     {
