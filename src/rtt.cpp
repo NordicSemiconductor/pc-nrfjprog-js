@@ -189,12 +189,16 @@ void RTT::ExecuteFunction(uv_work_t *req)
 {
     auto baton = static_cast<RTTBaton *>(req->data);
 
-    RTTErrorcodes_t executeError = baton->executeFunction(baton);
+    std::unique_lock<std::timed_mutex> lock (baton->executionMutex, std::defer_lock);
 
-    if (executeError != RTTSuccess)
-    {
-        baton->result = executeError;
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
+        baton->result = RTTCouldNotExecuteDueToLoad;
+        return;
     }
+
+    baton->result = baton->executeFunction(baton);
+
+    lock.unlock();
 }
 
 void RTT::ReturnFunction(uv_work_t *req)

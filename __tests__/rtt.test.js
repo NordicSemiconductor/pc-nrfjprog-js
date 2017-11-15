@@ -211,7 +211,7 @@ describe('RTT', () => {
 
     describe('writes to device', () => {
         beforeEach(done => {
-            const readCallback = (err, data, raw) => {
+            const readCallback = (err, data, raw, time) => {
                 expect(err).toBeUndefined();
 
                 done();
@@ -297,6 +297,77 @@ describe('RTT', () => {
             };
 
             RTT.write(0, writearray, writeCallback);
+        });
+    });
+
+    describe('race condition', () => {
+        afterEach(done => {
+            const stopCallback = (err) => {
+                expect(err).toBeUndefined();
+                done();
+            };
+
+            RTT.stop(stopCallback);
+        });
+
+        it('handle race conditions by waiting', done => {
+            const readOrder = [];
+            const startCallback = (err, down, up) => {
+                expect(err).toBeUndefined();
+                expect(down).toBeDefined();
+                expect(up).toBeDefined();
+            };
+
+            const readCallback = (number, err, data, raw) => {
+                readOrder.push(number);
+                expect(err).toBeUndefined();
+
+                if (readOrder.length === 3) {
+                    expect(readOrder).toEqual([1, 2, 3]);
+                    done();
+                }
+            };
+
+            RTT.start(device.serialNumber, {}, startCallback);
+            RTT.read(0, 100, readCallback.bind(null, 1));
+            RTT.read(0, 100, readCallback.bind(null, 2));
+            RTT.read(0, 100, readCallback.bind(null, 3));
+        });
+
+        // A timeout of 10 seconds is to long to trip this up
+        it.skip('returns an error when the call time exceeds 10 seconds', done => {
+            const errCount = 0;
+            const writeElementCount = 10000;
+            const writeResults = [];
+
+            const startCallback = (err, down, up) => {
+                expect(err).toBeUndefined();
+                expect(down).toBeDefined();
+                expect(up).toBeDefined();
+            };
+
+            const writeCallback = (err, writeLength, time) => {
+                if (err) {
+                    errCount++;
+                }
+
+                writeResults.push(err);
+
+                if (writeResults.length % 1000 === 0) {
+                    console.log(writeResults.length);
+                }
+
+                if (writeResults.length === writeElementCount) {
+                    expect(errCount).toBeGreaterThan(0);
+                    done();
+                }
+            };
+
+            RTT.start(device.serialNumber, {}, startCallback);
+
+            for (let i = 0; i < readElementCount; i++) {
+                RTT.write(0, "test", writeCallback);
+            }
         });
     });
 });

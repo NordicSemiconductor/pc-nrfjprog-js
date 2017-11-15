@@ -77,7 +77,8 @@ typedef enum RTTErrorcodes
     RTTCouldNotFindControlBlock,
     RTTCouldNotGetChannelInformation,
     RTTCouldNotCallFunction,
-    RTTNotInitialized
+    RTTNotInitialized,
+    RTTCouldNotExecuteDueToLoad
 } RTTErrorcodes_t;
 
 
@@ -110,7 +111,8 @@ static name_map_t rtt_err_map = {
     { RTTCouldNotFindControlBlock, "Could Not Find Control Block" },
     { RTTCouldNotGetChannelInformation, "Could Not Get Channel Information" },
     { RTTCouldNotCallFunction, "Could Not Call Function" },
-    { RTTNotInitialized, "There is no RTT connection open" }
+    { RTTNotInitialized, "There is no RTT connection open" },
+    { RTTCouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line" }
 };
 
 static name_map_t program_parameter_type_map = {

@@ -77,7 +77,11 @@ public:
 
     rtt_execute_function_t executeFunction;
     rtt_return_function_t returnFunction;
+
+    static std::timed_mutex executionMutex;
 };
+
+std::timed_mutex RTTBaton::executionMutex;
 
 class RTTStartBaton : public RTTBaton
 {
