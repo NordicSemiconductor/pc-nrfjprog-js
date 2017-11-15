@@ -68,6 +68,10 @@ public:
     static uint8_t *    getNativePointerToUint8(v8::Local<v8::Value>js);
     static uint16_t *   getNativePointerToUint16(v8::Local<v8::Object>js, const char *name);
     static uint16_t *   getNativePointerToUint16(v8::Local<v8::Value>js);
+    static std::vector<char> getVectorForChar(v8::Local<v8::Object>js, const char *name);
+    static std::vector<char> getVectorForChar(v8::Local<v8::Value> js);
+    static std::vector<uint8_t> getVectorForUint8(v8::Local<v8::Object>js, const char *name);
+    static std::vector<uint8_t> getVectorForUint8(v8::Local<v8::Value> js);
     static uint32_t     getLengthOfArray(v8::Local<v8::Object>js, const char *name);
     static uint32_t     getLengthOfArray(v8::Local<v8::Value>js);
     static v8::Local<v8::Object> getJsObject(v8::Local<v8::Object>js, const char *name);

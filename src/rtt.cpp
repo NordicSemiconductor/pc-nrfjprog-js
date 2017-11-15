@@ -174,7 +174,7 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
 
     log("===============================================\n");
     log("Start of ");
-    log(baton->name);
+    log(baton->name.c_str());
     log("\n");
     log("===============================================\n");
 
@@ -235,7 +235,7 @@ void RTT::resetLog()
     logItemCount = 0;
 }
 
-void RTT::log(std::string msg)
+void RTT::log(const char *msg)
 {
     if (logItemCount > 10000)
     {
@@ -250,11 +250,6 @@ void RTT::log(std::string msg)
 
     logMessage = logMessage.append(msg);
     logItemCount++;
-}
-
-void RTT::log(const char *msg)
-{
-    log(std::string(msg));
 }
 
 bool RTT::isStarted()
@@ -576,12 +571,13 @@ NAN_METHOD(RTT::Write)
 
         if (info[argumentCount]->IsString())
         {
-            baton->data = Convert::getNativePointerToChar(info[argumentCount]);
+            baton->data = Convert::getVectorForChar(info[argumentCount]);
             baton->length = Convert::getNativeString(info[argumentCount]).length();
         }
         else
         {
-            baton->data = (char *)Convert::getNativePointerToUint8(info[argumentCount]);
+            std::vector<uint8_t> tempData = Convert::getVectorForUint8(info[argumentCount]);
+            baton->data = std::vector<char>(tempData.begin(), tempData.end());
             baton->length = Convert::getLengthOfArray(info[argumentCount]);
         }
         argumentCount++;
@@ -599,7 +595,7 @@ NAN_METHOD(RTT::Write)
         uint32_t writeLength = 0;
 
         baton->functionStart = std::chrono::high_resolution_clock::now();
-        RETURN_ERROR_ON_FAIL(dll_function.rtt_write(baton->channelIndex, baton->data, baton->length, &writeLength), RTTCouldNotCallFunction);
+        RETURN_ERROR_ON_FAIL(dll_function.rtt_write(baton->channelIndex, baton->data.data(), baton->length, &writeLength), RTTCouldNotCallFunction);
 
         baton->length = writeLength;
 

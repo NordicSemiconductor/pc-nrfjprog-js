@@ -219,7 +219,7 @@ char *Convert::getNativePointerToChar(v8::Local<v8::Value> js)
 {
     if (!js->IsString())
     {
-        throw std::string("array");
+        throw std::string("string");
     }
 
     std::string content = Convert::getNativeString(js);
@@ -229,6 +229,48 @@ char *Convert::getNativePointerToChar(v8::Local<v8::Value> js)
     strncpy(string, content.c_str(), length);
 
     return string;
+}
+
+std::vector<char> Convert::getVectorForChar(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getVectorForChar(value));
+}
+
+std::vector<char> Convert::getVectorForChar(v8::Local<v8::Value> js)
+{
+    std::string content = Convert::getNativeString(js);
+
+    std::vector<char> returnData(content.begin(), content.end());
+
+    return returnData;
+}
+
+std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getVectorForUint8(value));
+}
+
+std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
+{
+    if (!js->IsArray())
+    {
+        throw std::string("array");
+    }
+
+    v8::Local<v8::Array> jsarray = v8::Local<v8::Array>::Cast(js);
+    auto length = jsarray->Length();
+    std::vector<uint8_t> returnData;
+
+    for (uint32_t i = 0; i < length; ++i)
+    {
+        returnData.push_back(static_cast<uint8_t>(jsarray->Get(Nan::New(i))->Uint32Value()));
+    }
+
+    return returnData;
 }
 
 uint8_t *Convert::getNativePointerToUint8(v8::Local<v8::Object>js, const char *name)

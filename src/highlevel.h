@@ -47,10 +47,9 @@
 
 class Baton;
 
-typedef std::vector<v8::Local<v8::Value> > returnType;
 typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_function_t;
 typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
-typedef std::function<returnType(Baton*)> return_function_t;
+typedef std::function<std::vector<v8::Local<v8::Value>>(Baton*)> return_function_t;
 
 class HighLevel : public Nan::ObjectWrap
 {
@@ -104,11 +103,10 @@ private:
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
-    static void logCallback(const char * msg);
-    static void log(std::string msg);
+    static void log(const char * msg);
 
     static void progressCallback(const char * process);
-    static Nan::Callback *jsProgressCallback;
+    static std::unique_ptr<Nan::Callback> jsProgressCallback;
     static void sendProgress(uv_async_t *handle);
     static uv_async_t *progressEvent;
 

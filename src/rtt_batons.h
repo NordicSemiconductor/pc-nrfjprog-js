@@ -51,7 +51,6 @@ public:
     {
         req = std::make_unique<uv_work_t>();
         req->data = static_cast<void*>(this);
-        callback = nullptr;
     }
 
     virtual ~RTTBaton()
@@ -116,13 +115,10 @@ class RTTWriteBaton : public RTTBaton
 {
 public:
     RTTWriteBaton() : RTTBaton("rtt write", 2) {}
-    ~RTTWriteBaton() {
-        delete[] data;
-    }
 
     uint32_t channelIndex;
     uint32_t length;
-    char *data;
+    std::vector<char> data;
 };
 
 
