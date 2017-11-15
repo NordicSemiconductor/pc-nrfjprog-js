@@ -41,31 +41,23 @@
 #include "rtt.h"
 #include "rtt_helpers.h"
 
-#define RTTBATON_CONSTRUCTOR(BatonType, name, returnParameterCount) BatonType() : RTTBaton(returnParameterCount, name) {}
-#define RTTBATON_DESTRUCTOR(BatonType) ~BatonType()
-
 class RTTBaton {
 public:
-    explicit RTTBaton(const uint32_t _returnParameterCount, const std::string _name) :
+    explicit RTTBaton(const std::string _name, const uint32_t _returnParameterCount) :
         returnParameterCount(_returnParameterCount),
         name(_name),
         result(JsSuccess),
         lowlevelError(SUCCESS)
     {
-        req = new uv_work_t();
+        req = std::make_unique<uv_work_t>();
         req->data = static_cast<void*>(this);
         callback = nullptr;
     }
 
     virtual ~RTTBaton()
     {
-        delete req;
-
-        if (callback != nullptr)
-        {
-            delete callback;
-            callback = nullptr;
-        }
+        req.reset();
+        callback.reset();
     }
 
     virtual uint32_t returnParamterCount()
@@ -79,8 +71,8 @@ public:
     uint32_t result;
     nrfjprogdll_err_t lowlevelError;
 
-    uv_work_t *req;
-    Nan::Callback *callback;
+    std::unique_ptr<uv_work_t> req;
+    std::unique_ptr<Nan::Callback> callback;
 
     std::chrono::high_resolution_clock::time_point functionStart;
 
@@ -91,25 +83,29 @@ public:
 class RTTStartBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTStartBaton, "start rtt", 2);
+    RTTStartBaton() : RTTBaton("start rtt", 2) {}
     uint32_t serialNumber;
     bool hasControlBlockLocation;
     uint32_t controlBlockLocation;
 
-    std::vector<ChannelInfo *> upChannelInfo;
-    std::vector<ChannelInfo *> downChannelInfo;
+    uint32_t clockSpeed;
+    device_family_t family;
+    std::string jlinkarmlocation;
+
+    std::vector<std::unique_ptr<ChannelInfo>> upChannelInfo;
+    std::vector<std::unique_ptr<ChannelInfo>> downChannelInfo;
 };
 
 class RTTStopBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTStopBaton, "stop rtt", 0);
+    RTTStopBaton() : RTTBaton("stop rtt", 0) {}
 };
 
 class RTTReadBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTReadBaton, "rtt read", 3);
+    RTTReadBaton() : RTTBaton("rtt read", 3) {}
 
     uint32_t channelIndex;
     uint32_t length;
@@ -119,7 +115,7 @@ public:
 class RTTWriteBaton : public RTTBaton
 {
 public:
-    RTTBATON_CONSTRUCTOR(RTTWriteBaton, "rtt write", 2);
+    RTTWriteBaton() : RTTBaton("rtt write", 2) {}
     ~RTTWriteBaton() {
         delete[] data;
     }

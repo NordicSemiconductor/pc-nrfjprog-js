@@ -417,6 +417,78 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "close", CloseDevice);
 }
 
+void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
+{
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1);
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2);
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3);
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3);
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);
+    NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);
+    NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
+    NODE_DEFINE_CONSTANT(target, NRF51_L3);
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV2);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_FUTURE);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV2);
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE);
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);
+    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);
+    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE);
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1);
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE);
+    NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA);
+
+    NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
+    NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
+    NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY);
+
+    NODE_DEFINE_CONSTANT(target, ERASE_NONE);
+    NODE_DEFINE_CONSTANT(target, ERASE_ALL);
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
+
+    NODE_DEFINE_CONSTANT(target, JsSuccess);
+    NODE_DEFINE_CONSTANT(target, CouldNotFindJlinkDLL);
+    NODE_DEFINE_CONSTANT(target, CouldNotFindJprogDLL);
+    NODE_DEFINE_CONSTANT(target, CouldNotLoadDLL);
+    NODE_DEFINE_CONSTANT(target, CouldNotOpenDevice);
+    NODE_DEFINE_CONSTANT(target, CouldNotOpenDLL);
+    NODE_DEFINE_CONSTANT(target, CouldNotConnectToDevice);
+    NODE_DEFINE_CONSTANT(target, CouldNotCallFunction);
+    NODE_DEFINE_CONSTANT(target, CouldNotErase);
+    NODE_DEFINE_CONSTANT(target, CouldNotProgram);
+    NODE_DEFINE_CONSTANT(target, CouldNotRead);
+    NODE_DEFINE_CONSTANT(target, CouldNotOpenHexFile);
+
+    NODE_DEFINE_CONSTANT(target, RESET_NONE);
+    NODE_DEFINE_CONSTANT(target, RESET_SYSTEM);
+    NODE_DEFINE_CONSTANT(target, RESET_DEBUG);
+    NODE_DEFINE_CONSTANT(target, RESET_PIN);
+
+    NODE_DEFINE_CONSTANT(target, ERASE_NONE);
+    NODE_DEFINE_CONSTANT(target, ERASE_ALL);
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
+
+    NODE_DEFINE_CONSTANT(target, VERIFY_NONE);
+    NODE_DEFINE_CONSTANT(target, VERIFY_READ);
+
+    NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_FILE);
+    NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_STRING);
+}
+
 NAN_METHOD(HighLevel::GetDllVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
@@ -850,88 +922,3 @@ NAN_METHOD(HighLevel::CloseDevice)
 
     CallFunction(info, p, e, nullptr, true);
 }
-
-#include "rtt.h"
-
-extern "C" {
-    void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
-    {
-        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1);
-        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2);
-        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3);
-        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3);
-        NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);
-        NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);
-        NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
-        NODE_DEFINE_CONSTANT(target, NRF51_L3);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
-        NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV2);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_FUTURE);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV2);
-        NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE);
-        NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);
-        NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);
-        NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);
-        NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE);
-        NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA);
-
-        NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
-        NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
-        NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY);
-
-        NODE_DEFINE_CONSTANT(target, ERASE_NONE);
-        NODE_DEFINE_CONSTANT(target, ERASE_ALL);
-        NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
-        NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
-
-        NODE_DEFINE_CONSTANT(target, JsSuccess);
-        NODE_DEFINE_CONSTANT(target, CouldNotFindJlinkDLL);
-        NODE_DEFINE_CONSTANT(target, CouldNotFindJprogDLL);
-        NODE_DEFINE_CONSTANT(target, CouldNotLoadDLL);
-        NODE_DEFINE_CONSTANT(target, CouldNotOpenDevice);
-        NODE_DEFINE_CONSTANT(target, CouldNotOpenDLL);
-        NODE_DEFINE_CONSTANT(target, CouldNotConnectToDevice);
-        NODE_DEFINE_CONSTANT(target, CouldNotCallFunction);
-        NODE_DEFINE_CONSTANT(target, CouldNotErase);
-        NODE_DEFINE_CONSTANT(target, CouldNotProgram);
-        NODE_DEFINE_CONSTANT(target, CouldNotRead);
-        NODE_DEFINE_CONSTANT(target, CouldNotOpenHexFile);
-
-        NODE_DEFINE_CONSTANT(target, RESET_NONE);
-        NODE_DEFINE_CONSTANT(target, RESET_SYSTEM);
-        NODE_DEFINE_CONSTANT(target, RESET_DEBUG);
-        NODE_DEFINE_CONSTANT(target, RESET_PIN);
-
-        NODE_DEFINE_CONSTANT(target, ERASE_NONE);
-        NODE_DEFINE_CONSTANT(target, ERASE_ALL);
-        NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
-        NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
-
-        NODE_DEFINE_CONSTANT(target, VERIFY_NONE);
-        NODE_DEFINE_CONSTANT(target, VERIFY_READ);
-
-        NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_FILE);
-        NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_STRING);
-    }
-
-    NAN_MODULE_INIT(init)
-    {
-        initConsts(target);
-        HighLevel::Init(target);
-        RTT::Init(target);
-    }
-}
-
-NODE_MODULE(pc_nrfjprog, init);

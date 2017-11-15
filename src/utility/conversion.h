@@ -94,11 +94,7 @@ public:
     static const char *          valueToString(uint16_t value, name_map_t name_map, const char *defaultValue = "Unknown value");
     static v8::Handle<v8::Value> valueToJsString(uint16_t, name_map_t name_map, v8::Handle<v8::Value> defaultValue = Nan::New<v8::String>("Unknown value").ToLocalChecked());
 
-    static v8::Handle<v8::Value> toTimeDifference(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime);
-    static v8::Handle<v8::Value> toTimeDifferenceM(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justMinutePart = false);
-    static v8::Handle<v8::Value> toTimeDifferenceS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justSecondPart = false);
-    static v8::Handle<v8::Value> toTimeDifferenceMS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justMillisecondPart = false);
-    static v8::Handle<v8::Value> toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime, bool justMicrosecondPart = false);
+    static v8::Handle<v8::Value> toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime);
 
     static v8::Local<v8::Function> getCallbackFunction(v8::Local<v8::Object> js, const char *name);
     static v8::Local<v8::Function> getCallbackFunction(v8::Local<v8::Value> js);

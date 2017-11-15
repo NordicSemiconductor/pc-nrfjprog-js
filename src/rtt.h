@@ -47,11 +47,11 @@
 #include <chrono>
 
 class RTTBaton;
+class RTTStartBaton;
 
-typedef std::vector<v8::Local<v8::Value> > returnType;
 typedef std::function<RTTBaton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> rtt_parse_parameters_function_t;
 typedef std::function<RTTErrorcodes_t(RTTBaton*)> rtt_execute_function_t;
-typedef std::function<returnType(RTTBaton*)> rtt_return_function_t;
+typedef std::function<std::vector<v8::Local<v8::Value>>(RTTBaton*)> rtt_return_function_t;
 
 class RTT : public Nan::ObjectWrap
 {
@@ -81,13 +81,18 @@ private:
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
+    static RTTErrorcodes_t getDeviceInformation(RTTStartBaton *baton);
+    static RTTErrorcodes_t waitForControlBlock(RTTStartBaton *baton);
+    static RTTErrorcodes_t getChannelInformation(RTTStartBaton *baton);
+
     static bool isStarted();
 
     static void cleanup();
 
-    static void logCallback(const char * msg);
+    static void log(const char * msg);
     static void log(std::string msg);
     static void resetLog();
+
     static std::string logMessage;
     static bool appendToLog;
     static int logItemCount;
