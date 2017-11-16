@@ -48,11 +48,8 @@
 
 #include <libproc.h>  // proc pidpathinfo maxsize
 
-errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 {
-    char temp_dll_path[dll_path_len];
-    memset(temp_dll_path, 0, dll_path_len);
-
     int ret;
     pid_t pid;
     char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
@@ -66,18 +63,19 @@ errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    strncpy(dll_path, dirname(pathbuf), dll_path_len - 1);
-    strncat(dll_path, "/libhighlevelnrfjprog.dylib", dll_path_len - strlen(dll_path) - 1);
+    dll_path.append(dirname(pathbuf));
+    dll_path.append("/");
+    dll_path.append(fileName);
 
     if (!AbstractFile::pathExists(dll_path))
     {
         /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * libraryHandle = dlopen("libhighlevelnrfjprog.dylib", RTLD_LAZY);
+        void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
         if (libraryHandle)
         {
             dlclose(libraryHandle);
-            strncpy(dll_path, "libhighlevelnrfjprog.dylib", dll_path_len - 1);
+            dll_path = fileName;
             return errorcode_t::JsSuccess;
         }
 
@@ -154,4 +152,14 @@ void TempFile::deleteFile()
     }
 
     filename.clear();
+}
+
+std::string getHighLevelLibraryName()
+{
+    return std::string("libhighlevelnrfjprog.dylib");
+}
+
+std::string getnrfjprogLibraryName()
+{
+    return std::string("libnrfjprogdll.dylib");
 }

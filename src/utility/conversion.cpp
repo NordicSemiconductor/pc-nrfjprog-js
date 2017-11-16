@@ -208,6 +208,71 @@ bool Convert::getBool(v8::Local<v8::Value>js)
     return ConvUtil<bool>::getNativeBool(js);
 }
 
+char *Convert::getNativePointerToChar(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getNativePointerToChar(value));
+}
+
+char *Convert::getNativePointerToChar(v8::Local<v8::Value> js)
+{
+    if (!js->IsString())
+    {
+        throw std::string("string");
+    }
+
+    std::string content = Convert::getNativeString(js);
+
+    auto length = content.length();
+    auto string = new char[length];
+    strncpy(string, content.c_str(), length);
+
+    return string;
+}
+
+std::vector<char> Convert::getVectorForChar(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getVectorForChar(value));
+}
+
+std::vector<char> Convert::getVectorForChar(v8::Local<v8::Value> js)
+{
+    std::string content = Convert::getNativeString(js);
+
+    std::vector<char> returnData(content.begin(), content.end());
+
+    return returnData;
+}
+
+std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Object>js, const char *name)
+{
+    v8::Local<v8::Value> value = Utility::Get(js, name);
+
+    RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getVectorForUint8(value));
+}
+
+std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
+{
+    if (!js->IsArray())
+    {
+        throw std::string("array");
+    }
+
+    v8::Local<v8::Array> jsarray = v8::Local<v8::Array>::Cast(js);
+    auto length = jsarray->Length();
+    std::vector<uint8_t> returnData;
+
+    for (uint32_t i = 0; i < length; ++i)
+    {
+        returnData.push_back(static_cast<uint8_t>(jsarray->Get(Nan::New(i))->Uint32Value()));
+    }
+
+    return returnData;
+}
+
 uint8_t *Convert::getNativePointerToUint8(v8::Local<v8::Object>js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
@@ -468,6 +533,14 @@ v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_m
 
     return scope.Escape(Nan::New<v8::String>(it->second).ToLocalChecked());
 }
+
+v8::Handle<v8::Value> Convert::toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime)
+{
+    uint32_t duration = (uint32_t)std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
+    return Convert::toJsNumber(duration);
+}
+
+
 
 v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Object> js, const char *name)
 {

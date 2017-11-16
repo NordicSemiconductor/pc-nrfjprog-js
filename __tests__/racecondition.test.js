@@ -34,24 +34,68 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../libraryloader.h"
+'use strict';
 
-#include <dlfcn.h>
-#include <stddef.h>
+const nRFjprog = require('../index.js');
 
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
-{
-    return dlsym(libraryHandle, func_name);
-}
+let device;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-LibraryHandleType LibraryLoad(std::string &path)
-{
-    return dlopen(path.c_str(), RTLD_LAZY);
-}
+describe('Handles race conditions gracefully', () => {
+    beforeAll(done => {
+        const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
+            device = connectedDevices[0];
+            done();
+        };
 
-void LibraryFree(LibraryHandleType libraryHandle)
-{
-    if (libraryHandle) {
-        dlclose(libraryHandle);
-    }
-}
+        nRFjprog.getConnectedDevices(callback);
+    });
+
+    it('allows multiple, fast, calls in a row', done => {
+        let errorCount = 0;
+        const getVersionAttempts = 50;
+        let callbackCalled = 0;
+
+        const getVersionCallback = (err) => {
+            if (err) {
+                errorCount++;
+            }
+
+            callbackCalled++;
+
+            if (callbackCalled === getVersionAttempts) {
+                expect(errorCount).toBe(0);
+                done();
+            }
+        };
+
+        for(let i = 0; i < getVersionAttempts; i++) {
+            nRFjprog.getDllVersion(getVersionCallback);
+        }
+    });
+
+    it('returns an error when attempting 5 programs in a row', done => {
+        let errorCount = 0;
+        const programAttempts = 5;
+        let callbackCalled = 0;
+
+        const programCallback = (err) => {
+            if (err) {
+                errorCount++;
+            }
+
+            callbackCalled++;
+
+            if (callbackCalled === programAttempts) {
+                expect(errorCount).toBeGreaterThan(0);
+                done();
+            }
+        };
+
+        for(let i = 0; i < programAttempts; i++) {
+            nRFjprog.program(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, programCallback);
+        }
+    });
+});

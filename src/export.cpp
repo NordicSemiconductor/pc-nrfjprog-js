@@ -33,25 +33,22 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef EXPORT_H
+#define EXPORT_H
 
-#include "../../libraryloader.h"
+#include <nan.h>
+#include "highlevel.h"
+#include "rtt.h"
 
-#include <dlfcn.h>
-#include <stddef.h>
-
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
-{
-    return dlsym(libraryHandle, func_name);
-}
-
-LibraryHandleType LibraryLoad(std::string &path)
-{
-    return dlopen(path.c_str(), RTLD_LAZY);
-}
-
-void LibraryFree(LibraryHandleType libraryHandle)
-{
-    if (libraryHandle) {
-        dlclose(libraryHandle);
+extern "C" {
+    NAN_MODULE_INIT(init)
+    {
+        HighLevel::initConsts(target);
+        HighLevel::Init(target);
+        RTT::Init(target);
     }
-}
+};
+
+NODE_MODULE(pc_nrfjprog, init);
+
+#endif

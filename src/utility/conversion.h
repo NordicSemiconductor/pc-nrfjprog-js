@@ -38,6 +38,7 @@
 #define CONVERSION_H
 
 #include <nan.h>
+#include <chrono>
 #include "../common.h"
 
 class Convert
@@ -61,10 +62,16 @@ public:
     static uint8_t      getNativeBool(v8::Local<v8::Value>js);
     static bool         getBool(v8::Local<v8::Object>js, const char *name);
     static bool         getBool(v8::Local<v8::Value>js);
+    static char *       getNativePointerToChar(v8::Local<v8::Object>js, const char *name);
+    static char *       getNativePointerToChar(v8::Local<v8::Value>js);
     static uint8_t *    getNativePointerToUint8(v8::Local<v8::Object>js, const char *name);
     static uint8_t *    getNativePointerToUint8(v8::Local<v8::Value>js);
     static uint16_t *   getNativePointerToUint16(v8::Local<v8::Object>js, const char *name);
     static uint16_t *   getNativePointerToUint16(v8::Local<v8::Value>js);
+    static std::vector<char> getVectorForChar(v8::Local<v8::Object>js, const char *name);
+    static std::vector<char> getVectorForChar(v8::Local<v8::Value> js);
+    static std::vector<uint8_t> getVectorForUint8(v8::Local<v8::Object>js, const char *name);
+    static std::vector<uint8_t> getVectorForUint8(v8::Local<v8::Value> js);
     static uint32_t     getLengthOfArray(v8::Local<v8::Object>js, const char *name);
     static uint32_t     getLengthOfArray(v8::Local<v8::Value>js);
     static v8::Local<v8::Object> getJsObject(v8::Local<v8::Object>js, const char *name);
@@ -90,6 +97,8 @@ public:
     static v8::Handle<v8::Value> toJsString(std::string string);
     static const char *          valueToString(uint16_t value, name_map_t name_map, const char *defaultValue = "Unknown value");
     static v8::Handle<v8::Value> valueToJsString(uint16_t, name_map_t name_map, v8::Handle<v8::Value> defaultValue = Nan::New<v8::String>("Unknown value").ToLocalChecked());
+
+    static v8::Handle<v8::Value> toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime);
 
     static v8::Local<v8::Function> getCallbackFunction(v8::Local<v8::Object> js, const char *name);
     static v8::Local<v8::Function> getCallbackFunction(v8::Local<v8::Value> js);

@@ -44,3 +44,4 @@
  });
 
  module.exports = instance;
+ module.exports.RTT = new nRFjprog.RTT();

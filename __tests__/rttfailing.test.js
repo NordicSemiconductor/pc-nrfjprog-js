@@ -34,24 +34,46 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../libraryloader.h"
+'use strict';
 
-#include <dlfcn.h>
-#include <stddef.h>
+const nRFjprog = require('../index.js');
+const RTT = nRFjprog.RTT;
 
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
-{
-    return dlsym(libraryHandle, func_name);
-}
+let device;
 
-LibraryHandleType LibraryLoad(std::string &path)
-{
-    return dlopen(path.c_str(), RTLD_LAZY);
-}
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-void LibraryFree(LibraryHandleType libraryHandle)
-{
-    if (libraryHandle) {
-        dlclose(libraryHandle);
-    }
-}
+describe('RTT without RTT firmware', () => {
+    beforeAll(done => {
+        const programCallback = err => {
+            expect(err).toBeUndefined();
+
+            done();
+        };
+
+        const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
+            device = connectedDevices[0];
+
+            nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, programCallback);
+        };
+
+        nRFjprog.getConnectedDevices(callback);
+    });
+
+    describe('can not start RTT', () => {
+        it('fails cleanly', (done) => {
+            const startCallback = (err, down, up) => {
+                expect(err).toBeDefined();
+                expect(err).toMatchSnapshot();
+
+                done();
+            };
+
+            RTT.start(device.serialNumber, {}, startCallback);
+        });
+    });
+});
+
+

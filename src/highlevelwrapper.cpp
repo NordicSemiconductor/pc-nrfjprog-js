@@ -36,12 +36,23 @@
 
 #include "highlevelwrapper.h"
 #include "libraryloader.h"
+#include "osfiles.h"
 
 LibraryHandleType libraryHandle;
+std::string highLevelPath;
 
-errorcode_t loadFunctions(const char * path, DllFunctionPointersType * dll_function)
+errorcode_t loadHighLevelFunctions(DllFunctionPointersType * dll_function)
 {
-    libraryHandle = LibraryLoad(path);
+    if (highLevelPath.empty()) {
+        std::string libraryName = getHighLevelLibraryName();
+        const errorcode_t finderror = OSFilesFindDll(highLevelPath, libraryName);
+
+        if (finderror != errorcode_t::JsSuccess) {
+            return finderror;
+        }
+    }
+
+    libraryHandle = LibraryLoad(highLevelPath);
 
     if (!libraryHandle){
         return errorcode_t::CouldNotLoadDLL;
@@ -134,7 +145,7 @@ errorcode_t loadFunctions(const char * path, DllFunctionPointersType * dll_funct
     return errorcode_t::JsSuccess;
 }
 
-errorcode_t release() {
+errorcode_t releaseHighLevel() {
     LibraryFree(libraryHandle);
     return errorcode_t::JsSuccess;
 }

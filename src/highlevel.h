@@ -33,8 +33,8 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef NRFJPROG_H
-#define NRFJPROG_H
+#ifndef HIGHLEVEL_H
+#define HIGHLEVEL_H
 
 #include <nan.h>
 #include "common.h"
@@ -47,15 +47,15 @@
 
 class Baton;
 
-typedef std::vector<v8::Local<v8::Value> > returnType;
 typedef std::function<Baton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> parse_parameters_function_t;
 typedef std::function<nrfjprogdll_err_t(Baton*, Probe_handle_t)> execute_function_t;
-typedef std::function<returnType(Baton*)> return_function_t;
+typedef std::function<std::vector<v8::Local<v8::Value>>(Baton*)> return_function_t;
 
 class HighLevel : public Nan::ObjectWrap
 {
 public:
     static NAN_MODULE_INIT(Init);
+    static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE tpl);
 
 private:
     explicit HighLevel();
@@ -103,20 +103,17 @@ private:
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
-    static void logCallback(const char * msg);
-    static void log(std::string msg);
+    static void log(const char * msg);
 
     static void progressCallback(const char * process);
-    static Nan::Callback *jsProgressCallback;
+    static std::unique_ptr<Nan::Callback> jsProgressCallback;
     static void sendProgress(uv_async_t *handle);
     static uv_async_t *progressEvent;
 
     static DllFunctionPointersType dll_function;
-    static char dll_path[COMMON_MAX_PATH];
 
     static bool loaded;
     static bool connectedToDevice;
-    static errorcode_t finderror;
 
     static bool keepDeviceOpen;
     static Probe_handle_t probe;

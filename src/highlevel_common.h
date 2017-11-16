@@ -34,8 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NRFJPROG_COMMON_H
-#define NRFJPROG_COMMON_H
+#ifndef HIGHLEVEL_COMMON_H
+#define HIGHLEVEL_COMMON_H
 
 #include "common.h"
 #include "DllCommonDefinitions.h"
@@ -61,8 +61,61 @@ typedef enum
     CouldNotErase,
     CouldNotProgram,
     CouldNotRead,
-    CouldNotOpenHexFile
+    CouldNotOpenHexFile,
+    CouldNotExecuteDueToLoad
 } errorcode_t;
+
+typedef enum RTTErrorcodes
+{
+    RTTSuccess,
+    RTTCouldNotLoadHighlevelLibrary,
+    RTTCouldNotOpenHighlevelLibrary,
+    RTTCouldNotGetDeviceInformation,
+    RTTCouldNotLoadnRFjprogLibrary,
+    RTTCouldNotOpennRFjprogLibrary,
+    RTTCouldNotConnectToDevice,
+    RTTCouldNotStartRTT,
+    RTTCouldNotFindControlBlock,
+    RTTCouldNotGetChannelInformation,
+    RTTCouldNotCallFunction,
+    RTTNotInitialized,
+    RTTCouldNotExecuteDueToLoad
+} RTTErrorcodes_t;
+
+
+static name_map_t nrfjprog_js_err_map = {
+    { errorcode_t::JsSuccess, "Success" },
+    { errorcode_t::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL" },
+    { errorcode_t::CouldNotFindJprogDLL, "CouldNotFindJprogDLL" },
+    { errorcode_t::CouldNotLoadDLL, "CouldNotLoadDLL" },
+    { errorcode_t::CouldNotOpenDLL, "CouldNotOpenDLL" },
+    { errorcode_t::CouldNotOpenDevice, "CouldNotOpenDevice" },
+    { errorcode_t::CouldNotResetDevice, "CouldNotResetDevice" },
+    { errorcode_t::CouldNotCloseDevice, "CouldNotCloseDevice" },
+    { errorcode_t::CouldNotConnectToDevice, "CouldNotConnectToDevice" },
+    { errorcode_t::CouldNotCallFunction, "CouldNotCallFunction" },
+    { errorcode_t::CouldNotErase, "CouldNotErase" },
+    { errorcode_t::CouldNotProgram, "CouldNotProgram" },
+    { errorcode_t::CouldNotRead, "CouldNotRead" },
+    { errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile" },
+    { errorcode_t::CouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line" }
+};
+
+static name_map_t rtt_err_map = {
+    { RTTSuccess, "Success" },
+    { RTTCouldNotLoadHighlevelLibrary, "Could Not Load Highlevel Library" },
+    { RTTCouldNotOpenHighlevelLibrary, "Could Not Open Highlevel Library" },
+    { RTTCouldNotGetDeviceInformation, "Could Not Get Device Information" },
+    { RTTCouldNotLoadnRFjprogLibrary, "Could Not Load nRFjprog Library" },
+    { RTTCouldNotOpennRFjprogLibrary, "Could Not Open nRFjprog Library" },
+    { RTTCouldNotConnectToDevice, "Could Not Connect To Device" },
+    { RTTCouldNotStartRTT, "Could Not Start RTT" },
+    { RTTCouldNotFindControlBlock, "Could Not Find Control Block" },
+    { RTTCouldNotGetChannelInformation, "Could Not Get Channel Information" },
+    { RTTCouldNotCallFunction, "Could Not Call Function" },
+    { RTTNotInitialized, "There is no RTT connection open" },
+    { RTTCouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line" }
+};
 
 static name_map_t program_parameter_type_map = {
     NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),

@@ -10,6 +10,9 @@ endif()
 
 set(NRFJPROG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/include)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Platform specific
 if(MSVC)
     include(cmake/msvc.cmake)

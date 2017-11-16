@@ -48,7 +48,7 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std::string &fileName)
 {
     HKEY key;
     HKEY innerKey;
@@ -110,11 +110,11 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_pa
         if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&install_path, &install_path_size) == ERROR_SUCCESS)
         {
             /* Copy, check it exists and return if it does. */
-            strncpy(dll_path, install_path, dll_path_len);
-            strncat(dll_path, "highlevelnrfjprog.dll", dll_path_len - strlen(dll_path) - 1);
+            dll_path.append(install_path);
+            dll_path.append(fileName);
             RegCloseKey(innerKey);
             RegCloseKey(key);
-            if (TempFile::pathExists(dll_path))
+            if (TempFile::pathExists(dll_path.c_str()))
             {
                 return errorcode_t::JsSuccess;
             }
@@ -129,12 +129,12 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, char * dll_path, int dll_pa
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-errorcode_t OSFilesFindDll(char * dll_path, int dll_path_len)
+errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 {
-    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, dll_path_len);
+    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, fileName);
 
     if (retCode != JsSuccess) {
-        retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, dll_path_len);
+        retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, fileName);
     }
 
     return retCode;
@@ -185,4 +185,14 @@ void TempFile::deleteFile()
     }
 
     filename.clear();
+}
+
+std::string getHighLevelLibraryName()
+{
+    return std::string("highlevelnrfjprog.dll");
+}
+
+std::string getnrfjprogLibraryName()
+{
+    return std::string("nrfjprog.dll");
 }

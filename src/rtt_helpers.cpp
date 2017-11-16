@@ -34,24 +34,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../libraryloader.h"
+#include "rtt_helpers.h"
 
-#include <dlfcn.h>
-#include <stddef.h>
+#include "utility/utility.h"
+#include "utility/conversion.h"
 
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
+v8::Local<v8::Object> ChannelInfo::ToJs()
 {
-    return dlsym(libraryHandle, func_name);
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+
+    Utility::Set(obj, "channelIndex", Convert::toJsNumber(channelIndex));
+    Utility::Set(obj, "name", Convert::toJsString(name));
+    Utility::Set(obj, "size", Convert::toJsNumber(size));
+
+    return scope.Escape(obj);
 }
 
-LibraryHandleType LibraryLoad(std::string &path)
+StartOptions::StartOptions(v8::Local<v8::Object> obj)
 {
-    return dlopen(path.c_str(), RTLD_LAZY);
-}
+    hasControlBlockLocation = false;
 
-void LibraryFree(LibraryHandleType libraryHandle)
-{
-    if (libraryHandle) {
-        dlclose(libraryHandle);
+    if (Utility::Has(obj, "controlBlockLocation"))
+    {
+        hasControlBlockLocation = true;
+        controlBlockLocation = Convert::getNativeUint32(obj, "controlBlockLocation");
     }
 }

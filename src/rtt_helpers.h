@@ -34,24 +34,37 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../libraryloader.h"
+#ifndef RTT_HELPERS_H
+#define RTT_HELPERS_H
 
-#include <dlfcn.h>
-#include <stddef.h>
+#include <nan.h>
 
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
+class ChannelInfo
 {
-    return dlsym(libraryHandle, func_name);
+public:
+    ChannelInfo(uint32_t _channelIndex, std::string &_name, const uint32_t _size) :
+      channelIndex(_channelIndex),
+      name(_name),
+      size(_size)
+{
 }
 
-LibraryHandleType LibraryLoad(std::string &path)
-{
-    return dlopen(path.c_str(), RTLD_LAZY);
-}
+    v8::Local<v8::Object> ToJs();
 
-void LibraryFree(LibraryHandleType libraryHandle)
+private:
+    const uint32_t channelIndex;
+    const std::string name;
+    const uint32_t size;
+};
+
+
+class StartOptions
 {
-    if (libraryHandle) {
-        dlclose(libraryHandle);
-    }
-}
+public:
+    StartOptions(v8::Local<v8::Object> obj);
+
+    uint32_t controlBlockLocation;
+    bool hasControlBlockLocation;
+};
+
+#endif

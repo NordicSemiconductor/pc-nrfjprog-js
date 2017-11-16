@@ -34,74 +34,96 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OS_FILES_H
-#define OS_FILES_H
-
-#include "highlevel_common.h"
+#ifndef RTT_BATONS_H
+#define RTT_BATONS_H
 
 #include <memory>
+#include "rtt.h"
+#include "rtt_helpers.h"
 
-#define COMMON_MAX_PATH  (4096)   /* Arbitrarily selected MAX_PATH for every platform. */
-#define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
-#define COMMON_MAX_INI_LINE (1024)
-
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName);
-std::string getHighLevelLibraryName();
-std::string getnrfjprogLibraryName();
-
-class AbstractFile
-{
+class RTTBaton {
 public:
-    virtual ~AbstractFile() {};
+    explicit RTTBaton(const std::string _name, const uint32_t _returnParameterCount) :
+        returnParameterCount(_returnParameterCount),
+        name(_name),
+        result(JsSuccess),
+        lowlevelError(SUCCESS)
+    {
+        req = std::make_unique<uv_work_t>();
+        req->data = static_cast<void*>(this);
+    }
 
-    std::string getFileName();
-    virtual std::string errormessage() = 0;
+    virtual ~RTTBaton()
+    {
+        req.reset();
+        callback.reset();
+    }
 
-    static bool pathExists(const std::string &path);
-    static bool pathExists(const char *path);
+    virtual uint32_t returnParamterCount()
+    {
+        return returnParameterCount + 1;
+    }
 
-protected:
-    std::string filename;
+    const uint32_t returnParameterCount;
+    const std::string name;
+
+    uint32_t result;
+    nrfjprogdll_err_t lowlevelError;
+
+    std::unique_ptr<uv_work_t> req;
+    std::unique_ptr<Nan::Callback> callback;
+
+    std::chrono::high_resolution_clock::time_point functionStart;
+
+    rtt_execute_function_t executeFunction;
+    rtt_return_function_t returnFunction;
+
+    static std::timed_mutex executionMutex;
 };
 
-class LocalFile : public AbstractFile
+std::timed_mutex RTTBaton::executionMutex;
+
+class RTTStartBaton : public RTTBaton
 {
 public:
-    LocalFile(std::string filename);
-    virtual std::string errormessage() override;
+    RTTStartBaton() : RTTBaton("start rtt", 2) {}
+    uint32_t serialNumber;
+    bool hasControlBlockLocation;
+    uint32_t controlBlockLocation;
+
+    uint32_t clockSpeed;
+    device_family_t family;
+    std::string jlinkarmlocation;
+
+    std::vector<std::unique_ptr<ChannelInfo>> upChannelInfo;
+    std::vector<std::unique_ptr<ChannelInfo>> downChannelInfo;
 };
 
-class TempFile : public AbstractFile
+class RTTStopBaton : public RTTBaton
 {
 public:
-    TempFile(std::string fileContent);
-    virtual ~TempFile() override;
-    virtual std::string errormessage() override;
-
-private:
-    std::string writeTempFile(std::string fileContent);
-    std::string getTempFileName();
-    void deleteFile();
-    std::string concatPaths(std::string base_path, std::string relative_path);
-
-    enum TempFileErrorcode {
-        TempNoError,
-        TempPathNotFound,
-        TempCouldNotCreateFile
-    } error;
+    RTTStopBaton() : RTTBaton("stop rtt", 0) {}
 };
 
-class FileFormatHandler
+class RTTReadBaton : public RTTBaton
 {
 public:
-    FileFormatHandler(std::string fileinfo, input_format_t inputFormat);
+    RTTReadBaton() : RTTBaton("rtt read", 3) {}
 
-    std::string getFileName();
-    bool exists();
-    std::string errormessage();
-
-private:
-    std::unique_ptr<AbstractFile> file;
+    uint32_t channelIndex;
+    uint32_t length;
+    std::vector<char> data;
 };
+
+class RTTWriteBaton : public RTTBaton
+{
+public:
+    RTTWriteBaton() : RTTBaton("rtt write", 2) {}
+
+    uint32_t channelIndex;
+    uint32_t length;
+    std::vector<char> data;
+};
+
 
 #endif
