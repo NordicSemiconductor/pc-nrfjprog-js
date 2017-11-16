@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "jshint api/ test/ && jscs api/ test/",
     "install": "node build.js",
-    "docs": "jsdoc doc/api.js -t node_modules/minami -R README.md -d docs",
+    "docs": "jsdoc doc/*.js -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
     "test": "node run-tests.js --runInBand --verbose --testResultsProcessor jest-bamboo-formatter",
     "test-watch": "jest --watch --runInBand"
