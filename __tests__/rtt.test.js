@@ -37,9 +37,9 @@
 'use strict';
 
 const nRFjprog = require('../index.js');
+const RTT = nRFjprog.RTT;
 
 let device;
-let RTT = new nRFjprog.RTT();
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
@@ -77,7 +77,6 @@ describe('RTT', () => {
                 RTT.stop(stopCallback);
             };
 
-            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, {}, startCallback);
         });
 
@@ -95,7 +94,6 @@ describe('RTT', () => {
                 RTT.stop(stopCallback);
             };
 
-            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, { controlBlockLocation: 0x200006E0 }, startCallback);
         });
 
@@ -107,7 +105,6 @@ describe('RTT', () => {
                 done();
             };
 
-            RTT = new nRFjprog.RTT();
             RTT.start(0, {}, startCallback);
         });
 
@@ -119,7 +116,6 @@ describe('RTT', () => {
                 done();
             };
 
-            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, { controlBlockLocation: 15 }, startCallback);
         });
     });
@@ -169,7 +165,6 @@ describe('RTT', () => {
                 done();
             };
 
-            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, {}, startCallback);
         });
 
@@ -226,7 +221,6 @@ describe('RTT', () => {
                 RTT.read(0, 100, readCallback);
             };
 
-            RTT = new nRFjprog.RTT();
             RTT.start(device.serialNumber, {}, startCallback);
         });
 
