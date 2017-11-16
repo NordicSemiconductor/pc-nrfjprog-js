@@ -58,6 +58,8 @@ class RTT : public Nan::ObjectWrap
 public:
     static NAN_MODULE_INIT(Init);
 
+    static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE tpl);
+
 private:
     explicit RTT();
     ~RTT();

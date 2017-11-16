@@ -115,6 +115,23 @@ void RTT::init(v8::Local<v8::FunctionTemplate> tpl)
     Nan::SetPrototypeMethod(tpl, "write", Write);
 }
 
+void RTT::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
+{
+    NODE_DEFINE_CONSTANT(target, RTTSuccess);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotLoadHighlevelLibrary);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotOpenHighlevelLibrary);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotGetDeviceInformation);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotLoadnRFjprogLibrary);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotOpennRFjprogLibrary);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotConnectToDevice);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotStartRTT);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotFindControlBlock);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotGetChannelInformation);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotCallFunction);
+    NODE_DEFINE_CONSTANT(target, RTTNotInitialized);
+    NODE_DEFINE_CONSTANT(target, RTTCouldNotExecuteDueToLoad);
+}
+
 void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_function_t parse, rtt_execute_function_t execute, rtt_return_function_t ret)
 {
     // This is a check that there exists a parse- and execute function, both of which are
