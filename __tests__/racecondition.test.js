@@ -53,6 +53,29 @@ describe('Handles race conditions gracefully', () => {
         nRFjprog.getConnectedDevices(callback);
     });
 
+    it('allows multiple, fast, calls in a row', done => {
+        let errorCount = 0;
+        const getVersionAttempts = 50;
+        let callbackCalled = 0;
+
+        const getVersionCallback = (err) => {
+            if (err) {
+                errorCount++;
+            }
+
+            callbackCalled++;
+
+            if (callbackCalled === getVersionAttempts) {
+                expect(errorCount).toBe(0);
+                done();
+            }
+        };
+
+        for(let i = 0; i < getVersionAttempts; i++) {
+            nRFjprog.getDllVersion(getVersionCallback);
+        }
+    });
+
     it('returns an error when attempting 5 programs in a row', done => {
         let errorCount = 0;
         const programAttempts = 5;
