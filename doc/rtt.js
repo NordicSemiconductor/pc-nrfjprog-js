@@ -143,7 +143,7 @@
 
  /**
  * Option flags to be used when starting RTT. This may speed up the process of locating the control block, and the RTT Start. If <tt>controlBlockLocation</tt>
- * specified, only that loacation will be searched for the RTT control block, and an error will be returned if no control block where found. If no value
+ * specified, only that location will be searched for the RTT control block, and an error will be returned if no control block where found. If no value
  * is specified for <tt>controlBlockLocation</tt>, the RAM will be searched for the location of the RTT control block.
  * @typedef StartOptions
  * @property {integer} [controlBlockLocation] The location of the control block. If this location is not the start of the RTT control block, start will fail.
@@ -152,7 +152,7 @@
 /**
  * <p>Async function to start RTT.</p>
  *
- * <p>This function will attempt to open a RTT connection to the device with serialnumber <tt>serialNumber</tt>. It will return an {@link pc-nrfjprog-js.module:RTT~Error|Error}
+ * <p>This function will attempt to open an RTT connection to the device with serialnumber <tt>serialNumber</tt>. It will return an {@link pc-nrfjprog-js.module:RTT~Error|Error}
  * if the device does not exist or if it is not set up with RTT.</p>
  *
  * <p>The RTT protocol uses down channels to write to the device and up channels to read from the device.</p>
@@ -205,7 +205,7 @@ export function start(serialnumber, startoptions, callback) {}
 export function stop(callback) {}
 
 /**
- * Async function to read RTT contents from a up channel on the device. You read on the up channel specified by
+ * Async function to read RTT contents from an up channel on the device. You read on the up channel specified by
  * the <tt>channelIndex</tt>. The data returned are attempted converted to a string (<tt>stringData</tt> in the
  * example), and as a raw, data array containing the bytes read from the channel (<tt>rawData</tt> in the example).
  * For the string callback value, the data will be encoded as UTF8.
