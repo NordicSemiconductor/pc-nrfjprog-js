@@ -45,6 +45,7 @@
 #include "rtt_batons.h"
 #include "rtt_helpers.h"
 #include "highlevelwrapper.h"
+#include "DllCommonDefinitions.h"
 
 #include "utility/conversion.h"
 #include "utility/errormessage.h"
@@ -130,6 +131,9 @@ void RTT::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, RTTCouldNotCallFunction);
     NODE_DEFINE_CONSTANT(target, RTTNotInitialized);
     NODE_DEFINE_CONSTANT(target, RTTCouldNotExecuteDueToLoad);
+
+    NODE_DEFINE_CONSTANT(target, UP_DIRECTION);
+    NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION);
 }
 
 void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_function_t parse, rtt_execute_function_t execute, rtt_return_function_t ret)
@@ -375,7 +379,7 @@ RTTErrorcodes_t RTT::getChannelInformation(RTTStartBaton *baton)
         RETURN_ERROR_ON_FAIL(dll_function.rtt_read_channel_info(i, DOWN_DIRECTION, channelName, 32, &channelSize), RTTCouldNotGetChannelInformation);
 
         std::string name(channelName);
-        baton->downChannelInfo.push_back(std::make_unique<ChannelInfo>(i, name, channelSize));
+        baton->downChannelInfo.push_back(std::make_unique<ChannelInfo>(i, DOWN_DIRECTION, name, channelSize));
     }
 
     for(uint32_t i = 0; i < upChannelNumber; ++i)
@@ -385,7 +389,7 @@ RTTErrorcodes_t RTT::getChannelInformation(RTTStartBaton *baton)
         RETURN_ERROR_ON_FAIL(dll_function.rtt_read_channel_info(i, UP_DIRECTION, channelName, 32, &channelSize), RTTCouldNotGetChannelInformation);
 
         std::string name(channelName);
-        baton->upChannelInfo.push_back(std::make_unique<ChannelInfo>(i, name, channelSize));
+        baton->upChannelInfo.push_back(std::make_unique<ChannelInfo>(i, UP_DIRECTION, name, channelSize));
     }
 
     return RTTSuccess;

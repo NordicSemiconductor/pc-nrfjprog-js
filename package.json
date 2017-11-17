@@ -15,7 +15,7 @@
     "type": "git",
     "url": "https://github.com/NordicSemiconductor/pc-nrfjprog-js.git"
   },
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "bindings": "^1.2.1",
     "cmake-js": "1.1.0",
