@@ -54,7 +54,13 @@ describe('RTT', () => {
         const callback = (err, connectedDevices) => {
             expect(err).toBeUndefined();
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
-            device = connectedDevices[0];
+
+            // We only have firmware for the nRF52 at the moment. RTT also works with nRF51, but with another firmware
+            let nrf52devices = connectedDevices.filter(device => device.deviceInfo.family === nRFjprog.NRF52_FAMILY);
+
+            device = nrf52devices[0];
+
+            expect(device).toBeDefined();
 
             nRFjprog.program(device.serialNumber, "./__tests__/hex/rtt.hex", { }, programCallback);
         };
