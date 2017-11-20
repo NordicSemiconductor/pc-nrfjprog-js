@@ -44,6 +44,7 @@ extern "C" {
     NAN_MODULE_INIT(init)
     {
         HighLevel::initConsts(target);
+        RTT::initConsts(target);
         HighLevel::Init(target);
         RTT::Init(target);
     }

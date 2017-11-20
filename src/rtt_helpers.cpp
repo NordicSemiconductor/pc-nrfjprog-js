@@ -45,6 +45,7 @@ v8::Local<v8::Object> ChannelInfo::ToJs()
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
     Utility::Set(obj, "channelIndex", Convert::toJsNumber(channelIndex));
+    Utility::Set(obj, "direction", Convert::toJsNumber(direction));
     Utility::Set(obj, "name", Convert::toJsString(name));
     Utility::Set(obj, "size", Convert::toJsNumber(size));
 
