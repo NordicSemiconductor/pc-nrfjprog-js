@@ -45,7 +45,7 @@
 /**
  *
  * <p>The <tt>pc-nrfjprog-js.RTT</tt> module exposes the functionality to the RTT functionality.
- * RTT is a high speed protocol specified by SEGGER available on all Nordic Semiconductor
+ * RTT is a high-speed protocol specified by SEGGER, available on all Nordic Semiconductor
  * development kits with a SEGGER chip. More details about the protocol may be found at
  * SEGGERS product pages:
  * {@link https://www.segger.com/products/debug-probes/j-link/technology/real-time-transfer/about-real-time-transfer/|Real Time Transfer}.</p>
@@ -54,11 +54,11 @@
  * with UP and DOWN circular buffers. A device may have multiple up and down buffers, called channels.</p>
  *
  * <p>When you want to write to a device, you choose a down channel and write data to it. The RTT
- * protocol will then fill the data into the chosen buffer of the chosen channel and update
- * the end pointer for the buffer. The firmware will subsequently detect that there is new data
- * in the buffer and pull them from the buffer.</p>
+ * protocol will then copy the data into the chosen buffer of the chosen channel and update
+ * the end pointer for that buffer. The firmware will subsequently detect that there is new data
+ * in the buffer and can then read it.</p>
  *
- * <p>When you want to read from a device, the firmware choose a up channel and writes data to it.
+ * <p>When you want to read from a device, the firmware chooses an up channel and writes data to it.
  * The RTT protocol will write data to the end of the buffer and update the end pointer for the
  * buffer of the chosen channel. When you subsequently read on that up channel, you will get
  * the data in the buffer, up to the specified amount of data you specified, and the start
@@ -67,7 +67,7 @@
  * <p>Due to <tt>nRFjprog</tt> resetting the device for all device specific function calls,
  * they may NOT be performed simultaneously.</p>
  *
- * <p>You may at any time have at most one RTT connection open.</p>
+ * <p>You may at any time have at most <strong>one</strong> RTT connection open.</p>
  *
  * @example
  * const nRFjprogjs = require('pc-nrfjprog-js');
@@ -132,8 +132,9 @@
  */
 
 /**
- * Information about the different up and down channels available on the device. A down channel is a channel from the computer to the device. An up channel
- * is a channel from the device to the computer.
+ * Information about the different up and down channels available on the device. A down channel is
+ * a channel from the computer to the device. An up channel is a channel from the device to the
+ * computer.
  * @typedef ChannelInfo
  * @property {integer} channelIndex The index used to address this channel
  * @property {integer} direction The direction of the channel. Value will be one of <tt>nrfjprogjs.UP_DIRECTION</tt> or <tt>nrfjprogjs.DOWN_DIRECTION</tt>
@@ -152,14 +153,17 @@
 /**
  * <p>Async function to start RTT.</p>
  *
- * <p>This function will attempt to open an RTT connection to the device with serialnumber <tt>serialNumber</tt>. It will return an {@link pc-nrfjprog-js.module:RTT~Error|Error}
- * if the device does not exist or if it is not set up with RTT.</p>
+ * <p>This function will attempt to open an RTT connection to the device with serialnumber
+ * <tt>serialNumber</tt>. It will return an {@link pc-nrfjprog-js.module:RTT~Error|Error}
+ * if the device does not exist or if its firmware doesn't support RTT.</p>
  *
  * <p>The RTT protocol uses down channels to write to the device and up channels to read from the device.</p>
  *
  * <p>You can only open RTT on one device at any given time.</p>
  *
- * <p>When you have an open RTT session, you should not call any functions in <tt>pc-nrfjprog-js</tt> as these will reset the device.<p>
+ * <p>When you have an open RTT session, you should not call any functions in <tt>pc-nrfjprog-js</tt>,
+ * as these will reset the device.<p>
+ *
  * <p>When you are done with the RTT session, you should call <tt>stop()</tt>.</p>
  *
  * @example
