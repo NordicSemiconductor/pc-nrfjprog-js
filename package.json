@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "jshint api/ test/ && jscs api/ test/",
+    "clean-prebuilt": "node-pre-gyp clean",
     "package-prebuilt": "node-pre-gyp package",
     "publish-prebuilt": "node-pre-gyp-github publish",
     "publish-all-prebuilt": "node scripts/publish-all-prebuilt.js",
