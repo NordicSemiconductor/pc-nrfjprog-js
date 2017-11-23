@@ -7,6 +7,7 @@
     "lint": "jshint api/ test/ && jscs api/ test/",
     "package-prebuilt": "node-pre-gyp package",
     "publish-prebuilt": "node-pre-gyp-github publish",
+    "publish-all-prebuilt": "node scripts/publish-all-prebuilt.js",
     "install": "node-pre-gyp install --fallback-to-build=false || node build.js",
     "docs": "jsdoc doc -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
