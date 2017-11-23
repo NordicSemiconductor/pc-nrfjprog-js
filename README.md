@@ -17,7 +17,7 @@ This will pull down precompiled binaries for your platform/runtime environment. 
 
 ## Required setup
 
-Before using the library, nRF5x-Command-Line-Tools must to be installed. The project includes nRF5x-Command-Line-Tools installers/archives for all supported platforms in the `nrfjprog` directory. These can also be [downloaded from the Nordic Semiconductor website](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html).
+Before using the library, nRF5x-Command-Line-Tools must be installed. The project includes nRF5x-Command-Line-Tools installers/archives for all supported platforms in the `nrfjprog` directory. These can also be [downloaded from the Nordic Semiconductor website](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html).
 
 ### Windows
 
