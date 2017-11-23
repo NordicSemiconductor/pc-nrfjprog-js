@@ -4,30 +4,30 @@ Node.js library that exposes the functionality of the [nRF5x Command-Line-Tools]
 
 ## Installing
 
-The following tools required for building the project:
+The library can be installed from npm, using:
+
+    npm install pc-nrfjprog-js
+
+This will pull down precompiled binaries for your platform/runtime environment. If precompiled binaries do not exist, then npm will try to compile them, which requires:
 
 * Node.js (>=4)
 * npm (>=3.7.0)
 * CMake (>=2.8.12)
 * A C/C++ toolchain
 
-To install dependencies and build the project:
+## Required setup
 
-    npm install
+Before using the library, nRF5x-Command-Line-Tools must to be installed. The project includes nRF5x-Command-Line-Tools installers/archives for all supported platforms in the `nrfjprog` directory. These can also be [downloaded from the Nordic Semiconductor website](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html).
 
-### nRF5x-Command-Line-Tools
+### Windows
 
-Before using the library, nRF5x-Command-Line-Tools must to be installed. The project includes nRF5x-Command-Line-Tools installers/archives for all supported platforms in the `nrfjprog` directory.
+Run the nRF-Command-Line-Tools installer (exe). This will install the required nrfjprog libraries and SEGGER J-Link.
 
-#### Windows
-
-Run the nRF-Command-Line-Tools installer (exe) from the `nrfjprog` directory. This will install the required nrfjprog libraries and SEGGER J-Link.
-
-#### Linux/macOS
+### Linux/macOS
 
 Download and install [SEGGER J-Link](https://www.segger.com/downloads/jlink/).
 
-Extract the nRF-Command-Line-Tools tar file from the `nrfjprog` directory, f.ex.:
+Extract the nRF-Command-Line-Tools tar file, f.ex.:
 
     sudo tar -xf nRF5x-Command-Line-Tools_<version>_<platform>.tar -C /opt
 
@@ -42,7 +42,7 @@ http://nordicsemiconductor.github.io/pc-nrfjprog-js/
 ## Example
 
 ```
-let nrfjprogjs = require('pc-nrfjprog-js');
+const nrfjprogjs = require('pc-nrfjprog-js');
 
 nrfjprogjs.getConnectedDevices(function(err, devices) {
     console.log('There are ' + devices.length + ' nRF devices connected.');
