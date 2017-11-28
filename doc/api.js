@@ -299,13 +299,13 @@ export function getDllVersion(callback) {}
 export function getConnectedDevices(callback) {}
 
 /**
- * Async function to get a list of all connected devices serialnumber.
+ * Async function to get the serial numbers of all connected devices.
  *
  * @example
  * nrfjprogjs.getSerialNumbers(function(err, serialNumbers) {
  *      if (err) throw err;
- *      for (let i = 0; i < devices.length; i++) {
- *          console.log(devices[i]);
+ *      for (let i = 0; i < serialNumbers.length; i++) {
+ *          console.log(serialNumbers[i]);
  *      }
  * } );
  *
