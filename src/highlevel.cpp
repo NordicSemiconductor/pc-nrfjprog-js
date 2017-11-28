@@ -387,6 +387,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> tpl)
 {
     Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
+    Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialNumbers);
     Nan::SetPrototypeMethod(tpl, "getDeviceInfo", GetDeviceInfo);
     Nan::SetPrototypeMethod(tpl, "getProbeInfo", GetProbeInfo);
     Nan::SetPrototypeMethod(tpl, "getLibraryInfo", GetLibraryInfo);
@@ -510,17 +511,7 @@ NAN_METHOD(HighLevel::GetDllVersion)
 NAN_METHOD(HighLevel::GetConnectedDevices)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
-        auto baton = new GetConnectedDevicesBaton();
-
-        if ((argumentCount + 1) < info.Length())
-        {
-            v8::Local<v8::Object> getConnectedDevicesOptions = Convert::getJsObject(parameters[argumentCount]);
-            GetConnectedDevicesOptions options(getConnectedDevicesOptions);
-            baton->getOnlySerialNumber = options.getOnlySerialNumbers;
-            argumentCount++;
-        }
-
-        return baton;
+        return new GetConnectedDevicesBaton();
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
@@ -536,29 +527,22 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
         for (uint32_t i = 0; i < available; i++)
         {
-            if (!baton->getOnlySerialNumber)
+            Probe_handle_t getInfoProbe;
+            nrfjprogdll_err_t initError = dll_function.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
+
+            device_info_t device_info;
+            probe_info_t probe_info;
+            library_info_t library_info;
+
+            if (initError == SUCCESS)
             {
-                Probe_handle_t getInfoProbe;
-                nrfjprogdll_err_t initError = dll_function.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
+                dll_function.get_device_info(getInfoProbe, &device_info);
+                dll_function.get_probe_info(getInfoProbe, &probe_info);
+                dll_function.get_library_info(getInfoProbe, &library_info);
 
-                device_info_t device_info;
-                probe_info_t probe_info;
-                library_info_t library_info;
-
-                if (initError == SUCCESS)
-                {
-                    dll_function.get_device_info(getInfoProbe, &device_info);
-                    dll_function.get_probe_info(getInfoProbe, &probe_info);
-                    dll_function.get_library_info(getInfoProbe, &library_info);
-
-                    dll_function.probe_uninit(&getInfoProbe);
-                }
-                baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info, probe_info, library_info));
+                dll_function.probe_uninit(&getInfoProbe);
             }
-            else
-            {
-                baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i]));
-            }
+            baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info, probe_info, library_info));
         }
 
         return SUCCESS;
@@ -577,6 +561,51 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         }
 
         returnData.push_back(connectedDevices);
+
+        return returnData;
+    };
+
+    CallFunction(info, p, e, r, false);
+}
+
+NAN_METHOD(HighLevel::GetSerialNumbers)
+{
+    parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
+        return new GetSerialNumbersBaton();
+    };
+
+    execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton = static_cast<GetSerialNumbersBaton*>(b);
+        uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
+        uint32_t available = 0;
+        nrfjprogdll_err_t error = dll_function.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available);
+
+        if (error != SUCCESS)
+        {
+            return error;
+        }
+
+        for (uint32_t i = 0; i < available; i++)
+        {
+            baton->serialNumbers.push_back(serialNumbers[i]);
+        }
+
+        return SUCCESS;
+    };
+
+    return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
+        auto baton = static_cast<GetSerialNumbersBaton*>(b);
+        std::vector<v8::Local<v8::Value>> returnData;
+
+        v8::Local<v8::Array> serialNumbers = Nan::New<v8::Array>();
+        int i = 0;
+        for (auto serialNumber : baton->serialNumbers)
+        {
+            Nan::Set(serialNumbers, Convert::toJsNumber(i), Convert::toJsNumber(serialNumber));
+            i++;
+        }
+
+        returnData.push_back(serialNumbers);
 
         return returnData;
     };

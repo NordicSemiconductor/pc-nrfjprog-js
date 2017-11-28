@@ -69,6 +69,7 @@ private:
     // Async methods
     static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)
     static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
+    static NAN_METHOD(GetSerialNumbers); // Params: callback(error, serialnumbers)
 
     static NAN_METHOD(GetDeviceInfo); // Params: serialnumber, callback(error, deviceinfo)
     static NAN_METHOD(GetProbeInfo); // Params: serialnumber, callback(error, probeinfo)

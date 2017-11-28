@@ -208,17 +208,9 @@
  * @typedef SerialNumberAndDeviceInformation
  *
  * @property {integer} serialNumber
- * @property {module:pc-nrfjprog-js~DeviceInformation} deviceInfo=undefined
- * @property {module:pc-nrfjprog-js~ProbeInformation} probeInfo=undefined
- * @property {module:pc-nrfjprog-js~LibraryInformation} libraryInfo=undefined
- */
-
-/**
- * Option flags to be used when getting serialnumbers.
- * @typedef GetConnectedDevicesOptions
- * @property {boolean} onlyGetSerialnumbers=false
- *    Select wheter getConnectedDevices shall fetch DeviceInformation, ProbeInformation, and LibraryInformation
- *    or not. Setting to true may speed up the function significantly.
+ * @property {module:pc-nrfjprog-js~DeviceInformation} deviceInfo
+ * @property {module:pc-nrfjprog-js~ProbeInformation} probeInfo
+ * @property {module:pc-nrfjprog-js~LibraryInformation} libraryInfo
  */
 
 /**
@@ -301,21 +293,26 @@ export function getDllVersion(callback) {}
  *      }
  * } );
  *
- * @example
- * nrfjprogjs.getConnectedDevices({ onlyGetSerialnumbers: true }, function(err, devices) {
- *      if (err) throw err;
- *      for (let i = 0; i < devices.length; i++) {
- *          console.log(devices[i].serialNumber);
- *      }
- * } );
- *
- * @param {module:pc-nrfjprog-js~GetConnectedDevicesOptions}={} Options for getting detailed information about the devices.
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of {@link module:pc-nrfjprog-js~SerialNumberAndDeviceInformation|SerialNumberAndDeviceInformation}).
  */
 export function getConnectedDevices(callback) {}
 
-
+/**
+ * Async function to get a list of all connected devices serialnumber.
+ *
+ * @example
+ * nrfjprogjs.getSerialNumbers(function(err, serialNumbers) {
+ *      if (err) throw err;
+ *      for (let i = 0; i < devices.length; i++) {
+ *          console.log(devices[i]);
+ *      }
+ * } );
+ *
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of {integer}.
+ */
+export function getSerialNumbers(callback) {}
 
 /**
  * Async function to get information of a single device, given its serial number.

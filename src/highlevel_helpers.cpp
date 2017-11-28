@@ -45,13 +45,9 @@ v8::Local<v8::Object> ProbeDetails::ToJs()
     v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(serial_number));
-
-    if (!onlySerialNumber)
-    {
-        Utility::Set(obj, "deviceInfo", DeviceInfo(device_info).ToJs());
-        Utility::Set(obj, "probeInfo", ProbeInfo(probe_info).ToJs());
-        Utility::Set(obj, "libraryInfo", LibraryInfo(library_info).ToJs());
-    }
+    Utility::Set(obj, "deviceInfo", DeviceInfo(device_info).ToJs());
+    Utility::Set(obj, "probeInfo", ProbeInfo(probe_info).ToJs());
+    Utility::Set(obj, "libraryInfo", LibraryInfo(library_info).ToJs());
 
     return scope.Escape(obj);
 }
@@ -116,15 +112,6 @@ v8::Local<v8::Object> LibraryInfo::ToJs()
     Utility::Set(obj, "path", Convert::toJsString(library_info.file_path));
 
     return scope.Escape(obj);
-}
-
-GetConnectedDevicesOptions::GetConnectedDevicesOptions(v8::Local<v8::Object> obj) :
-    getOnlySerialNumbers(false)
-{
-    if (Utility::Has(obj, "onlyGetSerialnumbers"))
-    {
-        getOnlySerialNumbers = Convert::getBool(obj, "onlyGetSerialnumbers");
-    }
 }
 
 EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :

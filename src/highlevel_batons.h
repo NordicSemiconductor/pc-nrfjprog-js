@@ -93,10 +93,15 @@ public:
 class GetConnectedDevicesBaton : public Baton
 {
 public:
-    GetConnectedDevicesBaton() : Baton("get connected devices", 1, false), getOnlySerialNumber(false) {}
+    GetConnectedDevicesBaton() : Baton("get connected devices", 1, false) {}
     std::vector<std::unique_ptr<ProbeDetails>> probes;
+};
 
-    bool getOnlySerialNumber;
+class GetSerialNumbersBaton : public Baton
+{
+public:
+    GetSerialNumbersBaton() : Baton("get serial numbers", 1, false) {}
+    std::vector<uint32_t> serialNumbers;
 };
 
 class GetDeviceInfoBaton : public Baton
