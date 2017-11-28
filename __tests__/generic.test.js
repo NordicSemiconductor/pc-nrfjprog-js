@@ -67,6 +67,18 @@ describe('Generic functionality', () => {
         nRFjprog.getConnectedDevices(callback);
     });
 
+    it('finds all connected serialnumbers', done => {
+        const callback = (err, serialNumbers) => {
+            expect(err).toBeUndefined();
+            expect(serialNumbers.length).toBeGreaterThanOrEqual(1);
+            expect(serialNumbers[0]).toEqual(expect.any(Number));
+
+            done();
+        };
+
+        nRFjprog.getSerialNumbers(callback);
+    });
+
     it('throws when too few parameters are sent in', () => {
         expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
     });

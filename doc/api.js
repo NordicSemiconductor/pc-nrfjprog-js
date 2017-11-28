@@ -298,7 +298,21 @@ export function getDllVersion(callback) {}
  */
 export function getConnectedDevices(callback) {}
 
-
+/**
+ * Async function to get the serial numbers of all connected devices.
+ *
+ * @example
+ * nrfjprogjs.getSerialNumbers(function(err, serialNumbers) {
+ *      if (err) throw err;
+ *      for (let i = 0; i < serialNumbers.length; i++) {
+ *          console.log(serialNumbers[i]);
+ *      }
+ * } );
+ *
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of {integer}.
+ */
+export function getSerialNumbers(callback) {}
 
 /**
  * Async function to get information of a single device, given its serial number.
