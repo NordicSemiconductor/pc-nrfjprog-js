@@ -25,6 +25,13 @@
     "host": "https://github.com/NordicSemiconductor/pc-nrfjprog-js/releases/download/",
     "remote_path": "v{version}"
   },
+  "files": [
+    "cmake",
+    "src",
+    "build.js",
+    "CMakeLists.txt",
+    "index.js"
+  ],
   "author": "Nordic Semiconductor ASA",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
