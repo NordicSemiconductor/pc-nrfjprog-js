@@ -95,6 +95,8 @@ class GetConnectedDevicesBaton : public Baton
 public:
     GetConnectedDevicesBaton() : Baton("get connected devices", 1, false) {}
     std::vector<std::unique_ptr<ProbeDetails>> probes;
+
+    bool getOnlySerialNumber;
 };
 
 class GetDeviceInfoBaton : public Baton

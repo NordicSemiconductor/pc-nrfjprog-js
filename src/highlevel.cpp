@@ -482,9 +482,7 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
 NAN_METHOD(HighLevel::GetDllVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
-        auto baton = new GetDllVersionBaton();
-
-        return baton;
+        return new GetDllVersionBaton();
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
@@ -512,7 +510,17 @@ NAN_METHOD(HighLevel::GetDllVersion)
 NAN_METHOD(HighLevel::GetConnectedDevices)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
-        return new GetConnectedDevicesBaton();
+        auto baton = new GetConnectedDevicesBaton();
+
+        if ((argumentCount + 1) < info.Length())
+        {
+            v8::Local<v8::Object> getConnectedDevicesOptions = Convert::getJsObject(parameters[argumentCount]);
+            GetConnectedDevicesOptions options(getConnectedDevicesOptions);
+            baton->getOnlySerialNumber = options.getOnlySerialNumbers;
+            argumentCount++;
+        }
+
+        return baton;
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
@@ -528,23 +536,29 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
         for (uint32_t i = 0; i < available; i++)
         {
-            Probe_handle_t getInfoProbe;
-            nrfjprogdll_err_t initError = dll_function.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
-
-            device_info_t device_info;
-            probe_info_t probe_info;
-            library_info_t library_info;
-
-            if (initError == SUCCESS)
+            if (!baton->getOnlySerialNumber)
             {
-                dll_function.get_device_info(getInfoProbe, &device_info);
-                dll_function.get_probe_info(getInfoProbe, &probe_info);
-                dll_function.get_library_info(getInfoProbe, &library_info);
+                Probe_handle_t getInfoProbe;
+                nrfjprogdll_err_t initError = dll_function.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
 
-                dll_function.probe_uninit(&getInfoProbe);
+                device_info_t device_info;
+                probe_info_t probe_info;
+                library_info_t library_info;
+
+                if (initError == SUCCESS)
+                {
+                    dll_function.get_device_info(getInfoProbe, &device_info);
+                    dll_function.get_probe_info(getInfoProbe, &probe_info);
+                    dll_function.get_library_info(getInfoProbe, &library_info);
+
+                    dll_function.probe_uninit(&getInfoProbe);
+                }
+                baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info, probe_info, library_info));
             }
-
-            baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info, probe_info, library_info));
+            else
+            {
+                baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i]));
+            }
         }
 
         return SUCCESS;

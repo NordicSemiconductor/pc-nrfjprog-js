@@ -45,12 +45,17 @@ class ProbeDetails
 {
 public:
     ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
-        serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
+        onlySerialNumber(false), serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
+    {}
+
+    ProbeDetails(uint32_t _serial_number) :
+        onlySerialNumber(true), serial_number(_serial_number)
     {}
 
     v8::Local<v8::Object> ToJs();
 
 private:
+    const bool onlySerialNumber;
     const uint32_t serial_number;
     const device_info_t device_info;
     const probe_info_t probe_info;
@@ -95,6 +100,14 @@ public:
 
 private:
     const library_info_t library_info;
+};
+
+class GetConnectedDevicesOptions
+{
+public:
+    GetConnectedDevicesOptions(v8::Local<v8::Object> obj);
+
+    bool getOnlySerialNumbers;
 };
 
 class EraseOptions
