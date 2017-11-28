@@ -67,6 +67,34 @@ describe('Generic functionality', () => {
         nRFjprog.getConnectedDevices(callback);
     });
 
+    it('finds only serialnumbers when getting all devices', done => {
+        const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
+            expect(connectedDevices[0]).toHaveProperty('serialNumber');
+            expect(connectedDevices[0]).not.toHaveProperty('deviceInfo');
+            expect(connectedDevices[0]).not.toHaveProperty('probeInfo');
+            expect(connectedDevices[0]).not.toHaveProperty('libraryInfo');
+            done();
+        };
+
+        nRFjprog.getConnectedDevices({ onlyGetSerialnumbers: true }, callback);
+    });
+
+    it('finds all information when getting all devices', done => {
+        const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
+            expect(connectedDevices[0]).toHaveProperty('serialNumber');
+            expect(connectedDevices[0]).toHaveProperty('deviceInfo');
+            expect(connectedDevices[0]).toHaveProperty('probeInfo');
+            expect(connectedDevices[0]).toHaveProperty('libraryInfo');
+            done();
+        };
+
+        nRFjprog.getConnectedDevices({ onlyGetSerialnumbers: false }, callback);
+    });
+
     it('throws when too few parameters are sent in', () => {
         expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
     });
