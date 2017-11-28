@@ -97,6 +97,13 @@ public:
     std::vector<std::unique_ptr<ProbeDetails>> probes;
 };
 
+class GetSerialNumbersBaton : public Baton
+{
+public:
+    GetSerialNumbersBaton() : Baton("get serial numbers", 1, false) {}
+    std::vector<uint32_t> serialNumbers;
+};
+
 class GetDeviceInfoBaton : public Baton
 {
 public:
