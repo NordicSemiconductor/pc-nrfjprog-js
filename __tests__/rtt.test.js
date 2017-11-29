@@ -323,7 +323,7 @@ describe('RTT', () => {
                 expect(err).toBeUndefined();
 
                 if (readOrder.length === 3) {
-                    expect(readOrder).toEqual([1, 2, 3]);
+                    expect(readOrder).toEqual(expect.arrayContaining([1, 2, 3]));
                     done();
                 }
             };
