@@ -215,7 +215,7 @@ export function stop(callback) {}
  * as an array (<tt>rawData</tt> in the example) containing the byte values (as integers between 0
  * and 255), plus the time elapsed since RTT was started, in microseconds.</p>
  *
- * <p>This fumction will attepmt read up to <tt>length</tt> number of bytes and return them as both
+ * <p>This function will read up to <tt>length</tt> number of bytes and return them as both
  * <tt>String</tt> and <tt>an array of the raw bytes</tt>. If the content of the channel is empty,
  * the returned string and array will be empty.</p>
  *
