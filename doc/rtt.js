@@ -209,11 +209,15 @@ export function start(serialnumber, startoptions, callback) {}
 export function stop(callback) {}
 
 /**
- * Async function to read RTT contents from an up channel on the device. You read on the up channel
+ * <p>Async function to read RTT contents from an up channel on the device. You read on the up channel
  * specified by the <tt>channelIndex</tt>. The callback function can access a UTF-8 string representation
  * of the RTT message (<tt>stringData</tt> in the example) if UTF-8 encoding is possible, as well
  * as an array (<tt>rawData</tt> in the example) containing the byte values (as integers between 0
- * and 255), plus the time elapsed since RTT was started, in microseconds.
+ * and 255), plus the time elapsed since RTT was started, in microseconds.</p>
+ *
+ * <p>This function will read up to <tt>length</tt> number of bytes and return them as both
+ * <tt>String</tt> and <tt>an array of the raw bytes</tt>. If the content of the channel is empty,
+ * the returned string and array will be empty.</p>
  *
  * @example
  * RTT.read(0, 100, function(err, stringData, rawData, timeSinceRTTStartInUs) {
