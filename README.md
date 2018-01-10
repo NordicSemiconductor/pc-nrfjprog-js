@@ -31,9 +31,9 @@ Extract the nRF-Command-Line-Tools tar file, f.ex.:
 
     sudo tar -xf nRF5x-Command-Line-Tools_<version>_<platform>.tar -C /opt
 
-This will create a directory `/opt/nrfjprog` containing the nrfjprog libraries. These libraries must be available for the process that uses pc-nrfjprog-js, f.ex. by adding the nrfjprog directory to `LD_LIBRARY_PATH`:
+This will create a directory `/opt/nrfjprog` containing the nrfjprog libraries. These libraries must be available for the process that uses pc-nrfjprog-js, f.ex. by adding the nrfjprog directory to the `LD_LIBRARY_PATH` environment variable:
 
-    export LD_LIBRARY_PATH=/opt/nrfjprog
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/nrfjprog
 
 ## API documentation
 
