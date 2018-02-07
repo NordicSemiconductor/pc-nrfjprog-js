@@ -19,6 +19,8 @@ This will pull down precompiled binaries for your platform/runtime environment. 
 
 Before using the library, nRF5x-Command-Line-Tools must be installed. The project includes nRF5x-Command-Line-Tools installers/archives for all supported platforms in the `nrfjprog` directory. These can also be [downloaded from the Nordic Semiconductor website](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html).
 
+If you are encountering errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that these tools are properly installed.
+
 ### Windows
 
 Run the nRF-Command-Line-Tools installer (exe). This will install the required nrfjprog libraries and SEGGER J-Link.
