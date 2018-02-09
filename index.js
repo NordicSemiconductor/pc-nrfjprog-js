@@ -34,14 +34,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- const nRFjprog = require('bindings')('pc-nrfjprog-js');
+const nRFjprog = require('bindings')('pc-nrfjprog-js');
 
- const instance = new nRFjprog.nRFjprog();
- Object.keys(nRFjprog).map(key => {
-     if (key !== 'nRFjprog') {
-         instance[key] = nRFjprog[key];
-     }
- });
+const instance = new nRFjprog.nRFjprog();
+Object.keys(nRFjprog).map(key => {
+    if (key !== 'nRFjprog') {
+        instance[key] = nRFjprog[key];
+    }
+});
 
- module.exports = instance;
- module.exports.RTT = new nRFjprog.RTT();
+module.exports = instance;
+module.exports.RTT = new nRFjprog.RTT();

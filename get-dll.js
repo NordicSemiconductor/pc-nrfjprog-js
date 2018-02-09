@@ -30,7 +30,7 @@ const PLATFORM_CONFIG = {
         extractTo: path.join(DOWNLOAD_DIR, 'unpacked'),
         copyFiles: {
             source: path.join(DOWNLOAD_DIR, 'unpacked', 'nrfjprog'),
-            destination: `${__dirname}/`,
+            destination: path.join(DOWNLOAD_DIR, 'lib'),
             pattern: /\.so/,
         },
     },
@@ -101,13 +101,31 @@ const dllVersion = new Promise((res, rej)=>{
 })
 
 
-// Check if binary libraries are really needed
+// Check if nrf-jprog binary libraries are working or not
 dllVersion
 .then((version)=>{
     console.log('nrfjprog libraries at version ', version, ', no need to fetch them');
 })
 .catch((err)=>{
+
     console.log(err);
+
+    let tryAgainAfterwards;
+    if (err.errno == 2 && err.errcode === "CouldNotFindJprogDLL") {
+        // This will happen if the binary bindings have already been built
+        // (with node-gyp) but the *.so files are not found.
+        tryAgainAfterwards = true;
+    } else if (err.message.match(/^Could not locate the bindings file/)) {
+        // This will happen on the first install, where the bindings are not
+        // yet built, and they need the jprog header files.
+        tryAgainAfterwards = false;
+    } else {
+        // Nothing to do here - this block only handles problems with the nrf-jprog libs
+        // (from Nordic), not with the Jlink-ARM libs (from Segger).
+        return Promise.reject(err);
+    }
+
+    console.log('nrf-jprog libraries seem to be missing.');
     console.log(`Downloading nrfjprog from ${platformConfig.url} to ${platformConfig.destinationFile}`);
 
     Promise.resolve()
@@ -124,7 +142,6 @@ dllVersion
         .then(() => {
             if (platformConfig.copyFiles) {
                 const copyConfig = platformConfig.copyFiles;
-                console.log(`Copying nrfjprog libs from ${copyConfig.source} to ${copyConfig.destination}`);
                 const files = sander.lsr(copyConfig.source);
 
                 return Promise.all([
@@ -134,6 +151,8 @@ dllVersion
                             filenames.filter(filename=>filename.match(copyConfig.pattern))
                         )
                         .then(filenames=>{
+                            console.log(`Copying nrfjprog libs from ${copyConfig.source} to ${copyConfig.destination}`);
+
                             return Promise.all(filenames.map(filename=>{
                                 return sander.symlinkOrCopy(copyConfig.source, filename).to(copyConfig.destination, filename);
                             })
@@ -146,6 +165,7 @@ dllVersion
                             filenames.filter(filename=>filename.match(/\.h$/))
                         )
                         .then(filenames=>{
+                            console.log(`Copying nrfjprog header files from ${copyConfig.source} to ${DOWNLOAD_DIR}/include/`);
                             return Promise.all(filenames.map(filename=>{
                                 return sander.symlinkOrCopy(copyConfig.source, filename).to(DOWNLOAD_DIR, 'include', filename);
                             })
@@ -157,7 +177,14 @@ dllVersion
         })
         .then(()=>{
             if (platformConfig.instructions) {
-                console.warn(platformConfig.instructions);
+                return Promise.resolve(console.warn(platformConfig.instructions));
+            } else if (tryAgainAfterwards) {
+                // Try and see if it works now.
+                return dllVersion.then((version)=>{
+                    console.log('Automated fetch of nrfjprog seems to have worked, now at ', version);
+                })
+            } else {
+                return true;
             }
         })
         .catch(error => console.log(`Error when getting nrfjprog: ${error.message}`));

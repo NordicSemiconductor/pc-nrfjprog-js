@@ -49,8 +49,22 @@
 #include <iostream>
 #include <fstream>
 // #include <sstream>
-// #include <regex>
+#include <regex>
 #include <dirent.h>
+
+// C++ version of ANSI C readlink, as per
+// https://stackoverflow.com/questions/5525668/how-to-implement-readlink-to-find-the-path#5525712
+std::string cpp_readlink(std::string const& path) {
+    char buff[COMMON_MAX_PATH];
+    ssize_t len = ::readlink(path.c_str(), buff, sizeof(buff)-1);
+    if (len != -1) {
+      buff[len] = '\0';
+      return std::string(buff);
+    }
+    return std::string("");
+}
+
+
 
 /* Try to locate a dynamically-linked library named fileName, and set dll_path
  * to the full path to that library.
@@ -64,7 +78,7 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     ssize_t len;
     len = readlink("/proc/self/exe", temp_dll_path, COMMON_MAX_PATH - 1);
 
-    printf("\n/proc/self/exe points to: %s\n\n", temp_dll_path);
+//     printf("\n/proc/self/exe points to: %s\n\n", temp_dll_path);
 
     if (len == -1)
     {
@@ -75,7 +89,7 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     dll_path.append("/");
     dll_path.append(fileName);
 
-    printf("\nTrying to load %s from: %s\n\n", fileName.c_str(), dll_path.c_str());
+//     printf("\nTrying to load %s from: %s\n\n", fileName.c_str(), dll_path.c_str());
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
@@ -85,73 +99,48 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     }
 
     // Try fetching paths of all loaded libraries by resolving symlinks from
-    // all entries at /proc/self/map_files
+    // all entries at /proc/self/map_files, look for */build/Release/pc-nrfjprog-js.node
 
     DIR *dir;
     struct dirent *entry;
-    char mapped_file_name[COMMON_MAX_PATH];
-    char mem_region_file_name[COMMON_MAX_PATH];
+    std::string mapped_file_name;
+    std::string mem_region_file_name;
+    std::regex build_path("/build/Release/pc-nrfjprog-js.node$");
     dir = opendir("/proc/self/map_files");
 
     while((entry = readdir(dir)) != NULL) {
-        memset(mapped_file_name, 0, COMMON_MAX_PATH);
-        memset(mem_region_file_name, 0, COMMON_MAX_PATH);
-        strcpy(mem_region_file_name, "/proc/self/map_files/");
-        strcat(mem_region_file_name, entry->d_name);
-        len = readlink(mem_region_file_name, mapped_file_name, COMMON_MAX_PATH - 1);
-        if (len != -1) {
-            printf("%s → %s\n", entry->d_name, mapped_file_name );
-            dll_path.assign(dirname(mapped_file_name));
-            dll_path.append("/");
+        mem_region_file_name.assign("/proc/self/map_files/");
+        mem_region_file_name.append(entry->d_name);
+
+        mapped_file_name = cpp_readlink(mem_region_file_name);
+
+        if (std::regex_search(mapped_file_name, build_path)) {
+
+//             printf("%s → %s\n", entry->d_name, (char*) mapped_file_name.c_str() );
+
+            // The path of the library is relative to the path of the built files
+            // (which should be at build/Release/ as per the regexp), hence the ../../
+            dll_path.assign(dirname((char*) mapped_file_name.c_str()));
+            dll_path.append("/../../nrfjprog/lib/");
             dll_path.append(fileName);
 
-            printf("\nTrying to load %s from: %s\n", fileName.c_str(), dll_path.c_str());
+//             printf("\nTrying to load %s from: %s\n", fileName.c_str(), dll_path.c_str());
+
             if (AbstractFile::pathExists(dll_path))
             {
-                printf("Success!!\n");
+//                 printf("Will load nrf-jprog libs from %s\n", dll_path.c_str());
                 return errorcode_t::JsSuccess;
             } else {
-                printf("Nope :-(\n\n");
+//                 printf("Nope :-(\n\n");
             }
-
-        } else {
-            printf("%s %d\n", entry->d_name, errno);
         }
-
     }
 
 
 
-
-
-    // Try fetching paths of all loaded libraries by reading /proc/self/maps and
-    // parsing its contents, look for loaded *.node files
-//     std::ifstream ifs("/proc/self/maps");
-// //     std::string maps( (std::istreambuf_iterator<char>(ifs) ),
-// //                          (std::istreambuf_iterator<char>()    ) );
-//
-//     printf("\n/proc/self/maps contains: \n\n");
-//
-//     // Use ECMAScript-style regexps because of \S character class
-// //     std::regex nodeRegExp("(\\S+\\.node)$");
-// //     std::regex nodeRegExp("(\\S*)/build/Release/pc-nrfjprog-js\\.node$");
-//     std::regex nodeRegExp("(.*)/build/Release/pc-nrfjprog-js\\.node$");
-// //     std::regex nodeRegExp("(.+\\.node)$");
-//     std::smatch nodeRegExpMatch;
-//
-//     for (std::string line; std::getline(ifs, line); ) {
-//         printf("%s\n", line.c_str());
-//         if (std::regex_match(line, nodeRegExpMatch, nodeRegExp)) {
-//             printf("Found!!!!!!1!\n");
-//             printf(">> %s <<\n", nodeRegExpMatch.str().c_str());
-//         }
-//
-// //         cout << to <<endl;
-//     }
-
     // Last recourse, try loading the library through dlopen().
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
-    printf("\nTrying to load %s through dlopen()\n\n", fileName.c_str() );
+//     printf("\nTrying to load %s through dlopen()\n\n", fileName.c_str() );
 
     void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 

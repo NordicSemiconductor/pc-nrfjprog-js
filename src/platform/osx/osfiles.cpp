@@ -54,6 +54,7 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     pid_t pid;
     char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
 
+    // Fetch path of currently running executable
     pid = getpid();
     ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
 
@@ -63,26 +64,31 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
+    // If there is a file with the requested fileName in the same path as the
+    // current node.js (or electron) executable, use that.
+        if (AbstractFile::pathExists(dll_path))
+    {
+        return errorcode_t::JsSuccess;
+    }
+
     dll_path.append(dirname(pathbuf));
     dll_path.append("/");
     dll_path.append(fileName);
 
-    if (!AbstractFile::pathExists(dll_path))
+
+    // Last recourse, try loading the library through dlopen().
+    // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
+    void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+
+    if (libraryHandle)
     {
-        /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
-
-        if (libraryHandle)
-        {
-            dlclose(libraryHandle);
-            dll_path = fileName;
-            return errorcode_t::JsSuccess;
-        }
-
-        return errorcode_t::CouldNotFindJprogDLL;
+        dlclose(libraryHandle);
+        dll_path = fileName;
+        return errorcode_t::JsSuccess;
     }
 
-    return errorcode_t::JsSuccess;
+    return errorcode_t::CouldNotFindJprogDLL;
+
 }
 
 std::string TempFile::concatPaths(std::string base_path, std::string relative_path)

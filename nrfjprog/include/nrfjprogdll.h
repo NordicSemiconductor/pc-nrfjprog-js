@@ -1,1 +1,0 @@
-/home/ivan/devel/pc-nrfjprog-js/nrfjprog/unpacked/nrfjprog/nrfjprogdll.h
