@@ -108,8 +108,6 @@ dllVersion
 })
 .catch((err)=>{
 
-    console.log(err);
-
     let tryAgainAfterwards;
     if (err.errno == 2 && err.errcode === "CouldNotFindJprogDLL") {
         // This will happen if the binary bindings have already been built
@@ -189,5 +187,6 @@ dllVersion
         })
         .catch(error => console.log(`Error when getting nrfjprog: ${error.message}`));
 });
+
 
 
