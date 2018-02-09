@@ -36,6 +36,8 @@
 
 #include "../../osfiles.h"
 
+#include <nan.h>
+
 #include <sys/stat.h>
 #include <string.h>
 #include <libgen.h>
@@ -47,6 +49,13 @@
 #include <unistd.h>
 
 #include <libproc.h>  // proc pidpathinfo maxsize
+
+
+NAN_METHOD(OSFilesSetDllSearchPath)
+{
+    printf("\osx/osfiles.cpp: SetDllSearchPath() called. FIXME!!!!!!!!!!.\n\n");
+}
+
 
 errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 {

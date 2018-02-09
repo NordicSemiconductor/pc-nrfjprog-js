@@ -41,10 +41,13 @@
 
 #include <memory>
 
+#include <nan.h>
+
 #define COMMON_MAX_PATH  (4096)   /* Arbitrarily selected MAX_PATH for every platform. */
 #define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
 #define COMMON_MAX_INI_LINE (1024)
 
+NAN_METHOD(OSFilesSetDllSearchPath);
 errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName);
 std::string getHighLevelLibraryName();
 std::string getnrfjprogLibraryName();

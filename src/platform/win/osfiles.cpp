@@ -40,6 +40,8 @@
 
 #include "../../osfiles.h"
 
+#include <nan.h>
+
 #include <windows.h>
 #include "Shlwapi.h"
 
@@ -47,6 +49,11 @@
 
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
+
+NAN_METHOD(OSFilesSetDllSearchPath)
+{
+    printf("\win/osfiles.cpp: SetDllSearchPath() called. Ignoring.\n\n");
+}
 
 errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std::string &fileName)
 {

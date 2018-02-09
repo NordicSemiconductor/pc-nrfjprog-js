@@ -65,6 +65,7 @@ private:
     static NAN_METHOD(New);
 
     // Sync methods
+    static NAN_METHOD(SetDllSearchPath); // Params: path (string)
 
     // Async methods
     static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)

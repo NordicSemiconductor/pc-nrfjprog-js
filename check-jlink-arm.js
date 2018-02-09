@@ -1,6 +1,12 @@
 
 // Small script run *after* the node binary module is either fetched or compiled.
 
+/*
+ * J-link libraries are required for the nrfjprog libraries, which are required
+ * for programming. This script warns the user if these libs are missing and points
+ * them to the right place to look for a solution.
+ */
+
 const chalk = require('chalk');
 
 const dllVersion = new Promise((res, rej)=>{

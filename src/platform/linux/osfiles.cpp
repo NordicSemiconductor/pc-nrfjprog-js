@@ -36,6 +36,8 @@
 
 #include "../../osfiles.h"
 
+#include <nan.h>
+
 #include <sys/stat.h>
 #include <string>
 #include <libgen.h>
@@ -51,6 +53,31 @@
 // #include <sstream>
 #include <regex>
 #include <dirent.h>
+
+std::string dll_search_path;
+
+
+// NAN_METHOD is a macro; it's shorthand so you don't have to write that the
+// first and only parameter is of type Nan::FunctionCallbackInfo<v8::Value>
+NAN_METHOD(OSFilesSetDllSearchPath)
+{
+    // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
+    if (info.Length() > 0) {
+        if (info[0]->IsString()) {
+            v8::String::Utf8Value param1(info[0]->ToString());
+            std::string path = std::string(*param1);
+
+            printf("\nlinux/osfiles.cpp: SetDllSearchPath() called with %s\n\n",
+                path.c_str()
+            );
+
+            dll_search_path.assign(path);
+        }
+    }
+    /// TODO: Add some error throwing if no parameters or the parameter is not a string
+}
+
+
 
 // C++ version of ANSI C readlink, as per
 // https://stackoverflow.com/questions/5525668/how-to-implement-readlink-to-find-the-path#5525712
@@ -98,43 +125,60 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
         return errorcode_t::JsSuccess;
     }
 
-    // Try fetching paths of all loaded libraries by resolving symlinks from
-    // all entries at /proc/self/map_files, look for */build/Release/pc-nrfjprog-js.node
 
-    DIR *dir;
-    struct dirent *entry;
-    std::string mapped_file_name;
-    std::string mem_region_file_name;
-    std::regex build_path("/build/Release/pc-nrfjprog-js.node$");
-    dir = opendir("/proc/self/map_files");
+    // Try the path specified from calling OSFilesSetDllSearchPath
+        printf("\nSpecified search path is: %s \n\n", dll_search_path.c_str());
 
-    while((entry = readdir(dir)) != NULL) {
-        mem_region_file_name.assign("/proc/self/map_files/");
-        mem_region_file_name.append(entry->d_name);
-
-        mapped_file_name = cpp_readlink(mem_region_file_name);
-
-        if (std::regex_search(mapped_file_name, build_path)) {
-
-//             printf("%s → %s\n", entry->d_name, (char*) mapped_file_name.c_str() );
-
-            // The path of the library is relative to the path of the built files
-            // (which should be at build/Release/ as per the regexp), hence the ../../
-            dll_path.assign(dirname((char*) mapped_file_name.c_str()));
-            dll_path.append("/../../nrfjprog/lib/");
-            dll_path.append(fileName);
-
-//             printf("\nTrying to load %s from: %s\n", fileName.c_str(), dll_path.c_str());
-
-            if (AbstractFile::pathExists(dll_path))
-            {
-//                 printf("Will load nrf-jprog libs from %s\n", dll_path.c_str());
-                return errorcode_t::JsSuccess;
-            } else {
-//                 printf("Nope :-(\n\n");
-            }
-        }
+    dll_path.assign(dll_search_path);
+    dll_path.append("/");
+    dll_path.append(fileName);
+    if (AbstractFile::pathExists(dll_path))
+    {
+        printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
+        return errorcode_t::JsSuccess;
+    } else {
+        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", dll_path.c_str());
     }
+
+
+
+//     // Try fetching paths of all loaded libraries by resolving symlinks from
+//     // all entries at /proc/self/map_files, look for */build/Release/pc-nrfjprog-js.node
+//
+//     DIR *dir;
+//     struct dirent *entry;
+//     std::string mapped_file_name;
+//     std::string mem_region_file_name;
+//     std::regex build_path("/build/Release/pc-nrfjprog-js.node$");
+//     dir = opendir("/proc/self/map_files");
+//
+//     while((entry = readdir(dir)) != NULL) {
+//         mem_region_file_name.assign("/proc/self/map_files/");
+//         mem_region_file_name.append(entry->d_name);
+//
+//         mapped_file_name = cpp_readlink(mem_region_file_name);
+//
+//         if (std::regex_search(mapped_file_name, build_path)) {
+//
+// //             printf("%s → %s\n", entry->d_name, (char*) mapped_file_name.c_str() );
+//
+//             // The path of the library is relative to the path of the built files
+//             // (which should be at build/Release/ as per the regexp), hence the ../../
+//             dll_path.assign(dirname((char*) mapped_file_name.c_str()));
+//             dll_path.append("/../../nrfjprog/lib/");
+//             dll_path.append(fileName);
+//
+// //             printf("\nTrying to load %s from: %s\n", fileName.c_str(), dll_path.c_str());
+//
+//             if (AbstractFile::pathExists(dll_path))
+//             {
+// //                 printf("Will load nrf-jprog libs from %s\n", dll_path.c_str());
+//                 return errorcode_t::JsSuccess;
+//             } else {
+// //                 printf("Nope :-(\n\n");
+//             }
+//         }
+//     }
 
 
 

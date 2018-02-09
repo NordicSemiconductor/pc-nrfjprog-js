@@ -34,6 +34,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+const path = require('path');
 const nRFjprog = require('bindings')('pc-nrfjprog-js');
 
 const instance = new nRFjprog.nRFjprog();
@@ -42,6 +43,9 @@ Object.keys(nRFjprog).map(key => {
         instance[key] = nRFjprog[key];
     }
 });
+
+instance.setDllSearchPath(path.join(__dirname, 'nrfjprog', 'lib'));
+// instance.setDllSearchPath();
 
 module.exports = instance;
 module.exports.RTT = new nRFjprog.RTT();
