@@ -9,7 +9,7 @@
     "package-prebuilt": "node-pre-gyp package",
     "publish-prebuilt": "node-pre-gyp-github publish",
     "publish-all-prebuilt": "node scripts/publish-all-prebuilt.js",
-    "install": "node get-dll.js; node-pre-gyp install --fallback-to-build=false || node build.js; node check-jlink-arm.js",
+    "install": "node ./get-dll.js ; node-pre-gyp install --fallback-to-build=false || node build.js ; node ./check-jlink-arm.js",
     "docs": "jsdoc doc -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
     "test": "node run-tests.js --runInBand --verbose --testResultsProcessor jest-bamboo-formatter",
@@ -41,6 +41,7 @@
     "cmake-js": "1.1.0",
     "nan": "2.3.3",
     "node-pre-gyp": "^0.6.39",
+    "opn": "^5.2.0",
     "sander": "^0.6.0",
     "tar": "^4.3.3"
   },

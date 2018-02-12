@@ -6,7 +6,8 @@ const fs = require('fs');
 const sander = require('sander');
 const os = require('os');
 const path = require('path');
-const exec = require('child_process').exec ;
+const opn = require('opn');
+
 
 /*
  * nRF5x-Command-Line-Tools (nrfjprog) is required for programming. This script
@@ -50,7 +51,8 @@ const PLATFORM_CONFIG = {
         // When changing this, remember to also update the nrfjprog version in installer.nsh
         url: 'https://www.nordicsemi.com/eng/nordic/download_resource/33444/47/97153666/53210',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe'),
-        instructions: "WARNING: You must manually install the latest nRF5x command line tools on this platform. Please check the " + DOWNLOAD_DIR + " directory and run the \"nrfjprog-win32.exe\" installer that you will find there.",
+        //instructions: "WARNING: You must manually install the latest nRF5x command line tools on this platform. Please check the " + DOWNLOAD_DIR + " directory and run the \"nrfjprog-win32.exe\" installer that you will find there.",
+        spawnChild: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe')
     },
 };
 
@@ -63,7 +65,10 @@ function downloadFile(url, destinationFile) {
                 reject(new Error(`Unable to download ${url}. Got status code ${statusCode}`));
             } else {
                 response.pipe(file);
-                response.on('end', () => resolve());
+                response.on('end', () => {
+                    file.end();
+                    resolve();
+                });
             }
         });
     });
@@ -105,6 +110,22 @@ const dllVersion = new Promise((res, rej)=>{
 dllVersion
 .then((version)=>{
     console.log('nrfjprog libraries at version ', version, ', no need to fetch them');
+})
+.catch((err)=>{
+    // Windows-specific: check if the header files for nrfjprog are there. If they are, 
+    // assume the nrfjprog files are available in the system, do not download, do not
+    // prompt information.
+    if (process.platform === 'win32') {
+        try {
+            fs.accessSync(path.join(process.env['ProgramFiles(x86)'], 'Nordic Semiconductor', 'nrf5x', 'bin', 'headers', 'nrfjprog.h'));
+        } catch(ex) {
+            return Promise.reject(err);
+        }
+            
+        return true;
+    } else {
+        return Promise.reject(err);
+    }
 })
 .catch((err)=>{
 
@@ -172,6 +193,12 @@ dllVersion
                 ]);
             }
             return Promise.resolve();
+        })
+        .then(()=>{
+            if (platformConfig.spawnChild) {
+                console.log('Installation of pc-nrfjprog-js requires running ' + platformConfig.spawnChild);
+                return opn(platformConfig.spawnChild);
+            } 
         })
         .then(()=>{
             if (platformConfig.instructions) {
