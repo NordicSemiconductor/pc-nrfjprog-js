@@ -162,18 +162,23 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     {
         printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
         return errorcode_t::JsSuccess;
-    } else {
-        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", dll_path.c_str());
     }
 
     // If that fails, try to find the DLLs when installed in the whole machine (for all users)
     errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, fileName);
     if (retCode == errorcode_t::JsSuccess) {
+        printf("\nShared jprog libraries found in registry under HKEY_LOCAL_MACHINE path: %s \n\n", dll_path.c_str());
         return retCode;
     }
 
     // If that fails, try to find the DLLs when installed for the current user only
     retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, fileName);
+
+    if (retCode == errorcode_t::JsSuccess) {
+        printf("\nShared jprog libraries found in registry under HKEY_CURRENT_USER path: %s \n\n", dll_path.c_str());
+    } else {
+        printf("\nShared jprog libraries not found anywhere :-( \n\n", dll_path.c_str());
+    }
 
     return retCode;
 }
