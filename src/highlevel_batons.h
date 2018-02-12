@@ -81,13 +81,6 @@ public:
 
 std::timed_mutex Baton::executionMutex;
 
-class SetDllSearchPathBaton : public Baton
-{
-public:
-    SetDllSearchPathBaton() : Baton("set dll search path", 0, false) {}
-    std::string path;
-};
-
 class GetDllVersionBaton : public Baton
 {
 public:

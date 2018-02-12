@@ -50,14 +50,6 @@ const spawn = require('child_process').spawn;
 
 const jest = path.join(__dirname, 'node_modules', '.bin', 'jest');
 
-const NRFJPROG_ARCHIVES_DIR = path.join(__dirname, 'nrfjprog');
-const NRFJPROG_HOME = path.join(NRFJPROG_ARCHIVES_DIR, 'unpacked/');
-const PLATFORM_ARCHIVE_EXT = {
-    linux: 'Linux-x86_64.tar',
-    darwin: 'OSX.tar',
-};
-const PLATFORM = os.platform();
-
 function runTests() {
     // Spawning a new process when running jest. This is legacy: before,
     // a custom LD_LIBRARY_PATH env variable was set so that the tests are able to load
@@ -76,10 +68,8 @@ function runTests() {
     });
 }
 
-// setupNrfjprog()
-Promise.resolve()
-    .then(() => runTests())
-    .catch(err => {
-        console.error(`Error running tests: ${err.message}`);
-        process.exit(1);
-    });
+runTests()
+.catch(err => {
+    console.error(`Error running tests: ${err.message}`);
+    process.exit(1);
+});

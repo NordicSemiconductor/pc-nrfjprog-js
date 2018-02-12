@@ -49,10 +49,6 @@
 #include <unistd.h>
 
 #include <iostream>
-#include <fstream>
-// #include <sstream>
-#include <regex>
-#include <dirent.h>
 
 std::string dll_search_path;
 
@@ -75,21 +71,6 @@ NAN_METHOD(OSFilesSetDllSearchPath)
     }
     /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
-
-
-
-// C++ version of ANSI C readlink, as per
-// https://stackoverflow.com/questions/5525668/how-to-implement-readlink-to-find-the-path#5525712
-std::string cpp_readlink(std::string const& path) {
-    char buff[COMMON_MAX_PATH];
-    ssize_t len = ::readlink(path.c_str(), buff, sizeof(buff)-1);
-    if (len != -1) {
-      buff[len] = '\0';
-      return std::string(buff);
-    }
-    return std::string("");
-}
-
 
 
 /* Try to locate a dynamically-linked library named fileName, and set dll_path
