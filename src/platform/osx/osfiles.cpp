@@ -50,10 +50,24 @@
 
 #include <libproc.h>  // proc pidpathinfo maxsize
 
+std::string dll_search_path;
 
 NAN_METHOD(OSFilesSetDllSearchPath)
 {
-    printf("\osx/osfiles.cpp: SetDllSearchPath() called. FIXME!!!!!!!!!!.\n\n");
+    // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
+    if (info.Length() > 0) {
+        if (info[0]->IsString()) {
+            v8::String::Utf8Value param1(info[0]->ToString());
+            std::string path = std::string(*param1);
+
+            printf("\nosx/osfiles.cpp: SetDllSearchPath() called with %s\n\n",
+                path.c_str()
+            );
+
+            dll_search_path.assign(path);
+        }
+    }
+    /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
 
 
@@ -84,6 +98,16 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     dll_path.append("/");
     dll_path.append(fileName);
 
+    // Try the path specified from calling OSFilesSetDllSearchPath
+    dll_path.assign(dll_search_path);
+    dll_path.append("/");
+    dll_path.append(fileName);
+    {
+        printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
+        return errorcode_t::JsSuccess;
+    } else {
+        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", dll_path.c_str());
+    }
 
     // Last recourse, try loading the library through dlopen().
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.

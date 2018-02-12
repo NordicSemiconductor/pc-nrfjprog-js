@@ -56,7 +56,6 @@
 
 std::string dll_search_path;
 
-
 // NAN_METHOD is a macro; it's shorthand so you don't have to write that the
 // first and only parameter is of type Nan::FunctionCallbackInfo<v8::Value>
 NAN_METHOD(OSFilesSetDllSearchPath)

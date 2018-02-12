@@ -50,10 +50,26 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
+std::string dll_search_path;
+
 NAN_METHOD(OSFilesSetDllSearchPath)
 {
-    printf("\win/osfiles.cpp: SetDllSearchPath() called. Ignoring.\n\n");
+    // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
+    if (info.Length() > 0) {
+        if (info[0]->IsString()) {
+            v8::String::Utf8Value param1(info[0]->ToString());
+            std::string path = std::string(*param1);
+
+            printf("\nwin/osfiles.cpp: SetDllSearchPath() called with %s\n\n",
+                path.c_str()
+            );
+
+            dll_search_path.assign(path);
+        }
+    }
+    /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
+
 
 errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std::string &fileName)
 {
@@ -138,11 +154,26 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std:
 
 errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 {
-    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, fileName);
-
-    if (retCode != JsSuccess) {
-        retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, fileName);
+    // Try to find the DLLs from the path given to OSFilesSetDllSearchPath()
+    dll_path.assign(dll_search_path);
+    dll_path.append("\\");
+    dll_path.append(fileName);
+    if (AbstractFile::pathExists(dll_path))
+    {
+        printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
+        return errorcode_t::JsSuccess;
+    } else {
+        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", dll_path.c_str());
     }
+
+    // If that fails, try to find the DLLs when installed in the whole machine (for all users)
+    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, fileName);
+    if (retCode == errorcode_t::JsSuccess) {
+        return retCode;
+    }
+
+    // If that fails, try to find the DLLs when installed for the current user only
+    retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, fileName);
 
     return retCode;
 }
