@@ -89,19 +89,19 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-        if (AbstractFile::pathExists(dll_path))
-    {
-        return errorcode_t::JsSuccess;
-    }
-
     dll_path.append(dirname(pathbuf));
     dll_path.append("/");
     dll_path.append(fileName);
+    if (AbstractFile::pathExists(dll_path))
+    {
+        return errorcode_t::JsSuccess;
+    }
 
     // Try the path specified from calling OSFilesSetDllSearchPath
     dll_path.assign(dll_search_path);
     dll_path.append("/");
     dll_path.append(fileName);
+    if (AbstractFile::pathExists(dll_path))
     {
         printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
         return errorcode_t::JsSuccess;
