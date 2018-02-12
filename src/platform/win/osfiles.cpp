@@ -133,7 +133,7 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std:
         if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&install_path, &install_path_size) == ERROR_SUCCESS)
         {
             /* Copy, check it exists and return if it does. */
-            dll_path.append(install_path);
+            dll_path.assign(install_path);
             dll_path.append(fileName);
             RegCloseKey(innerKey);
             RegCloseKey(key);
