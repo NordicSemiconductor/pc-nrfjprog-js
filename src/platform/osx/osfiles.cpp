@@ -124,9 +124,9 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 
 }
 
-std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
+std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
 {
-    return base_path + '/' + relative_path;
+    return basePath + '/' + relativePath;
 }
 
 bool AbstractFile::pathExists(const char * path)
@@ -138,7 +138,7 @@ bool AbstractFile::pathExists(const char * path)
 /* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are valid, "/tmp" is returned. */
 std::string OSFilesGetTempFolderPath(void)
 {
-    std::string temp_keys[4] = {
+    std::string tempKeys[4] = {
         "TMPDIR",
         "TMP",
         "TEMP",
@@ -147,7 +147,7 @@ std::string OSFilesGetTempFolderPath(void)
 
     for (uint32_t i = 0; i < 4; i++)
     {
-        char * val = getenv(temp_keys[i].c_str());
+        char * val = getenv(tempKeys[i].c_str());
 
         if (val != NULL)
         {
@@ -162,13 +162,13 @@ std::string OSFilesGetTempFolderPath(void)
  * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
 std::string TempFile::getTempFileName()
 {
-    std::string temp_file_name_template = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
+    std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
-    char temp_file_name[COMMON_MAX_PATH];
+    char tempFileName[COMMON_MAX_PATH];
 
-    strncpy(temp_file_name, temp_file_name_template.c_str(), COMMON_MAX_PATH);
+    strncpy(tempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(temp_file_name, 4);
+    int temp_file = mkstemps(tempFileName, 4);
 
     if (temp_file == -1)
     {
@@ -179,7 +179,7 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(temp_file_name);
+    return std::string(tempFileName);
 }
 
 

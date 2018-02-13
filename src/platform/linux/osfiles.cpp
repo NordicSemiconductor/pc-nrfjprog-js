@@ -66,7 +66,7 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
                 path.c_str()
             );
 
-            library_search_path.assign(path);
+            librarySearchPath.assign(path);
         }
     }
     /// TODO: Add some error throwing if no parameters or the parameter is not a string
@@ -78,21 +78,21 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
  */
 errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 {
-    char temp_libraryPath[COMMON_MAX_PATH];
-    memset(temp_libraryPath, 0, COMMON_MAX_PATH);
+    char tempLibraryPath[COMMON_MAX_PATH];
+    memset(tempLibraryPath, 0, COMMON_MAX_PATH);
 
     // Fetch path of currently running executable
     ssize_t len;
-    len = readlink("/proc/self/exe", temp_libraryPath, COMMON_MAX_PATH - 1);
+    len = readlink("/proc/self/exe", tempLibraryPath, COMMON_MAX_PATH - 1);
 
-//     printf("\n/proc/self/exe points to: %s\n\n", temp_libraryPath);
+//     printf("\n/proc/self/exe points to: %s\n\n", tempLibraryPath);
 
     if (len == -1)
     {
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    libraryPath.append(dirname(temp_libraryPath));
+    libraryPath.append(dirname(tempLibraryPath));
     libraryPath.append("/");
     libraryPath.append(fileName);
 
@@ -137,9 +137,9 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
+std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
 {
-    return base_path + '/' + relative_path;
+    return basePath + '/' + relativePath;
 }
 
 bool AbstractFile::pathExists(const char * path)
@@ -175,13 +175,13 @@ std::string OSFilesGetTempFolderPath(void)
  * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
 std::string TempFile::getTempFileName()
 {
-    std::string temp_file_name_template = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
+    std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
-    char temp_file_name[COMMON_MAX_PATH];
+    char tempFileName[COMMON_MAX_PATH];
 
-    strncpy(temp_file_name, temp_file_name_template.c_str(), COMMON_MAX_PATH);
+    strncpy(tempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(temp_file_name, 4);
+    int temp_file = mkstemps(tempFileName, 4);
 
     if (temp_file == -1)
     {
@@ -192,7 +192,7 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(temp_file_name);
+    return std::string(tempFileName);
 }
 
 

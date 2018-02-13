@@ -151,7 +151,7 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
         {
             argumentCount = CUSTOM_ARGUMENT_PARSE_ERROR;
             std::ostringstream errorStringStream;
-            errorStringStream << "Too many parameters. The function " << baton->name << " do not take " << info.Length() << " parameters.";
+            errorStringStream << "Too many parameters. The function " << baton->name << " does not take " << info.Length() << " parameters.";
             throw errorStringStream.str();
         }
     }

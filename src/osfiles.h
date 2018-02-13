@@ -87,7 +87,7 @@ private:
     std::string writeTempFile(std::string fileContent);
     std::string getTempFileName();
     void deleteFile();
-    std::string concatPaths(std::string base_path, std::string relative_path);
+    std::string concatPaths(std::string basePath, std::string relativePath);
 
     enum TempFileErrorcode {
         TempNoError,

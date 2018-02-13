@@ -76,8 +76,8 @@ errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPat
     HKEY key;
     HKEY innerKey;
 
-    CHAR install_path[COMMON_MAX_PATH] = {'\0'};
-    DWORD install_path_size = sizeof(install_path);
+    CHAR installPath[COMMON_MAX_PATH] = {'\0'};
+    DWORD installPathSize = sizeof(installPath);
 
     /* Search for JLinkARM in the Local Machine Key.  */
     if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &key) == ERROR_SUCCESS)
@@ -130,10 +130,10 @@ errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPat
         }
 
         /* If it is found, read the install path. */
-        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&install_path, &install_path_size) == ERROR_SUCCESS)
+        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&installPath, &installPathSize) == ERROR_SUCCESS)
         {
             /* Copy, check it exists and return if it does. */
-            libraryPath.assign(install_path);
+            libraryPath.assign(installPath);
             libraryPath.append(fileName);
             RegCloseKey(innerKey);
             RegCloseKey(key);
@@ -183,11 +183,11 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     return retCode;
 }
 
-std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
+std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
 {
     char buffer[MAX_PATH] = "";
 
-    PathCombine(buffer, base_path.c_str(), relative_path.c_str());
+    PathCombine(buffer, basePath.c_str(), relativePath.c_str());
 
     return std::string(buffer);
 }
@@ -200,10 +200,10 @@ bool AbstractFile::pathExists(const char *path)
 std::string TempFile::getTempFileName()
 {
     /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with GetTempFileName function. */
-    TCHAR temp_folder_path[MAX_PATH];
-    TCHAR temp_file_path[MAX_PATH];
+    TCHAR tempFolderPath[MAX_PATH];
+    TCHAR tempFilePath[MAX_PATH];
 
-    DWORD pathLength = GetTempPath(MAX_PATH, temp_folder_path);
+    DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath);
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {
@@ -211,13 +211,13 @@ std::string TempFile::getTempFileName()
         return std::string();
     }
 
-    if (GetTempFileName(temp_folder_path, TEXT("NRF"), 0, temp_file_path) == 0)
+    if (GetTempFileName(tempFolderPath, TEXT("NRF"), 0, tempFilePath) == 0)
     {
         error = TempCouldNotCreateFile;
         return std::string();
     }
 
-    return std::string(temp_file_path);
+    return std::string(tempFilePath);
 }
 
 void TempFile::deleteFile()
