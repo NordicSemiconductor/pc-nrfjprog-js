@@ -81,10 +81,10 @@ public:
 
 std::timed_mutex Baton::executionMutex;
 
-class GetDllVersionBaton : public Baton
+class GetLibraryVersionBaton : public Baton
 {
 public:
-    GetDllVersionBaton() : Baton("get dll version", 1, false) {}
+    GetLibraryVersionBaton() : Baton("get library version", 1, false) {}
     uint32_t major;
     uint32_t minor;
     uint32_t revision;

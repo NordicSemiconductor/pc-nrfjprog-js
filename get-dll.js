@@ -94,10 +94,10 @@ if (!platformConfig) {
     throw new Error(`Unsupported platform: '${platform}'. Cannot get nrfjprog command-line tools.`);
 }
 
-const dllVersion = new Promise((res, rej)=>{
+const libraryVersion = new Promise((res, rej)=>{
     try {
         const nrfjprog = require('.');
-        nrfjprog.getDllVersion((err, version)=>{
+        nrfjprog.getLibraryVersion((err, version)=>{
             if (err) { rej(err) } else {res(version)}
         })
     } catch(ex) {
@@ -107,12 +107,12 @@ const dllVersion = new Promise((res, rej)=>{
 
 
 // Check if nrf-jprog binary libraries are working or not
-dllVersion
+libraryVersion
 .then((version)=>{
     console.log('nrfjprog libraries at version ', version, ', no need to fetch them');
 })
 .catch((err)=>{
-    // Windows-specific: check if the header files for nrfjprog are there. If they are, 
+    // Windows-specific: check if the header files for nrfjprog are there. If they are,
     // assume the nrfjprog files are available in the system, do not download, do not
     // prompt information.
     if (process.platform === 'win32') {
@@ -121,7 +121,7 @@ dllVersion
         } catch(ex) {
             return Promise.reject(err);
         }
-            
+
         return true;
     } else {
         return Promise.reject(err);
@@ -198,14 +198,14 @@ dllVersion
             if (platformConfig.spawnChild) {
                 console.log('Installation of pc-nrfjprog-js requires running ' + platformConfig.spawnChild);
                 return opn(platformConfig.spawnChild);
-            } 
+            }
         })
         .then(()=>{
             if (platformConfig.instructions) {
                 return Promise.resolve(console.warn(platformConfig.instructions));
             } else if (tryAgainAfterwards) {
                 // Try and see if it works now.
-                return dllVersion.then((version)=>{
+                return libraryVersion.then((version)=>{
                     console.log('Automated fetch of nrfjprog seems to have worked, now at ', version);
                 })
             } else {

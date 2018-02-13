@@ -9,10 +9,10 @@
 
 const chalk = require('chalk');
 
-const dllVersion = new Promise((res, rej)=>{
+const libraryVersion = new Promise((res, rej)=>{
     try {
         const nrfjprog = require('.');
-        nrfjprog.getDllVersion((err, version)=>{
+        nrfjprog.getLibraryVersion((err, version)=>{
             if (err) { rej(err) } else {res(version)}
         })
     } catch(ex) {
@@ -21,7 +21,7 @@ const dllVersion = new Promise((res, rej)=>{
 });
 
 
-dllVersion
+libraryVersion
 .then((version)=>{
     console.log('nrfjprog libraries at version ', version, ', seems that J-Link libraries are working as expected');
 })

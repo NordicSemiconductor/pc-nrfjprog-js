@@ -50,9 +50,9 @@
 
 #include <libproc.h>  // proc pidpathinfo maxsize
 
-std::string dll_search_path;
+std::string librarySearchPath;
 
-NAN_METHOD(OSFilesSetDllSearchPath)
+NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
     // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
     if (info.Length() > 0) {
@@ -60,18 +60,18 @@ NAN_METHOD(OSFilesSetDllSearchPath)
             v8::String::Utf8Value param1(info[0]->ToString());
             std::string path = std::string(*param1);
 
-            printf("\nosx/osfiles.cpp: SetDllSearchPath() called with %s\n\n",
+            printf("\nosx/osfiles.cpp: setLibrarySearchPath() called with %s\n\n",
                 path.c_str()
             );
 
-            dll_search_path.assign(path);
+            librarySearchPath.assign(path);
         }
     }
     /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
 
 
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 {
     int ret;
     pid_t pid;
@@ -89,24 +89,24 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    dll_path.append(dirname(pathbuf));
-    dll_path.append("/");
-    dll_path.append(fileName);
-    if (AbstractFile::pathExists(dll_path))
+    libraryPath.append(dirname(pathbuf));
+    libraryPath.append("/");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
     {
         return errorcode_t::JsSuccess;
     }
 
-    // Try the path specified from calling OSFilesSetDllSearchPath
-    dll_path.assign(dll_search_path);
-    dll_path.append("/");
-    dll_path.append(fileName);
-    if (AbstractFile::pathExists(dll_path))
+    // Try the path specified from calling OSFilesSetLibrarySearchPath
+    libraryPath.assign(librarySearchPath);
+    libraryPath.append("/");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
     {
-        printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
+        printf("\nShared jprog libraries found in specified path: %s \n\n", libraryPath.c_str());
         return errorcode_t::JsSuccess;
     } else {
-        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", dll_path.c_str());
+        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", libraryPath.c_str());
     }
 
     // Last recourse, try loading the library through dlopen().
@@ -116,7 +116,7 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     if (libraryHandle)
     {
         dlclose(libraryHandle);
-        dll_path = fileName;
+        libraryPath = fileName;
         return errorcode_t::JsSuccess;
     }
 

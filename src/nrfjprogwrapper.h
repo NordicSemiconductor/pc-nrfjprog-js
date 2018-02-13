@@ -37,7 +37,6 @@
 #ifndef NRFJPROGWRAPPER_H
 #define NRFJPROGWRAPPER_H
 
-//#include "nrfjprogdll.h"
 #include "highlevel_common.h"
 #include "utility/errormessage.h"
 
@@ -106,7 +105,7 @@ typedef nrfjprogdll_err_t (*nRFjprog_qspi_write)                        (uint32_
 typedef nrfjprogdll_err_t (*nRFjprog_qspi_erase)                        (uint32_t addr, qspi_erase_len_t length);
 typedef nrfjprogdll_err_t (*nRFjprog_qspi_custom)                       (uint8_t instruction_code, uint8_t instruction_length, const uint8_t * data_in, uint8_t * data_out);
 
-struct nRFjprogDllFunctionPointersType {
+struct nRFjprogLibraryFunctionPointersType {
     nRFjprog_dll_version                      dll_version;
     nRFjprog_is_dll_open                      is_dll_open;
     nRFjprog_open_dll                         open_dll;
@@ -173,7 +172,7 @@ struct nRFjprogDllFunctionPointersType {
     nRFjprog_qspi_custom                      qspi_custom;
 };
 
-errorcode_t loadnRFjprogFunctions(nRFjprogDllFunctionPointersType * dll_function);
+errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType * libraryFunctions);
 errorcode_t releasenRFjprog();
 
 #endif

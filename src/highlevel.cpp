@@ -53,7 +53,7 @@
 #define REPORTABLE_PROGESS 5
 
 Nan::Persistent<v8::Function> HighLevel::constructor;
-DllFunctionPointersType HighLevel::dll_function;
+LibraryFunctionPointersType HighLevel::libraryFunctions;
 bool HighLevel::loaded = false;
 bool HighLevel::connectedToDevice = false;
 std::string HighLevel::logMessage;
@@ -212,7 +212,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         uv_async_init(uv_default_loop(), progressEvent, sendProgress);
     }
 
-    baton->result = loadDll();
+    baton->result = loadLibrary();
 
     if (baton->result != errorcode_t::JsSuccess)
     {
@@ -220,11 +220,11 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     }
 
     bool isOpen;
-    dll_function.is_dll_open(&isOpen);
+    libraryFunctions.is_dll_open(&isOpen);
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError = dll_function.dll_open(nullptr, &HighLevel::log, &HighLevel::progressCallback);
+        nrfjprogdll_err_t openError = libraryFunctions.dll_open(nullptr, &HighLevel::log, &HighLevel::progressCallback);
 
         if (openError != SUCCESS)
         {
@@ -237,7 +237,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     if (baton->serialNumber != 0
         && !keepDeviceOpen)
     {
-        nrfjprogdll_err_t initError = dll_function.probe_init(&probe, baton->serialNumber, nullptr);
+        nrfjprogdll_err_t initError = libraryFunctions.probe_init(&probe, baton->serialNumber, nullptr);
 
         if (initError != SUCCESS)
         {
@@ -253,7 +253,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         if (baton->serialNumber != 0)
         {
-            nrfjprogdll_err_t resetError = dll_function.reset(probe, RESET_SYSTEM);
+            nrfjprogdll_err_t resetError = libraryFunctions.reset(probe, RESET_SYSTEM);
 
             if (resetError != SUCCESS)
             {
@@ -262,7 +262,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
                 return;
             }
 
-            nrfjprogdll_err_t uninitError = dll_function.probe_uninit(&probe);
+            nrfjprogdll_err_t uninitError = libraryFunctions.probe_uninit(&probe);
 
             if (uninitError != SUCCESS)
             {
@@ -272,9 +272,9 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
             }
         }
 
-        dll_function.dll_close();
+        libraryFunctions.dll_close();
 
-        unloadDll();
+        unloadLibrary();
     }
 
     if (executeError != SUCCESS)
@@ -361,20 +361,20 @@ void HighLevel::sendProgress(uv_async_t *handle)
     }
 }
 
-errorcode_t HighLevel::loadDll()
+errorcode_t HighLevel::loadLibrary()
 {
     if (loaded)
     {
         return errorcode_t::JsSuccess;
     }
 
-    errorcode_t dll_load_result = loadHighLevelFunctions(&dll_function);
-    loaded = dll_load_result == errorcode_t::JsSuccess;
+    errorcode_t library_load_result = loadHighLevelFunctions(&libraryFunctions);
+    loaded = library_load_result == errorcode_t::JsSuccess;
 
-    return dll_load_result;
+    return library_load_result;
 }
 
-void HighLevel::unloadDll()
+void HighLevel::unloadLibrary()
 {
     if (loaded)
     {
@@ -385,7 +385,8 @@ void HighLevel::unloadDll()
 
 void HighLevel::init(v8::Local<v8::FunctionTemplate> tpl)
 {
-    Nan::SetPrototypeMethod(tpl, "getDllVersion", GetDllVersion);
+    Nan::SetPrototypeMethod(tpl, "getDllVersion", GetLibraryVersion); // Deprecated
+    Nan::SetPrototypeMethod(tpl, "getLibraryVersion", GetLibraryVersion);
     Nan::SetPrototypeMethod(tpl, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(tpl, "getSerialNumbers", GetSerialNumbers);
     Nan::SetPrototypeMethod(tpl, "getDeviceInfo", GetDeviceInfo);
@@ -480,19 +481,19 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_STRING);
 }
 
-NAN_METHOD(HighLevel::GetDllVersion)
+NAN_METHOD(HighLevel::GetLibraryVersion)
 {
     parse_parameters_function_t p = [&] (Nan::NAN_METHOD_ARGS_TYPE parameters, int &argumentCount) -> Baton* {
-        return new GetDllVersionBaton();
+        return new GetLibraryVersionBaton();
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        auto baton = static_cast<GetDllVersionBaton*>(b);
-        return dll_function.dll_get_version(&baton->major, &baton->minor, &baton->revision);
+        auto baton = static_cast<GetLibraryVersionBaton*>(b);
+        return libraryFunctions.dll_get_version(&baton->major, &baton->minor, &baton->revision);
     };
 
     return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
-        auto baton = static_cast<GetDllVersionBaton*>(b);
+        auto baton = static_cast<GetLibraryVersionBaton*>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
         v8::Local<v8::Object> versionObj = Nan::New<v8::Object>();
@@ -518,7 +519,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         auto baton = static_cast<GetConnectedDevicesBaton*>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
         uint32_t available = 0;
-        nrfjprogdll_err_t error = dll_function.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available);
+        nrfjprogdll_err_t error = libraryFunctions.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
         {
@@ -528,7 +529,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         for (uint32_t i = 0; i < available; i++)
         {
             Probe_handle_t getInfoProbe;
-            nrfjprogdll_err_t initError = dll_function.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
+            nrfjprogdll_err_t initError = libraryFunctions.probe_init(&getInfoProbe, serialNumbers[i], nullptr);
 
             device_info_t device_info;
             probe_info_t probe_info;
@@ -536,11 +537,11 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
             if (initError == SUCCESS)
             {
-                dll_function.get_device_info(getInfoProbe, &device_info);
-                dll_function.get_probe_info(getInfoProbe, &probe_info);
-                dll_function.get_library_info(getInfoProbe, &library_info);
+                libraryFunctions.get_device_info(getInfoProbe, &device_info);
+                libraryFunctions.get_probe_info(getInfoProbe, &probe_info);
+                libraryFunctions.get_library_info(getInfoProbe, &library_info);
 
-                dll_function.probe_uninit(&getInfoProbe);
+                libraryFunctions.probe_uninit(&getInfoProbe);
             }
             baton->probes.push_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info, probe_info, library_info));
         }
@@ -578,7 +579,7 @@ NAN_METHOD(HighLevel::GetSerialNumbers)
         auto baton = static_cast<GetSerialNumbersBaton*>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
         uint32_t available = 0;
-        nrfjprogdll_err_t error = dll_function.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available);
+        nrfjprogdll_err_t error = libraryFunctions.get_connected_probes(serialNumbers, MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
         {
@@ -621,7 +622,7 @@ NAN_METHOD(HighLevel::GetProbeInfo)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<GetProbeInfoBaton*>(b);
-        return dll_function.get_probe_info(probe, &baton->probeInfo);
+        return libraryFunctions.get_probe_info(probe, &baton->probeInfo);
     };
 
     return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -644,7 +645,7 @@ NAN_METHOD(HighLevel::GetLibraryInfo)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<GetLibraryInfoBaton*>(b);
-        return dll_function.get_library_info(probe, &baton->libraryInfo);
+        return libraryFunctions.get_library_info(probe, &baton->libraryInfo);
     };
 
     return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -667,7 +668,7 @@ NAN_METHOD(HighLevel::GetDeviceInfo)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<GetDeviceInfoBaton*>(b);
-        return dll_function.get_device_info(probe, &baton->deviceInfo);
+        return libraryFunctions.get_device_info(probe, &baton->deviceInfo);
     };
 
     return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -699,7 +700,7 @@ NAN_METHOD(HighLevel::Read)
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadBaton*>(b);
         baton->data.resize(baton->length, 0);
-        return dll_function.read(probe, baton->address, baton->data.data(), baton->length);
+        return libraryFunctions.read(probe, baton->address, baton->data.data(), baton->length);
     };
 
     return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -727,7 +728,7 @@ NAN_METHOD(HighLevel::ReadU32)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadU32Baton*>(b);
-        return dll_function.read_u32(probe, baton->address, &baton->data);
+        return libraryFunctions.read_u32(probe, baton->address, &baton->data);
     };
 
     return_function_t r = [&] (Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -774,16 +775,16 @@ NAN_METHOD(HighLevel::Program)
 
         baton->filename = file.getFileName();
 
-        programResult = dll_function.program(probe, baton->filename.c_str(), baton->options);
+        programResult = libraryFunctions.program(probe, baton->filename.c_str(), baton->options);
 
         if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION &&
             baton->options.chip_erase_mode == ERASE_ALL)
         {
-            const nrfjprogdll_err_t recoverResult = dll_function.recover(probe);
+            const nrfjprogdll_err_t recoverResult = libraryFunctions.recover(probe);
 
             if (recoverResult == SUCCESS)
             {
-                programResult = dll_function.program(probe, baton->filename.c_str(), baton->options);
+                programResult = libraryFunctions.program(probe, baton->filename.c_str(), baton->options);
             }
             else
             {
@@ -815,7 +816,7 @@ NAN_METHOD(HighLevel::ReadToFile)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<ReadToFileBaton*>(b);
-        return dll_function.read_to_file(probe, baton->filename.c_str(), baton->options);
+        return libraryFunctions.read_to_file(probe, baton->filename.c_str(), baton->options);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -840,7 +841,7 @@ NAN_METHOD(HighLevel::Verify)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<VerifyBaton*>(b);
-        return dll_function.verify(probe, baton->filename.c_str(), VERIFY_READ);
+        return libraryFunctions.verify(probe, baton->filename.c_str(), VERIFY_READ);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -863,7 +864,7 @@ NAN_METHOD(HighLevel::Erase)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<EraseBaton*>(b);
-        return dll_function.erase(probe, baton->erase_mode, baton->start_address, baton->end_address);
+        return libraryFunctions.erase(probe, baton->erase_mode, baton->start_address, baton->end_address);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -876,7 +877,7 @@ NAN_METHOD(HighLevel::Recover)
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        return dll_function.recover(probe);
+        return libraryFunctions.recover(probe);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -899,7 +900,7 @@ NAN_METHOD(HighLevel::Write)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<WriteBaton*>(b);
-        return dll_function.write(probe, baton->address, baton->data.data(), baton->length);
+        return libraryFunctions.write(probe, baton->address, baton->data.data(), baton->length);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -921,7 +922,7 @@ NAN_METHOD(HighLevel::WriteU32)
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = static_cast<WriteU32Baton*>(b);
-        return dll_function.write_u32(probe, baton->address, baton->data);
+        return libraryFunctions.write_u32(probe, baton->address, baton->data);
     };
 
     CallFunction(info, p, e, nullptr, true);

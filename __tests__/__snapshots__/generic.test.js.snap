@@ -2,6 +2,6 @@
 
 exports[`Generic functionality throws when too few parameters are sent in 1`] = `"First argument must be a function"`;
 
-exports[`Generic functionality throws when too many parameters are sent in 1`] = `"Too many parameters. The function get dll version do not take 2 parameters."`;
+exports[`Generic functionality throws when too many parameters are sent in 1`] = `"Too many parameters. The function get library version do not take 2 parameters."`;
 
 exports[`Generic functionality throws when wrong type of parameters are sent in 1`] = `"First argument must be a function"`;

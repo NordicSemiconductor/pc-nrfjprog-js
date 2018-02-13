@@ -50,11 +50,11 @@
 
 #include <iostream>
 
-std::string dll_search_path;
+std::string librarySearchPath;
 
 // NAN_METHOD is a macro; it's shorthand so you don't have to write that the
 // first and only parameter is of type Nan::FunctionCallbackInfo<v8::Value>
-NAN_METHOD(OSFilesSetDllSearchPath)
+NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
     // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
     if (info.Length() > 0) {
@@ -62,62 +62,62 @@ NAN_METHOD(OSFilesSetDllSearchPath)
             v8::String::Utf8Value param1(info[0]->ToString());
             std::string path = std::string(*param1);
 
-            printf("\nlinux/osfiles.cpp: SetDllSearchPath() called with %s\n\n",
+            printf("\nlinux/osfiles.cpp: setLibrarySearchPath() called with %s\n\n",
                 path.c_str()
             );
 
-            dll_search_path.assign(path);
+            library_search_path.assign(path);
         }
     }
     /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
 
 
-/* Try to locate a dynamically-linked library named fileName, and set dll_path
+/* Try to locate a dynamically-linked library named fileName, and set libraryPath
  * to the full path to that library.
  */
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 {
-    char temp_dll_path[COMMON_MAX_PATH];
-    memset(temp_dll_path, 0, COMMON_MAX_PATH);
+    char temp_libraryPath[COMMON_MAX_PATH];
+    memset(temp_libraryPath, 0, COMMON_MAX_PATH);
 
     // Fetch path of currently running executable
     ssize_t len;
-    len = readlink("/proc/self/exe", temp_dll_path, COMMON_MAX_PATH - 1);
+    len = readlink("/proc/self/exe", temp_libraryPath, COMMON_MAX_PATH - 1);
 
-//     printf("\n/proc/self/exe points to: %s\n\n", temp_dll_path);
+//     printf("\n/proc/self/exe points to: %s\n\n", temp_libraryPath);
 
     if (len == -1)
     {
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    dll_path.append(dirname(temp_dll_path));
-    dll_path.append("/");
-    dll_path.append(fileName);
+    libraryPath.append(dirname(temp_libraryPath));
+    libraryPath.append("/");
+    libraryPath.append(fileName);
 
-//     printf("\nTrying to load %s from: %s\n\n", fileName.c_str(), dll_path.c_str());
+//     printf("\nTrying to load %s from: %s\n\n", fileName.c_str(), libraryPath.c_str());
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    if (AbstractFile::pathExists(dll_path))
+    if (AbstractFile::pathExists(libraryPath))
     {
         return errorcode_t::JsSuccess;
     }
 
 
-    // Try the path specified from calling OSFilesSetDllSearchPath
-//         printf("\nSpecified search path is: %s \n\n", dll_search_path.c_str());
+    // Try the path specified from calling OSFilesSetLibrarySearchPath
+//         printf("\nSpecified search path is: %s \n\n", librarySearchPath.c_str());
 
-    dll_path.assign(dll_search_path);
-    dll_path.append("/");
-    dll_path.append(fileName);
-    if (AbstractFile::pathExists(dll_path))
+    libraryPath.assign(librarySearchPath);
+    libraryPath.append("/");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
     {
-//         printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
+//         printf("\nShared jprog libraries found in specified path: %s \n\n", libraryPath.c_str());
         return errorcode_t::JsSuccess;
     } else {
-//         printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", dll_path.c_str());
+//         printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", libraryPath.c_str());
     }
 
 
@@ -129,7 +129,7 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
     if (libraryHandle)
     {
         dlclose(libraryHandle);
-        dll_path = fileName;
+        libraryPath = fileName;
         return errorcode_t::JsSuccess;
     }
 

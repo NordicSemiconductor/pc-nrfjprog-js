@@ -100,7 +100,7 @@ private:
     static bool libraryLoaded;
     static std::chrono::high_resolution_clock::time_point rttStartTime;
 
-    static nRFjprogDllFunctionPointersType dll_function;
+    static nRFjprogLibraryFunctionPointersType libraryFunctions;
 };
 
 #endif

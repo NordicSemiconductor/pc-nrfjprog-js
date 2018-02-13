@@ -44,12 +44,7 @@
 extern "C" {
     NAN_MODULE_INIT(init)
     {
-        Nan::Set(
-            target,
-            Nan::New("setDllSearchPath").ToLocalChecked(),
-            Nan::GetFunction(Nan::New<v8::FunctionTemplate>(OSFilesSetDllSearchPath)).ToLocalChecked()
-        );
-
+        OSFilesInit(target);
         HighLevel::initConsts(target);
         RTT::initConsts(target);
         HighLevel::Init(target);

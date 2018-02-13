@@ -85,7 +85,7 @@
  * @property {String} log The complete log from the internal functions.
  *
  * @example
- * nrfprogjs.getDllVersion(function(err, version){
+ * nrfprogjs.getLibraryVersion(function(err, version){
  *     if (err) {
  *         throw err;
  *     } else {
@@ -265,6 +265,7 @@
 
 /**
  * Async function to get the version of the nrfjprog DLL in use.
+ * @deprecated in favour of getLibraryVersion
  *
  * @example
  * nrfjprogjs.getDllVersion( function(err, version) {
@@ -276,6 +277,20 @@
  *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~Version|Version}).
  */
 export function getDllVersion(callback) {}
+
+/**
+ * Async function to get the version of the nrfjprog library in use.
+ *
+ * @example
+ * nrfjprogjs.getLibraryVersion( function(err, version) {
+ *      if (err) throw err;
+ *      console.log( version.major + '.' + version.minor + '.' + version.revision ) // e.g. 9.6.0
+ * } );
+ *
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~Version|Version}).
+ */
+export function getLibraryVersion(callback) {}
 
 /**
  * Async function to get a list of all connected devices.

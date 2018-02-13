@@ -68,8 +68,9 @@ function runTests() {
     });
 }
 
-runTests()
-.catch(err => {
-    console.error(`Error running tests: ${err.message}`);
-    process.exit(1);
-});
+Promise.resolve()
+    .then(() => runTests())
+    .catch(err => {
+        console.error(`Error running tests: ${err.message}`);
+        process.exit(1);
+    });

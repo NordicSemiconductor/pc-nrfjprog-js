@@ -50,9 +50,9 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-std::string dll_search_path;
+std::string librarySearchPath;
 
-NAN_METHOD(OSFilesSetDllSearchPath)
+NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
     // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
     if (info.Length() > 0) {
@@ -60,18 +60,18 @@ NAN_METHOD(OSFilesSetDllSearchPath)
             v8::String::Utf8Value param1(info[0]->ToString());
             std::string path = std::string(*param1);
 
-            printf("\nwin/osfiles.cpp: SetDllSearchPath() called with %s\n\n",
+            printf("\nwin/osfiles.cpp: setLibrarySearchPath() called with %s\n\n",
                 path.c_str()
             );
 
-            dll_search_path.assign(path);
+            librarySearchPath.assign(path);
         }
     }
     /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
 
 
-errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std::string &fileName)
+errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath, std::string &fileName)
 {
     HKEY key;
     HKEY innerKey;
@@ -133,11 +133,11 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std:
         if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&install_path, &install_path_size) == ERROR_SUCCESS)
         {
             /* Copy, check it exists and return if it does. */
-            dll_path.assign(install_path);
-            dll_path.append(fileName);
+            libraryPath.assign(install_path);
+            libraryPath.append(fileName);
             RegCloseKey(innerKey);
             RegCloseKey(key);
-            if (TempFile::pathExists(dll_path.c_str()))
+            if (TempFile::pathExists(libraryPath.c_str()))
             {
                 return errorcode_t::JsSuccess;
             }
@@ -152,32 +152,32 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std:
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 {
-    // Try to find the DLLs from the path given to OSFilesSetDllSearchPath()
-    dll_path.assign(dll_search_path);
-    dll_path.append("\\");
-    dll_path.append(fileName);
-    if (AbstractFile::pathExists(dll_path))
+    // Try to find the DLLs from the path given to OSFilesSetLibrarySearchPath()
+    libraryPath.assign(librarySearchPath);
+    libraryPath.append("\\");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
     {
-        printf("\nShared jprog libraries found in specified path: %s \n\n", dll_path.c_str());
+        printf("\nShared jprog libraries found in specified path: %s \n\n", libraryPath.c_str());
         return errorcode_t::JsSuccess;
     }
 
     // If that fails, try to find the DLLs when installed in the whole machine (for all users)
-    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, fileName);
+    errorcode_t retCode = OSFilesFindLibraryByHKey(HKEY_LOCAL_MACHINE, libraryPath, fileName);
     if (retCode == errorcode_t::JsSuccess) {
-        printf("\nShared jprog libraries found in registry under HKEY_LOCAL_MACHINE path: %s \n\n", dll_path.c_str());
+        printf("\nShared jprog libraries found in registry under HKEY_LOCAL_MACHINE path: %s \n\n", libraryPath.c_str());
         return retCode;
     }
 
     // If that fails, try to find the DLLs when installed for the current user only
-    retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, fileName);
+    retCode = OSFilesFindLibraryByHKey(HKEY_CURRENT_USER, libraryPath, fileName);
 
     if (retCode == errorcode_t::JsSuccess) {
-        printf("\nShared jprog libraries found in registry under HKEY_CURRENT_USER path: %s \n\n", dll_path.c_str());
+        printf("\nShared jprog libraries found in registry under HKEY_CURRENT_USER path: %s \n\n", libraryPath.c_str());
     } else {
-        printf("\nShared jprog libraries not found anywhere :-( \n\n", dll_path.c_str());
+        printf("\nShared jprog libraries not found anywhere :-( \n\n", libraryPath.c_str());
     }
 
     return retCode;

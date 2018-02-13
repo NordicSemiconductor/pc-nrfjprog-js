@@ -47,8 +47,10 @@
 #define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
 #define COMMON_MAX_INI_LINE (1024)
 
-NAN_METHOD(OSFilesSetDllSearchPath);
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName);
+void OSFilesInit(v8::Local<v8::Object> tpl);
+
+NAN_METHOD(OSFilesSetLibrarySearchPath);
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName);
 std::string getHighLevelLibraryName();
 std::string getnrfjprogLibraryName();
 

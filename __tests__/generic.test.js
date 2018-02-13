@@ -41,7 +41,19 @@ const nRFjprog = require('../index.js');
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 describe('Generic functionality', () => {
-    it('gets dll version', done => {
+    it('gets library version', done => {
+        const callback = (err, version) => {
+            expect(err).toBeUndefined();
+            expect(version).toHaveProperty('major');
+            expect(version).toHaveProperty('minor');
+            expect(version).toHaveProperty('revision');
+            done();
+        };
+
+        nRFjprog.getLibraryVersion(callback);
+    });
+
+    it('gets deprecated dll version', done => {
         const callback = (err, version) => {
             expect(err).toBeUndefined();
             expect(version).toHaveProperty('major');
@@ -80,16 +92,16 @@ describe('Generic functionality', () => {
     });
 
     it('throws when too few parameters are sent in', () => {
-        expect(() => { nRFjprog.getDllVersion(); }).toThrowErrorMatchingSnapshot();
+        expect(() => { nRFjprog.getLibraryVersion(); }).toThrowErrorMatchingSnapshot();
     });
 
     it('throws when too many parameters are sent in', () => {
         const mockCallback = jest.fn();
 
-        expect(() => { nRFjprog.getDllVersion(mockCallback, mockCallback); }).toThrowErrorMatchingSnapshot();
+        expect(() => { nRFjprog.getLibraryVersion(mockCallback, mockCallback); }).toThrowErrorMatchingSnapshot();
     });
 
     it('throws when wrong type of parameters are sent in', () => {
-        expect(() => { nRFjprog.getDllVersion(1); }).toThrowErrorMatchingSnapshot();
+        expect(() => { nRFjprog.getLibraryVersion(1); }).toThrowErrorMatchingSnapshot();
     });
 });
