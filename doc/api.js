@@ -264,17 +264,8 @@
  */
 
 /**
- * Async function to get the version of the nrfjprog DLL in use.
- * @deprecated in favour of getLibraryVersion
- *
- * @example
- * nrfjprogjs.getDllVersion( function(err, version) {
- *      if (err) throw err;
- *      console.log( version.major + '.' + version.minor + '.' + version.revision ) // e.g. 9.6.0
- * } );
- *
- * @param {Function} callback A callback function to handle the async response.
- *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~Version|Version}).
+ * Alias to {@linkcode module:pc-nrfjprog-js.getLibraryVersion|getLibraryVersion}.
+ * @deprecated Use {@linkcode module:pc-nrfjprog-js.getLibraryVersion|getLibraryVersion} instead.
  */
 export function getDllVersion(callback) {}
 
@@ -369,7 +360,7 @@ export function getProbeInfo(serialNumber, callback) {}
  * @example
  * nrfjprogjs.getLibrayInfo(123456789, function(err, info) {
  *      if (err) throw err;
- *      console.log('Selected device use ' + info.path + ' to connect');
+ *      console.log('Selected device uses ' + info.path + ' to connect');
  * } );
  *
  * @param {integer} serialNumber The serial number of the device to query
