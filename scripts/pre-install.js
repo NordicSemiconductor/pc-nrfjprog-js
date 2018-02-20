@@ -140,9 +140,17 @@ getLibraryVersion()
 
         console.log('Could not find nrfjprog libraries. Trying to install.');
 
+        let exitCode = 0;
         return downloadFile(platformConfig.url, platformConfig.destinationFile)
             .then(() => installNrfjprog(platformConfig.destinationFile))
-            .catch(error => console.log(`Error when installing nrfjprog libraries: ${error.message}`))
+            .catch(error => {
+                exitCode = 1;
+                console.log(`Error when installing nrfjprog libraries: ${error.message}`);
+            })
             .then(() => removeFileIfExists(platformConfig.destinationFile))
-            .catch(error => console.log(`Unable to remove downloaded nrfjprog artifact: ${error.message}`));
+            .catch(error => {
+                exitCode = 1;
+                console.log(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
+            })
+            .then(() => process.exit(exitCode));
     });
