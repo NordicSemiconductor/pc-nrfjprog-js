@@ -8,7 +8,6 @@ const os = require('os');
 const path = require('path');
 const opn = require('opn');
 
-
 /*
  * nRF5x-Command-Line-Tools (nrfjprog) is required for programming. This script
  * downloads nrfjprog for the current platform.
@@ -21,7 +20,7 @@ const opn = require('opn');
  * to tell the user they should run it.
  */
 
-const DOWNLOAD_DIR = path.join(__dirname, 'nrfjprog');
+const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 const PLATFORM_CONFIG = {
     linux: {
@@ -78,7 +77,7 @@ function getLibraryVersion() {
     return new Promise((resolve, reject) => {
         try {
             // eslint-disable-next-line global-require
-            const nrfjprog = require('.');
+            const nrfjprog = require('..');
             nrfjprog.getLibraryVersion((err, version) => {
                 if (err) {
                     reject(err);
