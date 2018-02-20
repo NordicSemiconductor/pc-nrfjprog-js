@@ -27,7 +27,6 @@
   },
   "files": [
     "cmake",
-    "nrfjprog/include",
     "src",
     "build.js",
     "CMakeLists.txt",
