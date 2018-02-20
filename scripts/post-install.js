@@ -34,9 +34,9 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Small script run *after* the node binary module is either fetched or compiled.
-
 /*
+ * Small script run *after* the node binary module is either fetched or compiled.
+ *
  * Both nrfjprog and J-link libraries are required for pc-nrfjprog-js to function.
  * This script warns the user if these libs are missing and points them to the
  * right place to look for a solution.
