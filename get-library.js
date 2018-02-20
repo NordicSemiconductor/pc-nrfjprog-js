@@ -133,25 +133,9 @@ getLibraryVersion()
     .then(version => {
         console.log('Found nrfjprog libraries at version', version);
     })
-    .catch(err => {
+    .catch(() => {
         // If we have nrfjprog header files on win32, then assume nrfjprog is installed.
         if (platform === 'win32' && isHeaderFileInstalledWin32()) {
-            return Promise.resolve();
-        }
-
-        let tryAgainAfterwards;
-        if (err.errno === 2 && err.errcode === 'CouldNotFindJprogDLL') {
-            // This will happen if the binary bindings have already been built
-            // (with node-gyp) but the *.so files are not found.
-            tryAgainAfterwards = true;
-        } else if (err.message.match(/^Could not locate the bindings file/)) {
-            // This will happen on the first install, where the bindings are not
-            // yet built, and they need the nrfjprog header files.
-            tryAgainAfterwards = false;
-        } else {
-            // Nothing to do here - this script only installs the Nordic nrfjprog
-            // libs, not with the SEGGER Jlink-ARM libs.
-            console.log(`Got error when checking nrfjprog library version: ${err.message}`);
             return Promise.resolve();
         }
 
@@ -159,17 +143,7 @@ getLibraryVersion()
 
         return downloadFile(platformConfig.url, platformConfig.destinationFile)
             .then(() => installNrfjprog(platformConfig.destinationFile))
-            .then(() => {
-                if (tryAgainAfterwards) {
-                    // Try and see if it works now.
-                    return getLibraryVersion()
-                        .then(version => {
-                            console.log('Automated fetch of nrfjprog seems to have worked, now at ', version);
-                        });
-                }
-                return Promise.resolve();
-            })
-            .catch(error => console.log(`Error when getting nrfjprog: ${error.message}`))
+            .catch(error => console.log(`Error when installing nrfjprog libraries: ${error.message}`))
             .then(() => removeFileIfExists(platformConfig.destinationFile))
             .catch(error => console.log(`Unable to remove downloaded nrfjprog artifact: ${error.message}`));
     });
