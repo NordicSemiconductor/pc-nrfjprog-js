@@ -23,7 +23,6 @@ const opn = require('opn');
 
 const DOWNLOAD_DIR = path.join(__dirname, 'nrfjprog');
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
-
 const PLATFORM_CONFIG = {
     linux: {
         // See https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386
@@ -43,38 +42,36 @@ const PLATFORM_CONFIG = {
 };
 
 function downloadFile(url, destinationFile) {
-    return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(destinationFile);
-        https.get(url, response => {
-            const statusCode = response.statusCode;
-            if (statusCode !== 200) {
-                reject(new Error(`Unable to download ${url}. Got status code ${statusCode}`));
-            } else {
-                response.pipe(file);
-                response.on('end', () => {
-                    file.end();
-                    resolve();
-                });
-            }
-        });
-    });
+    console.log(`Downloading nrfjprog from ${url} to ${destinationFile}...`);
+
+    const destinationDir = path.dirname(destinationFile);
+    return sander.mkdir(destinationDir)
+        .then(() => new Promise((resolve, reject) => {
+            const file = fs.createWriteStream(destinationFile);
+            https.get(url, response => {
+                const statusCode = response.statusCode;
+                if (statusCode !== 200) {
+                    reject(new Error(`Unable to download ${url}. Got status code ${statusCode}`));
+                } else {
+                    response.pipe(file);
+                    response.on('end', () => {
+                        file.end();
+                        resolve();
+                    });
+                }
+            });
+        }));
 }
 
 function extractTarFile(filePath, outputDir) {
-    console.log(`Extracting nrfjprog from ${filePath} to ${outputDir}`);
-    return tar.extract({
-        file: filePath,
-        filter: pathToFile => pathToFile.match(/\.so|\.dylib$|\.h$/),
-        strip: 2,
-        cwd: outputDir,
-    });
-}
-
-const platform = os.platform();
-const platformConfig = PLATFORM_CONFIG[platform];
-
-if (!platformConfig) {
-    throw new Error(`Unsupported platform: '${platform}'. Cannot get nRF5x command-line tools.`);
+    return sander.mkdir(outputDir)
+        .then(() => tar.extract({
+            file: filePath,
+            filter: f => f.match(/\.so|\.dylib$|\.h$/),
+            strip: 2,
+            keep: true,
+            cwd: outputDir,
+        }));
 }
 
 function getLibraryVersion() {
@@ -95,26 +92,53 @@ function getLibraryVersion() {
     });
 }
 
-// Check if nrfjprog binary libraries are working or not
+function isHeaderFileInstalledWin32() {
+    const programFilesDir = process.env['ProgramFiles(x86)'];
+    const headerFile = path.join(programFilesDir, 'Nordic Semiconductor', 'nrf5x', 'bin', 'headers', 'nrfjprog.h');
+    try {
+        fs.accessSync(headerFile);
+        return true;
+    } catch (ex) {
+        return false;
+    }
+}
+
+function installNrfjprog(pathToArtifact) {
+    if (pathToArtifact.endsWith('.tar')) {
+        console.log(`Extracting ${pathToArtifact} to ${LIB_DIR}...`);
+        return extractTarFile(pathToArtifact, LIB_DIR);
+    } else if (pathToArtifact.endsWith('.exe')) {
+        console.log(`Running nrfjprog installer at ${pathToArtifact}...`);
+        return opn(pathToArtifact);
+    }
+    return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
+}
+
+function removeFileIfExists(filePath) {
+    if (sander.existsSync(filePath)) {
+        return sander.unlink(filePath);
+    }
+    return Promise.resolve();
+}
+
+const platform = os.platform();
+const platformConfig = PLATFORM_CONFIG[platform];
+
+if (!platformConfig) {
+    throw new Error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
+}
+
+// Check if nrfjprog libraries are working or not
 getLibraryVersion()
     .then(version => {
-        console.log('nrfjprog libraries at version ', version, ', no need to fetch them');
+        console.log('Found nrfjprog libraries at version', version);
     })
     .catch(err => {
-        // Windows-specific: check if the header files for nrfjprog are there. If they are,
-        // assume the nrfjprog files are available in the system, do not download, do not
-        // prompt information.
-        if (platform === 'win32') {
-            try {
-                fs.accessSync(path.join(process.env['ProgramFiles(x86)'], 'Nordic Semiconductor', 'nrf5x', 'bin', 'headers', 'nrfjprog.h'));
-            } catch (ex) {
-                return Promise.reject(err);
-            }
+        // If we have nrfjprog header files on win32, then assume nrfjprog is installed.
+        if (platform === 'win32' && isHeaderFileInstalledWin32()) {
             return Promise.resolve();
         }
-        return Promise.reject(err);
-    })
-    .catch(err => {
+
         let tryAgainAfterwards;
         if (err.errno === 2 && err.errcode === 'CouldNotFindJprogDLL') {
             // This will happen if the binary bindings have already been built
@@ -122,53 +146,30 @@ getLibraryVersion()
             tryAgainAfterwards = true;
         } else if (err.message.match(/^Could not locate the bindings file/)) {
             // This will happen on the first install, where the bindings are not
-            // yet built, and they need the jprog header files.
+            // yet built, and they need the nrfjprog header files.
             tryAgainAfterwards = false;
         } else {
-            // Nothing to do here - this block only handles problems with the nrf-jprog libs
-            // (from Nordic), not with the Jlink-ARM libs (from Segger).
-            console.log(err.message);
+            // Nothing to do here - this script only installs the Nordic nrfjprog
+            // libs, not with the SEGGER Jlink-ARM libs.
+            console.log(`Got error when checking nrfjprog library version: ${err.message}`);
             return Promise.resolve();
         }
 
-        console.log('nrfjprog libraries seem to be missing.');
-        console.log(`Downloading nrfjprog from ${platformConfig.url} to ${platformConfig.destinationFile}`);
+        console.log('Could not find nrfjprog libraries. Trying to install.');
 
-        return Promise.resolve()
-            .then(() => sander.mkdir(DOWNLOAD_DIR))
-            .then(() => downloadFile(platformConfig.url, platformConfig.destinationFile))
+        return downloadFile(platformConfig.url, platformConfig.destinationFile)
+            .then(() => installNrfjprog(platformConfig.destinationFile))
             .then(() => {
-                if (platformConfig.destinationFile.endsWith('.tar')) {
-                    return sander.mkdir(LIB_DIR).then(() =>
-                        extractTarFile(platformConfig.destinationFile, LIB_DIR),
-                    );
-                }
-                return Promise.resolve();
-            })
-            .then(() => {
-                if (platformConfig.spawnChild) {
-                    console.log('Installation of pc-nrfjprog-js requires running ', platformConfig.spawnChild);
-                    return opn(platformConfig.spawnChild);
-                }
-                return Promise.resolve();
-            })
-            .then(() => {
-                if (platformConfig.instructions) {
-                    return Promise.resolve(console.warn(platformConfig.instructions));
-                } else if (tryAgainAfterwards) {
+                if (tryAgainAfterwards) {
                     // Try and see if it works now.
-                    return getLibraryVersion().then(version => {
-                        console.log('Automated fetch of nrfjprog seems to have worked, now at ', version);
-                    });
+                    return getLibraryVersion()
+                        .then(version => {
+                            console.log('Automated fetch of nrfjprog seems to have worked, now at ', version);
+                        });
                 }
                 return Promise.resolve();
             })
             .catch(error => console.log(`Error when getting nrfjprog: ${error.message}`))
-            .then(() => {
-                if (sander.existsSync(platformConfig.destinationFile)) {
-                    return sander.rm(platformConfig.destinationFile)
-                        .catch(error => console.log(`Unable to remove ${platformConfig.destinationFile}: ${error.message}`));
-                }
-                return Promise.resolve();
-            });
+            .then(() => removeFileIfExists(platformConfig.destinationFile))
+            .catch(error => console.log(`Unable to remove downloaded nrfjprog artifact: ${error.message}`));
     });
