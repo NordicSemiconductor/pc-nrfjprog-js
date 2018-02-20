@@ -35,15 +35,16 @@
  */
 
 /*
- * nRF5x-Command-Line-Tools (nrfjprog) is required for programming. This script
- * downloads nrfjprog for the current platform.
+ * nRF5x Command Line Tools (nrfjprog) is required for pc-nrfjprog-js to function.
+ * This script checks if nrfjprog libraries are found, and installs them if required.
  *
- * On Linux/macOS, the nrfjprog libraries will be placed in pc-nrfjprog-js's directory,
- * so that nodejs can find them. The script extracts
- * the nrfjprog tar file, and copies the libraries to the correct directory.
+ * On Linux/macOS, the nrfjprog artifact (tar) is extracted into nrfjprog/lib. This
+ * directory will then contain both headers (required when building) and libraries
+ * (required at runtime).
  *
- * In win32 platforms, this just downloads the the installer and logs a message
- * to tell the user they should run it.
+ * On Windows, the nrfjprog installer (exe) is run, which installs the libraries and
+ * headers in Program Files. The pc-nrfjprog-js library will then find the nrfjprog
+ * libraries by doing a registry lookup.
  */
 
 'use strict';
