@@ -28,6 +28,7 @@
   "files": [
     "cmake",
     "src",
+    "scripts",
     "build.js",
     "CMakeLists.txt",
     "index.js"
