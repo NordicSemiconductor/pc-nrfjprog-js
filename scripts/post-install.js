@@ -14,7 +14,7 @@ function getLibraryVersion() {
     return new Promise((resolve, reject) => {
         try {
             // eslint-disable-next-line global-require
-            const nrfjprog = require('.');
+            const nrfjprog = require('..');
             nrfjprog.getLibraryVersion((err, version) => {
                 if (err) {
                     reject(err);
