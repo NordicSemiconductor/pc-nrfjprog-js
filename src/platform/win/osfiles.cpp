@@ -60,10 +60,6 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
             v8::String::Utf8Value param1(info[0]->ToString());
             std::string path = std::string(*param1);
 
-            printf("\nwin/osfiles.cpp: setLibrarySearchPath() called with %s\n\n",
-                path.c_str()
-            );
-
             librarySearchPath.assign(path);
         }
     }
