@@ -51,7 +51,6 @@ const PLATFORM_CONFIG = {
         // When changing this, remember to also update the nrfjprog version in installer.nsh
         url: 'https://www.nordicsemi.com/eng/nordic/download_resource/33444/47/97153666/53210',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe'),
-        //instructions: "WARNING: You must manually install the latest nRF5x command line tools on this platform. Please check the " + DOWNLOAD_DIR + " directory and run the \"nrfjprog-win32.exe\" installer that you will find there.",
         spawnChild: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe')
     },
 };
