@@ -129,7 +129,7 @@ function getLibraryVersion() {
 }
 
 function isHeaderFileInstalledWin32() {
-    const programFilesDir = process.env['ProgramFiles(x86)'];
+    const programFilesDir = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
     const headerFile = path.join(programFilesDir, 'Nordic Semiconductor', 'nrf5x', 'bin', 'headers', 'nrfjprog.h');
     try {
         fs.accessSync(headerFile);
