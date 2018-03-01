@@ -39,8 +39,8 @@ const nRFjprog = require('bindings')('pc-nrfjprog-js');
 
 const instance = new nRFjprog.nRFjprog();
 Object.keys(nRFjprog).map(key => {
-    if (key === 'setDllSearchPath') {
-        nRFjprog.setDllSearchPath(path.join(__dirname, 'nrfjprog', 'lib'));
+    if (key === 'setLibrarySearchPath') {
+        nRFjprog.setLibrarySearchPath(path.join(__dirname, 'nrfjprog', 'lib'));
     } else if (key !== 'nRFjprog') {
         instance[key] = nRFjprog[key];
     }
