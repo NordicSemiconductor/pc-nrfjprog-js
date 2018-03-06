@@ -35,6 +35,7 @@
  */
 
 #include "../../osfiles.h"
+#include "../../utility/conversion.h"
 
 #include <nan.h>
 
@@ -54,16 +55,12 @@ std::string librarySearchPath;
 
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
-    // Parse parameter from the FunctionCallbackInfo received, convert into a std::string
-    if (info.Length() > 0) {
-        if (info[0]->IsString()) {
-            v8::String::Utf8Value param1(info[0]->ToString());
-            std::string path = std::string(*param1);
-
-            librarySearchPath.assign(path);
-        }
+    // Parse parameter from the FunctionCallbackInfo received
+    if (info.Length() > 0 && info[0]->IsString()) {
+        librarySearchPath.assign(Convert::getNativeString(info[0]));
+    } else {
+        Nan::ThrowError(Nan::New("Expected string as the first argument").ToLocalChecked());
     }
-    /// TODO: Add some error throwing if no parameters or the parameter is not a string
 }
 
 
