@@ -96,10 +96,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
     {
-        printf("\nShared jprog libraries found in specified path: %s \n\n", libraryPath.c_str());
         return errorcode_t::JsSuccess;
-    } else {
-        printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", libraryPath.c_str());
     }
 
     // Last recourse, try loading the library through dlopen().

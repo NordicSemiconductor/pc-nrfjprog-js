@@ -78,45 +78,32 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     ssize_t len;
     len = readlink("/proc/self/exe", tempLibraryPath, COMMON_MAX_PATH - 1);
 
-//     printf("\n/proc/self/exe points to: %s\n\n", tempLibraryPath);
-
     if (len == -1)
     {
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
+    // If there is a file with the requested fileName in the same path as the
+    // current node.js (or electron) executable, use that.
     libraryPath.append(dirname(tempLibraryPath));
     libraryPath.append("/");
     libraryPath.append(fileName);
-
-//     printf("\nTrying to load %s from: %s\n\n", fileName.c_str(), libraryPath.c_str());
-
-    // If there is a file with the requested fileName in the same path as the
-    // current node.js (or electron) executable, use that.
     if (AbstractFile::pathExists(libraryPath))
     {
         return errorcode_t::JsSuccess;
     }
 
-
     // Try the path specified from calling OSFilesSetLibrarySearchPath
-//         printf("\nSpecified search path is: %s \n\n", librarySearchPath.c_str());
-
     libraryPath.assign(librarySearchPath);
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
     {
-//         printf("\nShared jprog libraries found in specified path: %s \n\n", libraryPath.c_str());
         return errorcode_t::JsSuccess;
-    } else {
-//         printf("\nShared jprog libraries **NOT** found in specified path :-( %s \n\n", libraryPath.c_str());
     }
-
 
     // Last recourse, try loading the library through dlopen().
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
-
     void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
     if (libraryHandle)
