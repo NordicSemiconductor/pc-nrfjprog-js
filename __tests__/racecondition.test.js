@@ -72,7 +72,7 @@ describe('Handles race conditions gracefully', () => {
         };
 
         for(let i = 0; i < getVersionAttempts; i++) {
-            nRFjprog.getDllVersion(getVersionCallback);
+            nRFjprog.getLibraryVersion(getVersionCallback);
         }
     });
 

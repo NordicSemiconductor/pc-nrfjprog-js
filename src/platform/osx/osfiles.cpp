@@ -35,6 +35,9 @@
  */
 
 #include "../../osfiles.h"
+#include "../../utility/conversion.h"
+
+#include <nan.h>
 
 #include <sys/stat.h>
 #include <string.h>
@@ -48,12 +51,26 @@
 
 #include <libproc.h>  // proc pidpathinfo maxsize
 
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
+std::string librarySearchPath;
+
+NAN_METHOD(OSFilesSetLibrarySearchPath)
+{
+    // Parse parameter from the FunctionCallbackInfo received
+    if (info.Length() > 0 && info[0]->IsString()) {
+        librarySearchPath.assign(Convert::getNativeString(info[0]));
+    } else {
+        Nan::ThrowError(Nan::New("Expected string as the first argument").ToLocalChecked());
+    }
+}
+
+
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 {
     int ret;
     pid_t pid;
     char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
 
+    // Fetch path of currently running executable
     pid = getpid();
     ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
 
@@ -63,31 +80,43 @@ errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
         return errorcode_t::CouldNotFindJprogDLL;
     }
 
-    dll_path.append(dirname(pathbuf));
-    dll_path.append("/");
-    dll_path.append(fileName);
-
-    if (!AbstractFile::pathExists(dll_path))
+    // If there is a file with the requested fileName in the same path as the
+    // current node.js (or electron) executable, use that.
+    libraryPath.append(dirname(pathbuf));
+    libraryPath.append("/");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
     {
-        /* It is possible that the user might have place the .dylib in another folder. In that case dlopen will find it. If it is not found, return JLinkARMDllNotFoundError. */
-        void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
-
-        if (libraryHandle)
-        {
-            dlclose(libraryHandle);
-            dll_path = fileName;
-            return errorcode_t::JsSuccess;
-        }
-
-        return errorcode_t::CouldNotFindJprogDLL;
+        return errorcode_t::JsSuccess;
     }
 
-    return errorcode_t::JsSuccess;
+    // Try the path specified from calling OSFilesSetLibrarySearchPath
+    libraryPath.assign(librarySearchPath);
+    libraryPath.append("/");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
+    {
+        return errorcode_t::JsSuccess;
+    }
+
+    // Last recourse, try loading the library through dlopen().
+    // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
+    void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+
+    if (libraryHandle)
+    {
+        dlclose(libraryHandle);
+        libraryPath = fileName;
+        return errorcode_t::JsSuccess;
+    }
+
+    return errorcode_t::CouldNotFindJprogDLL;
+
 }
 
-std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
+std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
 {
-    return base_path + '/' + relative_path;
+    return basePath + '/' + relativePath;
 }
 
 bool AbstractFile::pathExists(const char * path)
@@ -99,7 +128,7 @@ bool AbstractFile::pathExists(const char * path)
 /* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are valid, "/tmp" is returned. */
 std::string OSFilesGetTempFolderPath(void)
 {
-    std::string temp_keys[4] = {
+    std::string tempKeys[4] = {
         "TMPDIR",
         "TMP",
         "TEMP",
@@ -108,7 +137,7 @@ std::string OSFilesGetTempFolderPath(void)
 
     for (uint32_t i = 0; i < 4; i++)
     {
-        char * val = getenv(temp_keys[i].c_str());
+        char * val = getenv(tempKeys[i].c_str());
 
         if (val != NULL)
         {
@@ -123,13 +152,13 @@ std::string OSFilesGetTempFolderPath(void)
  * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
 std::string TempFile::getTempFileName()
 {
-    std::string temp_file_name_template = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
+    std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
-    char temp_file_name[COMMON_MAX_PATH];
+    char tempFileName[COMMON_MAX_PATH];
 
-    strncpy(temp_file_name, temp_file_name_template.c_str(), COMMON_MAX_PATH);
+    strncpy(tempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(temp_file_name, 4);
+    int temp_file = mkstemps(tempFileName, 4);
 
     if (temp_file == -1)
     {
@@ -140,7 +169,7 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(temp_file_name);
+    return std::string(tempFileName);
 }
 
 

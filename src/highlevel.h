@@ -67,7 +67,7 @@ private:
     // Sync methods
 
     // Async methods
-    static NAN_METHOD(GetDllVersion); // Params: callback(error, dllversion)
+    static NAN_METHOD(GetLibraryVersion); // Params: callback(error, libraryversion)
     static NAN_METHOD(GetConnectedDevices); // Params: callback(error, connectedDevices)
     static NAN_METHOD(GetSerialNumbers); // Params: callback(error, serialnumbers)
 
@@ -99,8 +99,8 @@ private:
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
 
-    static errorcode_t loadDll();
-    static void unloadDll();
+    static errorcode_t loadLibrary();
+    static void unloadLibrary();
 
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
@@ -111,7 +111,7 @@ private:
     static void sendProgress(uv_async_t *handle);
     static uv_async_t *progressEvent;
 
-    static DllFunctionPointersType dll_function;
+    static LibraryFunctionPointersType libraryFunctions;
 
     static bool loaded;
     static bool connectedToDevice;

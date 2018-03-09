@@ -39,6 +39,9 @@
 #endif
 
 #include "../../osfiles.h"
+#include "../../utility/conversion.h"
+
+#include <nan.h>
 
 #include <windows.h>
 #include "Shlwapi.h"
@@ -48,13 +51,26 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std::string &fileName)
+std::string librarySearchPath;
+
+NAN_METHOD(OSFilesSetLibrarySearchPath)
+{
+    // Parse parameter from the FunctionCallbackInfo received
+    if (info.Length() > 0 && info[0]->IsString()) {
+        librarySearchPath.assign(Convert::getNativeString(info[0]));
+    } else {
+        Nan::ThrowError(Nan::New("Expected string as the first argument").ToLocalChecked());
+    }
+}
+
+
+errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath, std::string &fileName)
 {
     HKEY key;
     HKEY innerKey;
 
-    CHAR install_path[COMMON_MAX_PATH] = {'\0'};
-    DWORD install_path_size = sizeof(install_path);
+    CHAR installPath[COMMON_MAX_PATH] = {'\0'};
+    DWORD installPathSize = sizeof(installPath);
 
     /* Search for JLinkARM in the Local Machine Key.  */
     if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &key) == ERROR_SUCCESS)
@@ -107,14 +123,14 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std:
         }
 
         /* If it is found, read the install path. */
-        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&install_path, &install_path_size) == ERROR_SUCCESS)
+        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&installPath, &installPathSize) == ERROR_SUCCESS)
         {
             /* Copy, check it exists and return if it does. */
-            dll_path.append(install_path);
-            dll_path.append(fileName);
+            libraryPath.assign(installPath);
+            libraryPath.append(fileName);
             RegCloseKey(innerKey);
             RegCloseKey(key);
-            if (TempFile::pathExists(dll_path.c_str()))
+            if (TempFile::pathExists(libraryPath.c_str()))
             {
                 return errorcode_t::JsSuccess;
             }
@@ -129,22 +145,34 @@ errorcode_t OSFilesFindDllByHKey(const HKEY rootKey, std::string &dll_path, std:
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-errorcode_t OSFilesFindDll(std::string &dll_path, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 {
-    errorcode_t retCode = OSFilesFindDllByHKey(HKEY_LOCAL_MACHINE, dll_path, fileName);
-
-    if (retCode != JsSuccess) {
-        retCode = OSFilesFindDllByHKey(HKEY_CURRENT_USER, dll_path, fileName);
+    // Try to find the DLLs from the path given to OSFilesSetLibrarySearchPath()
+    libraryPath.assign(librarySearchPath);
+    libraryPath.append("\\");
+    libraryPath.append(fileName);
+    if (AbstractFile::pathExists(libraryPath))
+    {
+        return errorcode_t::JsSuccess;
     }
+
+    // If that fails, try to find the DLLs when installed in the whole machine (for all users)
+    errorcode_t retCode = OSFilesFindLibraryByHKey(HKEY_LOCAL_MACHINE, libraryPath, fileName);
+    if (retCode == errorcode_t::JsSuccess) {
+        return retCode;
+    }
+
+    // If that fails, try to find the DLLs when installed for the current user only
+    retCode = OSFilesFindLibraryByHKey(HKEY_CURRENT_USER, libraryPath, fileName);
 
     return retCode;
 }
 
-std::string TempFile::concatPaths(std::string base_path, std::string relative_path)
+std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
 {
     char buffer[MAX_PATH] = "";
 
-    PathCombine(buffer, base_path.c_str(), relative_path.c_str());
+    PathCombine(buffer, basePath.c_str(), relativePath.c_str());
 
     return std::string(buffer);
 }
@@ -157,10 +185,10 @@ bool AbstractFile::pathExists(const char *path)
 std::string TempFile::getTempFileName()
 {
     /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with GetTempFileName function. */
-    TCHAR temp_folder_path[MAX_PATH];
-    TCHAR temp_file_path[MAX_PATH];
+    TCHAR tempFolderPath[MAX_PATH];
+    TCHAR tempFilePath[MAX_PATH];
 
-    DWORD pathLength = GetTempPath(MAX_PATH, temp_folder_path);
+    DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath);
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {
@@ -168,13 +196,13 @@ std::string TempFile::getTempFileName()
         return std::string();
     }
 
-    if (GetTempFileName(temp_folder_path, TEXT("NRF"), 0, temp_file_path) == 0)
+    if (GetTempFileName(tempFolderPath, TEXT("NRF"), 0, tempFilePath) == 0)
     {
         error = TempCouldNotCreateFile;
         return std::string();
     }
 
-    return std::string(temp_file_path);
+    return std::string(tempFilePath);
 }
 
 void TempFile::deleteFile()

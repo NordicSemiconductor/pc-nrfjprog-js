@@ -39,6 +39,11 @@
 #include <iostream>
 #include <fstream>
 
+void OSFilesInit(v8::Local<v8::Object> target)
+{
+    Nan::SetMethod(target, "setLibrarySearchPath", OSFilesSetLibrarySearchPath);
+}
+
 FileFormatHandler::FileFormatHandler(std::string fileinfo, input_format_t inputFormat)
 {
     if (inputFormat == INPUT_FORMAT_HEX_STRING)

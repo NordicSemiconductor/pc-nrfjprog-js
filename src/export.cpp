@@ -39,10 +39,12 @@
 #include <nan.h>
 #include "highlevel.h"
 #include "rtt.h"
+#include "osfiles.h"
 
 extern "C" {
     NAN_MODULE_INIT(init)
     {
+        OSFilesInit(target);
         HighLevel::initConsts(target);
         RTT::initConsts(target);
         HighLevel::Init(target);
