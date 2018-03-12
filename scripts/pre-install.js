@@ -160,7 +160,10 @@ function removeFileIfExists(filePath) {
 const platform = os.platform();
 const platformConfig = PLATFORM_CONFIG[platform];
 
-if (!platformConfig) {
+if (platform === 'win32' && os.arch() !== 'ia32') {
+    throw new Error(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
+        'currently require 32-bit Node.js.');
+} else if (!platformConfig) {
     throw new Error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
 }
 
