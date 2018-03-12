@@ -161,10 +161,12 @@ const platform = os.platform();
 const platformConfig = PLATFORM_CONFIG[platform];
 
 if (platform === 'win32' && os.arch() !== 'ia32') {
-    throw new Error(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
+    console.log(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
         'currently require 32-bit Node.js.');
+    process.exit(1);
 } else if (!platformConfig) {
-    throw new Error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
+    console.log(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
+    process.exit(1);
 }
 
 // Check if nrfjprog libraries are working or not
