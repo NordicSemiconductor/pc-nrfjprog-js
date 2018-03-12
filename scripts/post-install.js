@@ -70,27 +70,27 @@ getLibraryVersion()
         console.log('J-Link libraries seem to be working as expected.');
     })
     .catch(err => {
-        console.log();
-        console.log(chalk.red.bold(`Found error: ${err.errcode}`));
+        console.error();
+        console.error(chalk.red.bold(`Found error: ${err.errcode}`));
 
         const isNrfjprogError = err.errno === 2 && err.errcode === 'CouldNotFindJprogDLL';
         const isJlinkError = err.errno === 7 && err.errcode === 'CouldNotOpenDLL'
             && err.lowlevelError === 'JLINKARM_DLL_NOT_FOUND';
 
         if (isNrfjprogError) {
-            console.log('WARNING: The automated setup of nrfjprog libraries failed. The ' +
+            console.error('WARNING: The automated setup of nrfjprog libraries failed. The ' +
                 'pc-nrfjprog-js library cannot function without them.');
-            console.log(chalk.bold('Please install nRF5x Command Line Tools manually from ' +
+            console.error(chalk.bold('Please install nRF5x Command Line Tools manually from ' +
                 'the Nordic Semiconductor website.'));
         } else if (isJlinkError) {
-            console.log('WARNING: The J-Link libraries were not found on your system. The ' +
+            console.error('WARNING: The J-Link libraries were not found on your system. The ' +
                 'pc-nrfjprog-js library cannot function without them.');
-            console.log(chalk.bold('Please visit https://www.segger.com/downloads/jlink/ and ' +
+            console.error(chalk.bold('Please visit https://www.segger.com/downloads/jlink/ and ' +
                 'install the "J-Link Software and Documentation Pack".'));
         } else {
-            console.log('The pc-nrfjprog-js post-install check failed unexpectedly:', err.message);
+            console.error('The pc-nrfjprog-js post-install check failed unexpectedly:', err.message);
         }
 
-        console.log();
+        console.error();
         process.exit(1);
     });

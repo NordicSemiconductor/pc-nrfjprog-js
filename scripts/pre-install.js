@@ -161,11 +161,11 @@ const platform = os.platform();
 const platformConfig = PLATFORM_CONFIG[platform];
 
 if (platform === 'win32' && os.arch() !== 'ia32') {
-    console.log(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
+    console.error(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
         'currently require 32-bit Node.js.');
     process.exit(1);
 } else if (!platformConfig) {
-    console.log(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
+    console.error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
     process.exit(1);
 }
 
@@ -187,12 +187,12 @@ getLibraryVersion()
             .then(() => installNrfjprog(platformConfig.destinationFile))
             .catch(error => {
                 exitCode = 1;
-                console.log(`Error when installing nrfjprog libraries: ${error.message}`);
+                console.error(`Error when installing nrfjprog libraries: ${error.message}`);
             })
             .then(() => removeFileIfExists(platformConfig.destinationFile))
             .catch(error => {
                 exitCode = 1;
-                console.log(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
+                console.error(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
             })
             .then(() => process.exit(exitCode));
     });
