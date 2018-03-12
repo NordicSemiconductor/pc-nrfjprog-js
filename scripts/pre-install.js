@@ -160,8 +160,13 @@ function removeFileIfExists(filePath) {
 const platform = os.platform();
 const platformConfig = PLATFORM_CONFIG[platform];
 
-if (!platformConfig) {
-    throw new Error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
+if (platform === 'win32' && os.arch() !== 'ia32') {
+    console.error(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
+        'currently require 32-bit Node.js.');
+    process.exit(1);
+} else if (!platformConfig) {
+    console.error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
+    process.exit(1);
 }
 
 // Check if nrfjprog libraries are working or not
@@ -182,12 +187,12 @@ getLibraryVersion()
             .then(() => installNrfjprog(platformConfig.destinationFile))
             .catch(error => {
                 exitCode = 1;
-                console.log(`Error when installing nrfjprog libraries: ${error.message}`);
+                console.error(`Error when installing nrfjprog libraries: ${error.message}`);
             })
             .then(() => removeFileIfExists(platformConfig.destinationFile))
             .catch(error => {
                 exitCode = 1;
-                console.log(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
+                console.error(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
             })
             .then(() => process.exit(exitCode));
     });

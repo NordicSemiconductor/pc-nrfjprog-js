@@ -25,6 +25,8 @@ If you are encountering errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `
 
 Run the nRF-Command-Line-Tools installer (exe). This will install the required nrfjprog libraries and SEGGER J-Link.
 
+Note that the nRF-Command-Line-Tools for Windows is only available in 32-bit at the moment. This means that 32-bit Node.js is required in order to use pc-nrfjprog-js on Windows.
+
 ### Linux/macOS
 
 Download and install [SEGGER J-Link](https://www.segger.com/downloads/jlink/).
