@@ -17,7 +17,7 @@ This will pull down precompiled binaries for your platform/runtime environment. 
 
 ## Required setup
 
-Before using the library, some platform specific setup is required. If you are seeing errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that these tools are properly installed.
+Before using the library, some platform specific setup is required. If you are seeing errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that the tools described below are properly installed.
 
 ### Windows
 
