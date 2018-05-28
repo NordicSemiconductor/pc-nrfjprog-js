@@ -17,27 +17,17 @@ This will pull down precompiled binaries for your platform/runtime environment. 
 
 ## Required setup
 
-Before using the library, nRF5x-Command-Line-Tools must be installed. The project includes nRF5x-Command-Line-Tools installers/archives for all supported platforms in the `nrfjprog` directory. These can also be [downloaded from the Nordic Semiconductor website](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html).
-
-If you are encountering errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that these tools are properly installed.
+Before using the library, some platform specific setup is required. If you are seeing errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that the tools described below are properly installed.
 
 ### Windows
 
-Run the nRF-Command-Line-Tools installer (exe). This will install the required nrfjprog libraries and SEGGER J-Link.
+Download [nRF-Command-Line-Tools](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html) and run the installer (exe). This will install the required nrfjprog libraries and SEGGER J-Link.
 
 Note that the nRF-Command-Line-Tools for Windows is only available in 32-bit at the moment. This means that 32-bit Node.js is required in order to use pc-nrfjprog-js on Windows.
 
 ### Linux/macOS
 
-Download and install [SEGGER J-Link](https://www.segger.com/downloads/jlink/).
-
-Extract the nRF-Command-Line-Tools tar file, f.ex.:
-
-    sudo tar -xf nRF5x-Command-Line-Tools_<version>_<platform>.tar -C /opt
-
-This will create a directory `/opt/nrfjprog` containing the nrfjprog libraries. These libraries must be available for the process that uses pc-nrfjprog-js, f.ex. by adding the nrfjprog directory to the `LD_LIBRARY_PATH` environment variable:
-
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/nrfjprog
+[SEGGER J-Link](https://www.segger.com/downloads/jlink/) must be downloaded and installed. The required nRF-Command-Line-Tools libraries are bundled together with pc-nrfjprog-js on Linux/macOS, so they do not have to be installed.
 
 ## API documentation
 
