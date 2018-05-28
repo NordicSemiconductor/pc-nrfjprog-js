@@ -76,6 +76,11 @@ const PLATFORM_CONFIG = {
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe'),
     },
 };
+const REQUIRED_VERSION = {
+    major: 9,
+    minor: 7,
+    revision: 3,
+};
 
 function downloadFile(url, destinationFile) {
     console.log(`Downloading nrfjprog from ${url} to ${destinationFile}...`);
@@ -90,6 +95,7 @@ function downloadFile(url, destinationFile) {
                     reject(new Error(`Unable to download ${url}. Got status code ${statusCode}`));
                 } else {
                     response.pipe(file);
+                    response.on('error', reject);
                     response.on('end', () => {
                         file.end();
                         resolve();
@@ -169,30 +175,44 @@ if (platform === 'win32' && os.arch() !== 'ia32') {
     process.exit(1);
 }
 
-// Check if nrfjprog libraries are working or not
+let isInstallationRequired = false;
 getLibraryVersion()
     .then(version => {
-        console.log('Found nrfjprog libraries at version', version);
-    })
-    .catch(() => {
-        // If we have nrfjprog header files on win32, then assume nrfjprog is installed.
-        if (platform === 'win32' && isHeaderFileInstalledWin32()) {
-            return Promise.resolve();
+        if (version.major < REQUIRED_VERSION.major ||
+            version.minor < REQUIRED_VERSION.minor ||
+            version.revision < REQUIRED_VERSION.revision) {
+            console.log(`Found nrfjprog version ${version}, but ${REQUIRED_VERSION} is required`);
+            isInstallationRequired = true;
+        } else {
+            console.log('Found nrfjprog libraries at required version', version);
         }
+    })
+    .catch(error => {
+        // If we have nrfjprog header files on win32, then assume nrfjprog is installed
+        if (platform === 'win32' && isHeaderFileInstalledWin32()) {
+            isInstallationRequired = false;
+        } else {
+            console.log(`Validation of nrfjprog libraries failed: ${error.message}`);
+            isInstallationRequired = true;
+        }
+    })
+    .then(() => {
+        if (isInstallationRequired) {
+            console.log('Trying to install nrfjprog');
 
-        console.log('Could not find nrfjprog libraries. Trying to install.');
-
-        let exitCode = 0;
-        return downloadFile(platformConfig.url, platformConfig.destinationFile)
-            .then(() => installNrfjprog(platformConfig.destinationFile))
-            .catch(error => {
-                exitCode = 1;
-                console.error(`Error when installing nrfjprog libraries: ${error.message}`);
-            })
-            .then(() => removeFileIfExists(platformConfig.destinationFile))
-            .catch(error => {
-                exitCode = 1;
-                console.error(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
-            })
-            .then(() => process.exit(exitCode));
+            let exitCode = 0;
+            return downloadFile(platformConfig.url, platformConfig.destinationFile)
+                .then(() => installNrfjprog(platformConfig.destinationFile))
+                .catch(error => {
+                    exitCode = 1;
+                    console.error(`Error when installing nrfjprog libraries: ${error.message}`);
+                })
+                .then(() => removeFileIfExists(platformConfig.destinationFile))
+                .catch(error => {
+                    exitCode = 1;
+                    console.error(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);
+                })
+                .then(() => process.exit(exitCode));
+        }
+        return Promise.resolve();
     });
