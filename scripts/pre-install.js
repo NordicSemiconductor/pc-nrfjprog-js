@@ -181,7 +181,8 @@ getLibraryVersion()
         if (version.major < REQUIRED_VERSION.major ||
             version.minor < REQUIRED_VERSION.minor ||
             version.revision < REQUIRED_VERSION.revision) {
-            console.log(`Found nrfjprog version ${version}, but ${REQUIRED_VERSION} is required`);
+            console.log(`Found nrfjprog version ${JSON.stringify(version)}, ` +
+                `but ${JSON.stringify(REQUIRED_VERSION)} is required`);
             isInstallationRequired = true;
         } else {
             console.log('Found nrfjprog libraries at required version', version);
