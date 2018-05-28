@@ -145,22 +145,30 @@ function isHeaderFileInstalledWin32() {
     }
 }
 
-function installNrfjprog(pathToArtifact) {
-    if (pathToArtifact.endsWith('.tar')) {
-        console.log(`Extracting ${pathToArtifact} to ${LIB_DIR}...`);
-        return extractTarFile(pathToArtifact, LIB_DIR);
-    } else if (pathToArtifact.endsWith('.exe')) {
-        console.log(`Running nrfjprog installer at ${pathToArtifact}...`);
-        return opn(pathToArtifact);
-    }
-    return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
-}
-
 function removeFileIfExists(filePath) {
     if (sander.existsSync(filePath)) {
         return sander.unlink(filePath);
     }
     return Promise.resolve();
+}
+
+function removeDirIfExists(dirPath) {
+    if (sander.existsSync(dirPath)) {
+        return sander.rimraf(dirPath);
+    }
+    return Promise.resolve();
+}
+
+function installNrfjprog(pathToArtifact) {
+    if (pathToArtifact.endsWith('.tar')) {
+        console.log(`Extracting ${pathToArtifact} to ${LIB_DIR}...`);
+        return removeDirIfExists(LIB_DIR)
+            .then(() => extractTarFile(pathToArtifact, LIB_DIR));
+    } else if (pathToArtifact.endsWith('.exe')) {
+        console.log(`Running nrfjprog installer at ${pathToArtifact}...`);
+        return opn(pathToArtifact);
+    }
+    return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
 }
 
 const platform = os.platform();
