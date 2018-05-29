@@ -56,6 +56,7 @@ const sander = require('sander');
 const os = require('os');
 const path = require('path');
 const opn = require('opn');
+const semver = require('semver');
 
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
@@ -186,11 +187,12 @@ if (platform === 'win32' && os.arch() !== 'ia32') {
 let isInstallationRequired = false;
 getLibraryVersion()
     .then(version => {
-        if (version.major < REQUIRED_VERSION.major ||
-            version.minor < REQUIRED_VERSION.minor ||
-            version.revision < REQUIRED_VERSION.revision) {
-            console.log(`Found nrfjprog version ${JSON.stringify(version)}, ` +
-                `but ${JSON.stringify(REQUIRED_VERSION)} is required`);
+        const currentVersion = `${version.major}.${version.minor}.${version.revision}`;
+        const requiredVersion = `${REQUIRED_VERSION.major}.${REQUIRED_VERSION.minor}` +
+            `.${REQUIRED_VERSION.revision}`;
+        if (semver.lt(currentVersion, requiredVersion)) {
+            console.log(`Found nrfjprog version ${currentVersion}, but ` +
+                `${requiredVersion} is required`);
             isInstallationRequired = true;
         } else {
             console.log('Found nrfjprog libraries at required version', version);
