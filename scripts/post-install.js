@@ -46,6 +46,13 @@
 
 const chalk = require('chalk');
 
+// SKIP_NRFJPROG_CHECK environment variable allows to skip checking
+// for the purpose of publishing job on build server
+if (process.env.SKIP_NRFJPROG_CHECK) {
+    console.log('Skipping nrfjprog library version check.');
+    process.exit(0);
+}
+
 function getLibraryVersion() {
     return new Promise((resolve, reject) => {
         try {
