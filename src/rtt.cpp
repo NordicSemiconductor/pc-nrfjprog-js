@@ -260,20 +260,29 @@ void RTT::resetLog()
     logItemCount = 0;
 }
 
+#include <iostream>
+#include <fstream>
+
 void RTT::log(const char *msg)
 {
+    std::ofstream myfile;
+    myfile.open ("logger.log", std::ios::out | std::ios::app);
+    myfile << "logItemCount #" << logItemCount << " LogLength: " << logMessage.length() << std::endl;
+    myfile << "Message: " << msg << std::endl;
+    myfile.close();
+
     if (logItemCount > 10000)
     {
         if (appendToLog)
         {
-            logMessage = logMessage.append("The log has more than 10000 items. No more items will be logged.");
+            logMessage.append("The log has more than 10000 items. No more items will be logged.");
             appendToLog = false;
         }
 
         return;
     }
 
-    logMessage = logMessage.append(msg);
+    logMessage.append(msg);
     logItemCount++;
 }
 
