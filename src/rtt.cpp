@@ -197,8 +197,9 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
     log("Start of ");
     log(baton->name.c_str());
     log("\n");
+    log(baton->toString().c_str());
+    log("\n");
     log("===============================================\n");
-
 
     baton->executeFunction = execute;
     baton->returnFunction = ret;
