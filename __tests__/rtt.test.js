@@ -114,7 +114,7 @@ describe('RTT', () => {
             RTT.start(0, {}, startCallback);
         });
 
-        it.only('returns an error when using wrong control block location', done => {
+        it('returns an error when using wrong control block location', done => {
             const startCallback = (err, down, up) => {
                 expect(err).toBeDefined();
                 expect(err).toMatchSnapshot();

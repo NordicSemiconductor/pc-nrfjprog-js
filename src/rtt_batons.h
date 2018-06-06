@@ -38,6 +38,8 @@
 #define RTT_BATONS_H
 
 #include <memory>
+#include <sstream>
+#include <string>
 #include "rtt.h"
 #include "rtt_helpers.h"
 
@@ -87,9 +89,6 @@ public:
 };
 
 std::timed_mutex RTTBaton::executionMutex;
-
-#include <sstream>
-#include <string>
 
 class RTTStartBaton : public RTTBaton
 {

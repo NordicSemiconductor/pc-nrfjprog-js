@@ -57,6 +57,7 @@ LibraryFunctionPointersType HighLevel::libraryFunctions;
 bool HighLevel::loaded = false;
 bool HighLevel::connectedToDevice = false;
 std::string HighLevel::logMessage;
+std::timed_mutex HighLevel::logMutex;
 std::unique_ptr<Nan::Callback> HighLevel::jsProgressCallback;
 uv_async_t *HighLevel::progressEvent = nullptr;
 bool HighLevel::keepDeviceOpen = false;
@@ -331,7 +332,13 @@ void HighLevel::ReturnFunction(uv_work_t *req)
 
 void HighLevel::log(const char * msg)
 {
-    logMessage = logMessage.append(msg);
+    std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
+
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
+        return;
+    }
+
+    logMessage.append(msg);
 }
 
 void HighLevel::progressCallback(const char * process)

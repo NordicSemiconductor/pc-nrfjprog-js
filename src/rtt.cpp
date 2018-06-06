@@ -54,8 +54,7 @@
 
 Nan::Persistent<v8::Function> RTT::constructor;
 std::string RTT::logMessage;
-bool RTT::appendToLog;
-int RTT::logItemCount;
+std::timed_mutex RTT::logMutex;
 nRFjprogLibraryFunctionPointersType RTT::libraryFunctions;
 bool RTT::libraryLoaded;
 std::chrono::high_resolution_clock::time_point RTT::rttStartTime;
@@ -201,10 +200,6 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
     log("\n");
     log("===============================================\n");
 
-    for (int i = 0; i < 100000; i++) {
-        log("This is a long log message that I want to log to figure out how long I can actually get the log");
-    }
-
     baton->executeFunction = execute;
     baton->returnFunction = ret;
 
@@ -260,35 +255,25 @@ void RTT::ReturnFunction(uv_work_t *req)
 
 void RTT::resetLog()
 {
+    std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
+
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
+        return;
+    }
+
     logMessage.clear();
-    appendToLog = true;
-    logItemCount = 0;
 }
 
-#include <iostream>
-#include <fstream>
 
 void RTT::log(const char *msg)
 {
-    std::ofstream myfile;
-    myfile.open ("logger.log", std::ios::out | std::ios::app);
-    myfile << "logItemCount #" << logItemCount << " LogLength: " << logMessage.length() << " Max Length: " << logMessage.max_size() << std::endl;
-    myfile << "Message: " << msg << std::endl;
-    myfile.close();
-/*
-    if (logItemCount > 10000)
-    {
-        if (appendToLog)
-        {
-            logMessage.append("The log has more than 10000 items. No more items will be logged.");
-            appendToLog = false;
-        }
+    std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
 
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
         return;
     }
-*/
+
     logMessage.append(msg);
-    logItemCount++;
 }
 
 bool RTT::isStarted()

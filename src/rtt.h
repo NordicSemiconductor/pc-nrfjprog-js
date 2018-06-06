@@ -45,6 +45,7 @@
 
 #include <functional>
 #include <chrono>
+#include <memory>
 
 class RTTBaton;
 class RTTStartBaton;
@@ -95,8 +96,7 @@ private:
     static void resetLog();
 
     static std::string logMessage;
-    static bool appendToLog;
-    static int logItemCount;
+    static std::timed_mutex logMutex;
     static bool libraryLoaded;
     static std::chrono::high_resolution_clock::time_point rttStartTime;
 
