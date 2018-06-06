@@ -51,11 +51,11 @@
 #include "utility/errormessage.h"
 #include "utility/utility.h"
 
+#define MAX_LOGMESSAGE_SIZE (512*1024)
 
 Nan::Persistent<v8::Function> RTT::constructor;
-std::string RTT::logMessage;
+std::string RTT::logMessage(MAX_LOGMESSAGE_SIZE, '\0');
 bool RTT::appendToLog;
-int RTT::logItemCount;
 nRFjprogLibraryFunctionPointersType RTT::libraryFunctions;
 bool RTT::libraryLoaded;
 std::chrono::high_resolution_clock::time_point RTT::rttStartTime;
@@ -256,25 +256,24 @@ void RTT::ReturnFunction(uv_work_t *req)
 void RTT::resetLog()
 {
     logMessage.clear();
+    logMessage.reserve(MAX_LOGMESSAGE_SIZE);
     appendToLog = true;
-    logItemCount = 0;
 }
 
 void RTT::log(const char *msg)
 {
-    if (logItemCount > 10000)
+    if (logMessage.size() > MAX_LOGMESSAGE_SIZE-256)
     {
         if (appendToLog)
         {
-            logMessage = logMessage.append("The log has more than 10000 items. No more items will be logged.");
+            logMessage.append("The log has reached it's capacity. No more items will be logged.");
             appendToLog = false;
         }
 
         return;
     }
 
-    logMessage = logMessage.append(msg);
-    logItemCount++;
+    logMessage.append(msg);
 }
 
 bool RTT::isStarted()
