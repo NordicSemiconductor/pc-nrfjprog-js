@@ -201,6 +201,10 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
     log("\n");
     log("===============================================\n");
 
+    for (int i = 0; i < 100000; i++) {
+        log("This is a long log message that I want to log to figure out how long I can actually get the log");
+    }
+
     baton->executeFunction = execute;
     baton->returnFunction = ret;
 
@@ -268,10 +272,10 @@ void RTT::log(const char *msg)
 {
     std::ofstream myfile;
     myfile.open ("logger.log", std::ios::out | std::ios::app);
-    myfile << "logItemCount #" << logItemCount << " LogLength: " << logMessage.length() << std::endl;
+    myfile << "logItemCount #" << logItemCount << " LogLength: " << logMessage.length() << " Max Length: " << logMessage.max_size() << std::endl;
     myfile << "Message: " << msg << std::endl;
     myfile.close();
-
+/*
     if (logItemCount > 10000)
     {
         if (appendToLog)
@@ -282,7 +286,7 @@ void RTT::log(const char *msg)
 
         return;
     }
-
+*/
     logMessage.append(msg);
     logItemCount++;
 }
@@ -355,6 +359,7 @@ RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
 RTTErrorcodes_t RTT::waitForControlBlock(RTTStartBaton *baton)
 {
     while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         bool controlBlockFound = false;
         RETURN_ERROR_ON_FAIL(libraryFunctions.rtt_is_control_block_found(&controlBlockFound), RTTCouldNotCallFunction);
 
@@ -364,12 +369,11 @@ RTTErrorcodes_t RTT::waitForControlBlock(RTTStartBaton *baton)
 
         auto attemptedStartupTime = std::chrono::high_resolution_clock::now();
 
-        if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime - rttStartTime).count() > 10) {
+        if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime - rttStartTime).count() > 5) {
             cleanup();
             return RTTCouldNotFindControlBlock;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return RTTSuccess;
