@@ -38,6 +38,8 @@
 #define RTT_BATONS_H
 
 #include <memory>
+#include <sstream>
+#include <string>
 #include "rtt.h"
 #include "rtt_helpers.h"
 
@@ -64,6 +66,11 @@ public:
         return returnParameterCount + 1;
     }
 
+    virtual std::string toString()
+    {
+        return std::string();
+    }
+
     const uint32_t returnParameterCount;
     const std::string name;
 
@@ -87,6 +94,18 @@ class RTTStartBaton : public RTTBaton
 {
 public:
     RTTStartBaton() : RTTBaton("start rtt", 2) {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "Parameters:" << std::endl;
+        stream << "Serialnumber: " << serialNumber << std::endl;
+        stream << "Has Controlblock: " << (hasControlBlockLocation ? "true" : "false") << std::endl;
+        stream << "Controlblock location: " << controlBlockLocation << std::endl;
+
+        return stream.str();
+    }
+
     uint32_t serialNumber;
     bool hasControlBlockLocation;
     uint32_t controlBlockLocation;
@@ -103,12 +122,30 @@ class RTTStopBaton : public RTTBaton
 {
 public:
     RTTStopBaton() : RTTBaton("stop rtt", 0) {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "No parameters";
+
+        return stream.str();
+    }
 };
 
 class RTTReadBaton : public RTTBaton
 {
 public:
     RTTReadBaton() : RTTBaton("rtt read", 3) {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "Parameters:" << std::endl;
+        stream << "ChanneldIndex: " << channelIndex << std::endl;
+        stream << "Length wanted: " << length << std::endl;
+
+        return stream.str();
+    }
 
     uint32_t channelIndex;
     uint32_t length;
@@ -119,6 +156,17 @@ class RTTWriteBaton : public RTTBaton
 {
 public:
     RTTWriteBaton() : RTTBaton("rtt write", 2) {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "Parameters:" << std::endl;
+        stream << "ChanneldIndex: " << channelIndex << std::endl;
+        stream << "Length wanted: " << length << std::endl;
+        stream << "Data" << data.data() << std::endl;
+
+        return stream.str();
+    }
 
     uint32_t channelIndex;
     uint32_t length;

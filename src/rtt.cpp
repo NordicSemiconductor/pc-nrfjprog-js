@@ -54,8 +54,7 @@
 
 Nan::Persistent<v8::Function> RTT::constructor;
 std::string RTT::logMessage;
-bool RTT::appendToLog;
-int RTT::logItemCount;
+std::timed_mutex RTT::logMutex;
 nRFjprogLibraryFunctionPointersType RTT::libraryFunctions;
 bool RTT::libraryLoaded;
 std::chrono::high_resolution_clock::time_point RTT::rttStartTime;
@@ -197,8 +196,9 @@ void RTT::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info, rtt_parse_parameters_func
     log("Start of ");
     log(baton->name.c_str());
     log("\n");
+    log(baton->toString().c_str());
+    log("\n");
     log("===============================================\n");
-
 
     baton->executeFunction = execute;
     baton->returnFunction = ret;
@@ -255,26 +255,25 @@ void RTT::ReturnFunction(uv_work_t *req)
 
 void RTT::resetLog()
 {
-    logMessage.clear();
-    appendToLog = true;
-    logItemCount = 0;
-}
+    std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
 
-void RTT::log(const char *msg)
-{
-    if (logItemCount > 10000)
-    {
-        if (appendToLog)
-        {
-            logMessage = logMessage.append("The log has more than 10000 items. No more items will be logged.");
-            appendToLog = false;
-        }
-
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
         return;
     }
 
-    logMessage = logMessage.append(msg);
-    logItemCount++;
+    logMessage.clear();
+}
+
+
+void RTT::log(const char *msg)
+{
+    std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
+
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
+        return;
+    }
+
+    logMessage.append(msg);
 }
 
 bool RTT::isStarted()
@@ -345,6 +344,7 @@ RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
 RTTErrorcodes_t RTT::waitForControlBlock(RTTStartBaton *baton)
 {
     while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         bool controlBlockFound = false;
         RETURN_ERROR_ON_FAIL(libraryFunctions.rtt_is_control_block_found(&controlBlockFound), RTTCouldNotCallFunction);
 
@@ -354,12 +354,11 @@ RTTErrorcodes_t RTT::waitForControlBlock(RTTStartBaton *baton)
 
         auto attemptedStartupTime = std::chrono::high_resolution_clock::now();
 
-        if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime - rttStartTime).count() > 10) {
+        if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime - rttStartTime).count() > 5) {
             cleanup();
             return RTTCouldNotFindControlBlock;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     return RTTSuccess;

@@ -44,6 +44,7 @@
 #include "utility/errormessage.h"
 
 #include <functional>
+#include <memory>
 
 class Baton;
 
@@ -120,6 +121,7 @@ private:
     static Probe_handle_t probe;
 
     static std::string logMessage;
+    static std::timed_mutex logMutex;
 };
 
 #endif // __NRFJPROG_H__
