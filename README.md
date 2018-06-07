@@ -15,7 +15,7 @@ This will pull down precompiled binaries for your platform/runtime environment. 
 * CMake (>=2.8.12)
 * A C/C++ toolchain
 
-As part of the installation procedure, pc-nrfjprog-js will check if it can access the nrfjprog libraries, and verify that they are up to date. If not, it will try to install/upgrade these libraries. This check can be skipped by setting environment variable `SKIP_NRFJPROG_CHECK=true` before installing pc-nrfjprog-js.
+As part of the installation procedure, pc-nrfjprog-js will check if it can access the nrfjprog libraries, and verify that they are up to date. If not, it will try to install/upgrade these libraries.
 
 ## Required setup
 
