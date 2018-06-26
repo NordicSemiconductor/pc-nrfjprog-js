@@ -179,6 +179,19 @@ describe('Single device - non-destructive', () => {
         });
     });
 
+    it('calling close twice has no effect', done => {
+        nRFjprog.open(device.serialNumber, (err) => {
+            expect(err).toBeUndefined();
+            nRFjprog.close(device.serialNumber, (err) => {
+                expect(err).toBeUndefined();
+                nRFjprog.close(device.serialNumber, (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                });
+            });
+        });
+    });
+
     it('reads more than 0x10000 bytes', done => {
         const readLength = 0x10004;
 
