@@ -961,10 +961,6 @@ NAN_METHOD(HighLevel::CloseDevice)
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        if (!keepDeviceOpen)
-        {
-            return INVALID_OPERATION; // Already closed
-        }
         keepDeviceOpen = false;
         return SUCCESS;
     };

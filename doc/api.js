@@ -594,7 +594,7 @@ export function writeU32(serialNumber, address, data, callback) {}
  * If a connection to a device is opened, then all subsequent calls will use the
  * already-opened connection. Opening a connection twice will close the first
  * connection and return an error. Closing a connection twice will close it on
- * the first `close()` call: the second one will return an error.<br />
+ * the first `close()` call: the second one will have no effect.<br />
  *
  * @example
  * nrfjprogjs.read(123456789, 0, function(err, data) {
