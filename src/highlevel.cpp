@@ -942,6 +942,11 @@ NAN_METHOD(HighLevel::OpenDevice)
     };
 
     execute_function_t e = [&] (Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        if (keepDeviceOpen)
+        {
+            keepDeviceOpen = false;
+            return INVALID_OPERATION; // Already opened
+        }
         keepDeviceOpen = true;
         return SUCCESS;
     };
