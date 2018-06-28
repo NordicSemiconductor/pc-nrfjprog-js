@@ -4,7 +4,7 @@
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "scripts": {
-    "build": "npm install --build-from-source",
+    "build": "node build.js",
     "lint": "jshint api/ test/ && jscs api/ test/",
     "clean-prebuilt": "node-pre-gyp clean",
     "package-prebuilt": "node-pre-gyp package",

@@ -17,6 +17,18 @@ This will pull down precompiled binaries for your platform/runtime environment. 
 
 As part of the installation procedure, pc-nrfjprog-js will check if it can access the nrfjprog libraries, and verify that they are up to date. If not, it will try to install/upgrade these libraries.
 
+## Building from source
+
+The library can be built from source, using:
+
+    npm run build
+
+The library can be build from source while installing, using:
+
+    npm install --build-from-source
+
+Building from source requires the tools from Installing to be installed.
+
 ## Required setup
 
 Before using the library, some platform specific setup is required. If you are seeing errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that the tools described below are properly installed.
