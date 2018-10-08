@@ -62,25 +62,25 @@ const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 const PLATFORM_CONFIG = {
     linux: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Linux64/51386
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/51386/28/82499208/94917',
+        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Linux64/58852
+        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58852/30/91363763/94917',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-linux64.tar'),
     },
     darwin: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-OSX/53402
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/53402/20/87602525/99977',
+        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-OSX/58855
+        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58855/22/48944001/99977',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-darwin.tar'),
     },
     win32: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF51822/nRF5x-Command-Line-Tools-Win32/33444
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/33444/48/95932377/53210',
+        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Win32/58850
+        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58850/51/33271593/53210',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe'),
     },
 };
 const REQUIRED_VERSION = {
     major: 9,
-    minor: 7,
-    revision: 3,
+    minor: 8,
+    revision: 0,
 };
 
 function downloadFile(url, destinationFile) {
