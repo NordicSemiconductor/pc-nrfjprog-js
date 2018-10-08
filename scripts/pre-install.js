@@ -53,7 +53,6 @@ const https = require('https');
 const tar = require('tar');
 const fs = require('fs');
 const sander = require('sander');
-const os = require('os');
 const path = require('path');
 const opn = require('opn');
 const semver = require('semver');
@@ -61,7 +60,22 @@ const semver = require('semver');
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 const PLATFORM_CONFIG = {
-    linux: {
+    win32_ia32: {
+        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Win32/58850
+        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58850/51/33271593/53210',
+        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-ia32.exe'),
+    },
+    win32_x64: {
+        // See
+        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/70507/2/82059498/150713',
+        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-x64.exe'),
+    },
+    linux_ia32: {
+        // See
+        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58857/25/7453913/97746',
+        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-linux32.tar'),
+    },
+    linux_x64: {
         // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Linux64/58852
         url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58852/30/91363763/94917',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-linux64.tar'),
@@ -70,11 +84,6 @@ const PLATFORM_CONFIG = {
         // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-OSX/58855
         url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58855/22/48944001/99977',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-darwin.tar'),
-    },
-    win32: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Win32/58850
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58850/51/33271593/53210',
-        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32.exe'),
     },
 };
 const REQUIRED_VERSION = {
@@ -136,7 +145,14 @@ function getLibraryVersion() {
 }
 
 function isHeaderFileInstalledWin32() {
-    const programFilesDir = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
+    let programFilesDir
+    if (process.arch === 'ia32') {
+        programFilesDir = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
+    } else if (process.arch === 'x64') {
+        programFilesDir = process.env['ProgramW6432'] || process.env.ProgramFiles;
+    } else {
+        throw Error(`Arch ${process.arch} is not supported.`);
+    }
     const headerFile = path.join(programFilesDir, 'Nordic Semiconductor', 'nrf5x', 'bin', 'headers', 'nrfjprog.h');
     try {
         fs.accessSync(headerFile);
@@ -172,14 +188,17 @@ function installNrfjprog(pathToArtifact) {
     return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
 }
 
-const platform = os.platform();
-const platformConfig = PLATFORM_CONFIG[platform];
+const platform = process.platform;
+const arch = process.arch;
+let platformConfigStr;
+if (platform === 'win32' || platform === 'linux') {
+    platformConfigStr = `${platform}_${arch}`
+} else if (platform === 'darwin') {
+    platformConfigStr = platform
+}
+const platformConfig = PLATFORM_CONFIG[platformConfigStr];
 
-if (platform === 'win32' && os.arch() !== 'ia32') {
-    console.error(`Unsupported architecture: ${os.arch()}. On Windows, the nrfjprog libraries ` +
-        'currently require 32-bit Node.js.');
-    process.exit(1);
-} else if (!platformConfig) {
+if (!platformConfig) {
     console.error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
     process.exit(1);
 }
