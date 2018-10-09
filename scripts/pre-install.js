@@ -70,11 +70,6 @@ const PLATFORM_CONFIG = {
         url: 'https://www.nordicsemi.com/eng/nordic/download_resource/70507/2/82059498/150713',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-x64.exe'),
     },
-    linux_ia32: {
-        // See
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58857/25/7453913/97746',
-        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-linux32.tar'),
-    },
     linux_x64: {
         // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Linux64/58852
         url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58852/30/91363763/94917',
