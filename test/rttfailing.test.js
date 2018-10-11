@@ -56,7 +56,7 @@ describe('RTT without RTT firmware', () => {
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             device = connectedDevices[0];
 
-            nRFjprog.program(device.serialNumber, "./__tests__/hex/program.hex", { }, programCallback);
+            nRFjprog.program(device.serialNumber, "./test/hex/program.hex", { }, programCallback);
         };
 
         nRFjprog.getConnectedDevices(callback);

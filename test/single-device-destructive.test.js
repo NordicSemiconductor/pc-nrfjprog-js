@@ -68,7 +68,7 @@ describe('Single device - destructive', () => {
         const callback = (err) => {
             expect(err).toBeUndefined();
 
-            nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, verifyCallback);
+            nRFjprog.verify(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, verifyCallback);
         };
 
         const verifyCallback = (err) => {
@@ -76,7 +76,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.program(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
+        nRFjprog.program(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
     });
 
     it('reads device content', done => {
@@ -94,7 +94,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
+        nRFjprog.verify(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
     });
 
     it('verifies a hex file with progress callback', done => {
@@ -106,14 +106,14 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.verify(device.serialNumber, "./__tests__/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, mockProgressCallback, callback);
+        nRFjprog.verify(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, mockProgressCallback, callback);
     });
 
     it('programs a hex string', done => {
         const callback = (err) => {
             expect(err).toBeUndefined();
 
-            nRFjprog.verify(device.serialNumber, './__tests__/hex/program.hex', { }, verifyCallback);
+            nRFjprog.verify(device.serialNumber, './test/hex/program.hex', { }, verifyCallback);
         };
 
         const verifyCallback = (err) => {
@@ -121,7 +121,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        const filecontent = fs.readFileSync('./__tests__/hex/program.hex').toString('utf-8');
+        const filecontent = fs.readFileSync('./test/hex/program.hex').toString('utf-8');
 
         nRFjprog.program(device.serialNumber, filecontent, { inputFormat: nRFjprog.INPUT_FORMAT_HEX_STRING }, callback);
     });
