@@ -3,5 +3,7 @@
 /CMakeFiles
 /docs
 /jest.json
+/package-lock.json
+/*.hex
 nrfjprog/
 *~

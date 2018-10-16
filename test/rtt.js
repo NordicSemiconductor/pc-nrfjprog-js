@@ -62,7 +62,7 @@ describe('RTT', () => {
 
             expect(device).toBeDefined();
 
-            nRFjprog.program(device.serialNumber, "./__tests__/hex/rtt.hex", { }, programCallback);
+            nRFjprog.program(device.serialNumber, "./test/hex/rtt.hex", { }, programCallback);
         };
 
         nRFjprog.getConnectedDevices(callback);
