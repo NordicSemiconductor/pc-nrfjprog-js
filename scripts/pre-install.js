@@ -49,7 +49,6 @@
 
 'use strict';
 
-const https = require('https');
 const axios = require('axios');
 const tar = require('tar');
 const fs = require('fs');
