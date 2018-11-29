@@ -6,4 +6,6 @@
 /package-lock.json
 /*.hex
 nrfjprog/
+.DS_Store
+package-lock.json
 *~

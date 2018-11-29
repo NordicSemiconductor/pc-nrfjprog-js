@@ -50,6 +50,7 @@
 'use strict';
 
 const https = require('https');
+const axios = require('axios');
 const tar = require('tar');
 const fs = require('fs');
 const sander = require('sander');
@@ -58,26 +59,24 @@ const opn = require('opn');
 const semver = require('semver');
 
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
+const DOWNLOAD_URL = 'https://www.nordicsemi.com/api/sitecore/Products/DownloadPlatform';
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
+
 const PLATFORM_CONFIG = {
     win32_ia32: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Win32/58850
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58850/52/77745893/53210',
+        fileid: 'B96A931BEF8C400DA9BA4EADBE115071',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-ia32.exe'),
     },
     win32_x64: {
-        // See
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/70507/3/95086808/150713',
+        fileid: 'AAFC401DA6794101A4682508DA8A74C4',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-x64.exe'),
     },
     linux_x64: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-Linux64/58852
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58852/31/53761525/94917',
+        fileid: '8F19D314130548209E75EFFADD9348DB',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-linux64.tar'),
     },
     darwin: {
-        // See https://www.nordicsemi.com/eng/nordic/Products/nRF52840/nRF5x-Command-Line-Tools-OSX/58855
-        url: 'https://www.nordicsemi.com/eng/nordic/download_resource/58855/23/14740058/99977',
+        fileid: '6E0670EF22EC4D819908809AF13CD700',
         destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-darwin.tar'),
     },
 };
@@ -87,26 +86,30 @@ const REQUIRED_VERSION = {
     revision: 1,
 };
 
-function downloadFile(url, destinationFile) {
-    console.log(`Downloading nrfjprog from ${url} to ${destinationFile}...`);
+function downloadFile(fileid, destinationFile) {
+    console.log(`Downloading nrfjprog from ${DOWNLOAD_URL} with fileid ${fileid} to ${destinationFile}...`);
 
     const destinationDir = path.dirname(destinationFile);
     return sander.mkdir(destinationDir)
-        .then(() => new Promise((resolve, reject) => {
+        .then(() => new Promise(async (resolve, reject) => {
             const file = fs.createWriteStream(destinationFile);
-            https.get(url, response => {
-                const statusCode = response.statusCode;
-                if (statusCode !== 200) {
-                    reject(new Error(`Unable to download ${url}. Got status code ${statusCode}`));
-                } else {
-                    response.pipe(file);
-                    response.on('error', reject);
-                    response.on('end', () => {
-                        file.end();
-                        resolve();
-                    });
-                }
-            });
+            const response = await axios.post(
+                DOWNLOAD_URL,
+                {fileid},
+                {responseType: 'stream'}
+            );
+            const statusCode = response.status;
+            if (statusCode !== 200) {
+                reject(new Error(`Unable to download ${DOWNLOAD_URL} with fileid ${fileid}. Got status code ${statusCode}`));
+            } else {
+                response.data.pipe(file);
+                response.data.on('error', reject);
+                response.data.on('end', () => {
+                    file.end();
+                    resolve();
+                });
+            }
+
         }));
 }
 
@@ -226,7 +229,7 @@ getLibraryVersion()
             console.log('Trying to install nrfjprog');
 
             let exitCode = 0;
-            return downloadFile(platformConfig.url, platformConfig.destinationFile)
+            return downloadFile(platformConfig.fileid, platformConfig.destinationFile)
                 .then(() => installNrfjprog(platformConfig.destinationFile))
                 .catch(error => {
                     exitCode = 1;
