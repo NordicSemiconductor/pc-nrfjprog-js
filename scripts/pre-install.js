@@ -91,7 +91,6 @@ async function downloadFile(fileid, destinationFile) {
     const destinationDir = path.dirname(destinationFile);
     await sander.mkdir(destinationDir);
 
-    const file = fs.createWriteStream(destinationFile);
     const response = await axios.post(
         DOWNLOAD_URL,
         {fileid},
@@ -102,6 +101,7 @@ async function downloadFile(fileid, destinationFile) {
         throw new Error(`Unable to download ${DOWNLOAD_URL} with fileid ${fileid}. ` +
             `Got status code ${statusCode}`);
     } else {
+        const file = fs.createWriteStream(destinationFile);
         response.data.pipe(file);
         response.data.on('error', err => { throw new Error(err) });
         response.data.on('end', () => {
