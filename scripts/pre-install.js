@@ -100,15 +100,23 @@ async function downloadFile(fileid, destinationFile) {
     if (statusCode !== 200) {
         throw new Error(`Unable to download ${DOWNLOAD_URL} with fileid ${fileid}. ` +
             `Got status code ${statusCode}`);
-    } else {
+    }
+
+    return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destinationFile);
+        const expectedLength = response.headers['content-length'];
         response.data.pipe(file);
-        response.data.on('error', err => { throw new Error(err) });
+        response.data.on('error', reject);
         response.data.on('end', () => {
             file.end();
-            return;
+            const actualLength = file.bytesWritten;
+            if (actualLength / expectedLength < 0.9) {
+                console.log(`Downloading may be fail with response content length: ${expectedLength} ` +
+                    `and actual file size: ${actualLength}`);
+            }
+            resolve();
         });
-    }
+    });
 }
 
 function extractTarFile(filePath, outputDir) {
