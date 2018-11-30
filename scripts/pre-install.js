@@ -104,16 +104,10 @@ async function downloadFile(fileid, destinationFile) {
 
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destinationFile);
-        const expectedLength = response.headers['content-length'];
         response.data.pipe(file);
         response.data.on('error', reject);
         response.data.on('end', () => {
             file.end();
-            const actualLength = file.bytesWritten;
-            if (actualLength / expectedLength < 0.9) {
-                console.log(`Downloading may be fail with response content length: ${expectedLength} ` +
-                    `and actual file size: ${actualLength}`);
-            }
             resolve();
         });
     });
