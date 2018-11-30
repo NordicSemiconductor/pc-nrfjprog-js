@@ -85,31 +85,30 @@ const REQUIRED_VERSION = {
     revision: 1,
 };
 
-function downloadFile(fileid, destinationFile) {
+async function downloadFile(fileid, destinationFile) {
     console.log(`Downloading nrfjprog from ${DOWNLOAD_URL} with fileid ${fileid} to ${destinationFile}...`);
 
     const destinationDir = path.dirname(destinationFile);
-    return sander.mkdir(destinationDir)
-        .then(() => new Promise(async (resolve, reject) => {
-            const file = fs.createWriteStream(destinationFile);
-            const response = await axios.post(
-                DOWNLOAD_URL,
-                {fileid},
-                {responseType: 'stream'}
-            );
-            const statusCode = response.status;
-            if (statusCode !== 200) {
-                reject(new Error(`Unable to download ${DOWNLOAD_URL} with fileid ${fileid}. Got status code ${statusCode}`));
-            } else {
-                response.data.pipe(file);
-                response.data.on('error', reject);
-                response.data.on('end', () => {
-                    file.end();
-                    resolve();
-                });
-            }
+    await sander.mkdir(destinationDir);
 
-        }));
+    const file = fs.createWriteStream(destinationFile);
+    const response = await axios.post(
+        DOWNLOAD_URL,
+        {fileid},
+        {responseType: 'stream'}
+    );
+    const statusCode = response.status;
+    if (statusCode !== 200) {
+        throw new Error(`Unable to download ${DOWNLOAD_URL} with fileid ${fileid}. ` +
+            `Got status code ${statusCode}`);
+    } else {
+        response.data.pipe(file);
+        response.data.on('error', err => { throw new Error(err) });
+        response.data.on('end', () => {
+            file.end();
+            return;
+        });
+    }
 }
 
 function extractTarFile(filePath, outputDir) {
