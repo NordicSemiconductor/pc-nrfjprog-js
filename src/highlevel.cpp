@@ -99,6 +99,7 @@ NAN_METHOD(HighLevel::New)
 HighLevel::HighLevel()
 {
     keepDeviceOpen = false;
+    resetLog();
 }
 
 void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
@@ -119,7 +120,7 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
         return;
     }
 
-    logMessage.clear();
+    resetLog();
 
     auto argumentCount = 0;
     Baton *baton = nullptr;
@@ -180,13 +181,6 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
         Nan::ThrowError(message);
         return;
     }
-
-    log("===============================================\n");
-    log("Start of ");
-    log(baton->name.c_str());
-    log("\n");
-    log("===============================================\n");
-
 
     baton->executeFunction = execute;
     baton->returnFunction = ret;
@@ -339,6 +333,17 @@ void HighLevel::log(const char * msg)
     }
 
     logMessage.append(msg);
+}
+
+void HighLevel::resetLog()
+{
+    std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
+
+    if(!lock.try_lock_for(std::chrono::seconds(10))) {
+        return;
+    }
+
+    logMessage.clear();
 }
 
 void HighLevel::progressCallback(const char * process)
