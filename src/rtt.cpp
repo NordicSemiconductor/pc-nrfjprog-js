@@ -259,6 +259,11 @@ void RTT::resetLog()
 
 void RTT::log(const char *msg)
 {
+    log(std::string(msg));
+}
+
+void RTT::log(const std::string& msg)
+{
     std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
 
     if(!lock.try_lock_for(std::chrono::seconds(10))) {
