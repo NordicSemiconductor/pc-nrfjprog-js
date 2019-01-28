@@ -93,6 +93,7 @@ private:
     static void cleanup();
 
     static void log(const char * msg);
+    static void log(const std::string& msg);
     static void resetLog();
 
     static std::string logMessage;

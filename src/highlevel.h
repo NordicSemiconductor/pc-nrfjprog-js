@@ -106,6 +106,8 @@ private:
     static void init(v8::Local<v8::FunctionTemplate> tpl);
 
     static void log(const char * msg);
+    static void log(const std::string& msg);
+    static void resetLog();
 
     static void progressCallback(const char * process);
     static std::unique_ptr<Nan::Callback> jsProgressCallback;

@@ -358,7 +358,7 @@ export function getProbeInfo(serialNumber, callback) {}
  * Async function to get information about the low level library used by the device, given its serial number.
  *
  * @example
- * nrfjprogjs.getLibrayInfo(123456789, function(err, info) {
+ * nrfjprogjs.getLibraryInfo(123456789, function(err, info) {
  *      if (err) throw err;
  *      console.log('Selected device uses ' + info.path + ' to connect');
  * } );
