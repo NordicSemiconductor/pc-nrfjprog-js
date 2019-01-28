@@ -324,7 +324,13 @@ void HighLevel::ReturnFunction(uv_work_t *req)
     delete baton;
 }
 
-void HighLevel::log(const char * msg)
+
+void HighLevel::log(const char *msg)
+{
+    log(std::string(msg));
+}
+
+void HighLevel::log(const std::string& msg)
 {
     std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
 
