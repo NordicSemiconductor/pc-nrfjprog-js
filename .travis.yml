@@ -64,9 +64,9 @@ before_install:
 
 script:
 - npm install --build-from-source
-- npm package-prebuilt
+- npm run package-prebuilt
 - echo tag=$TRAVIS_TAG pullrequest=$TRAVIS_PULL_REQUEST
 - |
     if [[ "$TRAVIS_TAG" =~ ^v?[0-9] ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-      npm publish-prebuilt
+      npm run publish-prebuilt
     fi
