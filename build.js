@@ -47,7 +47,8 @@ function build(debug)
         runtime: process.env.npm_config_runtime || undefined,
         runtimeVersion: process.env.npm_config_target || undefined,
         arch: process.env.npm_config_arch || undefined,
-        debug: debug
+        debug: debug,
+        preferGnu: true,
     };
 
     var buildSystem = new cmakeJS.BuildSystem(options);
