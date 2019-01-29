@@ -54,7 +54,7 @@ const tar = require('tar');
 const fs = require('fs');
 const sander = require('sander');
 const path = require('path');
-const opn = require('opn');
+const child_process = require('child_process');
 const semver = require('semver');
 
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
@@ -181,7 +181,12 @@ function installNrfjprog(pathToArtifact) {
             .then(() => extractTarFile(pathToArtifact, LIB_DIR));
     } else if (pathToArtifact.endsWith('.exe')) {
         console.log(`Running nrfjprog installer at ${pathToArtifact}...`);
-        return opn(pathToArtifact);
+        try {
+            child_process.execFileSync(pathToArtifact, ['-silent']);
+            return Promise.resolve();
+        } catch (err) {
+            return Promise.reject(err);
+        }
     }
     return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
 }
@@ -230,6 +235,8 @@ getLibraryVersion()
 
             let exitCode = 0;
             return downloadFile(platformConfig.fileid, platformConfig.destinationFile)
+                // without this sleep windows install fails with EBUSY
+                .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
                 .then(() => installNrfjprog(platformConfig.destinationFile))
                 .catch(error => {
                     exitCode = 1;
