@@ -25,23 +25,23 @@ env:
   - NODE_ARCH="64"
   matrix:
   - NODE_VERSION="8.15.0"
-  # - NODE_VERSION="10.15.0"
-  # - NODE_VERSION="11.7.0"
+  - NODE_VERSION="10.15.0"
+  - NODE_VERSION="11.7.0"
   - NODE_VERSION="8.15.0" npm_config_runtime="electron" npm_config_target="2.0.6" npm_config_disturl="https://atom.io/download/electron"
-  # - NODE_VERSION="10.15.0" npm_config_runtime="electron" npm_config_target="4.0.1" npm_config_disturl="https://atom.io/download/electron"
+  - NODE_VERSION="10.15.0" npm_config_runtime="electron" npm_config_target="4.0.1" npm_config_disturl="https://atom.io/download/electron"
 
 matrix:
   include:
   - os: windows
     env: NODE_ARCH="32" NODE_VERSION="8.15.0"
-  # - os: windows
-  #   env: NODE_ARCH="32" NODE_VERSION="10.15.0"
-  # - os: windows
-  #   env: NODE_ARCH="32" NODE_VERSION="11.7.0"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="10.15.0"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="11.7.0"
   - os: windows
     env: NODE_ARCH="32" NODE_VERSION="8.15.0" npm_config_runtime="electron" npm_config_target="2.0.6" npm_config_disturl="https://atom.io/download/electron"
-  # - os: windows
-  #   env: NODE_ARCH="32" NODE_VERSION="10.15.0" npm_config_runtime="electron" npm_config_target="4.0.1" npm_config_disturl="https://atom.io/download/electron"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="10.15.0" npm_config_runtime="electron" npm_config_target="4.0.1" npm_config_disturl="https://atom.io/download/electron"
 
 before_install:
 - |
@@ -63,14 +63,10 @@ before_install:
   fi
 
 script:
-- |
-  node -v
-  node -p process.arch
-  npm install --build-from-source
-- ./node_modules/.bin/node-pre-gyp package
+- npm install --build-from-source
+- npm package-prebuilt
 - echo tag=$TRAVIS_TAG pullrequest=$TRAVIS_PULL_REQUEST
 - |
     if [[ "$TRAVIS_TAG" =~ ^v?[0-9] ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-      npm install node-pre-gyp-github@1.4.3
-      ./node_modules/.bin/node-pre-gyp-github publish
+      npm publish-prebuilt
     fi
