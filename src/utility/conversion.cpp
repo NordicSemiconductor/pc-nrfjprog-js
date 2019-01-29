@@ -64,7 +64,7 @@ public:
             throw std::string("unsigned integer");
         }
 
-        return static_cast<NativeType>(js->ToUint32()->Uint32Value());
+        return static_cast<NativeType>(js->Uint32Value());
     }
 
     static NativeType getNativeSigned(v8::Local<v8::Value> js)
@@ -74,7 +74,7 @@ public:
             throw std::string("signed integer");
         }
 
-        return static_cast<NativeType>(js->ToInt32()->Int32Value());
+       return static_cast<NativeType>(js->IntegerValue());
     }
 
     static NativeType getNativeFloat(v8::Local<v8::Value> js)
@@ -84,7 +84,7 @@ public:
             throw std::string("float");
         }
 
-        return static_cast<NativeType>(js->ToNumber()->NumberValue());
+        return static_cast<NativeType>(js->NumberValue());
     }
 
     static NativeType getNativeBool(v8::Local<v8::Value> js)
@@ -94,7 +94,7 @@ public:
             throw std::string("bool");
         }
 
-        return static_cast<NativeType>(js->ToBoolean()->BooleanValue());
+        return static_cast<NativeType>(js->BooleanValue());
     }
 
     static NativeType getNativeUnsigned(v8::Local<v8::Object> js, const char *name)
