@@ -300,7 +300,17 @@ void HighLevel::ReturnFunction(uv_work_t *req)
     auto baton = static_cast<Baton *>(req->data);
     std::vector<v8::Local<v8::Value> > argv;
 
-    argv.push_back(ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, logMessage, baton->lowlevelError));
+    std::string msg;
+
+    {
+        std::unique_lock<std::timed_mutex> lock (logMutex, std::defer_lock);
+
+        if(lock.try_lock_for(std::chrono::seconds(10))) {
+            msg = logMessage;
+        }
+    }
+
+    argv.push_back(ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, msg, baton->lowlevelError));
 
     if (baton->result != errorcode_t::JsSuccess)
     {
