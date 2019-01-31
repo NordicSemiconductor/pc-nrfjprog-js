@@ -1,0 +1,72 @@
+branches:
+  only:
+    - master
+    - /^v?[0-9]/
+
+language: cpp
+compiler: gcc
+
+filter_secrets: false
+
+os:
+- linux
+- osx
+- windows
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-6
+
+env:
+  global:
+  - NODE_ARCH="64"
+  matrix:
+  - NODE_VERSION="8.15.0"
+  - NODE_VERSION="10.15.0"
+  - NODE_VERSION="11.7.0"
+  - NODE_VERSION="8.15.0" npm_config_runtime="electron" npm_config_target="2.0.6" npm_config_disturl="https://atom.io/download/electron"
+  - NODE_VERSION="10.15.0" npm_config_runtime="electron" npm_config_target="4.0.1" npm_config_disturl="https://atom.io/download/electron"
+
+matrix:
+  include:
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="8.15.0"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="10.15.0"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="11.7.0"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="8.15.0" npm_config_runtime="electron" npm_config_target="2.0.6" npm_config_disturl="https://atom.io/download/electron"
+  - os: windows
+    env: NODE_ARCH="32" NODE_VERSION="10.15.0" npm_config_runtime="electron" npm_config_target="4.0.1" npm_config_disturl="https://atom.io/download/electron"
+
+before_install:
+- |
+  if [ $TRAVIS_OS_NAME == "windows" ]; then
+    choco install -y nvm
+    export NVM_HOME="C:\ProgramData\nvm"
+    export NVM_SYMLINK="C:\Program Files\nodejs"
+    export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
+    nvm install $NODE_VERSION $NODE_ARCH
+    nvm use $NODE_VERSION $NODE_ARCH
+  else
+    nvm install $NODE_VERSION
+    nvm use $NODE_VERSION
+  fi
+- |
+  if [ $TRAVIS_OS_NAME == "linux" ]; then
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/gcc-6 100
+  fi
+
+script:
+- npm install --build-from-source
+- npm run package-prebuilt
+- echo tag=$TRAVIS_TAG pullrequest=$TRAVIS_PULL_REQUEST
+- |
+    if [[ "$TRAVIS_TAG" =~ ^v?[0-9] ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
+      npm run publish-prebuilt
+    fi
