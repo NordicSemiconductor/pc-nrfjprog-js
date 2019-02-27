@@ -34,66 +34,58 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-function build(debug)
+const cmakeJS = require('cmake-js');
+const os = require('os');
+
+function build(debug, target)
 {
-    var cmakeJS = require('cmake-js');
-    var os = require('os');
+    const { npm_config_runtime, npm_config_target, npm_config_arch } = process.env;
 
-    var defaultRuntime = 'node';
-    var defaultRuntimeVersion = process.version.substr(1);
-    var defaultWinArch = os.arch();
+    const runtime = npm_config_runtime || 'node';
+    const runtimeVersion = npm_config_target || process.version.substr(1);
+    const arch = npm_config_arch || (process.plaform == 'win32' ? os.arch() : undefined);
 
-    var options = {
-        runtime: process.env.npm_config_runtime || undefined,
-        runtimeVersion: process.env.npm_config_target || undefined,
-        arch: process.env.npm_config_arch || undefined,
-        debug: debug,
+    const options = {
+        runtime,
+        runtimeVersion,
+        arch,
+        debug,
         preferGnu: true,
+        target,
     };
 
-    var buildSystem = new cmakeJS.BuildSystem(options);
-
-    if (buildSystem.options.runtime === undefined) {
-        buildSystem.options.runtime = defaultRuntime;
+    if (process.platform === 'win32') {
+        if (process.arch === 'ia32') {
+            options.generator = 'Visual Studio 15 2017';
+        } else if (process.arch === 'x64') {
+            options.generator = 'Visual Studio 15 2017 Win64';
+        } else {
+            console.log(`${process.arch} is not supported on Windows`);
+        }
     }
 
-    if (buildSystem.options.runtimeVersion === undefined) {
-        buildSystem.options.runtimeVersion = defaultRuntimeVersion;
-    }
-
-    if (buildSystem.options.arch === undefined && process.platform == 'win32') {
-        buildSystem.options.arch = defaultWinArch;
-    }
-
+    const buildSystem = new cmakeJS.BuildSystem(options);
     buildSystem.rebuild();
 }
 
-var times = 0;
+let times = 0;
 
-function begin(args) {
-    var debug = false;
-
-    var length = args.length >>> 0;
-
-    for (var i = 0; i < length; i++) {
-        if(args[i] === '--debug') debug = true;
-    }
+function main(args = []) {
+    const debug = args.includes('--debug');
+    const target = args.includes('--target') ? args[args.indexOf('--target') + 1] : undefined;
 
     try {
-        build(debug);
+        build(debug, target);
     } catch(e) {
-        if (e.code == 'MODULE_NOT_FOUND') {
-            if (times++ == 5) {
-                throw e;
-            }
-            else {
-                setTimeout(begin, 2000);
-            }
-        }
-        else {
+        if (e.code != 'MODULE_NOT_FOUND') {
             throw e;
         }
+        times += 1;
+        if (times == 5) {
+            throw e;
+        }
+        setTimeout(() => main(args), 2000);
     }
 }
 
-begin(process.argv);
+main(process.argv);
