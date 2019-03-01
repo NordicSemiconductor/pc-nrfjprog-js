@@ -252,7 +252,8 @@ void RTT::ReturnFunction(uv_work_t *req)
         }
     }
 
-    baton->callback->Call(baton->returnParamterCount(), argv.data());
+    Nan::AsyncResource resource("pc-nrfjprog-js:callback");
+    baton->callback->Call(baton->returnParamterCount(), argv.data(), &resource);
 
     delete baton;
 }

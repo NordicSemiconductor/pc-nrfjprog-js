@@ -331,7 +331,8 @@ void HighLevel::ReturnFunction(uv_work_t *req)
 
     jsProgressCallback.reset();
 
-    baton->callback->Call(baton->returnParameterCount + 1, argv.data());
+    Nan::AsyncResource resource("pc-nrfjprog-js:callback");
+    baton->callback->Call(baton->returnParameterCount + 1, argv.data(), &resource);
 
     delete baton;
 }
@@ -387,7 +388,8 @@ void HighLevel::sendProgress(uv_async_t *handle)
 
     if (jsProgressCallback != nullptr)
     {
-        jsProgressCallback->Call(1, argv);
+        Nan::AsyncResource resource("pc-nrfjprog-js:callback");
+        jsProgressCallback->Call(1, argv, &resource);
     }
 }
 
