@@ -65,3 +65,5 @@ message(STATUS ${NRFJPROG_LIB})
 # Essential library files to link to a node addon,
 # you should add this line in every CMake.js based project.
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
+
+include (cmake/clang-dev-tools.cmake)
