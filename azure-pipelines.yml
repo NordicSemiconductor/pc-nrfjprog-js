@@ -14,8 +14,8 @@ strategy:
       node_version: 8.x
     linux_node_10_x:
       image_name: 'ubuntu-16.04'
-    linux_node_11_x:
       node_version: 10.x
+    linux_node_11_x:
       image_name: 'ubuntu-16.04'
       node_version: 11.x
     macOS_node_8_x:
