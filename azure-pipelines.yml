@@ -27,9 +27,6 @@ strategy:
     macOS_node_11_x:
       image_name: 'macos-10.13'
       node_version: 11.x
-    macOS_node_11_x:
-      image_name: 'macos-10.13'
-      node_version: 11.x
     macOS_electron_2_x:
       image_name: 'macos-10.13'
       node_version: 8.x
