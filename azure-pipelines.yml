@@ -9,18 +9,12 @@ trigger:
 
 strategy:
   matrix:
-    linux_node_6_x:
-      image_name: 'ubuntu-16.04'
-      node_version: 6.x
     linux_node_8_x:
       image_name: 'ubuntu-16.04'
       node_version: 8.x
     linux_node_10_x:
       image_name: 'ubuntu-16.04'
       node_version: 10.x
-    macOS_node_6_x:
-      image_name: 'macos-10.13'
-      node_version: 6.x
     macOS_node_8_x:
       image_name: 'macos-10.13'
       node_version: 8.x
@@ -34,7 +28,7 @@ pool:
 steps:
 - task: NodeTool@0
   inputs:
-    version: $(node_version)
+    versionSpec: $(node_version)
   displayName: 'Install Node.js $(node_version)'
 - bash: |
     node -v
