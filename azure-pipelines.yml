@@ -30,6 +30,7 @@ strategy:
 
 pool:
   vmImage: $(image_name)
+
 steps:
 - task: NodeTool@0
   inputs:
