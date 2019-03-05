@@ -36,6 +36,6 @@ steps:
   inputs:
     version: $(node_version)
   displayName: 'Install Node.js $(node_version)'
-- script: |
+- bash: |
     node -v
     npm i
