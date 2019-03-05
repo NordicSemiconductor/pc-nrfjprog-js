@@ -36,4 +36,4 @@ steps:
     version: $(node_version)
   displayName: 'Install Node.js $(node_version)'
 - script: |
-  npm install --build-from-source
+    npm install --build-from-source
