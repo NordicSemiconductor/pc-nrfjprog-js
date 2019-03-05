@@ -27,3 +27,13 @@ jobs:
       version: $(node_version)
     displayName: 'Install Node.js $(node_version)'
   - script: echo Hello, world!
+
+- job: Ubuntu_16_04
+  pool:
+    vmImage: 'Ubuntu 16.04'
+  steps:
+  - task: NodeTool@0
+    inputs:
+      version: $(node_version)
+    displayName: 'Install Node.js $(node_version)'
+  - script: echo Hello, world!
