@@ -38,3 +38,4 @@ steps:
   displayName: 'Install Node.js $(node_version)'
 - script: |
     node -v
+    npm i
