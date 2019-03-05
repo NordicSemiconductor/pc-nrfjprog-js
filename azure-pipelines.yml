@@ -10,7 +10,6 @@ trigger:
 jobs:
 - job: Ubuntu_16_04
   strategy:
-    maxParallel: 3
     matrix:
       node_6_x:
         node_version: 6.x
