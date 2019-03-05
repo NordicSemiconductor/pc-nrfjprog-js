@@ -7,34 +7,33 @@ trigger:
 - master
 - test-azure
 
-jobs:
-- job: Ubuntu_16_04
-  strategy:
-    matrix:
-      linux_node_6_x:
-        image_name: 'ubuntu-16.04'
-        node_version: 6.x
-      linux_node_8_x:
-        image_name: 'ubuntu-16.04'
-        node_version: 8.x
-      linux_node_10_x:
-        image_name: 'ubuntu-16.04'
-        node_version: 10.x
-      macOS_node_6_x:
-        image_name: 'macos-10.13'
-        node_version: 6.x
-      macOS_node_8_x:
-        image_name: 'macos-10.13'
-        node_version: 8.x
-      macOS_node_10_x:
-        image_name: 'macos-10.13'
-        node_version: 10.x
+strategy:
+  matrix:
+    linux_node_6_x:
+      image_name: 'ubuntu-16.04'
+      node_version: 6.x
+    linux_node_8_x:
+      image_name: 'ubuntu-16.04'
+      node_version: 8.x
+    linux_node_10_x:
+      image_name: 'ubuntu-16.04'
+      node_version: 10.x
+    macOS_node_6_x:
+      image_name: 'macos-10.13'
+      node_version: 6.x
+    macOS_node_8_x:
+      image_name: 'macos-10.13'
+      node_version: 8.x
+    macOS_node_10_x:
+      image_name: 'macos-10.13'
+      node_version: 10.x
 
-  pool:
-    vmImage: $(image_name)
-  steps:
-  - task: NodeTool@0
-    inputs:
-      version: $(node_version)
-    displayName: 'Install Node.js $(node_version)'
-  - script: echo Hello, world!
+pool:
+  vmImage: $(image_name)
+steps:
+- task: NodeTool@0
+  inputs:
+    version: $(node_version)
+  displayName: 'Install Node.js $(node_version)'
+- script: |
+  npm install --build-from-source
