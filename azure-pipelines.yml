@@ -53,6 +53,7 @@ steps:
     versionSpec: $(node_version)
   displayName: 'Install Node.js $(node_version)'
 - script: |
-    export NODE_ARCH=$(node_arch)
+    echo $npm_config_runtime
     node -v
     npm i --build-from-source
+  env: { npm_config_runtime: $(npm_config_runtime) }
