@@ -11,22 +11,27 @@ jobs:
 - job: Ubuntu_16_04
   strategy:
     matrix:
-      node_6_x:
+      linux_node_6_x:
+        image_name: 'ubuntu-16.04'
         node_version: 6.x
-      node_8_x:
+      linux_node_8_x:
+        image_name: 'ubuntu-16.04'
         node_version: 8.x
-      node_10_x:
+      linux_node_10_x:
+        image_name: 'ubuntu-16.04'
         node_version: 10.x
-  strategy:
-    matrix:
-      linux:
-        imageName: 'ubuntu-16.04'
-      mac:
-        imageName: 'macos-10.13'
-      windows:
-        imageName: 'vs2017-win2016'
+      macOS_node_6_x:
+        image_ame: 'macos-10.13'
+        node_version: 6.x
+      macOS_node_8_x:
+        image_ame: 'macos-10.13'
+        node_version: 8.x
+      macOS_node_10_x:
+        image_ame: 'macos-10.13'
+        node_version: 10.x
+
   pool:
-    vmImage: $(imageName)
+    vmImage: $(image_ame)
   steps:
   - task: NodeTool@0
     inputs:
