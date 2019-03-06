@@ -85,15 +85,11 @@ steps:
     choco install -y nvm
     export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
     nvm install $(NODE_VERSION) $(NODE_ARCH)
-    nvm use $(NODE_VERSION) $(NODE_ARCH)
-  env: {
-    NVM_HOME: "/C/ProgramData/nvm",
-    NVM_SYMLINK: "/C/Program Files/nodejs",
-  }
   condition: and(contains(variables['image_name'], 'win'), eq(variables['node_arch'], '32'))
   displayName: 'Install Node.js $(node_version) 32-bit'
 - bash: |
     export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
+    nvm use $(NODE_VERSION) $(NODE_ARCH)
     node -v
     npm i --build-from-source
     npm run package-prebuilt
@@ -108,3 +104,4 @@ steps:
     npm_config_disturl: $(npm_config_disturl),
     NODE_PRE_GYP_GITHUB_TOKEN: $(chun_github_token)
   }
+  displayName: 'Build'
