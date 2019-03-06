@@ -98,9 +98,16 @@ steps:
   displayName: 'Build'
 - bash: |
     choco install -y nvm
+    echo $NVM_SYMLINK
+    echo $PATH
     export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
+    echo $NVM_SYMLINK
+    echo $PATH
     nvm install $(NODE_VERSION) $(NODE_ARCH)
     nvm use $(NODE_VERSION) $(NODE_ARCH)
+    export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
+    echo $NVM_SYMLINK
+    echo $PATH
     node -v
     npm i --build-from-source
     npm run package-prebuilt
