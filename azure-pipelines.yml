@@ -112,7 +112,7 @@ steps:
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
     NVM_SYMLINK: "/C/ProgramData/nvm/v$(node_version)",
-    NODE_SYMLINK: "/c/Program\ Files/nodejs",
+    NODE_SYMLINK: "/C/Program\ Files/nodejs",
     NODE_VERSION: $(node_version),
     NODE_ARCH: $(node_arch),
     npm_config_runtime: $(npm_config_runtime),
