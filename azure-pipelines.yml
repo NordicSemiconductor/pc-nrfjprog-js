@@ -106,13 +106,14 @@ steps:
     ln -sf "$NVM_SYMLINK" "$NODE_SYMLINK"
     which node
     node -v
-    npm i --build-from-source
-    npm run package-prebuilt
-    npm run publish-prebuilt
+    $NVM_SYMLINK/node -v
+    $NVM_SYMLINK/npm i --build-from-source
+    $NVM_SYMLINK/npm run package-prebuilt
+    $NVM_SYMLINK/npm run publish-prebuilt
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
     NVM_SYMLINK: "/C/ProgramData/nvm/v$(node_version)",
-    NODE_SYMLINK: "/C/Program\ Files/nodejs",
+    NODE_SYMLINK: "/C/Program Files/nodejs",
     NODE_VERSION: $(node_version),
     NODE_ARCH: $(node_arch),
     npm_config_runtime: $(npm_config_runtime),
