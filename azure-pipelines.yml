@@ -66,15 +66,15 @@ strategy:
       node_version: 11.x
     win32_node_8_x:
       image_name: 'vs2017-win2016'
-      node_version: 8.x
+      node_version: 8.15.0
       node_arch: '32'
     win32_node_10_x:
       image_name: 'vs2017-win2016'
-      node_version: 10.x
+      node_version: 10.15.0
       node_arch: '32'
     win32_node_11_x:
       image_name: 'vs2017-win2016'
-      node_version: 11.x
+      node_version: 11.7.0
       node_arch: '32'
 
 pool:
