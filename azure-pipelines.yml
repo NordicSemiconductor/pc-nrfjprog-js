@@ -105,10 +105,9 @@ steps:
     ls $NVM_SYMLINK
     which node
     node -v
-    $NVM_SYMLINK/node32 -v
-    $NVM_SYMLINK/npm i --build-from-source
-    $NVM_SYMLINK/npm run package-prebuilt
-    $NVM_SYMLINK/npm run publish-prebuilt
+    npm i --build-from-source
+    npm run package-prebuilt
+    npm run publish-prebuilt
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
     NVM_SYMLINK: /C/ProgramData/nvm/v$(node_version),
