@@ -59,6 +59,18 @@ strategy:
     win64_node_11_x:
       image_name: 'vs2017-win2016'
       node_version: 11.x
+    win64_electron_2_x:
+      image_name: 'vs2017-win2016'
+      node_version: 8.15.0
+      npm_config_runtime: 'electron'
+      npm_config_target: '2.0.17'
+      npm_config_disturl: 'https://atom.io/download/electron'
+    win64_electron_4_x:
+      image_name: 'vs2017-win2016'
+      node_version: 10.15.0
+      npm_config_runtime: 'electron'
+      npm_config_target: '4.0.6'
+      npm_config_disturl: 'https://atom.io/download/electron'
     win32_node_8_x:
       image_name: 'vs2017-win2016'
       node_version: 8.15.0
@@ -70,6 +82,20 @@ strategy:
     win32_node_11_x:
       image_name: 'vs2017-win2016'
       node_version: 11.7.0
+      node_arch: '32'
+    win32_electron_2_x:
+      image_name: 'vs2017-win2016'
+      node_version: 8.15.0
+      npm_config_runtime: 'electron'
+      npm_config_target: '2.0.17'
+      npm_config_disturl: 'https://atom.io/download/electron'
+      node_arch: '32'
+    win32_electron_4_x:
+      image_name: 'vs2017-win2016'
+      node_version: 10.15.0
+      npm_config_runtime: 'electron'
+      npm_config_target: '4.0.6'
+      npm_config_disturl: 'https://atom.io/download/electron'
       node_arch: '32'
 
 pool:
@@ -99,18 +125,12 @@ steps:
 - bash: |
     choco install -y nvm
     export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
-    echo $PATH
     nvm install $(NODE_VERSION) $(NODE_ARCH)
-    nvm use $(NODE_VERSION) $(NODE_ARCH)
-    ls $NVM_HOME
-    ls $NVM_SYMLINK
     ln -sf "$NVM_SYMLINK/node" "$NODE_SYMLINK/node"
-    which node
     node -v
-    $NVM_SYMLINK/node -v
-    $NVM_SYMLINK/npm i --build-from-source
-    $NVM_SYMLINK/npm run package-prebuilt
-    $NVM_SYMLINK/npm run publish-prebuilt
+    npm i --build-from-source
+    npm run package-prebuilt
+    npm run publish-prebuilt
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
     NVM_SYMLINK: "/C/ProgramData/nvm/v$(node_version)",
