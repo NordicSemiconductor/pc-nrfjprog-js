@@ -17,6 +17,18 @@ strategy:
     linux_node_11_x:
       image_name: 'ubuntu-16.04'
       node_version: 11.x
+    linux_electron_2_x:
+      image_name: 'macos-10.13'
+      node_version: 8.x
+      npm_config_runtime: 'electron'
+      npm_config_target: '2.0.17'
+      npm_config_disturl: 'https://atom.io/download/electron'
+    linux_electron_4_x:
+      image_name: 'macos-10.13'
+      node_version: 10.x
+      npm_config_runtime: 'electron'
+      npm_config_target: '4.0.6'
+      npm_config_disturl: 'https://atom.io/download/electron'
     macOS_node_8_x:
       image_name: 'macos-10.13'
       node_version: 8.x
@@ -29,9 +41,14 @@ strategy:
     macOS_electron_2_x:
       image_name: 'macos-10.13'
       node_version: 8.x
-      node_arch: '32'
       npm_config_runtime: 'electron'
       npm_config_target: '2.0.17'
+      npm_config_disturl: 'https://atom.io/download/electron'
+    macOS_electron_4_x:
+      image_name: 'macos-10.13'
+      node_version: 10.x
+      npm_config_runtime: 'electron'
+      npm_config_target: '4.0.6'
       npm_config_disturl: 'https://atom.io/download/electron'
     win_node_8_x:
       image_name: 'vs2017-win2016'
@@ -55,7 +72,12 @@ steps:
     echo $npm_config_runtime
     node -v
     npm i --build-from-source
+    npm run package-prebuilt
+    npm run publish-prebuilt
   env: {
+    NODE_VERSION: $(node_version),
+    NODE_ARCH: $(node_arch),
     npm_config_runtime: $(npm_config_runtime),
-    npm_config_target: $(npm_config_target)
+    npm_config_target: $(npm_config_target),
+    npm_config_disturl: $(npm_config_disturl)
   }
