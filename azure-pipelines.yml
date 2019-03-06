@@ -105,7 +105,7 @@ steps:
 - task: NodeTool@0
   inputs:
     versionSpec: $(node_version)
-  condition: neq(variables['node_arch'], '32')
+  condition: ne(variables['node_arch'], '32')
   displayName: 'Install Node.js $(node_version)'
 - bash: |
     choco install -y nvm
