@@ -104,7 +104,8 @@ steps:
     ls $NVM_HOME
     ls $NVM_SYMLINK
     which node
-    $NVM_SYMLINK/node -v
+    node -v
+    $NVM_SYMLINK/node32 -v
     $NVM_SYMLINK/npm i --build-from-source
     $NVM_SYMLINK/npm run package-prebuilt
     $NVM_SYMLINK/npm run publish-prebuilt
