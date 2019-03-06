@@ -112,11 +112,11 @@ steps:
     export PATH=$PATH:$NVM_HOME
     nvm install $(NODE_VERSION) $(NODE_ARCH)
     nvm use $(NODE_VERSION) $(NODE_ARCH)
-    ln -sf "$NVM_SYMLINK" "$NODE_SYMLINK"
+    ln -sf "$NVM_SYMLINK/node" "$NODE_SYMLINK/node"
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
-    NVM_SYMLINK: "/C/ProgramData/nvm/v$(node_version)/node",
-    NODE_SYMLINK: "/C/Program Files/nodejs/node",
+    NVM_SYMLINK: "/C/ProgramData/nvm/v$(node_version)",
+    NODE_SYMLINK: "/C/Program Files/nodejs",
     NODE_VERSION: $(node_version),
     NODE_ARCH: $(node_arch),
   }
