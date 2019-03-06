@@ -10,7 +10,7 @@
     "package-prebuilt": "node-pre-gyp package",
     "publish-prebuilt": "node-pre-gyp-github publish",
     "publish-all-prebuilt": "node scripts/publish-all-prebuilt.js",
-    "install": "nrf-fetch fetch-draft || node scripts/pre-install.js && ( node-pre-gyp install --fallback-to-build=false || node build.js )",
+    "install": "node scripts/pre-install.js && ( nrf-fetch fetch-draft || node-pre-gyp install --fallback-to-build=false || node build.js )",
     "docs": "jsdoc doc -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
     "test": "jest --runInBand --verbose --testResultsProcessor jest-bamboo-formatter",
