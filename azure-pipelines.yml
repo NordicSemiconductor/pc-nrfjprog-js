@@ -6,6 +6,11 @@
 trigger:
 - test-azure
 
+variables:
+  npm_config_runtime: ''
+  npm_config_target: ''
+  npm_config_disturl: ''
+
 strategy:
   matrix:
     linux_node_8_x:
@@ -18,13 +23,13 @@ strategy:
       image_name: 'ubuntu-16.04'
       node_version: 11.x
     linux_electron_2_x:
-      image_name: 'macos-10.13'
+      image_name: 'ubuntu-16.04'
       node_version: 8.x
       npm_config_runtime: 'electron'
       npm_config_target: '2.0.17'
       npm_config_disturl: 'https://atom.io/download/electron'
     linux_electron_4_x:
-      image_name: 'macos-10.13'
+      image_name: 'ubuntu-16.04'
       node_version: 10.x
       npm_config_runtime: 'electron'
       npm_config_target: '4.0.6'
