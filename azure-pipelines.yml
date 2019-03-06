@@ -104,13 +104,13 @@ steps:
     nvm use $(NODE_VERSION) $(NODE_ARCH)
     ls $NVM_HOME
     ls $NVM_SYMLINK
-    ln -sf "$NVM_SYMLINK" "$NODE_SYMLINK"
+    ln -sf "$NVM_SYMLINK/node" "$NODE_SYMLINK/node"
     which node
     node -v
     $NVM_SYMLINK/node -v
-    $NVM_SYMLINK/npm --scripts-prepend-node-path i --build-from-source
-    $NVM_SYMLINK/npm --scripts-prepend-node-path run package-prebuilt
-    $NVM_SYMLINK/npm --scripts-prepend-node-path run publish-prebuilt
+    $NVM_SYMLINK/npm i --build-from-source
+    $NVM_SYMLINK/npm run package-prebuilt
+    $NVM_SYMLINK/npm run publish-prebuilt
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
     NVM_SYMLINK: "/C/ProgramData/nvm/v$(node_version)",
