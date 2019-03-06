@@ -31,7 +31,7 @@ strategy:
       image_name: 'macos-10.13'
       node_version: 8.x
       node_arch: '32'
-      env: "npm_config_runtime: 'electron'"
+      npm_config_runtime: 'electron'
       npm_config_target: '2.0.17'
       npm_config_disturl: 'https://atom.io/download/electron'
     win_node_8_x:
@@ -56,4 +56,6 @@ steps:
     echo $npm_config_runtime
     node -v
     npm i --build-from-source
-  env: { $(env) }
+  env: { |
+    npm_config_runtime: $(npm_config_runtime), |
+    npm_config_target: $(npm_config_target) }
