@@ -69,7 +69,6 @@ steps:
     versionSpec: $(node_version)
   displayName: 'Install Node.js $(node_version)'
 - script: |
-    echo $npm_config_runtime
     node -v
     npm i --build-from-source
     npm run package-prebuilt
@@ -79,5 +78,6 @@ steps:
     NODE_ARCH: $(node_arch),
     npm_config_runtime: $(npm_config_runtime),
     npm_config_target: $(npm_config_target),
-    npm_config_disturl: $(npm_config_disturl)
+    npm_config_disturl: $(npm_config_disturl),
+    NODE_PRE_GYP_GITHUB_TOKEN: $(chun_github_token)
   }
