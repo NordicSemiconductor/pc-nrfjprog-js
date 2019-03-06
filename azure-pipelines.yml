@@ -105,16 +105,13 @@ steps:
     echo $PATH
     nvm install $(NODE_VERSION) $(NODE_ARCH)
     nvm use $(NODE_VERSION) $(NODE_ARCH)
-    export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
-    echo $NVM_SYMLINK
-    echo $PATH
     node -v
     npm i --build-from-source
     npm run package-prebuilt
     npm run publish-prebuilt
   env: {
     NVM_HOME: "/C/ProgramData/nvm",
-    NVM_SYMLINK: "/C/Program Files/nodejs",
+    NVM_SYMLINK: /C/ProgramData/nvm/v$(node_version),
     NODE_VERSION: $(node_version),
     NODE_ARCH: $(node_arch),
     npm_config_runtime: $(npm_config_runtime),
