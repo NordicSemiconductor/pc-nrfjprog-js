@@ -4,7 +4,6 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
 - test-azure
 
 strategy:
@@ -56,6 +55,4 @@ steps:
     echo $npm_config_runtime
     node -v
     npm i --build-from-source
-  env: { |
-    npm_config_runtime: $(npm_config_runtime), |
-    npm_config_target: $(npm_config_target) }
+  env: { npm_config_runtime: $(npm_config_runtime), npm_config_target: $(npm_config_target) }
