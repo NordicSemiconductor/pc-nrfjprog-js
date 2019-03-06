@@ -1,8 +1,3 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - test-azure
 
@@ -86,16 +81,17 @@ steps:
     versionSpec: $(node_version)
   condition: xor(contains(variables['image_name'], 'win'), eq(variables['node_arch'], '32'))
   displayName: 'Install Node.js $(node_version)'
-- script: |
+- bash: |
     choco install -y nvm
-    %NVM_HOME%\\nvm install $(NODE_VERSION) $(NODE_ARCH)
+    export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
+    nvm install $(NODE_VERSION) $(NODE_ARCH)
+    nvm use $(NODE_VERSION) $(NODE_ARCH)
   env: {
     NVM_HOME: "C:\\ProgramData\\nvm",
   }
   condition: and(contains(variables['image_name'], 'win'), eq(variables['node_arch'], '32'))
   displayName: 'Install Node.js $(node_version) 32-bit'
-- script: |
-    %NVM_HOME%\\nvm use $(NODE_VERSION) $(NODE_ARCH)
+- bash: |
     node -v
     npm i --build-from-source
     npm run package-prebuilt
