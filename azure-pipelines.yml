@@ -121,7 +121,7 @@ steps:
     NODE_ARCH: $(node_arch),
   }
   condition: and(contains(variables['image_name'], 'win'), eq(variables['node_arch'], '32'))
-  displayName: 'Build for Node.js $(node_version) 32-bit'
+  displayName: 'Install Node.js $(node_version) 32-bit'
 - bash: |
     node -v
     npm i --build-from-source
