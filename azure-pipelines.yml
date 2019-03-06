@@ -103,7 +103,7 @@ steps:
     nvm use $(NODE_VERSION) $(NODE_ARCH)
     ls $NVM_HOME
     ls $NVM_SYMLINK
-    ln -sf $NVM_SYMLINK $NODE_SYMLINK
+    ln -sf "$NVM_SYMLINK" "$NODE_SYMLINK"
     which node
     node -v
     npm i --build-from-source
