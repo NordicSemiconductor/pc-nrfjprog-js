@@ -49,33 +49,33 @@
 class RTTBaton;
 class RTTStartBaton;
 
-typedef std::function<RTTBaton*(Nan::NAN_METHOD_ARGS_TYPE, int&)> rtt_parse_parameters_function_t;
-typedef std::function<RTTErrorcodes_t(RTTBaton*)> rtt_execute_function_t;
-typedef std::function<std::vector<v8::Local<v8::Value>>(RTTBaton*)> rtt_return_function_t;
+typedef std::function<RTTBaton *(Nan::NAN_METHOD_ARGS_TYPE, int &)> rtt_parse_parameters_function_t;
+typedef std::function<RTTErrorcodes_t(RTTBaton *)> rtt_execute_function_t;
+typedef std::function<std::vector<v8::Local<v8::Value>>(RTTBaton *)> rtt_return_function_t;
 
 class RTT : public Nan::ObjectWrap
 {
-public:
+  public:
     static NAN_MODULE_INIT(Init);
 
     static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
 
-private:
+  private:
     explicit RTT();
     ~RTT();
 
     static NAN_METHOD(New);
 
     static NAN_METHOD(Start); // Params: serialNumber, { location }, callback(error, down, up)
-    static NAN_METHOD(Stop); // Params: callback(error)
+    static NAN_METHOD(Stop);  // Params: callback(error)
 
-    static NAN_METHOD(Read); // Params: channelIndex, callback(error, data, raw, time)
+    static NAN_METHOD(Read);  // Params: channelIndex, callback(error, data, raw, time)
     static NAN_METHOD(Write); // Params: channelIndex, data, callback(error, writtenlength, time)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
-                            const rtt_parse_parameters_function_t& parse,
-                            const rtt_execute_function_t& execute,
-                            const rtt_return_function_t& ret);
+                             const rtt_parse_parameters_function_t &parse,
+                             const rtt_execute_function_t &execute,
+                             const rtt_return_function_t &ret);
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
 
@@ -89,8 +89,8 @@ private:
 
     static void cleanup();
 
-    static void log(const char * msg);
-    static void log(const std::string& msg);
+    static void log(const char *msg);
+    static void log(const std::string &msg);
     static void resetLog();
 };
 

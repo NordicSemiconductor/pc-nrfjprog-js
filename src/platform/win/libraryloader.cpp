@@ -50,7 +50,8 @@ LibraryHandleType LibraryLoad(const std::string &path)
 
 void LibraryFree(LibraryHandleType libraryHandle)
 {
-    if (libraryHandle) {
+    if (libraryHandle)
+    {
         FreeLibrary(libraryHandle);
     }
 }

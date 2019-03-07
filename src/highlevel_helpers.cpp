@@ -36,8 +36,8 @@
 
 #include "highlevel_helpers.h"
 
-#include "utility/utility.h"
 #include "utility/conversion.h"
+#include "utility/utility.h"
 
 v8::Local<v8::Object> ProbeDetails::ToJs()
 {
@@ -59,7 +59,8 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(probe_info.serial_number));
     Utility::Set(obj, "clockSpeedkHz", Convert::toJsNumber(probe_info.clockspeed_khz));
-    Utility::Set(obj, "firmwareString", Convert::toJsString(static_cast<const char*>(probe_info.firmware_string)));
+    Utility::Set(obj, "firmwareString",
+                 Convert::toJsString(static_cast<const char *>(probe_info.firmware_string)));
 
     return scope.Escape(obj);
 }
@@ -101,7 +102,7 @@ v8::Local<v8::Object> DeviceInfo::ToJs()
 v8::Local<v8::Object> LibraryInfo::ToJs()
 {
     Nan::EscapableHandleScope scope;
-    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+    v8::Local<v8::Object> obj        = Nan::New<v8::Object>();
     v8::Local<v8::Object> versionObj = Nan::New<v8::Object>();
 
     Utility::Set(versionObj, "major", Convert::toJsNumber(library_info.version_major));
@@ -109,15 +110,16 @@ v8::Local<v8::Object> LibraryInfo::ToJs()
     Utility::Set(versionObj, "revision", Convert::toJsString(&library_info.version_revision, 1));
 
     Utility::Set(obj, "version", versionObj);
-    Utility::Set(obj, "path", Convert::toJsString(static_cast<const char*>(library_info.file_path)));
+    Utility::Set(obj, "path",
+                 Convert::toJsString(static_cast<const char *>(library_info.file_path)));
 
     return scope.Escape(obj);
 }
 
-EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
-    eraseMode(ERASE_ALL),
-    startAddress(0),
-    endAddress(0)
+EraseOptions::EraseOptions(v8::Local<v8::Object> obj)
+    : eraseMode(ERASE_ALL)
+    , startAddress(0)
+    , endAddress(0)
 {
     if (Utility::Has(obj, "erase_mode"))
     {
@@ -142,12 +144,12 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
 }
 
 ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
-  : options({
-    .readram = false,
-    .readcode = true,
-    .readuicr = false,
-    .readqspi = false,
-  })
+    : options({
+          .readram  = false,
+          .readcode = true,
+          .readuicr = false,
+          .readqspi = false,
+      })
 {
     if (Utility::Has(obj, "readram"))
     {
@@ -171,34 +173,34 @@ ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
 }
 
 ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
-  : options({
-    .verify = VERIFY_READ,
-    .chip_erase_mode = ERASE_ALL,
-    .qspi_erase_mode = ERASE_NONE,
-    .reset = RESET_SYSTEM
-  })
-  , inputFormat(INPUT_FORMAT_HEX_FILE)
+    : options({.verify          = VERIFY_READ,
+               .chip_erase_mode = ERASE_ALL,
+               .qspi_erase_mode = ERASE_NONE,
+               .reset           = RESET_SYSTEM})
+    , inputFormat(INPUT_FORMAT_HEX_FILE)
 {
     if (Utility::Has(obj, "verify"))
     {
         const bool verify = Convert::getBool(obj, "verify");
-        options.verify = verify ? VERIFY_READ : VERIFY_NONE;
+        options.verify    = verify ? VERIFY_READ : VERIFY_NONE;
     }
 
     if (Utility::Has(obj, "chip_erase_mode"))
     {
-        options.chip_erase_mode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "chip_erase_mode"));
+        options.chip_erase_mode =
+            static_cast<erase_action_t>(Convert::getNativeUint32(obj, "chip_erase_mode"));
     }
 
     if (Utility::Has(obj, "qspi_erase_mode"))
     {
-        options.qspi_erase_mode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "qspi_erase_mode"));
+        options.qspi_erase_mode =
+            static_cast<erase_action_t>(Convert::getNativeUint32(obj, "qspi_erase_mode"));
     }
 
     if (Utility::Has(obj, "reset"))
     {
         const bool reset = Convert::getBool(obj, "reset");
-        options.reset = reset ? RESET_SYSTEM : RESET_NONE;
+        options.reset    = reset ? RESET_SYSTEM : RESET_NONE;
     }
 
     if (Utility::Has(obj, "inputFormat"))
@@ -208,5 +210,4 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 }
 
 VerifyOptions::VerifyOptions(v8::Local<v8::Object> obj)
-{
-}
+{}

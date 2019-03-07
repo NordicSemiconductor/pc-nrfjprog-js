@@ -40,9 +40,12 @@
 #include <map>
 #include <string>
 
-#define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
+#define NAME_MAP_ENTRY(EXP)                                                                        \
+    {                                                                                              \
+        EXP, "" #EXP ""                                                                            \
+    }
 
 // Typedef of name to string with enum name, covers most cases
-typedef std::map<uint16_t, const char*> name_map_t;
+typedef std::map<uint16_t, const char *> name_map_t;
 
 #endif // COMMON_H

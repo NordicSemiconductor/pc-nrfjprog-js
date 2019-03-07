@@ -40,30 +40,38 @@
 
 LibraryHandleType nrfJproglibraryHandle;
 
-errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType * libraryFunctions)
+errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType *libraryFunctions)
 {
     static std::string nrfjprogPath{};
 
-    if (nrfjprogPath.empty()) {
-        std::string libraryName = getnrfjprogLibraryName();
+    if (nrfjprogPath.empty())
+    {
+        std::string libraryName     = getnrfjprogLibraryName();
         const errorcode_t finderror = OSFilesFindLibrary(nrfjprogPath, libraryName);
 
-        if (finderror != errorcode_t::JsSuccess) {
+        if (finderror != errorcode_t::JsSuccess)
+        {
             return finderror;
         }
     }
 
     nrfJproglibraryHandle = LibraryLoad(nrfjprogPath);
 
-    if (!static_cast<bool>(nrfJproglibraryHandle)) {
+    if (!static_cast<bool>(nrfJproglibraryHandle))
+    {
         return errorcode_t::CouldNotLoadDLL;
     }
 
-#define LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(target) do { \
-    if (!load_func_ptr(&libraryFunctions->target, static_cast<const char*>("NRFJPROG_" #target), (nrfJproglibraryHandle))) { \
-        return errorcode_t::CouldNotLoadDLL; \
-    } \
-} while (0);
+#define LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(target)                                              \
+    do                                                                                             \
+    {                                                                                              \
+        if (!load_func_ptr(&libraryFunctions->target,                                              \
+                           static_cast<const char *>("NRFJPROG_" #target),                         \
+                           (nrfJproglibraryHandle)))                                               \
+        {                                                                                          \
+            return errorcode_t::CouldNotLoadDLL;                                                   \
+        }                                                                                          \
+    } while (0);
 
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(dll_version);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_dll_open);

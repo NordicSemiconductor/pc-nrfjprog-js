@@ -37,33 +37,32 @@
 #ifndef RTT_HELPERS_H
 #define RTT_HELPERS_H
 
-#include <nan.h>
 #include "DllCommonDefinitions.h"
+#include <nan.h>
 
 class ChannelInfo
 {
-public:
-    ChannelInfo(uint32_t _channelIndex, rtt_direction_t _direction, std::string &_name, const uint32_t _size) :
-      channelIndex(_channelIndex),
-      direction(_direction),
-      name(_name),
-      size(_size)
-{
-}
+  public:
+    ChannelInfo(uint32_t _channelIndex, rtt_direction_t _direction, std::string &_name,
+                const uint32_t _size)
+        : channelIndex(_channelIndex)
+        , direction(_direction)
+        , name(_name)
+        , size(_size)
+    {}
 
     v8::Local<v8::Object> ToJs();
 
-private:
+  private:
     const uint32_t channelIndex;
     const rtt_direction_t direction;
     const std::string name;
     const uint32_t size;
 };
 
-
 class StartOptions
 {
-public:
+  public:
     StartOptions(v8::Local<v8::Object> obj);
 
     uint32_t controlBlockLocation;

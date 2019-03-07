@@ -49,11 +49,11 @@ v8::Local<v8::Value> Utility::Get(v8::Local<v8::Object> jsobj, const int index)
     return scope.Escape(Nan::Get(jsobj, index).ToLocalChecked());
 }
 
-void Utility::SetMethod(v8::Handle<v8::Object> target, const char *exportName, Nan::FunctionCallback function)
+void Utility::SetMethod(v8::Handle<v8::Object> target, const char *exportName,
+                        Nan::FunctionCallback function)
 {
-    Utility::Set(target,
-        exportName,
-        Nan::GetFunction(Nan::New<v8::FunctionTemplate>(function)).ToLocalChecked());
+    Utility::Set(target, exportName,
+                 Nan::GetFunction(Nan::New<v8::FunctionTemplate>(function)).ToLocalChecked());
 }
 
 bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int32_t value)
@@ -101,7 +101,7 @@ bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const char *v
     return Utility::Set(target, name, Convert::toJsString(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const std::string& value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const std::string &value)
 {
     return Utility::Set(target, name, Convert::toJsString(value));
 }

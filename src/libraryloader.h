@@ -42,12 +42,13 @@
 
 LoadedFunctionType LoadFunction(LibraryHandleType, const char *func_name);
 
-template<typename T>
-static bool load_func_ptr(T * func_ptr, const char * func_name, LibraryHandleType libraryHandle)
+template <typename T>
+static bool load_func_ptr(T *func_ptr, const char *func_name, LibraryHandleType libraryHandle)
 {
-    *func_ptr = (T) LoadFunction(libraryHandle, func_name);
+    *func_ptr = (T)LoadFunction(libraryHandle, func_name);
 
-    if (*func_ptr == nullptr) {
+    if (*func_ptr == nullptr)
+    {
         return false;
     }
 

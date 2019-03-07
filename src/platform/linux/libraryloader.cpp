@@ -36,8 +36,8 @@
 
 #include "../../libraryloader.h"
 
-#include <dlfcn.h>
 #include <cstddef>
+#include <dlfcn.h>
 
 LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
 {
@@ -51,7 +51,8 @@ LibraryHandleType LibraryLoad(const std::string &path)
 
 void LibraryFree(LibraryHandleType libraryHandle)
 {
-    if (libraryHandle != nullptr) {
+    if (libraryHandle != nullptr)
+    {
         dlclose(libraryHandle);
     }
 }

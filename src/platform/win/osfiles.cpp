@@ -43,8 +43,8 @@
 
 #include <nan.h>
 
-#include <windows.h>
 #include "Shlwapi.h"
+#include <windows.h>
 
 #pragma comment(lib, "Shlwapi.lib")
 
@@ -56,74 +56,72 @@ std::string librarySearchPath;
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
     // Parse parameter from the FunctionCallbackInfo received
-    if (info.Length() > 0 && info[0]->IsString()) {
+    if (info.Length() > 0 && info[0]->IsString())
+    {
         librarySearchPath.assign(Convert::getNativeString(info[0]));
-    } else {
+    }
+    else
+    {
         Nan::ThrowError(Nan::New("Expected string as the first argument").ToLocalChecked());
     }
 }
 
-
-errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath, const std::string &fileName)
+errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath,
+                                     const std::string &fileName)
 {
     HKEY key;
     HKEY innerKey;
 
     CHAR installPath[COMMON_MAX_PATH] = {'\0'};
-    DWORD installPathSize = sizeof(installPath);
+    DWORD installPathSize             = sizeof(installPath);
 
     /* Search for JLinkARM in the Local Machine Key.  */
-    if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &key) == ERROR_SUCCESS)
+    if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0,
+                     KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &key) == ERROR_SUCCESS)
     {
-        TCHAR    achKey[MAX_KEY_LENGTH];   // buffer for subkey name
-        DWORD    cbName;                   // size of name string
-        TCHAR    achClass[MAX_PATH] = TEXT("");  // buffer for class name
-        DWORD    cchClassName = MAX_PATH;  // size of class string
-        DWORD    cSubKeys = 0;               // number of subkeys
-        DWORD    cbMaxSubKey;              // longest subkey size
-        DWORD    cchMaxClass;              // longest class string
-        DWORD    cValues;              // number of values for key
-        DWORD    cchMaxValue;          // longest value name
-        DWORD    cbMaxValueData;       // longest value data
-        DWORD    cbSecurityDescriptor; // size of security descriptor
-        FILETIME ftLastWriteTime;      // last write time
+        TCHAR achKey[MAX_KEY_LENGTH];        // buffer for subkey name
+        DWORD cbName;                        // size of name string
+        TCHAR achClass[MAX_PATH] = TEXT(""); // buffer for class name
+        DWORD cchClassName       = MAX_PATH; // size of class string
+        DWORD cSubKeys           = 0;        // number of subkeys
+        DWORD cbMaxSubKey;                   // longest subkey size
+        DWORD cchMaxClass;                   // longest class string
+        DWORD cValues;                       // number of values for key
+        DWORD cchMaxValue;                   // longest value name
+        DWORD cbMaxValueData;                // longest value data
+        DWORD cbSecurityDescriptor;          // size of security descriptor
+        FILETIME ftLastWriteTime;            // last write time
 
         DWORD retCode;
 
         DWORD cchValue = MAX_VALUE_NAME;
 
-        retCode = RegQueryInfoKey(
-            key,                    // key handle
-            achClass,                // buffer for class name
-            &cchClassName,           // size of class string
-            NULL,                    // reserved
-            &cSubKeys,               // number of subkeys
-            &cbMaxSubKey,            // longest subkey size
-            &cchMaxClass,            // longest class string
-            &cValues,                // number of values for this key
-            &cchMaxValue,            // longest value name
-            &cbMaxValueData,         // longest value data
-            &cbSecurityDescriptor,   // security descriptor
-            &ftLastWriteTime);       // last write time
+        retCode = RegQueryInfoKey(key,                   // key handle
+                                  achClass,              // buffer for class name
+                                  &cchClassName,         // size of class string
+                                  NULL,                  // reserved
+                                  &cSubKeys,             // number of subkeys
+                                  &cbMaxSubKey,          // longest subkey size
+                                  &cchMaxClass,          // longest class string
+                                  &cValues,              // number of values for this key
+                                  &cchMaxValue,          // longest value name
+                                  &cbMaxValueData,       // longest value data
+                                  &cbSecurityDescriptor, // security descriptor
+                                  &ftLastWriteTime);     // last write time
 
         // Enumerate the subkeys, until RegEnumKeyEx fails.
 
         if (cSubKeys)
         {
-            cbName = MAX_KEY_LENGTH;
-            retCode = RegEnumKeyEx(key,
-                                    cSubKeys - 1,
-                                    achKey,
-                                    &cbName,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    &ftLastWriteTime);
+            cbName  = MAX_KEY_LENGTH;
+            retCode = RegEnumKeyEx(key, cSubKeys - 1, achKey, &cbName, NULL, NULL, NULL,
+                                   &ftLastWriteTime);
             RegOpenKeyEx(key, achKey, 0, KEY_QUERY_VALUE, &innerKey);
         }
 
         /* If it is found, read the install path. */
-        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&installPath, &installPathSize) == ERROR_SUCCESS)
+        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&installPath,
+                            &installPathSize) == ERROR_SUCCESS)
         {
             /* Copy, check it exists and return if it does. */
             libraryPath.assign(installPath);
@@ -158,7 +156,8 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
     // If that fails, try to find the DLLs when installed in the whole machine (for all users)
     errorcode_t retCode = OSFilesFindLibraryByHKey(HKEY_LOCAL_MACHINE, libraryPath, fileName);
-    if (retCode == errorcode_t::JsSuccess) {
+    if (retCode == errorcode_t::JsSuccess)
+    {
         return retCode;
     }
 
@@ -168,7 +167,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     return retCode;
 }
 
-std::string TempFile::concatPaths(const std::string & basePath, const std::string & relativePath)
+std::string TempFile::concatPaths(const std::string &basePath, const std::string &relativePath)
 {
     char buffer[MAX_PATH] = "";
 
@@ -184,7 +183,8 @@ bool AbstractFile::pathExists(const char *path)
 
 std::string TempFile::getTempFileName()
 {
-    /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with GetTempFileName function. */
+    /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with
+     * GetTempFileName function. */
     TCHAR tempFolderPath[MAX_PATH];
     TCHAR tempFilePath[MAX_PATH];
 

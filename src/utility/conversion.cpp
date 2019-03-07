@@ -36,27 +36,27 @@
 
 #include "conversion.h"
 
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 #include "utility.h"
 
-#define RETURN_VALUE_OR_THROW_EXCEPTION(method) \
-try { \
-    return (method); \
-} \
-catch(const std::runtime_error& error) \
-{ \
-    std::cout << "Exception: " << name << ":" << error.what() << std::endl; \
-    std::stringstream ex; \
-    ex << "Failed to get property " << name << ": " << error.what(); \
-    throw std::runtime_error(ex.str()); \
-}
+#define RETURN_VALUE_OR_THROW_EXCEPTION(method)                                                    \
+    try                                                                                            \
+    {                                                                                              \
+        return (method);                                                                           \
+    }                                                                                              \
+    catch (const std::runtime_error &error)                                                        \
+    {                                                                                              \
+        std::cout << "Exception: " << name << ":" << error.what() << std::endl;                    \
+        std::stringstream ex;                                                                      \
+        ex << "Failed to get property " << name << ": " << error.what();                           \
+        throw std::runtime_error(ex.str());                                                        \
+    }
 
-template<typename NativeType>
-class ConvUtil
+template <typename NativeType> class ConvUtil
 {
-public:
+  public:
     static NativeType getNativeUnsigned(v8::Local<v8::Value> js)
     {
         if (!js->IsNumber())
@@ -74,7 +74,7 @@ public:
             throw std::runtime_error("signed integer");
         }
 
-       return static_cast<NativeType>(js->IntegerValue());
+        return static_cast<NativeType>(js->IntegerValue());
     }
 
     static NativeType getNativeFloat(v8::Local<v8::Value> js)
@@ -118,7 +118,7 @@ public:
     }
 };
 
-uint32_t Convert::getNativeUint32(v8::Local<v8::Object>js, const char *name)
+uint32_t Convert::getNativeUint32(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint32_t>::getNativeUnsigned(js, name));
 }
@@ -128,7 +128,7 @@ uint32_t Convert::getNativeUint32(v8::Local<v8::Value> js)
     return ConvUtil<uint32_t>::getNativeUnsigned(js);
 }
 
-uint16_t Convert::getNativeUint16(v8::Local<v8::Object>js, const char *name)
+uint16_t Convert::getNativeUint16(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint16_t>::getNativeUnsigned(js, name));
 }
@@ -138,7 +138,7 @@ uint16_t Convert::getNativeUint16(v8::Local<v8::Value> js)
     return ConvUtil<uint16_t>::getNativeUnsigned(js);
 }
 
-uint8_t Convert::getNativeUint8(v8::Local<v8::Object>js, const char *name)
+uint8_t Convert::getNativeUint8(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint8_t>::getNativeUnsigned(js, name));
 }
@@ -148,67 +148,67 @@ uint8_t Convert::getNativeUint8(v8::Local<v8::Value> js)
     return ConvUtil<uint8_t>::getNativeUnsigned(js);
 }
 
-int32_t Convert::getNativeInt32(v8::Local<v8::Object>js, const char *name)
+int32_t Convert::getNativeInt32(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int32_t>::getNativeSigned(js, name));
 }
 
-int32_t Convert::getNativeInt32(v8::Local<v8::Value>js)
+int32_t Convert::getNativeInt32(v8::Local<v8::Value> js)
 {
     return ConvUtil<int32_t>::getNativeSigned(js);
 }
 
-int16_t Convert::getNativeInt16(v8::Local<v8::Object>js, const char *name)
+int16_t Convert::getNativeInt16(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int16_t>::getNativeSigned(js, name));
 }
 
-int16_t Convert::getNativeInt16(v8::Local<v8::Value>js)
+int16_t Convert::getNativeInt16(v8::Local<v8::Value> js)
 {
     return ConvUtil<int16_t>::getNativeSigned(js);
 }
 
-int8_t Convert::getNativeInt8(v8::Local<v8::Object>js, const char *name)
+int8_t Convert::getNativeInt8(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int8_t>::getNativeSigned(js, name));
 }
 
-int8_t Convert::getNativeInt8(v8::Local<v8::Value>js)
+int8_t Convert::getNativeInt8(v8::Local<v8::Value> js)
 {
     return ConvUtil<int8_t>::getNativeSigned(js);
 }
 
-double Convert::getNativeDouble(v8::Local<v8::Object>js, const char *name)
+double Convert::getNativeDouble(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<double>::getNativeFloat(js, name));
 }
 
-double Convert::getNativeDouble(v8::Local<v8::Value>js)
+double Convert::getNativeDouble(v8::Local<v8::Value> js)
 {
     return ConvUtil<double>::getNativeFloat(js);
 }
 
-uint8_t Convert::getNativeBool(v8::Local<v8::Object>js, const char *name)
+uint8_t Convert::getNativeBool(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<bool>::getNativeBool(js, name));
 }
 
-uint8_t Convert::getNativeBool(v8::Local<v8::Value>js)
+uint8_t Convert::getNativeBool(v8::Local<v8::Value> js)
 {
     return ConvUtil<uint8_t>::getNativeBool(js);
 }
 
-bool Convert::getBool(v8::Local<v8::Object>js, const char *name)
+bool Convert::getBool(v8::Local<v8::Object> js, const char *name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<bool>::getNativeBool(js, name));
 }
 
-bool Convert::getBool(v8::Local<v8::Value>js)
+bool Convert::getBool(v8::Local<v8::Value> js)
 {
     return ConvUtil<bool>::getNativeBool(js);
 }
 
-std::vector<char> Convert::getVectorForChar(v8::Local<v8::Object>js, const char *name)
+std::vector<char> Convert::getVectorForChar(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
@@ -224,7 +224,7 @@ std::vector<char> Convert::getVectorForChar(v8::Local<v8::Value> js)
     return returnData;
 }
 
-std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Object>js, const char *name)
+std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
@@ -239,7 +239,7 @@ std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
     }
 
     v8::Local<v8::Array> jsarray = v8::Local<v8::Array>::Cast(js);
-    auto length = jsarray->Length();
+    auto length                  = jsarray->Length();
     std::vector<uint8_t> returnData;
 
     for (uint32_t i = 0; i < length; ++i)
@@ -250,20 +250,20 @@ std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
     return returnData;
 }
 
-uint32_t Convert::getLengthOfArray(v8::Local<v8::Object>js, const char *name)
+uint32_t Convert::getLengthOfArray(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
     RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getLengthOfArray(value));
 }
 
-uint32_t Convert::getLengthOfArray(v8::Local<v8::Value>js)
+uint32_t Convert::getLengthOfArray(v8::Local<v8::Value> js)
 {
     v8::Local<v8::Array> jsarray = v8::Local<v8::Array>::Cast(js);
     return jsarray->Length();
 }
 
-v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Value>js)
+v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Value> js)
 {
     if (!js->IsObject())
     {
@@ -280,7 +280,7 @@ v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Object> js, const char 
     RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getJsObject(obj));
 }
 
-v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Value>js)
+v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Value> js)
 {
     if (js->IsNull())
     {
@@ -297,14 +297,14 @@ v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Value>js)
     throw std::runtime_error("object or null");
 }
 
-v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Object>js, const char *name)
+v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
     RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getJsObjectOrNull(obj));
 }
 
-std::string Convert::getNativeString(v8::Local<v8::Object>js, const char *name)
+std::string Convert::getNativeString(v8::Local<v8::Object> js, const char *name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
@@ -404,14 +404,13 @@ v8::Handle<v8::Value> Convert::toJsString(uint8_t *cString, size_t length)
     return Convert::toJsString(reinterpret_cast<const char *>(cString), length);
 }
 
-
-v8::Handle<v8::Value> Convert::toJsString(const std::string& string)
+v8::Handle<v8::Value> Convert::toJsString(const std::string &string)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::String>(string).ToLocalChecked());
 }
 
-const char * Convert::valueToString(uint16_t value, name_map_t name_map, const char *defaultValue)
+const char *Convert::valueToString(uint16_t value, name_map_t name_map, const char *defaultValue)
 {
     auto it = name_map.find(value);
 
@@ -423,7 +422,8 @@ const char * Convert::valueToString(uint16_t value, name_map_t name_map, const c
     return it->second;
 }
 
-v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_map, v8::Handle<v8::Value> defaultValue)
+v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_map,
+                                               v8::Handle<v8::Value> defaultValue)
 {
     Nan::EscapableHandleScope scope;
     auto it = name_map.find(value);
@@ -436,13 +436,14 @@ v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_m
     return scope.Escape(Nan::New<v8::String>(it->second).ToLocalChecked());
 }
 
-v8::Handle<v8::Value> Convert::toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime, std::chrono::high_resolution_clock::time_point endTime)
+v8::Handle<v8::Value>
+Convert::toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime,
+                            std::chrono::high_resolution_clock::time_point endTime)
 {
-    uint32_t duration = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count());
+    uint32_t duration = static_cast<uint32_t>(
+        std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count());
     return Convert::toJsNumber(duration);
 }
-
-
 
 v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Object> js, const char *name)
 {

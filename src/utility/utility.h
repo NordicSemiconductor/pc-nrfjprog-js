@@ -41,10 +41,11 @@
 
 class Utility
 {
-public:
+  public:
     static v8::Local<v8::Value> Get(v8::Local<v8::Object> jsobj, const char *name);
     static v8::Local<v8::Value> Get(v8::Local<v8::Object> jsobj, const int index);
-    static void SetMethod(v8::Handle<v8::Object> target, const char *exportName, Nan::FunctionCallback function);
+    static void SetMethod(v8::Handle<v8::Object> target, const char *exportName,
+                          Nan::FunctionCallback function);
 
     static bool Set(v8::Handle<v8::Object> target, const char *name, int32_t value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, uint32_t value);
@@ -55,7 +56,7 @@ public:
     static bool Set(v8::Handle<v8::Object> target, const char *name, bool value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, double value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, const char *value);
-    static bool Set(v8::Handle<v8::Object> target, const char *name, const std::string & value);
+    static bool Set(v8::Handle<v8::Object> target, const char *name, const std::string &value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, v8::Local<v8::Value> value);
 
     static bool Has(v8::Handle<v8::Object> target, const char *name);
