@@ -6,7 +6,7 @@ if(WIN32)
     add_custom_target(tidy COMMAND echo "not supported on Windows")
 
 else()
-    find_program(CLANG_TIDY NAMES run-clang-tidy.py run-clang-tidy-6.0.py run-clang-tidy-7.0.py)
+    find_program(CLANG_TIDY NAMES run-clang-tidy.py run-clang-tidy-7.py run-clang-tidy-7.0.py)
     if(NOT CLANG_TIDY)
 
         message(STATUS "Did not find clang-tidy, target tidy is disabled.")
@@ -43,6 +43,8 @@ else()
         set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-google-readability-todo")
         set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-google-runtime-int")
         set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-google-runtime-references")
+        # Fuchsia
+        set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-fuchsia-default-arguments")
         set(CLANG_TIDY_CHECKS "-checks='${CLANG_TIDY_CHECKS}'")
 
         add_custom_target(tidy
