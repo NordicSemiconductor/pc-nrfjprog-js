@@ -51,14 +51,17 @@
 
 #include <iostream>
 
-std::string librarySearchPath;
+std::string* pLibrarySearchPath = nullptr;
 
 // NAN_METHOD is a macro; it's shorthand so you don't have to write that the
 // first and only parameter is of type Nan::FunctionCallbackInfo<v8::Value>
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
+    static std::string librarySearchPath;
+
     // Parse parameter from the FunctionCallbackInfo received
     if (info.Length() > 0 && info[0]->IsString()) {
+        pLibrarySearchPath = &librarySearchPath;
         librarySearchPath.assign(Convert::getNativeString(info[0]));
     } else {
         Nan::ThrowError(Nan::New("Expected string as the first argument").ToLocalChecked());
@@ -69,14 +72,15 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
 /* Try to locate a dynamically-linked library named fileName, and set libraryPath
  * to the full path to that library.
  */
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
     char tempLibraryPath[COMMON_MAX_PATH];
-    memset(tempLibraryPath, 0, COMMON_MAX_PATH);
+    char* pTempLibraryPath = static_cast<char*>(tempLibraryPath);
+    memset(pTempLibraryPath, 0, COMMON_MAX_PATH);
 
     // Fetch path of currently running executable
     ssize_t len;
-    len = readlink("/proc/self/exe", tempLibraryPath, COMMON_MAX_PATH - 1);
+    len = readlink("/proc/self/exe", pTempLibraryPath, COMMON_MAX_PATH - 1);
 
     if (len == -1)
     {
@@ -85,7 +89,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    libraryPath.append(dirname(tempLibraryPath));
+    libraryPath.append(dirname(pTempLibraryPath));
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -94,7 +98,11 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     }
 
     // Try the path specified from calling OSFilesSetLibrarySearchPath
-    libraryPath.assign(librarySearchPath);
+    if (pLibrarySearchPath != nullptr) {
+        libraryPath.assign(*pLibrarySearchPath);
+    } else {
+        libraryPath.assign("");
+    }
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -106,7 +114,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
     void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
-    if (libraryHandle)
+    if (libraryHandle != nullptr)
     {
         dlclose(libraryHandle);
         libraryPath = fileName;
@@ -117,32 +125,32 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
+std::string TempFile::concatPaths(const std::string & basePath, const std::string & relativePath)
 {
     return basePath + '/' + relativePath;
 }
 
 bool AbstractFile::pathExists(const char * path)
 {
-    struct stat buffer;
+    struct stat buffer{};
     return ((0 == stat(path, &buffer)));
 }
 
 /* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are valid, "/tmp" is returned. */
-std::string OSFilesGetTempFolderPath(void)
+std::string OSFilesGetTempFolderPath()
 {
-    std::string temp_keys[4] = {
+    static const std::vector<std::string> temp_keys = {
         "TMPDIR",
         "TMP",
         "TEMP",
         "TEMPDIR"
     };
 
-    for (uint32_t i = 0; i < 4; i++)
+    for (const std::string& temp_key : temp_keys)
     {
-        char * val = getenv(temp_keys[i].c_str());
+        char * val = getenv(temp_key.c_str());
 
-        if (val != NULL)
+        if (val != nullptr)
         {
             return std::string(val);
         }
@@ -158,10 +166,11 @@ std::string TempFile::getTempFileName()
     std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
     char tempFileName[COMMON_MAX_PATH];
+    char* pTempFileName = static_cast<char*>(tempFileName);
 
-    strncpy(tempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
+    strncpy(pTempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(tempFileName, 4);
+    int temp_file = mkstemps(pTempFileName, 4);
 
     if (temp_file == -1)
     {
@@ -172,7 +181,7 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(tempFileName);
+    return std::string(pTempFileName);
 }
 
 

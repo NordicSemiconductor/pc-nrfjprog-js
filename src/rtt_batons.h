@@ -43,7 +43,8 @@
 #include "rtt.h"
 #include "rtt_helpers.h"
 
-class RTTBaton {
+class RTTBaton
+{
 public:
     explicit RTTBaton(const std::string _name, const uint32_t _returnParameterCount) :
         returnParameterCount(_returnParameterCount),

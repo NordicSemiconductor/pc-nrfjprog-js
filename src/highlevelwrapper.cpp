@@ -39,10 +39,11 @@
 #include "osfiles.h"
 
 LibraryHandleType libraryHandle;
-std::string highLevelPath;
 
 errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType * libraryFunctions)
 {
+    static std::string highLevelPath{};
+
     if (highLevelPath.empty()) {
         std::string libraryName = getHighLevelLibraryName();
         const errorcode_t finderror = OSFilesFindLibrary(highLevelPath, libraryName);
@@ -54,7 +55,7 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType * libraryFunction
 
     libraryHandle = LibraryLoad(highLevelPath);
 
-    if (!libraryHandle){
+    if (!static_cast<bool>(libraryHandle)){
         return errorcode_t::CouldNotLoadDLL;
     }
 
@@ -145,7 +146,8 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType * libraryFunction
     return errorcode_t::JsSuccess;
 }
 
-errorcode_t releaseHighLevel() {
+errorcode_t releaseHighLevel()
+{
     LibraryFree(libraryHandle);
     return errorcode_t::JsSuccess;
 }

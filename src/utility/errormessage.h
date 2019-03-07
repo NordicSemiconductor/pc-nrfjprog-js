@@ -46,10 +46,10 @@
 class ErrorMessage
 {
 public:
-    static v8::Local<v8::Value> getErrorMessage(const int errorCode, const name_map_t errorcodeMapper, const std::string customMessage);
-    static v8::Local<v8::Value> getErrorMessage(const int errorCode, const name_map_t errorcodeMapper, const std::string customMessage, const std::string logmessage, const nrfjprogdll_err_t lowlevelError);
-    static v8::Local<v8::String> getTypeErrorMessage(const int argumentNumber, const std::string message);
-    static v8::Local<v8::String> getStructErrorMessage(const std::string name, const std::string message);
+    static v8::Local<v8::Value> getErrorMessage(const int errorCode, const name_map_t& errorcodeMapper, const std::string& customMessage);
+    static v8::Local<v8::Value> getErrorMessage(const int errorCode, const name_map_t& errorcodeMapper, const std::string& customMessage, const std::string& logmessage, const nrfjprogdll_err_t& lowlevelError);
+    static v8::Local<v8::String> getTypeErrorMessage(const int argumentNumber, const std::string& message);
+    static v8::Local<v8::String> getStructErrorMessage(const std::string& name, const std::string& message);
 };
 
 #endif

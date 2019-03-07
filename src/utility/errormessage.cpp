@@ -43,22 +43,17 @@
 #include "utility.h"
 #include "../highlevel_common.h"
 
-static name_map_t argumentCountMap = {
-    { 0, "First" },
-    { 1, "Second"},
-    { 2, "Third"},
-    { 3, "Fourth"},
-    { 4, "Fifth"},
-    { 5, "Sixth"},
-    { 6, "Seventh"}
-};
-
-v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const name_map_t errorcodeMapper, const std::string customMessage)
+v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const name_map_t& errorcodeMapper, const std::string& customMessage)
 {
-    return getErrorMessage(errorCode, errorcodeMapper, customMessage, std::string(), (nrfjprogdll_err_t)0);
+    return getErrorMessage(errorCode, errorcodeMapper, customMessage, std::string(), static_cast<nrfjprogdll_err_t>(0));
 }
 
-v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const name_map_t errorcodeMapper, const std::string customMessage, const std::string logmessage, const nrfjprogdll_err_t lowlevelError)
+v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
+    const name_map_t& errorcodeMapper,
+    const std::string& customMessage,
+    const std::string& logmessage,
+    const nrfjprogdll_err_t& lowlevelError
+)
 {
     Nan::EscapableHandleScope scope;
 
@@ -94,8 +89,18 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode, const na
     return scope.Escape(error);
 }
 
-v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber, const std::string message)
+v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber, const std::string& message)
 {
+    static name_map_t argumentCountMap = {
+        { 0, "First" },
+        { 1, "Second" },
+        { 2, "Third" },
+        { 3, "Fourth" },
+        { 4, "Fifth" },
+        { 5, "Sixth" },
+        { 6, "Seventh" }
+    };
+
     std::ostringstream stream;
 
     if (argumentNumber != CUSTOM_ARGUMENT_PARSE_ERROR)
@@ -110,7 +115,7 @@ v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber
     return Convert::toJsString(stream.str())->ToString();
 }
 
-v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string name, const std::string message)
+v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string& name, const std::string& message)
 {
     std::ostringstream stream;
 

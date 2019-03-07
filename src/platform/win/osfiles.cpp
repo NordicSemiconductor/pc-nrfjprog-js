@@ -64,7 +64,7 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
 }
 
 
-errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath, std::string &fileName)
+errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath, const std::string &fileName)
 {
     HKEY key;
     HKEY innerKey;
@@ -145,7 +145,7 @@ errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPat
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
     // Try to find the DLLs from the path given to OSFilesSetLibrarySearchPath()
     libraryPath.assign(librarySearchPath);
@@ -168,7 +168,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     return retCode;
 }
 
-std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
+std::string TempFile::concatPaths(const std::string & basePath, const std::string & relativePath)
 {
     char buffer[MAX_PATH] = "";
 

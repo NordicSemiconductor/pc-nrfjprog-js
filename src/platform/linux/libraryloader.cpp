@@ -37,21 +37,21 @@
 #include "../../libraryloader.h"
 
 #include <dlfcn.h>
-#include <stddef.h>
+#include <cstddef>
 
 LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
 {
     return dlsym(libraryHandle, func_name);
 }
 
-LibraryHandleType LibraryLoad(std::string &path)
+LibraryHandleType LibraryLoad(const std::string &path)
 {
     return dlopen(path.c_str(), RTLD_LAZY);
 }
 
 void LibraryFree(LibraryHandleType libraryHandle)
 {
-    if (libraryHandle) {
+    if (libraryHandle != nullptr) {
         dlclose(libraryHandle);
     }
 }

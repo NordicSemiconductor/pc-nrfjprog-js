@@ -37,22 +37,12 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <nan.h>
 #include <map>
-#include <mutex>
 #include <string>
 
 #define NAME_MAP_ENTRY(EXP) { EXP, ""#EXP"" }
 
 // Typedef of name to string with enum name, covers most cases
 typedef std::map<uint16_t, const char*> name_map_t;
-typedef std::map<uint16_t, const char*>::iterator name_map_it_t;
-
-const std::string getCurrentTimeInMilliseconds();
-
-uint16_t uint16_decode(const uint8_t *p_encoded_data);
-uint32_t uint32_decode(const uint8_t *p_encoded_data);
-
-uint16_t fromNameToValue(name_map_t names, const char *name);
 
 #endif // COMMON_H

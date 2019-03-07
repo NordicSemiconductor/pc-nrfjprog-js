@@ -33,7 +33,7 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #include "utility.h"
 #include "conversion.h"
 
@@ -101,7 +101,7 @@ bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const char *v
     return Utility::Set(target, name, Convert::toJsString(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, std::string value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const std::string& value)
 {
     return Utility::Set(target, name, Convert::toJsString(value));
 }
@@ -151,12 +151,7 @@ bool Utility::IsNull(v8::Local<v8::Object> jsobj)
 
 bool Utility::IsBetween(const uint8_t value, const uint8_t min, const uint8_t max)
 {
-    if (value < min || value > max)
-    {
-        return false;
-    }
-
-    return true;
+    return !(value < min || value > max);
 }
 
 bool Utility::EnsureAsciiNumbers(uint8_t *value, const int length)

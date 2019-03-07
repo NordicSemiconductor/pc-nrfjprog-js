@@ -55,7 +55,7 @@ public:
     static bool Set(v8::Handle<v8::Object> target, const char *name, bool value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, double value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, const char *value);
-    static bool Set(v8::Handle<v8::Object> target, const char *name, std::string value);
+    static bool Set(v8::Handle<v8::Object> target, const char *name, const std::string & value);
     static bool Set(v8::Handle<v8::Object> target, const char *name, v8::Local<v8::Value> value);
 
     static bool Has(v8::Handle<v8::Object> target, const char *name);

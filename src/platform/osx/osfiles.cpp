@@ -64,7 +64,7 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
 }
 
 
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
     int ret;
     pid_t pid;
@@ -114,7 +114,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 
 }
 
-std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
+std::string TempFile::concatPaths(const std::string & basePath, const std::string & relativePath)
 {
     return basePath + '/' + relativePath;
 }

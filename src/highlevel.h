@@ -37,14 +37,14 @@
 #define HIGHLEVEL_H
 
 #include <nan.h>
-#include "common.h"
+
+#include <functional>
+#include <memory>
+
 #include "highlevelwrapper.h"
 #include "osfiles.h"
 
 #include "utility/errormessage.h"
-
-#include <functional>
-#include <memory>
 
 class Baton;
 
@@ -56,12 +56,10 @@ class HighLevel : public Nan::ObjectWrap
 {
 public:
     static NAN_MODULE_INIT(Init);
-    static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE tpl);
+    static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
 
 private:
     explicit HighLevel();
-
-    static Nan::Persistent<v8::Function> constructor;
 
     static NAN_METHOD(New);
 
@@ -93,9 +91,9 @@ private:
     static NAN_METHOD(CloseDevice); // Params: serialnumber, callback(error)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
-                             const parse_parameters_function_t parse,
-                             const execute_function_t execute,
-                             const return_function_t ret,
+                             const parse_parameters_function_t& parse,
+                             const execute_function_t& execute,
+                             const return_function_t& ret,
                              const bool hasSerialNumber);
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
@@ -103,27 +101,14 @@ private:
     static errorcode_t loadLibrary();
     static void unloadLibrary();
 
-    static void init(v8::Local<v8::FunctionTemplate> tpl);
+    static void init(v8::Local<v8::FunctionTemplate> target);
 
     static void log(const char * msg);
     static void log(const std::string& msg);
     static void resetLog();
 
     static void progressCallback(const char * process);
-    static std::unique_ptr<Nan::Callback> jsProgressCallback;
     static void sendProgress(uv_async_t *handle);
-    static uv_async_t *progressEvent;
-
-    static LibraryFunctionPointersType libraryFunctions;
-
-    static bool loaded;
-    static bool connectedToDevice;
-
-    static bool keepDeviceOpen;
-    static Probe_handle_t probe;
-
-    static std::string logMessage;
-    static std::timed_mutex logMutex;
 };
 
 #endif // __NRFJPROG_H__

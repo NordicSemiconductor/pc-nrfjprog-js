@@ -59,7 +59,7 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(probe_info.serial_number));
     Utility::Set(obj, "clockSpeedkHz", Convert::toJsNumber(probe_info.clockspeed_khz));
-    Utility::Set(obj, "firmwareString", Convert::toJsString(probe_info.firmware_string));
+    Utility::Set(obj, "firmwareString", Convert::toJsString(static_cast<const char*>(probe_info.firmware_string)));
 
     return scope.Escape(obj);
 }
@@ -109,7 +109,7 @@ v8::Local<v8::Object> LibraryInfo::ToJs()
     Utility::Set(versionObj, "revision", Convert::toJsString(&library_info.version_revision, 1));
 
     Utility::Set(obj, "version", versionObj);
-    Utility::Set(obj, "path", Convert::toJsString(library_info.file_path));
+    Utility::Set(obj, "path", Convert::toJsString(static_cast<const char*>(library_info.file_path)));
 
     return scope.Escape(obj);
 }
@@ -121,7 +121,7 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
 {
     if (Utility::Has(obj, "erase_mode"))
     {
-        eraseMode = (erase_action_t)Convert::getNativeUint32(obj, "erase_mode");
+        eraseMode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "erase_mode"));
     }
 
     if (Utility::Has(obj, "start_address"))
@@ -142,12 +142,13 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj) :
 }
 
 ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
+  : options({
+    .readram = false,
+    .readcode = true,
+    .readuicr = false,
+    .readqspi = false,
+  })
 {
-    options.readram = false;
-    options.readcode = true;
-    options.readuicr = false;
-    options.readqspi = false;
-
     if (Utility::Has(obj, "readram"))
     {
         options.readram = Convert::getBool(obj, "readram");
@@ -170,13 +171,14 @@ ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
 }
 
 ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
+  : options({
+    .verify = VERIFY_READ,
+    .chip_erase_mode = ERASE_ALL,
+    .qspi_erase_mode = ERASE_NONE,
+    .reset = RESET_SYSTEM
+  })
+  , inputFormat(INPUT_FORMAT_HEX_FILE)
 {
-    options.verify = VERIFY_READ;
-    options.chip_erase_mode = ERASE_ALL;
-    options.qspi_erase_mode = ERASE_NONE;
-    options.reset = RESET_SYSTEM;
-    inputFormat = INPUT_FORMAT_HEX_FILE;
-
     if (Utility::Has(obj, "verify"))
     {
         const bool verify = Convert::getBool(obj, "verify");
@@ -185,12 +187,12 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 
     if (Utility::Has(obj, "chip_erase_mode"))
     {
-        options.chip_erase_mode = (erase_action_t)Convert::getNativeUint32(obj, "chip_erase_mode");
+        options.chip_erase_mode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "chip_erase_mode"));
     }
 
     if (Utility::Has(obj, "qspi_erase_mode"))
     {
-        options.qspi_erase_mode = (erase_action_t)Convert::getNativeUint32(obj, "qspi_erase_mode");
+        options.qspi_erase_mode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "qspi_erase_mode"));
     }
 
     if (Utility::Has(obj, "reset"))
@@ -201,9 +203,10 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 
     if (Utility::Has(obj, "inputFormat"))
     {
-        inputFormat = (input_format_t)Convert::getNativeUint32(obj, "inputFormat");
+        inputFormat = static_cast<input_format_t>(Convert::getNativeUint32(obj, "inputFormat"));
     }
 }
 
 VerifyOptions::VerifyOptions(v8::Local<v8::Object> obj)
-{}
+{
+}

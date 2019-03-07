@@ -37,15 +37,14 @@
 #define RTT_H
 
 #include <nan.h>
-#include "common.h"
+
+#include <functional>
+#include <memory>
+
 #include "nrfjprogwrapper.h"
 #include "osfiles.h"
 
 #include "utility/errormessage.h"
-
-#include <functional>
-#include <chrono>
-#include <memory>
 
 class RTTBaton;
 class RTTStartBaton;
@@ -59,13 +58,11 @@ class RTT : public Nan::ObjectWrap
 public:
     static NAN_MODULE_INIT(Init);
 
-    static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE tpl);
+    static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
 
 private:
     explicit RTT();
     ~RTT();
-
-    static Nan::Persistent<v8::Function> constructor;
 
     static NAN_METHOD(New);
 
@@ -76,9 +73,9 @@ private:
     static NAN_METHOD(Write); // Params: channelIndex, data, callback(error, writtenlength, time)
 
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
-                            const rtt_parse_parameters_function_t parse,
-                            const rtt_execute_function_t execute,
-                            const rtt_return_function_t ret);
+                            const rtt_parse_parameters_function_t& parse,
+                            const rtt_execute_function_t& execute,
+                            const rtt_return_function_t& ret);
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
 
@@ -95,13 +92,6 @@ private:
     static void log(const char * msg);
     static void log(const std::string& msg);
     static void resetLog();
-
-    static std::string logMessage;
-    static std::timed_mutex logMutex;
-    static bool libraryLoaded;
-    static std::chrono::high_resolution_clock::time_point rttStartTime;
-
-    static nRFjprogLibraryFunctionPointersType libraryFunctions;
 };
 
 #endif

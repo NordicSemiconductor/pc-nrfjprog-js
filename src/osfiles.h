@@ -47,10 +47,10 @@
 #define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
 #define COMMON_MAX_INI_LINE (1024)
 
-void OSFilesInit(v8::Local<v8::Object> tpl);
+void OSFilesInit(v8::Local<v8::Object> target);
 
 NAN_METHOD(OSFilesSetLibrarySearchPath);
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName);
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName);
 std::string getHighLevelLibraryName();
 std::string getnrfjprogLibraryName();
 
@@ -72,22 +72,22 @@ protected:
 class LocalFile : public AbstractFile
 {
 public:
-    LocalFile(std::string filename);
+    LocalFile(const std::string & fileName);
     virtual std::string errormessage() override;
 };
 
 class TempFile : public AbstractFile
 {
 public:
-    TempFile(std::string fileContent);
+    TempFile(const std::string & fileContent);
     virtual ~TempFile() override;
     virtual std::string errormessage() override;
 
 private:
-    std::string writeTempFile(std::string fileContent);
+    std::string writeTempFile(const std::string & fileContent);
     std::string getTempFileName();
     void deleteFile();
-    std::string concatPaths(std::string basePath, std::string relativePath);
+    std::string concatPaths(const std::string & basePath, const std::string & relativePath);
 
     enum TempFileErrorcode {
         TempNoError,
@@ -99,7 +99,7 @@ private:
 class FileFormatHandler
 {
 public:
-    FileFormatHandler(std::string fileinfo, input_format_t inputFormat);
+    FileFormatHandler(const std::string & fileinfo, input_format_t inputFormat);
 
     std::string getFileName();
     bool exists();

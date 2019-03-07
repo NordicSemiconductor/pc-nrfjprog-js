@@ -54,7 +54,7 @@ static bool load_func_ptr(T * func_ptr, const char * func_name, LibraryHandleTyp
     return true;
 }
 
-LibraryHandleType LibraryLoad(std::string &path);
+LibraryHandleType LibraryLoad(const std::string &path);
 void LibraryFree(LibraryHandleType libraryHandle);
 
 #endif
