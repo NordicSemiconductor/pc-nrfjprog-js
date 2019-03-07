@@ -144,13 +144,12 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj)
 }
 
 ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
-    : options({
-          .readram  = false,
-          .readcode = true,
-          .readuicr = false,
-          .readqspi = false,
-      })
 {
+    options.readram  = false;
+    options.readcode = true;
+    options.readuicr = false;
+    options.readqspi = false;
+
     if (Utility::Has(obj, "readram"))
     {
         options.readram = Convert::getBool(obj, "readram");
@@ -173,12 +172,13 @@ ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
 }
 
 ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
-    : options({.verify          = VERIFY_READ,
-               .chip_erase_mode = ERASE_ALL,
-               .qspi_erase_mode = ERASE_NONE,
-               .reset           = RESET_SYSTEM})
-    , inputFormat(INPUT_FORMAT_HEX_FILE)
+    : inputFormat(INPUT_FORMAT_HEX_FILE)
 {
+    options.verify          = VERIFY_READ;
+    options.chip_erase_mode = ERASE_ALL;
+    options.qspi_erase_mode = ERASE_NONE;
+    options.reset           = RESET_SYSTEM;
+
     if (Utility::Has(obj, "verify"))
     {
         const bool verify = Convert::getBool(obj, "verify");
