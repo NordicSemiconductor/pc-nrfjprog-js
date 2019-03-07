@@ -144,6 +144,7 @@ EraseOptions::EraseOptions(v8::Local<v8::Object> obj)
 }
 
 ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
+    : options()
 {
     options.readram  = false;
     options.readcode = true;
@@ -172,7 +173,8 @@ ReadToFileOptions::ReadToFileOptions(v8::Local<v8::Object> obj)
 }
 
 ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
-    : inputFormat(INPUT_FORMAT_HEX_FILE)
+    : options()
+    , inputFormat(INPUT_FORMAT_HEX_FILE)
 {
     options.verify          = VERIFY_READ;
     options.chip_erase_mode = ERASE_ALL;
