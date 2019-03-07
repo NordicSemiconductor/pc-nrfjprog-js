@@ -134,6 +134,6 @@ steps:
     npm_config_runtime: $(npm_config_runtime),
     npm_config_target: $(npm_config_target),
     npm_config_disturl: $(npm_config_disturl),
-    NODE_PRE_GYP_GITHUB_TOKEN: $(chun_github_token)
+    NODE_PRE_GYP_GITHUB_TOKEN: $(wayland_github_token)
   }
   displayName: 'Build'
