@@ -8,7 +8,6 @@ jobs:
       npm_config_runtime: ''
       npm_config_target: ''
       npm_config_disturl: ''
-
     strategy:
       matrix:
         linux_node_8_x:
@@ -100,10 +99,8 @@ jobs:
         #   npm_config_target: 4.0.6
         #   npm_config_disturl: 'https://atom.io/download/electron'
         #   node_arch: '32'
-
     pool:
       vmImage: $(image_name)
-
     steps:
     - task: NodeTool@0
       inputs:
@@ -145,17 +142,23 @@ jobs:
     dependsOn: [
       Build,
     ]
+    strategy:
+      matrix:
+        linux:
+          osType: 'linux'
+        mac:
+          osType: 'mac'
+        win64:
+          osType: 'win64'
+        win32:
+          osType: 'win32'
     pool: server
     steps:
     - task: InvokeRESTAPI@1
+      name: Test
       inputs:
         connectionType: 'connectedServiceName' # Options: connectedServiceName, connectedServiceNameARM
-        serviceConnection: 'WaylandJenkins' # Required when connectionType == ConnectedServiceName
-        # azureServiceConnection: # Required when connectionType == ConnectedServiceNameARM
+        serviceConnection: 'waylandJenkins' # Required when connectionType == ConnectedServiceName
         method: 'POST' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
-        # method: 'GET' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
-        # headers: '{Content-Type: application/application/json}'
-        # body: 'BAR=lalala' # Required when method != GET && Method != HEAD
-        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-linux/buildWithParameters?BRANCH=$(Build.SourceBranchName)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
+        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceBranchName)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
         waitForCompletion: 'true' # Options: true, false
-        #successCriteria: # Optional
