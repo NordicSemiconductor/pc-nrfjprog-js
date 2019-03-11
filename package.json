@@ -45,6 +45,7 @@
     "node-pre-gyp": "^0.12.0",
     "sander": "^0.6.0",
     "semver": "^5.5.0",
+    "nrfconnect-build": "https://github.com/chunfantasy/pc-nrfconnect-build.git",
     "tar": "^4.3.3"
   },
   "devDependencies": {
@@ -53,7 +54,6 @@
     "jest-bamboo-formatter": "1.0.1",
     "jsdoc": "^3.5.4",
     "minami": "^1.2.3",
-    "nrfconnect-build": "https://github.com/chunfantasy/pc-nrfconnect-build.git",
     "node-pre-gyp-github": "1.4.3"
   },
   "jest": {
