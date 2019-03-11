@@ -15,10 +15,10 @@ os:
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
+    sources: ubuntu-toolchain-r-test
+    packages: g++-6 ninja-build
+  homebrew:
+    packages: ninja
 
 env:
   global:
@@ -46,7 +46,7 @@ matrix:
 before_install:
 - |
   if [ $TRAVIS_OS_NAME == "windows" ]; then
-    choco install -y nvm
+    choco install -y nvm ninja
     export NVM_HOME="C:\ProgramData\nvm"
     export NVM_SYMLINK="C:\Program Files\nodejs"
     export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
