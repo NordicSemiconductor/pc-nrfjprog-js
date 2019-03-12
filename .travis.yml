@@ -59,7 +59,7 @@ before_install:
   if [ $TRAVIS_OS_NAME == "windows" ]; then
     npm config set cmake_CMAKE_C_COMPILER=cl.exe
     npm config set cmake_CMAKE_CXX_COMPILER=cl.exe
-    npm config set cmake_MSVC_TOOSET_VERSION=150
+    npm config set cmake_MSVC_TOOLSET_VERSION=150
     export VCToolsVersion=14.16.27023
     export VCINSTALLDIR=/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/BuildTools/VC
     export VCToolsInstallDir=$VCINSTALLDIR/Tools/MSVC/14.16.27023
