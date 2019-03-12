@@ -46,11 +46,9 @@
 class ErrorMessage
 {
   public:
-    static v8::Local<v8::Value> getErrorMessage(int errorCode,
-                                                const name_map_t &errorcodeMapper,
+    static v8::Local<v8::Value> getErrorMessage(int errorCode, const name_map_t &errorcodeMapper,
                                                 const std::string &customMessage);
-    static v8::Local<v8::Value> getErrorMessage(int errorCode,
-                                                const name_map_t &errorcodeMapper,
+    static v8::Local<v8::Value> getErrorMessage(int errorCode, const name_map_t &errorcodeMapper,
                                                 const std::string &customMessage,
                                                 const std::string &logmessage,
                                                 const nrfjprogdll_err_t &lowlevelError);

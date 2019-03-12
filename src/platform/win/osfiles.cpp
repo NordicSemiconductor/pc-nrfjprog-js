@@ -82,21 +82,22 @@ errorcode_t OSFilesFindLibraryByHKey(HKEY rootKey, std::string &libraryPath,
 
     /* Search for JLinkARM in the Local Machine Key.  */
     if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0,
-                     static_cast<uint32_t>(KEY_QUERY_VALUE) | static_cast<uint32_t>(KEY_ENUMERATE_SUB_KEYS),
+                     static_cast<uint32_t>(KEY_QUERY_VALUE) |
+                         static_cast<uint32_t>(KEY_ENUMERATE_SUB_KEYS),
                      &key) == ERROR_SUCCESS)
     {
-        std::vector<TCHAR> achKey(MAX_KEY_LENGTH, '\0');        // buffer for subkey name
-        DWORD cbName;                        // size of name string
-        std::vector<TCHAR> achClass(MAX_PATH, '\0'); // buffer for class name
-        DWORD cchClassName       = MAX_PATH; // size of class string
-        DWORD cSubKeys           = 0u;       // number of subkeys
-        DWORD cbMaxSubKey;                   // longest subkey size
-        DWORD cchMaxClass;                   // longest class string
-        DWORD cValues;                       // number of values for key
-        DWORD cchMaxValue;                   // longest value name
-        DWORD cbMaxValueData;                // longest value data
-        DWORD cbSecurityDescriptor;          // size of security descriptor
-        FILETIME ftLastWriteTime;            // last write time
+        std::vector<TCHAR> achKey(MAX_KEY_LENGTH, '\0'); // buffer for subkey name
+        DWORD cbName;                                    // size of name string
+        std::vector<TCHAR> achClass(MAX_PATH, '\0');     // buffer for class name
+        DWORD cchClassName = MAX_PATH;                   // size of class string
+        DWORD cSubKeys     = 0u;                         // number of subkeys
+        DWORD cbMaxSubKey;                               // longest subkey size
+        DWORD cchMaxClass;                               // longest class string
+        DWORD cValues;                                   // number of values for key
+        DWORD cchMaxValue;                               // longest value name
+        DWORD cbMaxValueData;                            // longest value data
+        DWORD cbSecurityDescriptor;                      // size of security descriptor
+        FILETIME ftLastWriteTime;                        // last write time
 
         RegQueryInfoKey(key,                   // key handle
                         achClass.data(),       // buffer for class name
@@ -114,15 +115,16 @@ errorcode_t OSFilesFindLibraryByHKey(HKEY rootKey, std::string &libraryPath,
         // Enumerate the subkeys, until RegEnumKeyEx fails.
         if (cSubKeys != 0u)
         {
-            cbName  = MAX_KEY_LENGTH;
+            cbName = MAX_KEY_LENGTH;
             if (RegEnumKeyEx(key, cSubKeys - 1, achKey.data(), &cbName, nullptr, nullptr, nullptr,
                              &ftLastWriteTime) == ERROR_SUCCESS)
             {
-                if (RegOpenKeyEx(key, achKey.data(), 0, KEY_QUERY_VALUE, &innerKey) == ERROR_SUCCESS)
+                if (RegOpenKeyEx(key, achKey.data(), 0, KEY_QUERY_VALUE, &innerKey) ==
+                    ERROR_SUCCESS)
                 {
-
                     /* If it is found, read the install path. */
-                    if (RegQueryValueEx(innerKey, "InstallPath", nullptr, nullptr, reinterpret_cast<LPBYTE>(installPath.data()),
+                    if (RegQueryValueEx(innerKey, "InstallPath", nullptr, nullptr,
+                                        reinterpret_cast<LPBYTE>(installPath.data()),
                                         &installPathSize) == ERROR_SUCCESS)
                     {
                         /* Copy, check it exists and return if it does. */
