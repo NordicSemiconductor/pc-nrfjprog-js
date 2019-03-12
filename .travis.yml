@@ -78,6 +78,7 @@ before_install:
   fi
 
 script:
+- echo $PATH
 - npm install --build-from-source
 - npm run package-prebuilt
 - echo tag=$TRAVIS_TAG pullrequest=$TRAVIS_PULL_REQUEST
