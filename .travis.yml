@@ -61,13 +61,13 @@ before_install:
     npm config set cmake_CMAKE_CXX_COMPILER=cl.exe
     npm config set cmake_MSVC_TOOSET_VERSION=150
     export VCToolsVersion=14.16.27023
-    export VCINSTALLDIR="c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\"
-    export VCToolsInstallDir="c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\$VCToolsVersion\"
-    export VCToolsRedistDir="c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.16.27012\"
+    export VCINSTALLDIR="c:\Program Files \(x86\)\Microsoft Visual Studio\2017\Community\VC\"
+    export VCToolsInstallDir="c:\Program Files \(x86\)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\"
+    export VCToolsRedistDir="c:\Program Files \(x86\)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.16.27012\"
     if [ $NODE_ARCH == "32" ]; then
-      export PATH=$PATH:"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Tools\MSVC\$VCToolsVersion\bin\HostX86\x86"
+      export PATH=$PATH:"C:\Program Files \(x86\)\Microsoft Visual Studio\2017\BuildTools\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86"
     else
-      export PATH=$PATH:"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Tools\MSVC\$VCToolsVersion\bin\HostX64\x64"
+      export PATH=$PATH:"C:\Program Files \(x86\)\Microsoft Visual Studio\2017\BuildTools\VC\Tools\MSVC\14.16.27023\bin\HostX64\x64"
     fi
   fi
 - |
