@@ -61,13 +61,14 @@ before_install:
     npm config set cmake_CMAKE_CXX_COMPILER=cl.exe
     npm config set cmake_MSVC_TOOSET_VERSION=150
     export VCToolsVersion=14.16.27023
-    export VCINSTALLDIR=C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/Community/VC
+    export VCINSTALLDIR=/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/Community/VC
     export VCToolsInstallDir=$VCINSTALLDIR/Tools/MSVC/14.16.27023
     export VCToolsRedistDir=$VCINSTALLDIR/Redist/MSVC/14.16.27012
+    export WinKits=/c/Program\ Files\ \(x86\)/Windows\ Kits/10/bin
     if [ $NODE_ARCH == "32" ]; then
-      export PATH=$PATH:$VCToolsInstallDir/bin/HostX86/x86
+      export PATH=$PATH:$VCToolsInstallDir/bin/HostX86/x86:$WinKits/x86
     else
-      export PATH=$PATH:$VCToolsInstallDir/bin/HostX64/x64
+      export PATH=$PATH:$VCToolsInstallDir/bin/HostX64/x64:$WinKits/x64
     fi
   fi
 - |
