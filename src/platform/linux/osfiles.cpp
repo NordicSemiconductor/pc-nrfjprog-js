@@ -89,7 +89,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    libraryPath.append(dirname(tempLibraryPath.data());
+    libraryPath.append(dirname(tempLibraryPath.data()));
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))

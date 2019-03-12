@@ -73,11 +73,11 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 {
     int ret;
     pid_t pid;
-    char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+    std::vector<char> pathbuf(PROC_PIDPATHINFO_MAXSIZE, '\0');
 
     // Fetch path of currently running executable
     pid = getpid();
-    ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+    ret = proc_pidpath(pid, pathbuf.data(), PROC_PIDPATHINFO_MAXSIZE - 1);
 
     if (ret <= 0)
     {
@@ -87,7 +87,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    libraryPath.append(dirname(pathbuf));
+    libraryPath.append(dirname(pathbuf.data()));
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
