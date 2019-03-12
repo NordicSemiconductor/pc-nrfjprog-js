@@ -38,6 +38,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include <iostream>
+
 #include "../../osfiles.h"
 #include "../../utility/conversion.h"
 
@@ -51,10 +53,13 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-std::string librarySearchPath;
+std::string *pLibrarySearchPath = nullptr;
 
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
+    static std::string librarySearchPath;
+    pLibrarySearchPath = &librarySearchPath;
+
     // Parse parameter from the FunctionCallbackInfo received
     if (info.Length() > 0 && info[0]->IsString())
     {
@@ -66,24 +71,25 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
     }
 }
 
-errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPath,
+errorcode_t OSFilesFindLibraryByHKey(HKEY rootKey, std::string &libraryPath,
                                      const std::string &fileName)
 {
     HKEY key;
     HKEY innerKey;
 
-    CHAR installPath[COMMON_MAX_PATH] = {'\0'};
-    DWORD installPathSize             = sizeof(installPath);
+    std::vector<char> installPath(COMMON_MAX_PATH, '\0');
+    DWORD installPathSize = installPath.size();
 
     /* Search for JLinkARM in the Local Machine Key.  */
     if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0,
-                     KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &key) == ERROR_SUCCESS)
+                     static_cast<uint32_t>(KEY_QUERY_VALUE) | static_cast<uint32_t>(KEY_ENUMERATE_SUB_KEYS),
+                     &key) == ERROR_SUCCESS)
     {
-        TCHAR achKey[MAX_KEY_LENGTH];        // buffer for subkey name
+        std::vector<TCHAR> achKey(MAX_KEY_LENGTH, '\0');        // buffer for subkey name
         DWORD cbName;                        // size of name string
-        TCHAR achClass[MAX_PATH] = TEXT(""); // buffer for class name
+        std::vector<TCHAR> achClass(MAX_PATH, '\0'); // buffer for class name
         DWORD cchClassName       = MAX_PATH; // size of class string
-        DWORD cSubKeys           = 0;        // number of subkeys
+        DWORD cSubKeys           = 0u;       // number of subkeys
         DWORD cbMaxSubKey;                   // longest subkey size
         DWORD cchMaxClass;                   // longest class string
         DWORD cValues;                       // number of values for key
@@ -92,50 +98,49 @@ errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPat
         DWORD cbSecurityDescriptor;          // size of security descriptor
         FILETIME ftLastWriteTime;            // last write time
 
-        DWORD retCode;
-
-        DWORD cchValue = MAX_VALUE_NAME;
-
-        retCode = RegQueryInfoKey(key,                   // key handle
-                                  achClass,              // buffer for class name
-                                  &cchClassName,         // size of class string
-                                  NULL,                  // reserved
-                                  &cSubKeys,             // number of subkeys
-                                  &cbMaxSubKey,          // longest subkey size
-                                  &cchMaxClass,          // longest class string
-                                  &cValues,              // number of values for this key
-                                  &cchMaxValue,          // longest value name
-                                  &cbMaxValueData,       // longest value data
-                                  &cbSecurityDescriptor, // security descriptor
-                                  &ftLastWriteTime);     // last write time
+        RegQueryInfoKey(key,                   // key handle
+                        achClass.data(),       // buffer for class name
+                        &cchClassName,         // size of class string
+                        nullptr,               // reserved
+                        &cSubKeys,             // number of subkeys
+                        &cbMaxSubKey,          // longest subkey size
+                        &cchMaxClass,          // longest class string
+                        &cValues,              // number of values for this key
+                        &cchMaxValue,          // longest value name
+                        &cbMaxValueData,       // longest value data
+                        &cbSecurityDescriptor, // security descriptor
+                        &ftLastWriteTime);     // last write time
 
         // Enumerate the subkeys, until RegEnumKeyEx fails.
-
-        if (cSubKeys)
+        if (cSubKeys != 0u)
         {
             cbName  = MAX_KEY_LENGTH;
-            retCode = RegEnumKeyEx(key, cSubKeys - 1, achKey, &cbName, NULL, NULL, NULL,
-                                   &ftLastWriteTime);
-            RegOpenKeyEx(key, achKey, 0, KEY_QUERY_VALUE, &innerKey);
-        }
-
-        /* If it is found, read the install path. */
-        if (RegQueryValueEx(innerKey, "InstallPath", NULL, NULL, (LPBYTE)&installPath,
-                            &installPathSize) == ERROR_SUCCESS)
-        {
-            /* Copy, check it exists and return if it does. */
-            libraryPath.assign(installPath);
-            libraryPath.append(fileName);
-            RegCloseKey(innerKey);
-            RegCloseKey(key);
-            if (TempFile::pathExists(libraryPath.c_str()))
+            if (RegEnumKeyEx(key, cSubKeys - 1, achKey.data(), &cbName, nullptr, nullptr, nullptr,
+                             &ftLastWriteTime) == ERROR_SUCCESS)
             {
-                return errorcode_t::JsSuccess;
+                if (RegOpenKeyEx(key, achKey.data(), 0, KEY_QUERY_VALUE, &innerKey) == ERROR_SUCCESS)
+                {
+
+                    /* If it is found, read the install path. */
+                    if (RegQueryValueEx(innerKey, "InstallPath", nullptr, nullptr, reinterpret_cast<LPBYTE>(installPath.data()),
+                                        &installPathSize) == ERROR_SUCCESS)
+                    {
+                        /* Copy, check it exists and return if it does. */
+                        libraryPath.assign(installPath.data());
+                        libraryPath.append(fileName);
+                        RegCloseKey(innerKey);
+                        RegCloseKey(key);
+                        if (TempFile::pathExists(libraryPath.c_str()))
+                        {
+                            return errorcode_t::JsSuccess;
+                        }
+                    }
+
+                    /* In case we did not obtain the path, for whatever reason, we close the key. */
+                    RegCloseKey(innerKey);
+                }
             }
         }
-
-        /* In case we did not obtain the path, for whatever reason, we close the key. */
-        RegCloseKey(innerKey);
         RegCloseKey(key);
     }
 
@@ -146,7 +151,14 @@ errorcode_t OSFilesFindLibraryByHKey(const HKEY rootKey, std::string &libraryPat
 errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
     // Try to find the DLLs from the path given to OSFilesSetLibrarySearchPath()
-    libraryPath.assign(librarySearchPath);
+    if (pLibrarySearchPath != nullptr)
+    {
+        libraryPath.assign(*pLibrarySearchPath);
+    }
+    else
+    {
+        libraryPath.assign("");
+    }
     libraryPath.append("\\");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -155,6 +167,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     }
 
     // If that fails, try to find the DLLs when installed in the whole machine (for all users)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     errorcode_t retCode = OSFilesFindLibraryByHKey(HKEY_LOCAL_MACHINE, libraryPath, fileName);
     if (retCode == errorcode_t::JsSuccess)
     {
@@ -162,6 +175,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     }
 
     // If that fails, try to find the DLLs when installed for the current user only
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     retCode = OSFilesFindLibraryByHKey(HKEY_CURRENT_USER, libraryPath, fileName);
 
     return retCode;
@@ -169,11 +183,11 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
 std::string TempFile::concatPaths(const std::string &basePath, const std::string &relativePath)
 {
-    char buffer[MAX_PATH] = "";
+    std::vector<char> buffer(MAX_PATH);
 
-    PathCombine(buffer, basePath.c_str(), relativePath.c_str());
+    PathCombine(buffer.data(), basePath.c_str(), relativePath.c_str());
 
-    return std::string(buffer);
+    return std::string(buffer.data());
 }
 
 bool AbstractFile::pathExists(const char *path)
@@ -185,10 +199,10 @@ std::string TempFile::getTempFileName()
 {
     /* Folder name should never be longer than MAX_PATH-14 characters to be compatible with
      * GetTempFileName function. */
-    TCHAR tempFolderPath[MAX_PATH];
-    TCHAR tempFilePath[MAX_PATH];
+    std::vector<char> tempFolderPath(MAX_PATH);
+    std::vector<char> tempFilePath(MAX_PATH);
 
-    DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath);
+    DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath.data());
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {
@@ -196,13 +210,13 @@ std::string TempFile::getTempFileName()
         return std::string();
     }
 
-    if (GetTempFileName(tempFolderPath, TEXT("NRF"), 0, tempFilePath) == 0)
+    if (GetTempFileName(tempFolderPath.data(), TEXT("NRF"), 0, tempFilePath.data()) == 0)
     {
         error = TempCouldNotCreateFile;
         return std::string();
     }
 
-    return std::string(tempFilePath);
+    return std::string(tempFilePath.data());
 }
 
 void TempFile::deleteFile()

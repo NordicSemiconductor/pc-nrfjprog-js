@@ -46,6 +46,6 @@
     }
 
 // Typedef of name to string with enum name, covers most cases
-typedef std::map<uint16_t, const char *> name_map_t;
+using name_map_t = std::map<uint16_t, const char *>;
 
 #endif // COMMON_H

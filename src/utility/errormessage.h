@@ -41,20 +41,20 @@
 #include "DllCommonDefinitions.h"
 #include <nan.h>
 
-#define CUSTOM_ARGUMENT_PARSE_ERROR -1
+#define CUSTOM_ARGUMENT_PARSE_ERROR (-1)
 
 class ErrorMessage
 {
   public:
-    static v8::Local<v8::Value> getErrorMessage(const int errorCode,
+    static v8::Local<v8::Value> getErrorMessage(int errorCode,
                                                 const name_map_t &errorcodeMapper,
                                                 const std::string &customMessage);
-    static v8::Local<v8::Value> getErrorMessage(const int errorCode,
+    static v8::Local<v8::Value> getErrorMessage(int errorCode,
                                                 const name_map_t &errorcodeMapper,
                                                 const std::string &customMessage,
                                                 const std::string &logmessage,
                                                 const nrfjprogdll_err_t &lowlevelError);
-    static v8::Local<v8::String> getTypeErrorMessage(const int argumentNumber,
+    static v8::Local<v8::String> getTypeErrorMessage(int argumentNumber,
                                                      const std::string &message);
     static v8::Local<v8::String> getStructErrorMessage(const std::string &name,
                                                        const std::string &message);

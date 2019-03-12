@@ -102,7 +102,7 @@ std::string TempFile::writeTempFile(const std::string &fileContent)
     }
 
     std::ofstream outputfile;
-    outputfile.open(filePath, std::ios_base::out | std::ios_base::trunc);
+    outputfile.open(filePath, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     outputfile << fileContent;
     outputfile.close();
 

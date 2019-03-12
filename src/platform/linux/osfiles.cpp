@@ -58,11 +58,11 @@ std::string *pLibrarySearchPath = nullptr;
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
     static std::string librarySearchPath;
+    pLibrarySearchPath = &librarySearchPath;
 
     // Parse parameter from the FunctionCallbackInfo received
     if (info.Length() > 0 && info[0]->IsString())
     {
-        pLibrarySearchPath = &librarySearchPath;
         librarySearchPath.assign(Convert::getNativeString(info[0]));
     }
     else
@@ -76,13 +76,11 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
  */
 errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
-    char tempLibraryPath[COMMON_MAX_PATH];
-    char *pTempLibraryPath = static_cast<char *>(tempLibraryPath);
-    memset(pTempLibraryPath, 0, COMMON_MAX_PATH);
+    std::vector<char> tempLibraryPath(COMMON_MAX_PATH, '\0');
 
     // Fetch path of currently running executable
     ssize_t len;
-    len = readlink("/proc/self/exe", pTempLibraryPath, COMMON_MAX_PATH - 1);
+    len = readlink("/proc/self/exe", tempLibraryPath.data(), COMMON_MAX_PATH - 1);
 
     if (len == -1)
     {
@@ -91,7 +89,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    libraryPath.append(dirname(pTempLibraryPath));
+    libraryPath.append(dirname(tempLibraryPath.data());
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -168,12 +166,11 @@ std::string TempFile::getTempFileName()
 {
     std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
-    char tempFileName[COMMON_MAX_PATH];
-    char *pTempFileName = static_cast<char *>(tempFileName);
+    std::vector<char> tempFileName(COMMON_MAX_PATH, '\0');
 
-    strncpy(pTempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
+    strncpy(tempFileName.data(), tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(pTempFileName, 4);
+    int temp_file = mkstemps(tempFileName.data(), 4);
 
     if (temp_file == -1)
     {
@@ -184,7 +181,7 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(pTempFileName);
+    return std::string(tempFileName.data());
 }
 
 void TempFile::deleteFile()

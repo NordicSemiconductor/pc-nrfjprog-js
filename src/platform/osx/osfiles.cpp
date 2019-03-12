@@ -51,10 +51,13 @@
 
 #include <libproc.h> // proc pidpathinfo maxsize
 
-std::string librarySearchPath;
+std::string *pLibrarySearchPath = nullptr;
 
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
+    static std::string librarySearchPath;
+    pLibrarySearchPath = &librarySearchPath;
+
     // Parse parameter from the FunctionCallbackInfo received
     if (info.Length() > 0 && info[0]->IsString())
     {
@@ -93,7 +96,14 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     }
 
     // Try the path specified from calling OSFilesSetLibrarySearchPath
-    libraryPath.assign(librarySearchPath);
+    if (pLibrarySearchPath != nullptr)
+    {
+        libraryPath.assign(*pLibrarySearchPath);
+    }
+    else
+    {
+        libraryPath.assign("");
+    }
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -152,11 +162,11 @@ std::string TempFile::getTempFileName()
 {
     std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
-    char tempFileName[COMMON_MAX_PATH];
+    std::vector<char> tempFileName(COMMON_MAX_PATH, '\0');
 
-    strncpy(tempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
+    strncpy(tempFileName.data(), tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(tempFileName, 4);
+    int temp_file = mkstemps(tempFileName.data(), 4);
 
     if (temp_file == -1)
     {
@@ -167,7 +177,7 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(tempFileName);
+    return std::string(tempFileName.data());
 }
 
 void TempFile::deleteFile()

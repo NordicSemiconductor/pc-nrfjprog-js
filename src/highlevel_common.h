@@ -40,9 +40,9 @@
 #include "DllCommonDefinitions.h"
 #include "common.h"
 
-typedef enum { INPUT_FORMAT_HEX_FILE, INPUT_FORMAT_HEX_STRING } input_format_t;
+using input_format_t = enum { INPUT_FORMAT_HEX_FILE, INPUT_FORMAT_HEX_STRING };
 
-typedef enum {
+using errorcode_t = enum {
     JsSuccess,
     CouldNotFindJlinkDLL,
     CouldNotFindJprogDLL,
@@ -58,9 +58,9 @@ typedef enum {
     CouldNotRead,
     CouldNotOpenHexFile,
     CouldNotExecuteDueToLoad
-} errorcode_t;
+};
 
-typedef enum RTTErrorcodes {
+using RTTErrorcodes_t = enum RTTErrorcodes {
     RTTSuccess,
     RTTCouldNotLoadHighlevelLibrary,
     RTTCouldNotOpenHighlevelLibrary,
@@ -74,7 +74,7 @@ typedef enum RTTErrorcodes {
     RTTCouldNotCallFunction,
     RTTNotInitialized,
     RTTCouldNotExecuteDueToLoad
-} RTTErrorcodes_t;
+};
 
 static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::JsSuccess, "Success"},

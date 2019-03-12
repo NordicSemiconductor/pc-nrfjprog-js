@@ -454,80 +454,80 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
 
 void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
 {
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1);
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2);
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3);
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3);
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);
-    NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);
-    NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR1);
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR2);
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3);
-    NODE_DEFINE_CONSTANT(target, NRF51_L3);
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);
-    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);
-    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV2);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_FUTURE);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV2);
-    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE);
-    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);
-    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGB);
-    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV1);
-    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE);
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1);
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE);
-    NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA);
-    NODE_DEFINE_CONSTANT(target, NRF52_FP2_FUTURE);
-    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FP1);
-    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE);
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR2); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51_L3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR3P); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV2); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_REV2); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52832_xxAB_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGB); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FP2_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FP1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);
-    NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);
-    NODE_DEFINE_CONSTANT(target, NRF91_FAMILY);
-    NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY);
+    NODE_DEFINE_CONSTANT(target, NRF51_FAMILY); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52_FAMILY); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF91_FAMILY); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, ERASE_NONE);
-    NODE_DEFINE_CONSTANT(target, ERASE_ALL);
-    NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
-    NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
+    NODE_DEFINE_CONSTANT(target, ERASE_NONE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ERASE_ALL); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, JsSuccess);
-    NODE_DEFINE_CONSTANT(target, CouldNotFindJlinkDLL);
-    NODE_DEFINE_CONSTANT(target, CouldNotFindJprogDLL);
-    NODE_DEFINE_CONSTANT(target, CouldNotLoadDLL);
-    NODE_DEFINE_CONSTANT(target, CouldNotOpenDevice);
-    NODE_DEFINE_CONSTANT(target, CouldNotOpenDLL);
-    NODE_DEFINE_CONSTANT(target, CouldNotConnectToDevice);
-    NODE_DEFINE_CONSTANT(target, CouldNotCallFunction);
-    NODE_DEFINE_CONSTANT(target, CouldNotErase);
-    NODE_DEFINE_CONSTANT(target, CouldNotProgram);
-    NODE_DEFINE_CONSTANT(target, CouldNotRead);
-    NODE_DEFINE_CONSTANT(target, CouldNotOpenHexFile);
+    NODE_DEFINE_CONSTANT(target, JsSuccess); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotFindJlinkDLL); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotFindJprogDLL); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotLoadDLL); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotOpenDevice); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotOpenDLL); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotConnectToDevice); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotCallFunction); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotErase); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotProgram); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotRead); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, CouldNotOpenHexFile); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, RESET_NONE);
-    NODE_DEFINE_CONSTANT(target, RESET_SYSTEM);
-    NODE_DEFINE_CONSTANT(target, RESET_DEBUG);
-    NODE_DEFINE_CONSTANT(target, RESET_PIN);
+    NODE_DEFINE_CONSTANT(target, RESET_NONE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, RESET_SYSTEM); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, RESET_DEBUG); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, RESET_PIN); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, ERASE_NONE);
-    NODE_DEFINE_CONSTANT(target, ERASE_ALL);
-    NODE_DEFINE_CONSTANT(target, ERASE_PAGES);
-    NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR);
+    NODE_DEFINE_CONSTANT(target, ERASE_NONE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ERASE_ALL); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ERASE_PAGES_INCLUDING_UICR); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, VERIFY_NONE);
-    NODE_DEFINE_CONSTANT(target, VERIFY_READ);
+    NODE_DEFINE_CONSTANT(target, VERIFY_NONE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, VERIFY_READ); // NOLINT(hicpp-signed-bitwise)
 
-    NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_FILE);
-    NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_STRING);
+    NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_FILE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, INPUT_FORMAT_HEX_STRING); // NOLINT(hicpp-signed-bitwise)
 }
 
 NAN_METHOD(HighLevel::GetLibraryVersion)
