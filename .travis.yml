@@ -4,7 +4,6 @@ branches:
     - /^v?[0-9]/
 
 language: cpp
-compiler: gcc
 
 filter_secrets: false
 
