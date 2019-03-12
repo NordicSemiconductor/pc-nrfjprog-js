@@ -78,6 +78,10 @@ before_install:
   fi
 
 script:
+- echo $PATH
+- env | grep VC
+- which cl.exe
+- which rc.exe
 - npm install --build-from-source
 - npm run package-prebuilt
 - echo tag=$TRAVIS_TAG pullrequest=$TRAVIS_PULL_REQUEST
