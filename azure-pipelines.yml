@@ -1,6 +1,6 @@
 trigger:
 - master
-- test-fetch-draft
+- test-azure
 
 jobs:
   - job: Build
