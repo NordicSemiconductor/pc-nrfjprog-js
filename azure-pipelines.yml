@@ -193,3 +193,4 @@ jobs:
         urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(System.PullRequest.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
         waitForCompletion: 'true'
       condition: eq(variables['Build.Reason'], 'PullRequest')
+
