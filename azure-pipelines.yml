@@ -124,11 +124,11 @@ jobs:
       displayName: 'Install Node.js $(node_version) 32-bit'
     - bash: |
         apt-get install ninja-build
-      condition: and(contains(variables['image_name'], 'linux'))
+      condition: contains(variables['image_name'], 'linux')
       displayName: 'Install ninja on Linux'
     - bash: |
         brew install ninja
-      condition: and(contains(variables['image_name'], 'mac'))
+      condition: contains(variables['image_name'], 'mac')
       displayName: 'Install ninja on macOS'
     - bash: |
         node -v
