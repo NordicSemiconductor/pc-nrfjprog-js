@@ -4,7 +4,6 @@ branches:
     - /^v?[0-9]/
 
 language: cpp
-compiler: gcc
 
 filter_secrets: false
 
@@ -15,10 +14,10 @@ os:
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-6
+    sources: ubuntu-toolchain-r-test
+    packages: g++-6 ninja-build
+  homebrew:
+    packages: ninja
 
 env:
   global:

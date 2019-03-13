@@ -44,6 +44,7 @@ function build(debug, target)
     const runtime = npm_config_runtime || 'node';
     const runtimeVersion = npm_config_target || process.version.substr(1);
     const arch = npm_config_arch || (process.plaform == 'win32' ? os.arch() : undefined);
+    const generator = 'Ninja';
 
     const options = {
         runtime,
@@ -52,9 +53,10 @@ function build(debug, target)
         debug,
         preferGnu: true,
         target,
+        generator,
     };
 
-    if (process.platform === 'win32') {
+    if (process.platform === 'win32' && target !== 'tidy') {
         if (process.arch === 'ia32') {
             options.generator = 'Visual Studio 15 2017';
         } else if (process.arch === 'x64') {

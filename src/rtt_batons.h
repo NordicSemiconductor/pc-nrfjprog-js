@@ -37,22 +37,23 @@
 #ifndef RTT_BATONS_H
 #define RTT_BATONS_H
 
+#include "rtt.h"
+#include "rtt_helpers.h"
 #include <memory>
 #include <sstream>
 #include <string>
-#include "rtt.h"
-#include "rtt_helpers.h"
 
-class RTTBaton {
-public:
-    explicit RTTBaton(const std::string _name, const uint32_t _returnParameterCount) :
-        returnParameterCount(_returnParameterCount),
-        name(_name),
-        result(JsSuccess),
-        lowlevelError(SUCCESS)
+class RTTBaton
+{
+  public:
+    explicit RTTBaton(const std::string _name, const uint32_t _returnParameterCount)
+        : returnParameterCount(_returnParameterCount)
+        , name(_name)
+        , result(JsSuccess)
+        , lowlevelError(SUCCESS)
     {
-        req = std::make_unique<uv_work_t>();
-        req->data = static_cast<void*>(this);
+        req       = std::make_unique<uv_work_t>();
+        req->data = static_cast<void *>(this);
     }
 
     virtual ~RTTBaton()
@@ -92,8 +93,10 @@ std::timed_mutex RTTBaton::executionMutex;
 
 class RTTStartBaton : public RTTBaton
 {
-public:
-    RTTStartBaton() : RTTBaton("start rtt", 2) {}
+  public:
+    RTTStartBaton()
+        : RTTBaton("start rtt", 2)
+    {}
     std::string toString()
     {
         std::stringstream stream;
@@ -120,8 +123,10 @@ public:
 
 class RTTStopBaton : public RTTBaton
 {
-public:
-    RTTStopBaton() : RTTBaton("stop rtt", 0) {}
+  public:
+    RTTStopBaton()
+        : RTTBaton("stop rtt", 0)
+    {}
     std::string toString()
     {
         std::stringstream stream;
@@ -134,8 +139,10 @@ public:
 
 class RTTReadBaton : public RTTBaton
 {
-public:
-    RTTReadBaton() : RTTBaton("rtt read", 3) {}
+  public:
+    RTTReadBaton()
+        : RTTBaton("rtt read", 3)
+    {}
     std::string toString()
     {
         std::stringstream stream;
@@ -154,8 +161,10 @@ public:
 
 class RTTWriteBaton : public RTTBaton
 {
-public:
-    RTTWriteBaton() : RTTBaton("rtt write", 2) {}
+  public:
+    RTTWriteBaton()
+        : RTTBaton("rtt write", 2)
+    {}
     std::string toString()
     {
         std::stringstream stream;
@@ -172,6 +181,5 @@ public:
     uint32_t length;
     std::vector<char> data;
 };
-
 
 #endif

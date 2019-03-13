@@ -37,8 +37,7 @@
 #ifndef LIBRARYLOADER_PLATFORM_H
 #define LIBRARYLOADER_PLATFORM_H
 
-
-typedef void * LoadedFunctionType;
-typedef void * LibraryHandleType;
+typedef void *LoadedFunctionType;
+typedef void *LibraryHandleType;
 
 #endif

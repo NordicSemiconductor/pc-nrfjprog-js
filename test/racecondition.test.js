@@ -71,7 +71,7 @@ describe('Handles race conditions gracefully', () => {
             }
         };
 
-        for(let i = 0; i < getVersionAttempts; i++) {
+        for (let i = 0; i < getVersionAttempts; i++) {
             nRFjprog.getLibraryVersion(getVersionCallback);
         }
     });
@@ -94,7 +94,7 @@ describe('Handles race conditions gracefully', () => {
             }
         };
 
-        for(let i = 0; i < programAttempts; i++) {
+        for (let i = 0; i < programAttempts; i++) {
             nRFjprog.program(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, programCallback);
         }
     });
