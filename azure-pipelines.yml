@@ -1,7 +1,6 @@
 trigger:
 - master
 - release/*
-- test-azure
 
 jobs:
   - job: Build
@@ -181,5 +180,5 @@ jobs:
         connectionType: 'connectedServiceName' # Options: connectedServiceName, connectedServiceNameARM
         serviceConnection: 'waylandJenkins' # Required when connectionType == ConnectedServiceName
         method: 'POST' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
-        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceBranchName)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
+        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceVersion)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
         waitForCompletion: 'true' # Options: true, false
