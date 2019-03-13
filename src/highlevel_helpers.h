@@ -37,20 +37,24 @@
 #ifndef HIGHLEVEL_HELPERS_H
 #define HIGHLEVEL_HELPERS_H
 
-#include <nan.h>
-#include "highlevelnrfjprogdll.h"
 #include "highlevel_common.h"
+#include "highlevelnrfjprogdll.h"
+#include <nan.h>
 
 class ProbeDetails
 {
-public:
-    ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info, library_info_t _library_info) :
-        serial_number(_serial_number), device_info(_device_info), probe_info(_probe_info), library_info(_library_info)
+  public:
+    ProbeDetails(uint32_t _serial_number, device_info_t _device_info, probe_info_t _probe_info,
+                 library_info_t _library_info)
+        : serial_number(_serial_number)
+        , device_info(_device_info)
+        , probe_info(_probe_info)
+        , library_info(_library_info)
     {}
 
     v8::Local<v8::Object> ToJs();
 
-private:
+  private:
     const uint32_t serial_number;
     const device_info_t device_info;
     const probe_info_t probe_info;
@@ -60,10 +64,9 @@ private:
 class ProbeInfo
 {
   public:
-    ProbeInfo(probe_info_t _probe_info) :
-        probe_info(_probe_info)
-    {
-    }
+    ProbeInfo(probe_info_t _probe_info)
+        : probe_info(_probe_info)
+    {}
 
     v8::Local<v8::Object> ToJs();
 
@@ -73,33 +76,33 @@ class ProbeInfo
 
 class DeviceInfo
 {
-public:
-    DeviceInfo(device_info_t _device_info) :
-        device_info(_device_info)
+  public:
+    DeviceInfo(device_info_t _device_info)
+        : device_info(_device_info)
     {}
 
     v8::Local<v8::Object> ToJs();
 
-private:
+  private:
     const device_info_t device_info;
 };
 
 class LibraryInfo
 {
-public:
-    LibraryInfo(library_info_t _library_info) :
-        library_info(_library_info)
+  public:
+    LibraryInfo(library_info_t _library_info)
+        : library_info(_library_info)
     {}
 
     v8::Local<v8::Object> ToJs();
 
-private:
+  private:
     const library_info_t library_info;
 };
 
 class EraseOptions
 {
-public:
+  public:
     EraseOptions(v8::Local<v8::Object> obj);
 
     erase_action_t eraseMode;
@@ -109,7 +112,7 @@ public:
 
 class ReadToFileOptions
 {
-public:
+  public:
     ReadToFileOptions(v8::Local<v8::Object> obj);
 
     read_options_t options;
@@ -117,7 +120,7 @@ public:
 
 class ProgramOptions
 {
-public:
+  public:
     ProgramOptions(v8::Local<v8::Object> obj);
 
     program_options_t options;
@@ -126,7 +129,7 @@ public:
 
 class VerifyOptions
 {
-public:
+  public:
     VerifyOptions(v8::Local<v8::Object> obj);
 };
 

@@ -36,15 +36,15 @@
 
 #include "osfiles.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 void OSFilesInit(v8::Local<v8::Object> target)
 {
     Nan::SetMethod(target, "setLibrarySearchPath", OSFilesSetLibrarySearchPath);
 }
 
-FileFormatHandler::FileFormatHandler(std::string fileinfo, input_format_t inputFormat)
+FileFormatHandler::FileFormatHandler(const std::string &fileinfo, input_format_t inputFormat)
 {
     if (inputFormat == INPUT_FORMAT_HEX_STRING)
     {
@@ -81,8 +81,8 @@ bool AbstractFile::pathExists(const std::string &path)
     return pathExists(path.c_str());
 }
 
-TempFile::TempFile(std::string fileContent) :
-    AbstractFile()
+TempFile::TempFile(const std::string &fileContent)
+    : error(TempNoError)
 {
     filename = writeTempFile(fileContent);
 }
@@ -92,7 +92,7 @@ TempFile::~TempFile()
     deleteFile();
 }
 
-std::string TempFile::writeTempFile(std::string fileContent)
+std::string TempFile::writeTempFile(const std::string &fileContent)
 {
     std::string filePath = getTempFileName();
 
@@ -102,7 +102,7 @@ std::string TempFile::writeTempFile(std::string fileContent)
     }
 
     std::ofstream outputfile;
-    outputfile.open(filePath);
+    outputfile.open(filePath, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
     outputfile << fileContent;
     outputfile.close();
 
@@ -113,20 +113,20 @@ std::string TempFile::errormessage()
 {
     switch (error)
     {
-        default:
-        case TempNoError:
-            return "No error";
         case TempPathNotFound:
             return "Could not find a location to store the temp file";
         case TempCouldNotCreateFile:
             return "Could not create the temporary file";
+        case TempNoError:
+        default:
+            break;
     }
+    return "No error";
 }
 
-LocalFile::LocalFile(std::string _filename) :
-    AbstractFile()
+LocalFile::LocalFile(const std::string &fileName)
 {
-    filename = _filename;
+    filename = fileName;
 }
 
 std::string LocalFile::errormessage()

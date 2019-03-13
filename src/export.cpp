@@ -36,20 +36,20 @@
 #ifndef EXPORT_H
 #define EXPORT_H
 
-#include <nan.h>
 #include "highlevel.h"
-#include "rtt.h"
 #include "osfiles.h"
+#include "rtt.h"
+#include <nan.h>
 
 extern "C" {
-    NAN_MODULE_INIT(init)
-    {
-        OSFilesInit(target);
-        HighLevel::initConsts(target);
-        RTT::initConsts(target);
-        HighLevel::Init(target);
-        RTT::Init(target);
-    }
+NAN_MODULE_INIT(init)
+{
+    OSFilesInit(target);
+    HighLevel::initConsts(target);
+    RTT::initConsts(target);
+    HighLevel::Init(target);
+    RTT::Init(target);
+}
 };
 
 NODE_MODULE(pc_nrfjprog, init);

@@ -36,8 +36,8 @@
 
 #include "rtt_helpers.h"
 
-#include "utility/utility.h"
 #include "utility/conversion.h"
+#include "utility/utility.h"
 
 v8::Local<v8::Object> ChannelInfo::ToJs()
 {
@@ -59,6 +59,6 @@ StartOptions::StartOptions(v8::Local<v8::Object> obj)
     if (Utility::Has(obj, "controlBlockLocation"))
     {
         hasControlBlockLocation = true;
-        controlBlockLocation = Convert::getNativeUint32(obj, "controlBlockLocation");
+        controlBlockLocation    = Convert::getNativeUint32(obj, "controlBlockLocation");
     }
 }
