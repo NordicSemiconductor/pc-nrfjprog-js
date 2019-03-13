@@ -37,23 +37,25 @@
 #ifndef NRFJPROG_BATONS_H
 #define NRFJPROG_BATONS_H
 
-#include <memory>
 #include "highlevel.h"
-#include "highlevel_helpers.h"
 #include "highlevel_common.h"
+#include "highlevel_helpers.h"
+#include <memory>
 
-class Baton {
-public:
-    explicit Baton(const std::string _name, const uint32_t _returnParameterCount, const bool _mayHaveProgressCallback) :
-        returnParameterCount(_returnParameterCount),
-        name(_name),
-        mayHaveProgressCallback(_mayHaveProgressCallback),
-        serialNumber(0),
-        result(JsSuccess),
-        lowlevelError(SUCCESS)
+class Baton
+{
+  public:
+    explicit Baton(const std::string _name, const uint32_t _returnParameterCount,
+                   const bool _mayHaveProgressCallback)
+        : returnParameterCount(_returnParameterCount)
+        , name(_name)
+        , mayHaveProgressCallback(_mayHaveProgressCallback)
+        , serialNumber(0)
+        , result(JsSuccess)
+        , lowlevelError(SUCCESS)
     {
-        req = std::make_unique<uv_work_t>();
-        req->data = static_cast<void*>(this);
+        req       = std::make_unique<uv_work_t>();
+        req->data = static_cast<void *>(this);
     }
 
     virtual ~Baton()
@@ -83,8 +85,10 @@ std::timed_mutex Baton::executionMutex;
 
 class GetLibraryVersionBaton : public Baton
 {
-public:
-    GetLibraryVersionBaton() : Baton("get library version", 1, false) {}
+  public:
+    GetLibraryVersionBaton()
+        : Baton("get library version", 1, false)
+    {}
     uint32_t major;
     uint32_t minor;
     uint32_t revision;
@@ -92,52 +96,66 @@ public:
 
 class GetConnectedDevicesBaton : public Baton
 {
-public:
-    GetConnectedDevicesBaton() : Baton("get connected devices", 1, false) {}
+  public:
+    GetConnectedDevicesBaton()
+        : Baton("get connected devices", 1, false)
+    {}
     std::vector<std::unique_ptr<ProbeDetails>> probes;
 };
 
 class GetSerialNumbersBaton : public Baton
 {
-public:
-    GetSerialNumbersBaton() : Baton("get serial numbers", 1, false) {}
+  public:
+    GetSerialNumbersBaton()
+        : Baton("get serial numbers", 1, false)
+    {}
     std::vector<uint32_t> serialNumbers;
 };
 
 class GetDeviceInfoBaton : public Baton
 {
-public:
-    GetDeviceInfoBaton() : Baton("get device info", 1, false) {}
+  public:
+    GetDeviceInfoBaton()
+        : Baton("get device info", 1, false)
+    {}
     uint32_t serialNumber;
     device_info_t deviceInfo;
 };
 
 class GetProbeInfoBaton : public Baton
 {
-public:
-    GetProbeInfoBaton() : Baton("get probe info", 1, false) {}
+  public:
+    GetProbeInfoBaton()
+        : Baton("get probe info", 1, false)
+    {}
     probe_info_t probeInfo;
 };
 
 class GetLibraryInfoBaton : public Baton
 {
-public:
-    GetLibraryInfoBaton() : Baton("get library info", 1, false) {}
+  public:
+    GetLibraryInfoBaton()
+        : Baton("get library info", 1, false)
+    {}
     library_info_t libraryInfo;
 };
 
 class GetDeviceVersionBaton : public Baton
 {
-public:
-    GetDeviceVersionBaton() : Baton("get device version", 1, false) {}
+  public:
+    GetDeviceVersionBaton()
+        : Baton("get device version", 1, false)
+    {}
     uint32_t serialNumber;
     device_version_t deviceVersion;
 };
 
 class ReadBaton : public Baton
 {
-public:
-    ReadBaton() : Baton("read", 1, false) {}
+  public:
+    ReadBaton()
+        : Baton("read", 1, false)
+    {}
 
     uint32_t address;
     uint32_t length;
@@ -146,8 +164,10 @@ public:
 
 class ReadU32Baton : public Baton
 {
-public:
-    ReadU32Baton() : Baton("read u32", 1, false) {}
+  public:
+    ReadU32Baton()
+        : Baton("read u32", 1, false)
+    {}
     uint32_t address;
     uint32_t length;
     uint32_t data;
@@ -155,8 +175,10 @@ public:
 
 class ProgramBaton : public Baton
 {
-public:
-    ProgramBaton() : Baton("program", 0, true) {}
+  public:
+    ProgramBaton()
+        : Baton("program", 0, true)
+    {}
     std::string file;
     std::string filename;
     program_options_t options;
@@ -165,23 +187,29 @@ public:
 
 class VerifyBaton : public Baton
 {
-public:
-    VerifyBaton() : Baton("verify", 0, true) {}
+  public:
+    VerifyBaton()
+        : Baton("verify", 0, true)
+    {}
     std::string filename;
 };
 
 class ReadToFileBaton : public Baton
 {
-public:
-    ReadToFileBaton() : Baton("read to file", 0, true) {}
+  public:
+    ReadToFileBaton()
+        : Baton("read to file", 0, true)
+    {}
     std::string filename;
     read_options_t options;
 };
 
 class EraseBaton : public Baton
 {
-public:
-    EraseBaton() : Baton("erase", 0, true) {}
+  public:
+    EraseBaton()
+        : Baton("erase", 0, true)
+    {}
     erase_action_t erase_mode;
     uint32_t start_address;
     uint32_t end_address;
@@ -189,14 +217,18 @@ public:
 
 class RecoverBaton : public Baton
 {
-public:
-    RecoverBaton() : Baton("recover", 0, true) {}
+  public:
+    RecoverBaton()
+        : Baton("recover", 0, true)
+    {}
 };
 
 class WriteBaton : public Baton
 {
-public:
-    WriteBaton() : Baton("write", 0, false) {}
+  public:
+    WriteBaton()
+        : Baton("write", 0, false)
+    {}
     uint32_t address;
     std::vector<uint8_t> data;
     uint32_t length;
@@ -204,22 +236,28 @@ public:
 
 class WriteU32Baton : public Baton
 {
-public:
-    WriteU32Baton() : Baton("write u32", 0, false) {}
+  public:
+    WriteU32Baton()
+        : Baton("write u32", 0, false)
+    {}
     uint32_t address;
     uint32_t data;
 };
 
 class OpenBaton : public Baton
 {
-public:
-    OpenBaton() : Baton("open device long term", 0, false) {}
+  public:
+    OpenBaton()
+        : Baton("open device long term", 0, false)
+    {}
 };
 
 class CloseBaton : public Baton
 {
-public:
-    CloseBaton() : Baton("close opened device", 0, false) {}
+  public:
+    CloseBaton()
+        : Baton("close opened device", 0, false)
+    {}
 };
 
 #endif

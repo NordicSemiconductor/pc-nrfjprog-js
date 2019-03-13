@@ -39,40 +39,45 @@
 
 #include <nan.h>
 
-#include <sys/stat.h>
-#include <string.h>
-#include <libgen.h>
 #include <dlfcn.h>
+#include <libgen.h>
+#include <string.h>
+#include <sys/stat.h>
 
-#include <sys/types.h>
 #include <dirent.h>
+#include <sys/types.h>
 
 #include <unistd.h>
 
-#include <libproc.h>  // proc pidpathinfo maxsize
+#include <libproc.h> // proc pidpathinfo maxsize
 
-std::string librarySearchPath;
+std::string *pLibrarySearchPath = nullptr;
 
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
+    static std::string librarySearchPath;
+    pLibrarySearchPath = &librarySearchPath;
+
     // Parse parameter from the FunctionCallbackInfo received
-    if (info.Length() > 0 && info[0]->IsString()) {
+    if (info.Length() > 0 && info[0]->IsString())
+    {
         librarySearchPath.assign(Convert::getNativeString(info[0]));
-    } else {
+    }
+    else
+    {
         Nan::ThrowError(Nan::New("Expected string as the first argument").ToLocalChecked());
     }
 }
 
-
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
     int ret;
     pid_t pid;
-    char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+    std::vector<char> pathbuf(PROC_PIDPATHINFO_MAXSIZE, '\0');
 
     // Fetch path of currently running executable
     pid = getpid();
-    ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
+    ret = proc_pidpath(pid, pathbuf.data(), PROC_PIDPATHINFO_MAXSIZE - 1);
 
     if (ret <= 0)
     {
@@ -82,7 +87,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 
     // If there is a file with the requested fileName in the same path as the
     // current node.js (or electron) executable, use that.
-    libraryPath.append(dirname(pathbuf));
+    libraryPath.append(dirname(pathbuf.data()));
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -91,7 +96,14 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     }
 
     // Try the path specified from calling OSFilesSetLibrarySearchPath
-    libraryPath.assign(librarySearchPath);
+    if (pLibrarySearchPath != nullptr)
+    {
+        libraryPath.assign(*pLibrarySearchPath);
+    }
+    else
+    {
+        libraryPath.assign("");
+    }
     libraryPath.append("/");
     libraryPath.append(fileName);
     if (AbstractFile::pathExists(libraryPath))
@@ -101,7 +113,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
 
     // Last recourse, try loading the library through dlopen().
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
-    void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+    void *libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
     if (libraryHandle)
     {
@@ -111,33 +123,28 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName)
     }
 
     return errorcode_t::CouldNotFindJprogDLL;
-
 }
 
-std::string TempFile::concatPaths(std::string basePath, std::string relativePath)
+std::string TempFile::concatPaths(const std::string &basePath, const std::string &relativePath)
 {
     return basePath + '/' + relativePath;
 }
 
-bool AbstractFile::pathExists(const char * path)
+bool AbstractFile::pathExists(const char *path)
 {
     struct stat buffer;
     return ((0 == stat(path, &buffer)));
 }
 
-/* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are valid, "/tmp" is returned. */
+/* Return the temp folder found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are
+ * valid, "/tmp" is returned. */
 std::string OSFilesGetTempFolderPath(void)
 {
-    std::string tempKeys[4] = {
-        "TMPDIR",
-        "TMP",
-        "TEMP",
-        "TEMPDIR"
-    };
+    std::string tempKeys[4] = {"TMPDIR", "TMP", "TEMP", "TEMPDIR"};
 
     for (uint32_t i = 0; i < 4; i++)
     {
-        char * val = getenv(tempKeys[i].c_str());
+        char *val = getenv(tempKeys[i].c_str());
 
         if (val != NULL)
         {
@@ -149,16 +156,17 @@ std::string OSFilesGetTempFolderPath(void)
 }
 
 /* Return a valid, unique file name in the temp folder.
- * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found, "/tmp" is used. */
+ * The temp folder is found by checking TMPDIR, TMP, TEMP, or TEMPDIR. If none of these are found,
+ * "/tmp" is used. */
 std::string TempFile::getTempFileName()
 {
     std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
 
-    char tempFileName[COMMON_MAX_PATH];
+    std::vector<char> tempFileName(COMMON_MAX_PATH, '\0');
 
-    strncpy(tempFileName, tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
+    strncpy(tempFileName.data(), tempFileNameTemplate.c_str(), COMMON_MAX_PATH);
 
-    int temp_file = mkstemps(tempFileName, 4);
+    int temp_file = mkstemps(tempFileName.data(), 4);
 
     if (temp_file == -1)
     {
@@ -169,9 +177,8 @@ std::string TempFile::getTempFileName()
     /* mkstemps returns an opened file descriptor. */
     close(temp_file);
 
-    return std::string(tempFileName);
+    return std::string(tempFileName.data());
 }
-
 
 void TempFile::deleteFile()
 {

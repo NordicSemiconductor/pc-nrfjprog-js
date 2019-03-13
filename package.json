@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node build.js",
+    "tidy": "node build.js --target tidy",
     "lint": "jshint api/ test/ && jscs api/ test/",
     "clean-prebuilt": "node-pre-gyp clean",
     "package-prebuilt": "node-pre-gyp package",
@@ -38,20 +39,20 @@
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "axios": "^0.18.0",
-    "bindings": "^1.2.1",
-    "chalk": "^2.3.0",
-    "cmake-js": "^5.0.1",
+    "bindings": "^1.5.0",
+    "chalk": "^2.4.2",
+    "cmake-js": "^5.1.0",
     "nan": "2.12.1",
     "node-pre-gyp": "^0.12.0",
     "sander": "^0.6.0",
-    "semver": "^5.5.0",
-    "tar": "^4.3.3"
+    "semver": "^5.6.0",
+    "tar": "^4.4.8"
   },
   "devDependencies": {
-    "gh-pages": "^1.0.0",
-    "jest": "^19.0.2",
+    "gh-pages": "^2.0.1",
+    "jest": "^24.1.0",
     "jest-bamboo-formatter": "1.0.1",
-    "jsdoc": "^3.5.4",
+    "jsdoc": "^3.5.5",
     "minami": "^1.2.3",
     "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#master",
     "node-pre-gyp-github": "1.4.3"

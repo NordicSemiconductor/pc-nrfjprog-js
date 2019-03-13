@@ -43,21 +43,25 @@
 
 #include <nan.h>
 
-#define COMMON_MAX_PATH  (4096)   /* Arbitrarily selected MAX_PATH for every platform. */
-#define COMMON_MAX_COMMAND_LINE  (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit for windows: http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
+#define COMMON_MAX_PATH (4096) /* Arbitrarily selected MAX_PATH for every platform. */
+#define COMMON_MAX_COMMAND_LINE                                                                    \
+    (8191) /* Arbitrarily selected MAX_COMMAND_LINE_LENGTH for every platform, according to limit  \
+              \                                                                                    \
+              for windows: \                                                                                                 \
+              http://stackoverflow.com/questions/3205027/maximum-length-of-command-line-string. */
 #define COMMON_MAX_INI_LINE (1024)
 
-void OSFilesInit(v8::Local<v8::Object> tpl);
+void OSFilesInit(v8::Local<v8::Object> target);
 
 NAN_METHOD(OSFilesSetLibrarySearchPath);
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, std::string &fileName);
+errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName);
 std::string getHighLevelLibraryName();
 std::string getnrfjprogLibraryName();
 
 class AbstractFile
 {
-public:
-    virtual ~AbstractFile() {};
+  public:
+    virtual ~AbstractFile(){};
 
     std::string getFileName();
     virtual std::string errormessage() = 0;
@@ -65,47 +69,43 @@ public:
     static bool pathExists(const std::string &path);
     static bool pathExists(const char *path);
 
-protected:
+  protected:
     std::string filename;
 };
 
 class LocalFile : public AbstractFile
 {
-public:
-    LocalFile(std::string filename);
+  public:
+    LocalFile(const std::string &fileName);
     virtual std::string errormessage() override;
 };
 
 class TempFile : public AbstractFile
 {
-public:
-    TempFile(std::string fileContent);
+  public:
+    TempFile(const std::string &fileContent);
     virtual ~TempFile() override;
     virtual std::string errormessage() override;
 
-private:
-    std::string writeTempFile(std::string fileContent);
+  private:
+    std::string writeTempFile(const std::string &fileContent);
     std::string getTempFileName();
     void deleteFile();
-    std::string concatPaths(std::string basePath, std::string relativePath);
+    std::string concatPaths(const std::string &basePath, const std::string &relativePath);
 
-    enum TempFileErrorcode {
-        TempNoError,
-        TempPathNotFound,
-        TempCouldNotCreateFile
-    } error;
+    enum TempFileErrorcode { TempNoError, TempPathNotFound, TempCouldNotCreateFile } error;
 };
 
 class FileFormatHandler
 {
-public:
-    FileFormatHandler(std::string fileinfo, input_format_t inputFormat);
+  public:
+    FileFormatHandler(const std::string &fileinfo, input_format_t inputFormat);
 
     std::string getFileName();
     bool exists();
     std::string errormessage();
 
-private:
+  private:
     std::unique_ptr<AbstractFile> file;
 };
 
