@@ -176,7 +176,7 @@ jobs:
     pool: server
     steps:
     - task: InvokeRESTAPI@1
-      name: Test
+      displayName: Test pull request
       inputs:
         connectionType: 'connectedServiceName'
         serviceConnection: 'waylandJenkins'
@@ -185,7 +185,7 @@ jobs:
         waitForCompletion: 'true'
       condition: ne(variables['Build.Reason'], 'PullRequest')
     - task: InvokeRESTAPI@1
-      name: Test
+      displayName: Test
       inputs:
         connectionType: 'connectedServiceName'
         serviceConnection: 'waylandJenkins'
