@@ -158,6 +158,7 @@ jobs:
         assetUploadMode: 'replace'
         isDraft: 'true'
         addChangeLog: 'false'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
 
   - job: Test
     dependsOn: [
@@ -176,7 +177,7 @@ jobs:
     pool: server
     steps:
     - task: InvokeRESTAPI@1
-      displayName: Test pull request
+      displayName: Test
       inputs:
         connectionType: 'connectedServiceName'
         serviceConnection: 'waylandJenkins'
@@ -184,13 +185,3 @@ jobs:
         urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
         waitForCompletion: 'true'
       condition: ne(variables['Build.Reason'], 'PullRequest')
-    - task: InvokeRESTAPI@1
-      displayName: Test
-      inputs:
-        connectionType: 'connectedServiceName'
-        serviceConnection: 'waylandJenkins'
-        method: 'POST'
-        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(System.PullRequest.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
-        waitForCompletion: 'true'
-      condition: eq(variables['Build.Reason'], 'PullRequest')
-
