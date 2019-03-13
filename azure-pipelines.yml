@@ -1,6 +1,7 @@
 trigger:
 - master
 - release/*
+- test-azure
 
 jobs:
   - job: Build
@@ -177,8 +178,18 @@ jobs:
     - task: InvokeRESTAPI@1
       name: Test
       inputs:
-        connectionType: 'connectedServiceName' # Options: connectedServiceName, connectedServiceNameARM
-        serviceConnection: 'waylandJenkins' # Required when connectionType == ConnectedServiceName
-        method: 'POST' # Options: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, PATCH
-        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceVersion)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)' # Optional
-        waitForCompletion: 'true' # Options: true, false
+        connectionType: 'connectedServiceName'
+        serviceConnection: 'waylandJenkins'
+        method: 'POST'
+        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
+        waitForCompletion: 'true'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
+    - task: InvokeRESTAPI@1
+      name: Test
+      inputs:
+        connectionType: 'connectedServiceName'
+        serviceConnection: 'waylandJenkins'
+        method: 'POST'
+        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(System.PullRequest.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
+        waitForCompletion: 'true'
+      condition: eq(variables['Build.Reason'], 'PullRequest')
