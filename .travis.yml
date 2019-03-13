@@ -45,7 +45,7 @@ matrix:
 before_install:
 - |
   if [ $TRAVIS_OS_NAME == "windows" ]; then
-    choco install -y nvm ninja
+    choco install -y nvm
     export NVM_HOME="C:\ProgramData\nvm"
     export NVM_SYMLINK="C:\Program Files\nodejs"
     export PATH=$PATH:$NVM_HOME:$NVM_SYMLINK
@@ -54,22 +54,6 @@ before_install:
   else
     nvm install $NODE_VERSION
     nvm use $NODE_VERSION
-  fi
-- |
-  if [ $TRAVIS_OS_NAME == "windows" ]; then
-    npm config set cmake_CMAKE_C_COMPILER=cl.exe
-    npm config set cmake_CMAKE_CXX_COMPILER=cl.exe
-    npm config set cmake_MSVC_TOOLSET_VERSION=150
-    export VCToolsVersion=14.16.27023
-    export VCINSTALLDIR=/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/BuildTools/VC
-    export VCToolsInstallDir=$VCINSTALLDIR/Tools/MSVC/14.16.27023
-    export VCToolsRedistDir=$VCINSTALLDIR/Redist/MSVC/14.16.27012
-    export WinKits=/c/Program\ Files\ \(x86\)/Windows\ Kits/10/bin
-    if [ $NODE_ARCH == "32" ]; then
-      export PATH=$PATH:$VCToolsInstallDir/bin/HostX86/x86:$WinKits/x86
-    else
-      export PATH=$PATH:$VCToolsInstallDir/bin/HostX86/x64:$WinKits/x64
-    fi
   fi
 - |
   if [ $TRAVIS_OS_NAME == "linux" ]; then

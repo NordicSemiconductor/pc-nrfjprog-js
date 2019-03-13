@@ -56,6 +56,16 @@ function build(debug, target)
         generator,
     };
 
+    if (process.platform === 'win32' && target !== 'tidy') {
+        if (process.arch === 'ia32') {
+            options.generator = 'Visual Studio 15 2017';
+        } else if (process.arch === 'x64') {
+            options.generator = 'Visual Studio 15 2017 Win64';
+        } else {
+            console.log(`${process.arch} is not supported on Windows`);
+        }
+    }
+
     const buildSystem = new cmakeJS.BuildSystem(options);
     buildSystem.rebuild();
 }
