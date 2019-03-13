@@ -145,7 +145,7 @@ jobs:
         action: 'edit'
         tagSource: 'Git tag'
         tag: 'v$(Build.SourceVersion)'
-        assetUploadMode: 'delete'
+        assetUploadMode: 'replace'
         isDraft: 'true'
         addChangeLog: 'false'
 
