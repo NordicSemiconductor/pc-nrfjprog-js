@@ -54,7 +54,7 @@
     "jest-bamboo-formatter": "1.0.1",
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3",
-    "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#master",
+    "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#semver:^0.0.1",
     "node-pre-gyp-github": "1.4.3"
   },
   "jest": {
