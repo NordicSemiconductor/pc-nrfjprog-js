@@ -1,6 +1,6 @@
 trigger:
 - master
-- releases/*
+- release/*
 - test-azure
 
 jobs:
