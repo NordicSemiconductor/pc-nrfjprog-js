@@ -123,7 +123,8 @@ jobs:
       condition: and(contains(variables['image_name'], 'win'), eq(variables['node_arch'], '32'))
       displayName: 'Install Node.js $(node_version) 32-bit'
     - bash: |
-        apt-get install ninja-build
+        sudo apt-get update
+        sudo apt-get install ninja-build
       condition: contains(variables['image_name'], 'ubuntu')
       displayName: 'Install ninja on Linux'
     - bash: |
