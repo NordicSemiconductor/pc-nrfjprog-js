@@ -144,6 +144,7 @@ jobs:
         repositoryName: 'NordicSemiconductor/pc-nrfjprog-js'
         action: 'edit'
         tagSource: 'Git tag'
+        tag: 'v$(Build.SourceVersion)'
         assetUploadMode: 'delete'
         isDraft: 'true'
         addChangeLog: 'false'
