@@ -8,8 +8,6 @@ jobs:
       npm_config_runtime: ''
       npm_config_target: ''
       npm_config_disturl: ''
-      github_connection: 'waylandCI'
-      github_repo: 'NordicSemiconductor/pc-ble-driver'
     strategy:
       matrix:
         linux_node_8_x:
@@ -142,8 +140,8 @@ jobs:
       displayName: 'Copy artifacts'
     - task: GitHubRelease@0
       inputs:
-        gitHubConnection: $(github_connection)
-        repositoryName: $(github_repo)
+        gitHubConnection: 'waylandCI'
+        repositoryName: 'NordicSemiconductor/pc-nrfjprog-js'
         action: 'edit'
         tagSource: 'User specified tag'
         assetUploadMode: 'delete'
