@@ -143,7 +143,7 @@ jobs:
         gitHubConnection: 'waylandCI'
         repositoryName: 'NordicSemiconductor/pc-nrfjprog-js'
         action: 'edit'
-        tagSource: 'User specified tag'
+        tagSource: 'Git tag'
         assetUploadMode: 'delete'
         isDraft: 'true'
         addChangeLog: 'false'
