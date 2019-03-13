@@ -123,6 +123,14 @@ jobs:
       condition: and(contains(variables['image_name'], 'win'), eq(variables['node_arch'], '32'))
       displayName: 'Install Node.js $(node_version) 32-bit'
     - bash: |
+        apt-get install ninja-build
+      condition: and(contains(variables['image_name'], 'linux'))
+      displayName: 'Install ninja on Linux'
+    - bash: |
+        brew install ninja
+      condition: and(contains(variables['image_name'], 'mac'))
+      displayName: 'Install ninja on macOS'
+    - bash: |
         node -v
         npm i --build-from-source
         npm run package-prebuilt
