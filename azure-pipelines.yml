@@ -136,7 +136,7 @@ jobs:
       }
       displayName: 'Build'
     - bash: |
-        cp -R *.tar.gz "$(Build.ArtifactStagingDirectory)"
+        cp -R build/stage/**/*.tar.gz "$(Build.ArtifactStagingDirectory)"
       displayName: 'Copy artifacts'
     - task: GitHubRelease@0
       inputs:
