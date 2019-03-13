@@ -129,16 +129,16 @@ jobs:
         npm i --build-from-source
         npm run package-prebuilt
       env: {
-        NODE_VERSION: $(node_version),
-        NODE_ARCH: $(node_arch),
         npm_config_runtime: $(npm_config_runtime),
         npm_config_target: $(npm_config_target),
         npm_config_disturl: $(npm_config_disturl),
+        NODE_VERSION: $(node_version),
+        NODE_ARCH: $(node_arch),
         NODE_PRE_GYP_GITHUB_TOKEN: $(wayland_github_token)
       }
       displayName: 'Build'
     - bash: |
-      cp -R *.tar.gz "$(Build.ArtifactStagingDirectory)"
+        cp -R *.tar.gz "$(Build.ArtifactStagingDirectory)"
       displayName: 'Copy artifacts'
     - task: GitHubRelease@0
       inputs:
