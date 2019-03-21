@@ -67,108 +67,40 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType *libraryFunctions
         return errorcode_t::CouldNotLoadDLL;
     }
 
-    if (!load_func_ptr(&libraryFunctions->dll_open, "NRFJPROG_dll_open", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
+#define LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(target)                                              \
+    do                                                                                             \
+    {                                                                                              \
+        if (!load_func_ptr(&libraryFunctions->target,                                              \
+                           static_cast<const char *>("NRFJPROG_" #target),                         \
+                           (libraryHandle)))                                                       \
+        {                                                                                          \
+            return errorcode_t::CouldNotLoadDLL;                                                   \
+        }                                                                                          \
+    } while (0);
 
-    if (!load_func_ptr(&libraryFunctions->dll_close, "NRFJPROG_dll_close", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(dll_open);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(dll_close);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_dll_open);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_connected_probes);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(probe_init);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(DFU_init);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(probe_uninit);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_library_info);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_probe_info);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_device_info);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(program);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_to_file);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(verify);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(erase);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(recover);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_u32);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write_u32);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(reset);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(run);
 
-    if (!load_func_ptr(&libraryFunctions->is_dll_open, "NRFJPROG_is_dll_open", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->get_connected_probes, "NRFJPROG_get_connected_probes",
-                       libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->probe_init, "NRFJPROG_probe_init", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->probe_uninit, "NRFJPROG_probe_uninit", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->get_library_info, "NRFJPROG_get_library_info",
-                       libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->get_probe_info, "NRFJPROG_get_probe_info", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->get_device_info, "NRFJPROG_get_device_info",
-                       libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->program, "NRFJPROG_program", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->read_to_file, "NRFJPROG_read_to_file", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->verify, "NRFJPROG_verify", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->erase, "NRFJPROG_erase", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->recover, "NRFJPROG_recover", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->read, "NRFJPROG_read", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->read_u32, "NRFJPROG_read_u32", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->write, "NRFJPROG_write", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->write_u32, "NRFJPROG_write_u32", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->reset, "NRFJPROG_reset", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
-
-    if (!load_func_ptr(&libraryFunctions->run, "NRFJPROG_run", libraryHandle))
-    {
-        return errorcode_t::CouldNotLoadDLL;
-    }
+#undef LOAD_FUNCTION_POINTER_RETURN_ON_ERROR
 
     return errorcode_t::JsSuccess;
 }
