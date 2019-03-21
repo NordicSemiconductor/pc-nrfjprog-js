@@ -244,8 +244,15 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0 && !pHighlvlStatic->keepDeviceOpen)
     {
-        nrfjprogdll_err_t initError = pHighlvlStatic->libraryFunctions.probe_init(
-            &pHighlvlStatic->probe, baton->serialNumber, nullptr);
+        nrfjprogdll_err_t initError = NOT_IMPLEMENTED_ERROR;
+
+        if (baton->probeType == DFU_PROBE) {
+            initError = pHighlvlStatic->libraryFunctions.DFU_init(
+                &pHighlvlStatic->probe, baton->serialNumber, nullptr);
+        } else {
+            initError = pHighlvlStatic->libraryFunctions.probe_init(
+                &pHighlvlStatic->probe, baton->serialNumber, nullptr);
+        }
 
         if (initError != SUCCESS)
         {
@@ -439,6 +446,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
     Nan::SetPrototypeMethod(target, "readU32", ReadU32);
 
     Nan::SetPrototypeMethod(target, "program", Program);
+    Nan::SetPrototypeMethod(target, "programDFU", ProgramDFU);
     Nan::SetPrototypeMethod(target, "readToFile", ReadToFile);
     Nan::SetPrototypeMethod(target, "verify", Verify);
     Nan::SetPrototypeMethod(target, "erase", Erase);
@@ -832,8 +840,64 @@ NAN_METHOD(HighLevel::Program)
 
         if (!file.exists())
         {
-            log(file.errormessage().c_str());
-            log("\n");
+            log(file.errormessage() + "\n");
+            return INVALID_PARAMETER;
+        }
+
+        baton->filename = file.getFileName();
+
+        programResult = pHighlvlStatic->libraryFunctions.program(probe, baton->filename.c_str(),
+                                                                 baton->options);
+
+        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION &&
+            baton->options.chip_erase_mode == ERASE_ALL)
+        {
+            const nrfjprogdll_err_t recoverResult = pHighlvlStatic->libraryFunctions.recover(probe);
+
+            if (recoverResult == SUCCESS)
+            {
+                programResult = pHighlvlStatic->libraryFunctions.program(
+                    probe, baton->filename.c_str(), baton->options);
+            }
+            else
+            {
+                programResult = recoverResult;
+            }
+        }
+
+        return programResult;
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(HighLevel::ProgramDFU)
+{
+    parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
+                                        int &argumentCount) -> Baton * {
+        std::unique_ptr<ProgramDFUBaton> baton(new ProgramDFUBaton());
+
+        baton->file = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        v8::Local<v8::Object> programOptions = Convert::getJsObject(parameters[argumentCount]);
+        ProgramOptions options(programOptions);
+        baton->options     = options.options;
+        baton->inputFormat = options.inputFormat;
+        argumentCount++;
+
+        return baton.release();
+    };
+
+    execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton                      = dynamic_cast<ProgramDFUBaton *>(b);
+        nrfjprogdll_err_t programResult = SUCCESS;
+
+        FileFormatHandler file(baton->file, baton->inputFormat);
+
+        if (!file.exists())
+        {
+            log(file.errormessage() + "\n");
             return INVALID_PARAMETER;
         }
 
