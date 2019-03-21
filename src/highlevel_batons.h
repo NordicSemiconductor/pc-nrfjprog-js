@@ -46,12 +46,14 @@ class Baton
 {
   public:
     explicit Baton(const std::string _name, const uint32_t _returnParameterCount,
-                   const bool _mayHaveProgressCallback)
+                   const bool _mayHaveProgressCallback,
+                   const probe_type_t _probeType = DEBUG_PROBE)
         : returnParameterCount(_returnParameterCount)
         , name(_name)
         , mayHaveProgressCallback(_mayHaveProgressCallback)
         , serialNumber(0)
         , result(JsSuccess)
+        , probeType(_probeType)
         , lowlevelError(SUCCESS)
     {
         req       = std::make_unique<uv_work_t>();
@@ -68,6 +70,7 @@ class Baton
     const std::string name;
     const bool mayHaveProgressCallback;
 
+    probe_type_t probeType;
     uint32_t serialNumber;
     uint32_t result;
     nrfjprogdll_err_t lowlevelError;
@@ -178,6 +181,18 @@ class ProgramBaton : public Baton
   public:
     ProgramBaton()
         : Baton("program", 0, true)
+    {}
+    std::string file;
+    std::string filename;
+    program_options_t options;
+    input_format_t inputFormat;
+};
+
+class ProgramDFUBaton : public Baton
+{
+  public:
+    ProgramDFUBaton()
+        : Baton("program", 0, true, DFU_PROBE)
     {}
     std::string file;
     std::string filename;
