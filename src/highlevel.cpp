@@ -248,10 +248,10 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
         if (baton->probeType == DFU_PROBE) {
             initError = pHighlvlStatic->libraryFunctions.DFU_init(
-                &pHighlvlStatic->probe, baton->serialNumber, nullptr);
+                &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, nullptr);
         } else {
             initError = pHighlvlStatic->libraryFunctions.probe_init(
-                &pHighlvlStatic->probe, baton->serialNumber, nullptr);
+                &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, nullptr);
         }
 
         if (initError != SUCCESS)
@@ -469,14 +469,11 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR1);           // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR2);           // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3);           // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_L3);             // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);          // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);         // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV2);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52811_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52811_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
@@ -488,14 +485,9 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGB);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV2);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);       // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);       // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1);            // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE);     // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA);       // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP2_FUTURE);     // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FP1);     // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_REV1);    // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE);  // NOLINT(hicpp-signed-bitwise)
 
     NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);   // NOLINT(hicpp-signed-bitwise)
@@ -591,7 +583,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         {
             Probe_handle_t getInfoProbe;
             nrfjprogdll_err_t initError = pHighlvlStatic->libraryFunctions.probe_init(
-                &getInfoProbe, serialNumbers[i], nullptr);
+                &getInfoProbe, &HighLevel::log, serialNumbers[i], nullptr);
 
             device_info_t device_info;
             probe_info_t probe_info;

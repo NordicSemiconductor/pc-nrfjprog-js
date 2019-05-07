@@ -345,7 +345,7 @@ RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
 
     Probe_handle_t probe;
     const nrfjprogdll_err_t initProbeStatus =
-        highLevelFunctions.probe_init(&probe, baton->serialNumber, nullptr);
+        highLevelFunctions.probe_init(&probe, &RTT::log, baton->serialNumber, nullptr);
 
     if (initProbeStatus != SUCCESS)
     {
