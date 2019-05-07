@@ -85,7 +85,6 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_write_u32)(Probe_handle_t debug_probe, ui
                                                   const uint32_t data);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_reset)(Probe_handle_t debug_probe,
                                               reset_action_t reset_action);
-typedef nrfjprogdll_err_t (*HILVL_nRFJ_run)(Probe_handle_t debug_probe, uint32_t pc, uint32_t sp);
 
 struct LibraryFunctionPointersType
 {
@@ -110,7 +109,6 @@ struct LibraryFunctionPointersType
     HILVL_nRFJ_write write;
     HILVL_nRFJ_write_u32 write_u32;
     HILVL_nRFJ_reset reset;
-    HILVL_nRFJ_run run;
 };
 
 errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType *libraryFunctions);

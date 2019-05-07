@@ -98,7 +98,6 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType *libraryFunctions
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write_u32);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(reset);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(run);
 
 #undef LOAD_FUNCTION_POINTER_RETURN_ON_ERROR
 
