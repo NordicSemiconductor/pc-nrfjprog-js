@@ -456,6 +456,24 @@ export function program(serialNumber, filename, options, progressCallback, callb
 
 
 /**
+ * Async function to push a DFU update to the modem coprocessor of the device.
+ * <br/>
+ *
+ * @example
+ * nrfjprogjs.programDFU(123456789, "/some/path/nrf52832_abcd.zip", function(err) {
+ *      if (err) throw err;
+ * } );
+ *
+ * @param {integer} serialNumber The serial number of the device to program
+ * @param {string} filename The filename of the <tt>.zip</tt> file containing the update.
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function programDFU(serialNumber, filename, progressCallback, callback) {}
+
+
+/**
  * Async function to read memory from the device and write the results into a file.
  * <br />
  *
