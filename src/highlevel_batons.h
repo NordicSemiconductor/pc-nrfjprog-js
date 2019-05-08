@@ -194,10 +194,7 @@ class ProgramDFUBaton : public Baton
     ProgramDFUBaton()
         : Baton("program", 0, true, DFU_PROBE)
     {}
-    std::string file;
     std::string filename;
-    program_options_t options;
-    input_format_t inputFormat;
 };
 
 class VerifyBaton : public Baton

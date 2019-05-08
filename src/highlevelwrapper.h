@@ -56,6 +56,7 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_init)(Probe_handle_t *debug_probe,
                                                    const char *jlink_path);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_DFU_init)(Probe_handle_t *dfu_probe, log_callback *log_cb,
                                                  uint32_t snr,
+                                                 coprocessor_t coprocessor,
                                                  const char *jlink_path);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_uninit)(Probe_handle_t *debug_probe);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_library_info)(Probe_handle_t debug_probe,

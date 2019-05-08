@@ -248,7 +248,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
         if (baton->probeType == DFU_PROBE) {
             initError = pHighlvlStatic->libraryFunctions.DFU_init(
-                &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, nullptr);
+                &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, CP_MODEM, nullptr);
         } else {
             initError = pHighlvlStatic->libraryFunctions.probe_init(
                 &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, nullptr);
@@ -268,14 +268,16 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         if (baton->serialNumber != 0)
         {
-            nrfjprogdll_err_t resetError =
-                pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
+            if (baton->probeType != DFU_PROBE) {
+                nrfjprogdll_err_t resetError =
+                    pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
 
-            if (resetError != SUCCESS)
-            {
-                baton->result        = errorcode_t::CouldNotResetDevice;
-                baton->lowlevelError = resetError;
-                return;
+                if (resetError != SUCCESS)
+                {
+                    baton->result        = errorcode_t::CouldNotResetDevice;
+                    baton->lowlevelError = resetError;
+                    return;
+                }
             }
 
             nrfjprogdll_err_t uninitError =
@@ -869,13 +871,7 @@ NAN_METHOD(HighLevel::ProgramDFU)
                                         int &argumentCount) -> Baton * {
         std::unique_ptr<ProgramDFUBaton> baton(new ProgramDFUBaton());
 
-        baton->file = Convert::getNativeString(parameters[argumentCount]);
-        argumentCount++;
-
-        v8::Local<v8::Object> programOptions = Convert::getJsObject(parameters[argumentCount]);
-        ProgramOptions options(programOptions);
-        baton->options     = options.options;
-        baton->inputFormat = options.inputFormat;
+        baton->filename = Convert::getNativeString(parameters[argumentCount]);
         argumentCount++;
 
         return baton.release();
@@ -885,7 +881,7 @@ NAN_METHOD(HighLevel::ProgramDFU)
         auto baton                      = dynamic_cast<ProgramDFUBaton *>(b);
         nrfjprogdll_err_t programResult = SUCCESS;
 
-        FileFormatHandler file(baton->file, baton->inputFormat);
+        FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);
 
         if (!file.exists())
         {
@@ -893,27 +889,15 @@ NAN_METHOD(HighLevel::ProgramDFU)
             return INVALID_PARAMETER;
         }
 
-        baton->filename = file.getFileName();
+        std::string filename = file.getFileName();
+        program_options_t options;
+        options.verify = VERIFY_HASH;
+        options.chip_erase_mode = ERASE_NONE;
+        options.qspi_erase_mode = ERASE_NONE;
+        options.reset = RESET_NONE;
 
-        programResult = pHighlvlStatic->libraryFunctions.program(probe, baton->filename.c_str(),
-                                                                 baton->options);
-
-        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION &&
-            baton->options.chip_erase_mode == ERASE_ALL)
-        {
-            const nrfjprogdll_err_t recoverResult = pHighlvlStatic->libraryFunctions.recover(probe);
-
-            if (recoverResult == SUCCESS)
-            {
-                programResult = pHighlvlStatic->libraryFunctions.program(
-                    probe, baton->filename.c_str(), baton->options);
-            }
-            else
-            {
-                programResult = recoverResult;
-            }
-        }
-
+        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(),
+                                                                 options);
         return programResult;
     };
 
