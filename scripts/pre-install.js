@@ -1,4 +1,4 @@
-/* Copyright (c) 2010 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2010 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -57,11 +57,13 @@ const path = require('path');
 const child_process = require('child_process');
 const semver = require('semver');
 
+const { nrfjprog } = require('../package.json');
+
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const DOWNLOAD_URL = 'https://github.com/NordicSemiconductor/pc-nrfjprog-js/releases/download/nrfjprog';
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 
-const requiredVersion = '10.1.0';
+const requiredVersion = nrfjprog.version;
 const platform = `${process.platform}_${process.arch}`;
 const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
 const fileUrl = `${DOWNLOAD_URL}/${filename}`;
