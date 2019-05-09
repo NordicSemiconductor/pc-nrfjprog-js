@@ -43,7 +43,7 @@ function build(debug, target)
 
     const runtime = npm_config_runtime || 'node';
     const runtimeVersion = npm_config_target || process.version.substr(1);
-    const arch = npm_config_arch || (process.plaform == 'win32' ? os.arch() : undefined);
+    const arch = npm_config_arch || (process.platform === 'win32' ? os.arch() : undefined);
     const generator = 'Ninja';
 
     const options = {
