@@ -130,8 +130,12 @@ Promise.resolve()
     .then(() => getCurrentJLinkVersion())
     .then(currentVersion => {
         console.log('Minimum version required:', minVersion);
-        if (currentVersion >= minVersion || commander.list) {
+        if (commander.list) {
             process.exit();
+        }
+        if (currentVersion >= minVersion && commander.install) {
+            console.log('Installation will be skipped');
+            commander.install = false;
         }
     })
     .then(() => downloadFile(fileUrl))
