@@ -104,14 +104,14 @@ async function downloadFile() {
 }
 
 function installJLink() {
-    return new Promise(resolve => (
+    return new Promise(resolve => {
         const options = { name: 'JLink installer' };
-        sudo.exec(destinationFile, options, (error, stdout, stderr) => {
+        return sudo.exec(destinationFile, options, (error, stdout, stderr) => {
             if (error) throw error;
             console.log(stdout);
             resolve();
-        })
-    ));
+        });
+    });
 }
 
 Promise.resolve()
