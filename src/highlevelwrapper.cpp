@@ -51,6 +51,7 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType *libraryFunctions
 
         if (finderror != errorcode_t::JsSuccess)
         {
+            highLevelPath.clear();
             return finderror;
         }
     }

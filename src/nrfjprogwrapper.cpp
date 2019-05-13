@@ -51,6 +51,7 @@ errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType *libraryFu
 
         if (finderror != errorcode_t::JsSuccess)
         {
+            nrfjprogPath.clear();
             return finderror;
         }
     }
