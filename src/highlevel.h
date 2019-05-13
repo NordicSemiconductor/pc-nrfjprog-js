@@ -85,8 +85,8 @@ class HighLevel : public Nan::ObjectWrap
                                    // readuicr, readqspi}, callback(progress), callback(error)
     static NAN_METHOD(Verify);     // Params: serialnumber, filename, callback(progress),
                                    // callback(error)
-    static NAN_METHOD(Erase); // Params: serialnumber, options {erase_mode, start_address,
-                              // end_address}, callback(progress), callback(error)
+    static NAN_METHOD(Erase);      // Params: serialnumber, options {erase_mode, start_address,
+                                   // end_address}, callback(progress), callback(error)
 
     static NAN_METHOD(Recover); // Params: serialnumber, callback(progress), callback(error)
 

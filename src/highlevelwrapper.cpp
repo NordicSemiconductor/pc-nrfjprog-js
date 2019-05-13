@@ -72,8 +72,7 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType *libraryFunctions
     do                                                                                             \
     {                                                                                              \
         if (!load_func_ptr(&libraryFunctions->target,                                              \
-                           static_cast<const char *>("NRFJPROG_" #target),                         \
-                           (libraryHandle)))                                                       \
+                           static_cast<const char *>("NRFJPROG_" #target), (libraryHandle)))       \
         {                                                                                          \
             return errorcode_t::CouldNotLoadDLL;                                                   \
         }                                                                                          \

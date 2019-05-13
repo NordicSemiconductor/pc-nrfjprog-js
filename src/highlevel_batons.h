@@ -46,8 +46,7 @@ class Baton
 {
   public:
     explicit Baton(const std::string _name, const uint32_t _returnParameterCount,
-                   const bool _mayHaveProgressCallback,
-                   const probe_type_t _probeType = DEBUG_PROBE)
+                   const bool _mayHaveProgressCallback, const probe_type_t _probeType = DEBUG_PROBE)
         : returnParameterCount(_returnParameterCount)
         , name(_name)
         , mayHaveProgressCallback(_mayHaveProgressCallback)

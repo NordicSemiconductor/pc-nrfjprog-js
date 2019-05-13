@@ -51,12 +51,10 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_connected_probes)(uint32_t serial_num
                                                              uint32_t serial_numbers_len,
                                                              uint32_t *num_available);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_init)(Probe_handle_t *debug_probe,
-                                                   log_callback *log_cb,
-                                                   uint32_t snr,
+                                                   log_callback *log_cb, uint32_t snr,
                                                    const char *jlink_path);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_DFU_init)(Probe_handle_t *dfu_probe, log_callback *log_cb,
-                                                 uint32_t snr,
-                                                 coprocessor_t coprocessor,
+                                                 uint32_t snr, coprocessor_t coprocessor,
                                                  const char *jlink_path);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_uninit)(Probe_handle_t *debug_probe);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_library_info)(Probe_handle_t debug_probe,

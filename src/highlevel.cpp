@@ -246,10 +246,13 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         nrfjprogdll_err_t initError = NOT_IMPLEMENTED_ERROR;
 
-        if (baton->probeType == DFU_PROBE) {
+        if (baton->probeType == DFU_PROBE)
+        {
             initError = pHighlvlStatic->libraryFunctions.DFU_init(
                 &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, CP_MODEM, nullptr);
-        } else {
+        }
+        else
+        {
             initError = pHighlvlStatic->libraryFunctions.probe_init(
                 &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, nullptr);
         }
@@ -268,7 +271,8 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         if (baton->serialNumber != 0)
         {
-            if (baton->probeType != DFU_PROBE) {
+            if (baton->probeType != DFU_PROBE)
+            {
                 nrfjprogdll_err_t resetError =
                     pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
 
@@ -891,13 +895,12 @@ NAN_METHOD(HighLevel::ProgramDFU)
 
         std::string filename = file.getFileName();
         program_options_t options;
-        options.verify = VERIFY_HASH;
+        options.verify          = VERIFY_HASH;
         options.chip_erase_mode = ERASE_NONE;
         options.qspi_erase_mode = ERASE_NONE;
-        options.reset = RESET_NONE;
+        options.reset           = RESET_NONE;
 
-        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(),
-                                                                 options);
+        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(), options);
         return programResult;
     };
 
