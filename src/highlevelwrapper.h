@@ -44,16 +44,19 @@
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_get_version)(uint32_t *major, uint32_t *minor,
                                                         uint32_t *micro);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dll_open)(const char *default_jlink_path,
-                                                 log_callback *log_cb, progress_callback *prog_cb);
+                                                 log_callback *log_cb);
 typedef void (*HILVL_nRFJ_dll_close)(void);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_is_dll_open)(bool *is_opened);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_connected_probes)(uint32_t serial_numbers[],
                                                              uint32_t serial_numbers_len,
                                                              uint32_t *num_available);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_init)(Probe_handle_t *debug_probe,
+                                                   progress_callback * prog_cb,
                                                    log_callback *log_cb, uint32_t snr,
                                                    const char *jlink_path);
-typedef nrfjprogdll_err_t (*HILVL_nRFJ_DFU_init)(Probe_handle_t *dfu_probe, log_callback *log_cb,
+typedef nrfjprogdll_err_t (*HILVL_nRFJ_dfu_init)(Probe_handle_t *dfu_probe,
+                                                 progress_callback * prog_cb,
+                                                 log_callback *log_cb,
                                                  uint32_t snr, coprocessor_t coprocessor,
                                                  const char *jlink_path);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_uninit)(Probe_handle_t *debug_probe);
@@ -93,7 +96,7 @@ struct LibraryFunctionPointersType
     HILVL_nRFJ_is_dll_open is_dll_open;
     HILVL_nRFJ_get_connected_probes get_connected_probes;
     HILVL_nRFJ_probe_init probe_init;
-    HILVL_nRFJ_DFU_init DFU_init;
+    HILVL_nRFJ_dfu_init dfu_init;
     HILVL_nRFJ_probe_uninit probe_uninit;
     HILVL_nRFJ_get_library_info get_library_info;
     HILVL_nRFJ_get_probe_info get_probe_info;

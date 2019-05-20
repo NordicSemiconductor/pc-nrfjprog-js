@@ -213,7 +213,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         return;
     }
 
-    if (baton->mayHaveProgressCallback && pHighlvlStatic->jsProgressCallback)
+    if (pHighlvlStatic->jsProgressCallback)
     {
         pHighlvlStatic->progressEvent = std::make_unique<uv_async_t>();
         uv_async_init(uv_default_loop(), pHighlvlStatic->progressEvent.get(), sendProgress);
@@ -232,7 +232,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     if (!isOpen)
     {
         nrfjprogdll_err_t openError = pHighlvlStatic->libraryFunctions.dll_open(
-            nullptr, &HighLevel::log, &HighLevel::progressCallback);
+            nullptr, &HighLevel::log);
 
         if (openError != SUCCESS)
         {
@@ -248,13 +248,15 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
         if (baton->probeType == DFU_PROBE)
         {
-            initError = pHighlvlStatic->libraryFunctions.DFU_init(
-                &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, CP_MODEM, nullptr);
+            initError = pHighlvlStatic->libraryFunctions.dfu_init(
+                &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
+                baton->serialNumber, CP_MODEM, nullptr);
         }
         else
         {
             initError = pHighlvlStatic->libraryFunctions.probe_init(
-                &pHighlvlStatic->probe, &HighLevel::log, baton->serialNumber, nullptr);
+                &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
+                baton->serialNumber, nullptr);
         }
 
         if (initError != SUCCESS)
@@ -589,7 +591,8 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         {
             Probe_handle_t getInfoProbe;
             nrfjprogdll_err_t initError = pHighlvlStatic->libraryFunctions.probe_init(
-                &getInfoProbe, &HighLevel::log, serialNumbers[i], nullptr);
+                &getInfoProbe, &HighLevel::progressCallback, &HighLevel::log, serialNumbers[i],
+                nullptr);
 
             device_info_t device_info;
             probe_info_t probe_info;
