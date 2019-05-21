@@ -709,7 +709,7 @@ NAN_METHOD(RTT::Write)
     };
 
     rtt_return_function_t r = [&](RTTBaton *b) -> std::vector<v8::Local<v8::Value>> {
-        auto baton = dynamic_cast<RTTReadBaton *>(b);
+        auto baton = dynamic_cast<RTTWriteBaton *>(b);
 
         std::vector<v8::Local<v8::Value>> returnData;
 
