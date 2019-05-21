@@ -1,4 +1,4 @@
-/* Copyright (c) 2010 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -57,48 +57,30 @@ const path = require('path');
 const child_process = require('child_process');
 const semver = require('semver');
 
+const { nrfjprog } = require('../package.json');
+
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
-const DOWNLOAD_URL = 'https://www.nordicsemi.com/api/sitecore/Products/DownloadPlatform';
+const DOWNLOAD_URL = 'https://github.com/NordicSemiconductor/pc-nrfjprog-js/releases/download/nrfjprog';
 const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 
-const PLATFORM_CONFIG = {
-    win32_ia32: {
-        fileid: 'B96A931BEF8C400DA9BA4EADBE115071',
-        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-ia32.exe'),
-    },
-    win32_x64: {
-        fileid: 'AAFC401DA6794101A4682508DA8A74C4',
-        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-win32-x64.exe'),
-    },
-    linux_x64: {
-        fileid: '8F19D314130548209E75EFFADD9348DB',
-        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-linux64.tar'),
-    },
-    darwin: {
-        fileid: '6E0670EF22EC4D819908809AF13CD700',
-        destinationFile: path.join(DOWNLOAD_DIR, 'nrfjprog-darwin.tar'),
-    },
-};
-const REQUIRED_VERSION = {
-    major: 9,
-    minor: 8,
-    revision: 1,
-};
+const requiredVersion = nrfjprog.version;
+const platform = `${process.platform}_${process.arch}`;
+const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
+const fileUrl = `${DOWNLOAD_URL}/${filename}`;
+const destinationFile = path.join(DOWNLOAD_DIR, filename);
 
-async function downloadFile(fileid, destinationFile) {
-    console.log(`Downloading nrfjprog from ${DOWNLOAD_URL} with fileid ${fileid} to ${destinationFile}...`);
+async function downloadFile() {
+    console.log(`Downloading nrfjprog from ${fileUrl}...`);
 
-    const destinationDir = path.dirname(destinationFile);
-    await sander.mkdir(destinationDir);
+    await sander.mkdir(DOWNLOAD_DIR);
 
-    const response = await axios.post(
-        DOWNLOAD_URL,
-        {fileid},
+    const response = await axios.get(
+        `${fileUrl}`,
         {responseType: 'stream'}
     );
     const statusCode = response.status;
     if (statusCode !== 200) {
-        throw new Error(`Unable to download ${DOWNLOAD_URL} with fileid ${fileid}. ` +
+        throw new Error(`Unable to download ${fileUrl}. ` +
             `Got status code ${statusCode}`);
     }
 
@@ -117,8 +99,7 @@ function extractTarFile(filePath, outputDir) {
     return sander.mkdir(outputDir)
         .then(() => tar.extract({
             file: filePath,
-            filter: f => f.match(/\.so|\.dylib$|\.h$/),
-            strip: 2,
+            strip: 1,
             keep: true,
             cwd: outputDir,
         }));
@@ -142,24 +123,6 @@ function getLibraryVersion() {
     });
 }
 
-function isHeaderFileInstalledWin32() {
-    let programFilesDir
-    if (process.arch === 'ia32') {
-        programFilesDir = process.env['ProgramFiles(x86)'] || process.env.ProgramFiles;
-    } else if (process.arch === 'x64') {
-        programFilesDir = process.env['ProgramW6432'] || process.env.ProgramFiles;
-    } else {
-        throw Error(`Arch ${process.arch} is not supported.`);
-    }
-    const headerFile = path.join(programFilesDir, 'Nordic Semiconductor', 'nrf5x', 'bin', 'headers', 'nrfjprog.h');
-    try {
-        fs.accessSync(headerFile);
-        return true;
-    } catch (ex) {
-        return false;
-    }
-}
-
 function removeFileIfExists(filePath) {
     if (sander.existsSync(filePath)) {
         return sander.unlink(filePath);
@@ -175,43 +138,18 @@ function removeDirIfExists(dirPath) {
 }
 
 function installNrfjprog(pathToArtifact) {
-    if (pathToArtifact.endsWith('.tar')) {
+    if (pathToArtifact.endsWith('.tar') || pathToArtifact.endsWith('.tar.gz')) {
         console.log(`Extracting ${pathToArtifact} to ${LIB_DIR}...`);
         return removeDirIfExists(LIB_DIR)
-            .then(() => extractTarFile(pathToArtifact, LIB_DIR));
-    } else if (pathToArtifact.endsWith('.exe')) {
-        console.log(`Running nrfjprog installer at ${pathToArtifact}...`);
-        try {
-            child_process.execFileSync(pathToArtifact, ['-silent']);
-            return Promise.resolve();
-        } catch (err) {
-            return Promise.reject(err);
-        }
+            .then(() => extractTarFile(pathToArtifact, DOWNLOAD_DIR));
     }
     return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
-}
-
-const platform = process.platform;
-const arch = process.arch;
-let platformConfigStr;
-if (platform === 'win32' || platform === 'linux') {
-    platformConfigStr = `${platform}_${arch}`
-} else if (platform === 'darwin') {
-    platformConfigStr = platform
-}
-const platformConfig = PLATFORM_CONFIG[platformConfigStr];
-
-if (!platformConfig) {
-    console.error(`Unsupported platform: '${platform}'. Cannot install nrfjprog libraries.`);
-    process.exit(1);
 }
 
 let isInstallationRequired = false;
 getLibraryVersion()
     .then(version => {
         const currentVersion = `${version.major}.${version.minor}.${version.revision}`;
-        const requiredVersion = `${REQUIRED_VERSION.major}.${REQUIRED_VERSION.minor}` +
-            `.${REQUIRED_VERSION.revision}`;
         if (semver.lt(currentVersion, requiredVersion)) {
             console.log(`Found nrfjprog version ${currentVersion}, but ` +
                 `${requiredVersion} is required`);
@@ -221,28 +159,23 @@ getLibraryVersion()
         }
     })
     .catch(error => {
-        // If we have nrfjprog header files on win32, then assume nrfjprog is installed
-        if (platform === 'win32' && isHeaderFileInstalledWin32()) {
-            isInstallationRequired = false;
-        } else {
-            console.log(`Validation of nrfjprog libraries failed: ${error.message}`);
-            isInstallationRequired = true;
-        }
+        console.log(`Validation of nrfjprog libraries failed: ${error.message}`);
+        isInstallationRequired = true;
     })
     .then(() => {
         if (isInstallationRequired) {
             console.log('Trying to install nrfjprog');
 
             let exitCode = 0;
-            return downloadFile(platformConfig.fileid, platformConfig.destinationFile)
+            return downloadFile()
                 // without this sleep windows install fails with EBUSY
                 .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
-                .then(() => installNrfjprog(platformConfig.destinationFile))
+                .then(() => installNrfjprog(destinationFile))
                 .catch(error => {
                     exitCode = 1;
                     console.error(`Error when installing nrfjprog libraries: ${error.message}`);
                 })
-                .then(() => removeFileIfExists(platformConfig.destinationFile))
+                .then(() => removeFileIfExists(destinationFile))
                 .catch(error => {
                     exitCode = 1;
                     console.error(`Unable to remove downloaded nrfjprog artifact: ${error.message}`);

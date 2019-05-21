@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -39,6 +39,8 @@
 
 #include "DllCommonDefinitions.h"
 #include "common.h"
+
+typedef enum { DFU_PROBE, DEBUG_PROBE } probe_type_t;
 
 typedef enum { INPUT_FORMAT_HEX_FILE, INPUT_FORMAT_HEX_STRING } input_format_t;
 
@@ -120,27 +122,26 @@ static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
                                         NAME_MAP_ENTRY(NRF51xxx_xxAC_REV3),
                                         NAME_MAP_ENTRY(NRF51802_xxAA_REV3),
                                         NAME_MAP_ENTRY(NRF51801_xxAB_REV3),
-                                        NAME_MAP_ENTRY(NRF51_XLR1),
-                                        NAME_MAP_ENTRY(NRF51_XLR2),
-                                        NAME_MAP_ENTRY(NRF51_XLR3),
-                                        NAME_MAP_ENTRY(NRF51_L3),
-                                        NAME_MAP_ENTRY(NRF51_XLR3P),
-                                        NAME_MAP_ENTRY(NRF51_XLR3LC),
+                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV1),
+                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV2),
+                                        NAME_MAP_ENTRY(NRF52810_xxAA_FUTURE),
+                                        NAME_MAP_ENTRY(NRF52811_xxAA_REV1),
+                                        NAME_MAP_ENTRY(NRF52811_xxAA_FUTURE),
                                         NAME_MAP_ENTRY(NRF52832_xxAA_ENGA),
                                         NAME_MAP_ENTRY(NRF52832_xxAA_ENGB),
                                         NAME_MAP_ENTRY(NRF52832_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV1),
+                                        NAME_MAP_ENTRY(NRF52832_xxAA_REV2),
                                         NAME_MAP_ENTRY(NRF52832_xxAA_FUTURE),
+                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV1),
+                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV2),
                                         NAME_MAP_ENTRY(NRF52832_xxAB_FUTURE),
                                         NAME_MAP_ENTRY(NRF52840_xxAA_ENGA),
+                                        NAME_MAP_ENTRY(NRF52840_xxAA_ENGB),
+                                        NAME_MAP_ENTRY(NRF52840_xxAA_REV1),
+                                        NAME_MAP_ENTRY(NRF52840_xxAA_REV2),
                                         NAME_MAP_ENTRY(NRF52840_xxAA_FUTURE),
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_FUTURE),
-                                        NAME_MAP_ENTRY(NRF52_FP1_ENGA),
-                                        NAME_MAP_ENTRY(NRF52_FP1_ENGB),
-                                        NAME_MAP_ENTRY(NRF52_FP1),
-                                        NAME_MAP_ENTRY(NRF52_FP1_FUTURE),
-                                        NAME_MAP_ENTRY(NRF52_FP2_ENGA)};
+                                        NAME_MAP_ENTRY(NRF9160_xxAA_REV1),
+                                        NAME_MAP_ENTRY(NRF9160_xxAA_FUTURE)};
 
 static name_map_t device_family_map = {NAME_MAP_ENTRY(NRF51_FAMILY), NAME_MAP_ENTRY(NRF52_FAMILY),
                                        NAME_MAP_ENTRY(UNKNOWN_FAMILY)};

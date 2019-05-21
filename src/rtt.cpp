@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -334,7 +334,7 @@ RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
     }
 
     const nrfjprogdll_err_t openHighlevelStatus =
-        highLevelFunctions.dll_open(nullptr, &RTT::log, nullptr);
+        highLevelFunctions.dll_open(nullptr, &RTT::log);
 
     if (openHighlevelStatus != SUCCESS)
     {
@@ -345,7 +345,7 @@ RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
 
     Probe_handle_t probe;
     const nrfjprogdll_err_t initProbeStatus =
-        highLevelFunctions.probe_init(&probe, baton->serialNumber, nullptr);
+        highLevelFunctions.probe_init(&probe, nullptr, &RTT::log, baton->serialNumber, nullptr);
 
     if (initProbeStatus != SUCCESS)
     {
@@ -709,7 +709,7 @@ NAN_METHOD(RTT::Write)
     };
 
     rtt_return_function_t r = [&](RTTBaton *b) -> std::vector<v8::Local<v8::Value>> {
-        auto baton = dynamic_cast<RTTReadBaton *>(b);
+        auto baton = dynamic_cast<RTTWriteBaton *>(b);
 
         std::vector<v8::Local<v8::Value>> returnData;
 
