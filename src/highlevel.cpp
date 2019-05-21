@@ -38,6 +38,7 @@
 
 #include <iostream>
 #include <mutex>
+#include <queue>
 #include <sstream>
 #include <vector>
 
@@ -62,7 +63,8 @@ struct HighLevelStaticPrivate
     std::timed_mutex logMutex;
     std::unique_ptr<Nan::Callback> jsProgressCallback;
     std::unique_ptr<uv_async_t> progressEvent;
-    std::string progressProcess;
+    std::mutex progressProcessMutex;
+    std::queue<std::string> progressProcess;
 
     static inline Nan::Persistent<v8::Function> &constructor()
     {
@@ -231,8 +233,8 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError = pHighlvlStatic->libraryFunctions.dll_open(
-            nullptr, &HighLevel::log);
+        nrfjprogdll_err_t openError =
+            pHighlvlStatic->libraryFunctions.dll_open(nullptr, &HighLevel::log);
 
         if (openError != SUCCESS)
         {
@@ -394,7 +396,10 @@ void HighLevel::progressCallback(const char *process)
 {
     if (pHighlvlStatic->jsProgressCallback)
     {
-        pHighlvlStatic->progressProcess = std::string(process);
+        {
+            std::unique_lock<std::mutex> lock(pHighlvlStatic->progressProcessMutex);
+            pHighlvlStatic->progressProcess.emplace(process);
+        }
 
         uv_async_send(pHighlvlStatic->progressEvent.get());
     }
@@ -402,17 +407,26 @@ void HighLevel::progressCallback(const char *process)
 
 void HighLevel::sendProgress(uv_async_t * /*handle*/)
 {
-    Nan::HandleScope scope;
-
-    v8::Local<v8::Value> argv[1];
-
-    v8::Local<v8::Object> progressObj = Nan::New<v8::Object>();
-    Utility::Set(progressObj, "process", Convert::toJsString(pHighlvlStatic->progressProcess));
-
-    argv[0] = progressObj;
-
-    if (pHighlvlStatic->jsProgressCallback)
+    if (!pHighlvlStatic->jsProgressCallback)
     {
+        return;
+    }
+
+    Nan::HandleScope scope;
+    std::unique_lock<std::mutex> lock(pHighlvlStatic->progressProcessMutex);
+
+    while (!pHighlvlStatic->progressProcess.empty())
+    {
+        std::string process = pHighlvlStatic->progressProcess.front();
+        pHighlvlStatic->progressProcess.pop();
+
+        v8::Local<v8::Value> argv[1];
+
+        v8::Local<v8::Object> progressObj = Nan::New<v8::Object>();
+        Utility::Set(progressObj, "process", Convert::toJsString(process));
+
+        argv[0] = progressObj;
+
         Nan::AsyncResource resource("pc-nrfjprog-js:callback");
         pHighlvlStatic->jsProgressCallback->Call(1, static_cast<v8::Local<v8::Value> *>(argv),
                                                  &resource);
