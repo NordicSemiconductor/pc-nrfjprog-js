@@ -39,7 +39,7 @@
 'use strict';
 
 if (process.platform !== 'win32') {
-    console.log(`Unsupported platform: '${platform}', you need to visit https://www.segger.com/downloads/jlink`);
+    console.log(`Unsupported platform: '${process.platform}', you need to visit https://www.segger.com/downloads/jlink`);
     process.exit();
 }
 
