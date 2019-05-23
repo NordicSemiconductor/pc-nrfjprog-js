@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -38,9 +38,16 @@ const path = require('path');
 const nRFjprog = require('bindings')('pc-nrfjprog-js');
 
 const instance = new nRFjprog.nRFjprog();
-Object.keys(nRFjprog).map(key => {
+
+Object.keys(nRFjprog).forEach(key => {
     if (key === 'setLibrarySearchPath') {
         nRFjprog.setLibrarySearchPath(path.join(__dirname, 'nrfjprog', 'lib'));
+        instance.getLibraryVersion(err => {
+            if (err) {
+                // we are probably in asar context, let's try another way
+                nRFjprog.setLibrarySearchPath(process.cwd());
+            }
+        });
     } else if (key !== 'nRFjprog') {
         instance[key] = nRFjprog[key];
     }

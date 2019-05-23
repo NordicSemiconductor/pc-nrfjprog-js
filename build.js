@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -43,7 +43,7 @@ function build(debug, target)
 
     const runtime = npm_config_runtime || 'node';
     const runtimeVersion = npm_config_target || process.version.substr(1);
-    const arch = npm_config_arch || (process.plaform == 'win32' ? os.arch() : undefined);
+    const arch = npm_config_arch || (process.platform === 'win32' ? os.arch() : undefined);
     const generator = 'Ninja';
 
     const options = {
@@ -57,12 +57,12 @@ function build(debug, target)
     };
 
     if (process.platform === 'win32' && target !== 'tidy') {
-        if (process.arch === 'ia32') {
+        if (arch === 'ia32') {
             options.generator = 'Visual Studio 15 2017';
-        } else if (process.arch === 'x64') {
+        } else if (arch === 'x64') {
             options.generator = 'Visual Studio 15 2017 Win64';
         } else {
-            console.log(`${process.arch} is not supported on Windows`);
+            console.log(`${arch} is not supported on Windows`);
         }
     }
 

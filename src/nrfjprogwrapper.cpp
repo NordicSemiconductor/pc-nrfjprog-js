@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -51,6 +51,7 @@ errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType *libraryFu
 
         if (finderror != errorcode_t::JsSuccess)
         {
+            nrfjprogPath.clear();
             return finderror;
         }
     }
@@ -73,54 +74,12 @@ errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType *libraryFu
         }                                                                                          \
     } while (0);
 
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(dll_version);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_dll_open);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(open_dll);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(close_dll);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(enum_emu_snr);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_connected_to_emu);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(connect_to_emu_with_snr);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(connect_to_emu_without_snr);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_connected_emu_snr);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_connected_emu_fwstr);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(disconnect_from_emu);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(recover);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_connected_to_device);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(connect_to_device);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(disconnect_from_device);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(readback_protect);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(readback_status);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_region_0_size_and_source);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(debug_reset);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(sys_reset);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(pin_reset);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(disable_bprot);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(erase_all);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(erase_page);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(erase_uicr);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write_u32);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_u32);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_halted);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(halt);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(run);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(go);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(step);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_ram_sections_count);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_ram_sections_size);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_ram_sections_power_status);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_ram_powered);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(power_ram_all);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(unpower_ram_section);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_cpu_register);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write_cpu_register);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_device_version);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_device_family);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_debug_port_register);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write_debug_port_register);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(read_access_port_register);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(write_access_port_register);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_rtt_started);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(rtt_set_control_block_address);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(rtt_start);
@@ -130,13 +89,6 @@ errorcode_t loadnRFjprogFunctions(nRFjprogLibraryFunctionPointersType *libraryFu
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(rtt_write);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(rtt_read_channel_count);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(rtt_read_channel_info);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(is_qspi_init);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(qspi_init);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(qspi_uninit);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(qspi_read);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(qspi_write);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(qspi_erase);
-    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(qspi_custom);
 
 #undef LOAD_FUNCTION_POINTER_RETURN_ON_ERROR
 

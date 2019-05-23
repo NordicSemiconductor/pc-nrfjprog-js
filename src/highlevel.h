@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -79,12 +79,14 @@ class HighLevel : public Nan::ObjectWrap
 
     static NAN_METHOD(Program); // Params: serialnumber, filename, options {verify, chip_erase_mode,
                                 // qspi_erase_mode, reset}, callback(progress), callback(error)
+    static NAN_METHOD(ProgramDFU); // Params: serialnumber, filename, callback(progress),
+                                   // callback(error)
     static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode,
                                    // readuicr, readqspi}, callback(progress), callback(error)
-    static NAN_METHOD(
-        Verify);              // Params: serialnumber, filename, callback(progress), callback(error)
-    static NAN_METHOD(Erase); // Params: serialnumber, options {erase_mode, start_address,
-                              // end_address}, callback(progress), callback(error)
+    static NAN_METHOD(Verify);     // Params: serialnumber, filename, callback(progress),
+                                   // callback(error)
+    static NAN_METHOD(Erase);      // Params: serialnumber, options {erase_mode, start_address,
+                                   // end_address}, callback(progress), callback(error)
 
     static NAN_METHOD(Recover); // Params: serialnumber, callback(progress), callback(error)
 

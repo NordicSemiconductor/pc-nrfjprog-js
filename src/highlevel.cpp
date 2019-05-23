@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2019, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -38,6 +38,7 @@
 
 #include <iostream>
 #include <mutex>
+#include <queue>
 #include <sstream>
 #include <vector>
 
@@ -62,7 +63,8 @@ struct HighLevelStaticPrivate
     std::timed_mutex logMutex;
     std::unique_ptr<Nan::Callback> jsProgressCallback;
     std::unique_ptr<uv_async_t> progressEvent;
-    std::string progressProcess;
+    std::mutex progressProcessMutex;
+    std::queue<std::string> progressProcess;
 
     static inline Nan::Persistent<v8::Function> &constructor()
     {
@@ -213,7 +215,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         return;
     }
 
-    if (baton->mayHaveProgressCallback && pHighlvlStatic->jsProgressCallback)
+    if (pHighlvlStatic->jsProgressCallback)
     {
         pHighlvlStatic->progressEvent = std::make_unique<uv_async_t>();
         uv_async_init(uv_default_loop(), pHighlvlStatic->progressEvent.get(), sendProgress);
@@ -231,8 +233,8 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError = pHighlvlStatic->libraryFunctions.dll_open(
-            nullptr, &HighLevel::log, &HighLevel::progressCallback);
+        nrfjprogdll_err_t openError =
+            pHighlvlStatic->libraryFunctions.dll_open(nullptr, &HighLevel::log);
 
         if (openError != SUCCESS)
         {
@@ -244,8 +246,20 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
     if (baton->serialNumber != 0 && !pHighlvlStatic->keepDeviceOpen)
     {
-        nrfjprogdll_err_t initError = pHighlvlStatic->libraryFunctions.probe_init(
-            &pHighlvlStatic->probe, baton->serialNumber, nullptr);
+        nrfjprogdll_err_t initError = NOT_IMPLEMENTED_ERROR;
+
+        if (baton->probeType == DFU_PROBE)
+        {
+            initError = pHighlvlStatic->libraryFunctions.dfu_init(
+                &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
+                baton->serialNumber, CP_MODEM, nullptr);
+        }
+        else
+        {
+            initError = pHighlvlStatic->libraryFunctions.probe_init(
+                &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
+                baton->serialNumber, nullptr);
+        }
 
         if (initError != SUCCESS)
         {
@@ -261,14 +275,17 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         if (baton->serialNumber != 0)
         {
-            nrfjprogdll_err_t resetError =
-                pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
-
-            if (resetError != SUCCESS)
+            if (baton->probeType != DFU_PROBE)
             {
-                baton->result        = errorcode_t::CouldNotResetDevice;
-                baton->lowlevelError = resetError;
-                return;
+                nrfjprogdll_err_t resetError =
+                    pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
+
+                if (resetError != SUCCESS)
+                {
+                    baton->result        = errorcode_t::CouldNotResetDevice;
+                    baton->lowlevelError = resetError;
+                    return;
+                }
             }
 
             nrfjprogdll_err_t uninitError =
@@ -379,7 +396,10 @@ void HighLevel::progressCallback(const char *process)
 {
     if (pHighlvlStatic->jsProgressCallback)
     {
-        pHighlvlStatic->progressProcess = std::string(process);
+        {
+            std::unique_lock<std::mutex> lock(pHighlvlStatic->progressProcessMutex);
+            pHighlvlStatic->progressProcess.emplace(process);
+        }
 
         uv_async_send(pHighlvlStatic->progressEvent.get());
     }
@@ -387,17 +407,26 @@ void HighLevel::progressCallback(const char *process)
 
 void HighLevel::sendProgress(uv_async_t * /*handle*/)
 {
-    Nan::HandleScope scope;
-
-    v8::Local<v8::Value> argv[1];
-
-    v8::Local<v8::Object> progressObj = Nan::New<v8::Object>();
-    Utility::Set(progressObj, "process", Convert::toJsString(pHighlvlStatic->progressProcess));
-
-    argv[0] = progressObj;
-
-    if (pHighlvlStatic->jsProgressCallback)
+    if (!pHighlvlStatic->jsProgressCallback)
     {
+        return;
+    }
+
+    Nan::HandleScope scope;
+    std::unique_lock<std::mutex> lock(pHighlvlStatic->progressProcessMutex);
+
+    while (!pHighlvlStatic->progressProcess.empty())
+    {
+        std::string process = pHighlvlStatic->progressProcess.front();
+        pHighlvlStatic->progressProcess.pop();
+
+        v8::Local<v8::Value> argv[1];
+
+        v8::Local<v8::Object> progressObj = Nan::New<v8::Object>();
+        Utility::Set(progressObj, "process", Convert::toJsString(process));
+
+        argv[0] = progressObj;
+
         Nan::AsyncResource resource("pc-nrfjprog-js:callback");
         pHighlvlStatic->jsProgressCallback->Call(1, static_cast<v8::Local<v8::Value> *>(argv),
                                                  &resource);
@@ -439,6 +468,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
     Nan::SetPrototypeMethod(target, "readU32", ReadU32);
 
     Nan::SetPrototypeMethod(target, "program", Program);
+    Nan::SetPrototypeMethod(target, "programDFU", ProgramDFU);
     Nan::SetPrototypeMethod(target, "readToFile", ReadToFile);
     Nan::SetPrototypeMethod(target, "verify", Verify);
     Nan::SetPrototypeMethod(target, "erase", Erase);
@@ -461,14 +491,11 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR1);           // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR2);           // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3);           // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_L3);             // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3P);          // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51_XLR3LC);         // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV2);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52811_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52811_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_ENGB);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52832_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
@@ -480,14 +507,9 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGB);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV2);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGA);       // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_ENGB);       // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1);            // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP1_FUTURE);     // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP2_ENGA);       // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52_FP2_FUTURE);     // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FP1);     // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_REV1);    // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE);  // NOLINT(hicpp-signed-bitwise)
 
     NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);   // NOLINT(hicpp-signed-bitwise)
@@ -583,7 +605,8 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         {
             Probe_handle_t getInfoProbe;
             nrfjprogdll_err_t initError = pHighlvlStatic->libraryFunctions.probe_init(
-                &getInfoProbe, serialNumbers[i], nullptr);
+                &getInfoProbe, &HighLevel::progressCallback, &HighLevel::log, serialNumbers[i],
+                nullptr);
 
             device_info_t device_info;
             probe_info_t probe_info;
@@ -832,8 +855,7 @@ NAN_METHOD(HighLevel::Program)
 
         if (!file.exists())
         {
-            log(file.errormessage().c_str());
-            log("\n");
+            log(file.errormessage() + "\n");
             return INVALID_PARAMETER;
         }
 
@@ -858,6 +880,44 @@ NAN_METHOD(HighLevel::Program)
             }
         }
 
+        return programResult;
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(HighLevel::ProgramDFU)
+{
+    parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
+                                        int &argumentCount) -> Baton * {
+        std::unique_ptr<ProgramDFUBaton> baton(new ProgramDFUBaton());
+
+        baton->filename = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        return baton.release();
+    };
+
+    execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton                      = dynamic_cast<ProgramDFUBaton *>(b);
+        nrfjprogdll_err_t programResult = SUCCESS;
+
+        FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);
+
+        if (!file.exists())
+        {
+            log(file.errormessage() + "\n");
+            return INVALID_PARAMETER;
+        }
+
+        std::string filename = file.getFileName();
+        program_options_t options;
+        options.verify          = VERIFY_HASH;
+        options.chip_erase_mode = ERASE_NONE;
+        options.qspi_erase_mode = ERASE_NONE;
+        options.reset           = RESET_NONE;
+
+        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(), options);
         return programResult;
     };
 
