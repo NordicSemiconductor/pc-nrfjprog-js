@@ -4,7 +4,7 @@
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "nrfjprog": {
-    "version": "10.1.1",
+    "version": "10.1.0",
     "jlink": "V644e"
   },
   "scripts": {
