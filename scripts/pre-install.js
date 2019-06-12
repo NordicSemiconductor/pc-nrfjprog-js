@@ -38,7 +38,7 @@
  * nRF5x Command Line Tools (nrfjprog) is required for pc-nrfjprog-js to function.
  * This script checks if nrfjprog libraries are found, and installs them if required.
  *
- * On Linux/macOS, the nrfjprog artifact (tar) is extracted into nrfjprog/lib. This
+ * On Linux/macOS, the nrfjprog artifact (tar) is extracted into nrfjprog/ directory. This
  * directory will then contain both headers (required when building) and libraries
  * (required at runtime).
  *
@@ -54,14 +54,12 @@ const tar = require('tar');
 const fs = require('fs');
 const sander = require('sander');
 const path = require('path');
-const child_process = require('child_process');
 const semver = require('semver');
 
 const { nrfjprog } = require('../package.json');
 
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const DOWNLOAD_URL = 'https://github.com/NordicSemiconductor/pc-nrfjprog-js/releases/download/nrfjprog';
-const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 
 const requiredVersion = nrfjprog.version;
 const platform = `${process.platform}_${process.arch}`;
@@ -139,9 +137,8 @@ function removeDirIfExists(dirPath) {
 
 function installNrfjprog(pathToArtifact) {
     if (pathToArtifact.endsWith('.tar') || pathToArtifact.endsWith('.tar.gz')) {
-        console.log(`Extracting ${pathToArtifact} to ${LIB_DIR}...`);
-        return removeDirIfExists(LIB_DIR)
-            .then(() => extractTarFile(pathToArtifact, DOWNLOAD_DIR));
+        console.log(`Extracting ${pathToArtifact} to ${DOWNLOAD_DIR}...`);
+        return extractTarFile(pathToArtifact, DOWNLOAD_DIR);
     }
     return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
 }
@@ -167,7 +164,8 @@ getLibraryVersion()
             console.log('Trying to install nrfjprog');
 
             let exitCode = 0;
-            return downloadFile()
+            return removeDirIfExists(DOWNLOAD_DIR)
+                .then(() => downloadFile())
                 // without this sleep windows install fails with EBUSY
                 .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
                 .then(() => installNrfjprog(destinationFile))
