@@ -159,7 +159,7 @@ std::string OSFilesGetTempFolderPath()
  * "/tmp" is used. */
 std::string TempFile::getTempFileName()
 {
-    std::string tempFileNameTemplate = OSFilesGetTempFolderPath() + "/nRFXXXXXX.hex");
+    std::string tempFileNameTemplate = OSFilesGetTempFolderPath() + "/nRFXXXXXX.hex";
 
     std::vector<char> tempFileName(COMMON_MAX_PATH, '\0');
 
