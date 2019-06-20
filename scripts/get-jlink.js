@@ -102,8 +102,6 @@ async function downloadChecksum() {
     return data.split(' ').shift();
 }
 
-
-
 async function downloadFile() {
     const hash = crypto.createHash('md5');
     const expectedChecksum = await downloadChecksum();
