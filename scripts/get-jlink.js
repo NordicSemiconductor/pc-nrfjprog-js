@@ -50,6 +50,7 @@ const sander = require('sander');
 const path = require('path');
 const sudo = require('sudo-prompt');
 const regedit = require('regedit');
+const crypto = require('crypto');
 const { version, nrfjprog } = require('../package.json');
 
 commander
@@ -91,25 +92,46 @@ function getCurrentJLinkVersion() {
     });
 }
 
+async function downloadChecksum() {
+    console.log('Downloading', `${fileUrl}.md5`);
+    const { status, data } = await axios.get(`${fileUrl}.md5`);
+    if (status !== 200) {
+        throw new Error(`Unable to download ${fileUrl}.md5. ` +
+            `Got status code ${status}`);
+    }
+    return data.split(' ').shift();
+}
+
+
+
 async function downloadFile() {
+    const hash = crypto.createHash('md5');
+    const expectedChecksum = await downloadChecksum();
     console.log('Downloading', fileUrl);
-    const response = await axios.get(
+    const { status, data: stream } = await axios.get(
         fileUrl,
         { responseType: 'stream' },
     );
-    const statusCode = response.status;
-    if (statusCode !== 200) {
+    if (status !== 200) {
         throw new Error(`Unable to download ${fileUrl}. ` +
-            `Got status code ${statusCode}`);
+            `Got status code ${status}`);
     }
     console.log('Saving', destinationFile);
     await sander.mkdir(path.dirname(destinationFile));
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destinationFile);
-        response.data.pipe(file);
-        response.data.on('error', reject);
-        response.data.on('end', () => {
+        stream.pipe(file);
+        stream.on('data', data => hash.update(data));
+        stream.on('error', reject);
+        stream.on('end', () => {
             file.end();
+            const calculatedChecksum = hash.digest('hex');
+            if (calculatedChecksum !== expectedChecksum) {
+                fs.unlinkSync(destinationFile);
+                console.log('Calculated checksum:', calculatedChecksum);
+                console.log('Expected checksum:  ', expectedChecksum);
+                reject(new Error('Checksum verification failed.'));
+            }
             resolve();
         });
     });
@@ -140,4 +162,8 @@ Promise.resolve()
     })
     .then(() => downloadFile(fileUrl))
     .then(() => commander.install && installJLink())
+    .catch(error => {
+        console.error('\n!!! EXCEPTION', error.message);
+        process.exit(-1);
+    })
     .then(process.exit);
