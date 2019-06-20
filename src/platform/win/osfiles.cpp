@@ -92,15 +92,6 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-std::string TempFile::concatPaths(const std::string &basePath, const std::string &relativePath)
-{
-    std::vector<char> buffer(MAX_PATH);
-
-    PathCombine(buffer.data(), basePath.c_str(), relativePath.c_str());
-
-    return std::string(buffer.data());
-}
-
 bool AbstractFile::pathExists(const char *path)
 {
     return PathFileExists(path) == TRUE;
