@@ -55,6 +55,7 @@ const fs = require('fs');
 const sander = require('sander');
 const path = require('path');
 const semver = require('semver');
+const crypto = require('crypto');
 
 const { nrfjprog } = require('../package.json');
 
@@ -67,27 +68,47 @@ const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
 const fileUrl = `${DOWNLOAD_URL}/${filename}`;
 const destinationFile = path.join(DOWNLOAD_DIR, filename);
 
+async function downloadChecksum() {
+    console.log('Downloading', `${fileUrl}.md5`);
+    const { status, data } = await axios.get(`${fileUrl}.md5`);
+    if (status !== 200) {
+        throw new Error(`Unable to download ${fileUrl}.md5. ` +
+            `Got status code ${status}`);
+    }
+    return data.split(' ').shift();
+}
+
 async function downloadFile() {
+    const hash = crypto.createHash('md5');
+    const expectedChecksum = await downloadChecksum();
+
     console.log(`Downloading nrfjprog from ${fileUrl}...`);
 
     await sander.mkdir(DOWNLOAD_DIR);
 
-    const response = await axios.get(
+    const { status, data: stream } = await axios.get(
         `${fileUrl}`,
         {responseType: 'stream'}
     );
-    const statusCode = response.status;
-    if (statusCode !== 200) {
+    if (status !== 200) {
         throw new Error(`Unable to download ${fileUrl}. ` +
-            `Got status code ${statusCode}`);
+            `Got status code ${status}`);
     }
 
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destinationFile);
-        response.data.pipe(file);
-        response.data.on('error', reject);
-        response.data.on('end', () => {
+        stream.pipe(file);
+        stream.on('data', data => hash.update(data));
+        stream.on('error', reject);
+        stream.on('end', () => {
             file.end();
+            const calculatedChecksum = hash.digest('hex');
+            if (calculatedChecksum !== expectedChecksum) {
+                fs.unlinkSync(destinationFile);
+                console.log('Calculated checksum:', calculatedChecksum);
+                console.log('Expected checksum:  ', expectedChecksum);
+                reject(new Error('Checksum verification failed.'));
+            }
             resolve();
         });
     });
