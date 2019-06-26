@@ -55,7 +55,7 @@ describe('Handles race conditions gracefully', () => {
 
     it('allows multiple, fast, calls in a row', done => {
         let errorCount = 0;
-        const getVersionAttempts = 50;
+        const getVersionAttempts = 20;
         let callbackCalled = 0;
 
         const getVersionCallback = (err) => {
