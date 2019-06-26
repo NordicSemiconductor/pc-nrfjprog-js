@@ -41,7 +41,7 @@ const instance = new nRFjprog.nRFjprog();
 
 Object.keys(nRFjprog).forEach(key => {
     if (key === 'setLibrarySearchPath') {
-        nRFjprog.setLibrarySearchPath(path.join(__dirname, 'nrfjprog', 'lib'));
+        nRFjprog.setLibrarySearchPath(path.join(__dirname, 'nrfjprog'));
         instance.getLibraryVersion(err => {
             if (err) {
                 // we are probably in asar context, let's try another way

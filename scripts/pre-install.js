@@ -38,7 +38,7 @@
  * nRF5x Command Line Tools (nrfjprog) is required for pc-nrfjprog-js to function.
  * This script checks if nrfjprog libraries are found, and installs them if required.
  *
- * On Linux/macOS, the nrfjprog artifact (tar) is extracted into nrfjprog/lib. This
+ * On Linux/macOS, the nrfjprog artifact (tar) is extracted into nrfjprog/ directory. This
  * directory will then contain both headers (required when building) and libraries
  * (required at runtime).
  *
@@ -54,14 +54,13 @@ const tar = require('tar');
 const fs = require('fs');
 const sander = require('sander');
 const path = require('path');
-const child_process = require('child_process');
 const semver = require('semver');
+const crypto = require('crypto');
 
 const { nrfjprog } = require('../package.json');
 
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
 const DOWNLOAD_URL = 'https://github.com/NordicSemiconductor/pc-nrfjprog-js/releases/download/nrfjprog';
-const LIB_DIR = path.join(DOWNLOAD_DIR, 'lib');
 
 const requiredVersion = nrfjprog.version;
 const platform = `${process.platform}_${process.arch}`;
@@ -69,27 +68,47 @@ const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
 const fileUrl = `${DOWNLOAD_URL}/${filename}`;
 const destinationFile = path.join(DOWNLOAD_DIR, filename);
 
+async function downloadChecksum() {
+    console.log('Downloading', `${fileUrl}.md5`);
+    const { status, data } = await axios.get(`${fileUrl}.md5`);
+    if (status !== 200) {
+        throw new Error(`Unable to download ${fileUrl}.md5. ` +
+            `Got status code ${status}`);
+    }
+    return data.split(' ').shift();
+}
+
 async function downloadFile() {
+    const hash = crypto.createHash('md5');
+    const expectedChecksum = await downloadChecksum();
+
     console.log(`Downloading nrfjprog from ${fileUrl}...`);
 
     await sander.mkdir(DOWNLOAD_DIR);
 
-    const response = await axios.get(
+    const { status, data: stream } = await axios.get(
         `${fileUrl}`,
         {responseType: 'stream'}
     );
-    const statusCode = response.status;
-    if (statusCode !== 200) {
+    if (status !== 200) {
         throw new Error(`Unable to download ${fileUrl}. ` +
-            `Got status code ${statusCode}`);
+            `Got status code ${status}`);
     }
 
     return new Promise((resolve, reject) => {
         const file = fs.createWriteStream(destinationFile);
-        response.data.pipe(file);
-        response.data.on('error', reject);
-        response.data.on('end', () => {
+        stream.pipe(file);
+        stream.on('data', data => hash.update(data));
+        stream.on('error', reject);
+        stream.on('end', () => {
             file.end();
+            const calculatedChecksum = hash.digest('hex');
+            if (calculatedChecksum !== expectedChecksum) {
+                fs.unlinkSync(destinationFile);
+                console.log('Calculated checksum:', calculatedChecksum);
+                console.log('Expected checksum:  ', expectedChecksum);
+                reject(new Error('Checksum verification failed.'));
+            }
             resolve();
         });
     });
@@ -139,9 +158,8 @@ function removeDirIfExists(dirPath) {
 
 function installNrfjprog(pathToArtifact) {
     if (pathToArtifact.endsWith('.tar') || pathToArtifact.endsWith('.tar.gz')) {
-        console.log(`Extracting ${pathToArtifact} to ${LIB_DIR}...`);
-        return removeDirIfExists(LIB_DIR)
-            .then(() => extractTarFile(pathToArtifact, DOWNLOAD_DIR));
+        console.log(`Extracting ${pathToArtifact} to ${DOWNLOAD_DIR}...`);
+        return extractTarFile(pathToArtifact, DOWNLOAD_DIR);
     }
     return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
 }
@@ -167,7 +185,8 @@ getLibraryVersion()
             console.log('Trying to install nrfjprog');
 
             let exitCode = 0;
-            return downloadFile()
+            return removeDirIfExists(DOWNLOAD_DIR)
+                .then(() => downloadFile())
                 // without this sleep windows install fails with EBUSY
                 .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
                 .then(() => installNrfjprog(destinationFile))

@@ -71,85 +71,6 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
     }
 }
 
-errorcode_t OSFilesFindLibraryByHKey(HKEY rootKey, std::string &libraryPath,
-                                     const std::string &fileName)
-{
-    HKEY key;
-    HKEY innerKey;
-
-    std::vector<char> installPath(COMMON_MAX_PATH, '\0');
-    DWORD installPathSize = installPath.size();
-
-    /* Search for JLinkARM in the Local Machine Key.  */
-    if (RegOpenKeyEx(rootKey, "Software\\Nordic Semiconductor\\nrfjprog", 0,
-                     static_cast<uint32_t>(KEY_QUERY_VALUE) |
-                         static_cast<uint32_t>(KEY_ENUMERATE_SUB_KEYS),
-                     &key) == ERROR_SUCCESS)
-    {
-        std::vector<TCHAR> achKey(MAX_KEY_LENGTH, '\0'); // buffer for subkey name
-        DWORD cbName;                                    // size of name string
-        std::vector<TCHAR> achClass(MAX_PATH, '\0');     // buffer for class name
-        DWORD cchClassName = MAX_PATH;                   // size of class string
-        DWORD cSubKeys     = 0u;                         // number of subkeys
-        DWORD cbMaxSubKey;                               // longest subkey size
-        DWORD cchMaxClass;                               // longest class string
-        DWORD cValues;                                   // number of values for key
-        DWORD cchMaxValue;                               // longest value name
-        DWORD cbMaxValueData;                            // longest value data
-        DWORD cbSecurityDescriptor;                      // size of security descriptor
-        FILETIME ftLastWriteTime;                        // last write time
-
-        RegQueryInfoKey(key,                   // key handle
-                        achClass.data(),       // buffer for class name
-                        &cchClassName,         // size of class string
-                        nullptr,               // reserved
-                        &cSubKeys,             // number of subkeys
-                        &cbMaxSubKey,          // longest subkey size
-                        &cchMaxClass,          // longest class string
-                        &cValues,              // number of values for this key
-                        &cchMaxValue,          // longest value name
-                        &cbMaxValueData,       // longest value data
-                        &cbSecurityDescriptor, // security descriptor
-                        &ftLastWriteTime);     // last write time
-
-        // Enumerate the subkeys, until RegEnumKeyEx fails.
-        if (cSubKeys != 0u)
-        {
-            cbName = MAX_KEY_LENGTH;
-            if (RegEnumKeyEx(key, cSubKeys - 1, achKey.data(), &cbName, nullptr, nullptr, nullptr,
-                             &ftLastWriteTime) == ERROR_SUCCESS)
-            {
-                if (RegOpenKeyEx(key, achKey.data(), 0, KEY_QUERY_VALUE, &innerKey) ==
-                    ERROR_SUCCESS)
-                {
-                    /* If it is found, read the install path. */
-                    if (RegQueryValueEx(innerKey, "InstallPath", nullptr, nullptr,
-                                        reinterpret_cast<LPBYTE>(installPath.data()),
-                                        &installPathSize) == ERROR_SUCCESS)
-                    {
-                        /* Copy, check it exists and return if it does. */
-                        libraryPath.assign(installPath.data());
-                        libraryPath.append(fileName);
-                        RegCloseKey(innerKey);
-                        RegCloseKey(key);
-                        if (TempFile::pathExists(libraryPath.c_str()))
-                        {
-                            return errorcode_t::JsSuccess;
-                        }
-                    }
-
-                    /* In case we did not obtain the path, for whatever reason, we close the key. */
-                    RegCloseKey(innerKey);
-                }
-            }
-        }
-        RegCloseKey(key);
-    }
-
-    /* Search for JLinkARM in the Current User Key.  */
-    return errorcode_t::CouldNotFindJprogDLL;
-}
-
 errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
 {
     // Try to find the DLLs from the path given to OSFilesSetLibrarySearchPath()
@@ -168,28 +89,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
         return errorcode_t::JsSuccess;
     }
 
-    // If that fails, try to find the DLLs when installed in the whole machine (for all users)
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    errorcode_t retCode = OSFilesFindLibraryByHKey(HKEY_LOCAL_MACHINE, libraryPath, fileName);
-    if (retCode == errorcode_t::JsSuccess)
-    {
-        return retCode;
-    }
-
-    // If that fails, try to find the DLLs when installed for the current user only
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-    retCode = OSFilesFindLibraryByHKey(HKEY_CURRENT_USER, libraryPath, fileName);
-
-    return retCode;
-}
-
-std::string TempFile::concatPaths(const std::string &basePath, const std::string &relativePath)
-{
-    std::vector<char> buffer(MAX_PATH);
-
-    PathCombine(buffer.data(), basePath.c_str(), relativePath.c_str());
-
-    return std::string(buffer.data());
+    return errorcode_t::CouldNotFindJprogDLL;
 }
 
 bool AbstractFile::pathExists(const char *path)

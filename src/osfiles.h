@@ -92,7 +92,6 @@ class TempFile : public AbstractFile
     std::string writeTempFile(const std::string &fileContent);
     std::string getTempFileName();
     void deleteFile();
-    std::string concatPaths(const std::string &basePath, const std::string &relativePath);
 
     enum TempFileErrorcode { TempNoError, TempPathNotFound, TempCouldNotCreateFile } error;
 };
