@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfjprog-js",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "nrfjprog": {
@@ -64,7 +64,7 @@
     "jest-bamboo-formatter": "1.0.1",
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3",
-    "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#semver:^0.0.1",
+    "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#semver:^0.1.0",
     "node-pre-gyp-github": "1.4.3"
   },
   "jest": {
