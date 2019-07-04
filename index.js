@@ -39,12 +39,19 @@ const nRFjprog = require('bindings')('pc-nrfjprog-js');
 
 const instance = new nRFjprog.nRFjprog();
 
+// When this module is bundled with nRFConnect application the location of
+// nRFjprog libraries depend on the target platform, therefore we give the
+// possibility to nRFConnect to set the expected location via environment
+// variable. If not set, the path is expected to be under this module:
+const envLibPath = process.env.NRFJPROG_LIBRARY_PATH;
+const moduleLibPath = path.join(__dirname, 'nrfjprog');
+
 Object.keys(nRFjprog).forEach(key => {
     if (key === 'setLibrarySearchPath') {
-        nRFjprog.setLibrarySearchPath(path.join(__dirname, 'nrfjprog'));
+        nRFjprog.setLibrarySearchPath(envLibPath || moduleLibPath);
         instance.getLibraryVersion(err => {
             if (err) {
-                // we are probably in asar context, let's try another way
+                // obsolete fallback, only works in some cases
                 nRFjprog.setLibrarySearchPath(process.cwd());
             }
         });
