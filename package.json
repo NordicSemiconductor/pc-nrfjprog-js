@@ -1,6 +1,6 @@
 {
   "name": "pc-nrfjprog-js",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "nrfjprog": {
@@ -14,7 +14,6 @@
     "clean-prebuilt": "node-pre-gyp clean",
     "package-prebuilt": "node-pre-gyp package",
     "publish-prebuilt": "node-pre-gyp-github publish",
-    "publish-all-prebuilt": "node scripts/publish-all-prebuilt.js",
     "install": "node scripts/pre-install.js && ( nrfconnect-build fetch-draft || node-pre-gyp install --fallback-to-build=false || node build.js )",
     "docs": "jsdoc doc -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
@@ -45,24 +44,24 @@
   "author": "Nordic Semiconductor ASA",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "bindings": "^1.5.0",
     "chalk": "^2.4.2",
-    "cmake-js": "^5.1.0",
+    "cmake-js": "^5.3.0",
     "commander": "^2.20.0",
     "nan": "2.12.1",
-    "node-pre-gyp": "^0.12.0",
+    "node-pre-gyp": "^0.13.0",
     "regedit": "^3.0.2",
     "sander": "^0.6.0",
-    "semver": "^5.6.0",
-    "sudo-prompt": "^8.2.5",
-    "tar": "^4.4.8"
+    "semver": "^6.2.0",
+    "sudo-prompt": "^9.0.0",
+    "tar": "^4.4.10"
   },
   "devDependencies": {
     "gh-pages": "^2.0.1",
-    "jest": "^24.1.0",
+    "jest": "^24.8.0",
     "jest-bamboo-formatter": "1.0.1",
-    "jsdoc": "^3.5.5",
+    "jsdoc": "^3.6.2",
     "minami": "^1.2.3",
     "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#semver:^0.1.0",
     "node-pre-gyp-github": "1.4.3"
