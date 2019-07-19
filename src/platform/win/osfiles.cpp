@@ -39,6 +39,7 @@
 #endif
 
 #include <iostream>
+#include <vector>
 
 #include "../../osfiles.h"
 #include "../../utility/conversion.h"
@@ -94,7 +95,11 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
 bool AbstractFile::pathExists(const char *path)
 {
-    return PathFileExists(path) == TRUE;
+    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
+    auto wstr = std::vector<wchar_t>(wchars_num);
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, wstr.data(), wchars_num);
+
+    return PathFileExistsW(wstr.data()) == TRUE;
 }
 
 std::string TempFile::getTempFileName()
