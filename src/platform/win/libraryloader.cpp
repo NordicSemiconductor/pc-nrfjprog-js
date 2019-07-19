@@ -34,6 +34,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <vector>
+
 #include "../../libraryloader.h"
 
 #include <windows.h>
@@ -45,7 +47,11 @@ LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *fun
 
 LibraryHandleType LibraryLoad(const std::string &path)
 {
-    return LoadLibrary(path.c_str());
+    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, NULL, 0);
+    auto wstr = std::vector<wchar_t>(wchars_num);
+    MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wstr.data(), wchars_num);
+
+    return LoadLibraryW(wstr.data());
 }
 
 void LibraryFree(LibraryHandleType libraryHandle)
