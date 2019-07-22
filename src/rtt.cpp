@@ -304,7 +304,7 @@ void RTT::log(const std::string &msg)
         return;
     }
 
-    pRTTStatic->logMessage.append(msg);
+    pRTTStatic->logMessage.append(msg + '\n');
 }
 
 bool RTT::isStarted()
