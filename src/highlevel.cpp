@@ -377,7 +377,7 @@ void HighLevel::log(const std::string &msg)
         return;
     }
 
-    pHighlvlStatic->logMessage.append(msg);
+    pHighlvlStatic->logMessage.append(msg + '\n');
 }
 
 void HighLevel::resetLog()
