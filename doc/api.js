@@ -472,6 +472,25 @@ export function program(serialNumber, filename, options, progressCallback, callb
  */
 export function programDFU(serialNumber, filename, progressCallback, callback) {}
 
+/**
+ * Async function to push a DFU update to a mcuboot based device in serial recovery mode.
+ * <br/>
+ *
+ * @example
+ * nrfjprogjs.programDFU(-1, "/some/path/nrf52832_abcd.hex", "COM1", 15000, function(progress) { console.log(progress) }, function(err) {
+  *      if (err) throw err;
+  * } );
+  *
+  * @param {integer} serialNumber Fake serial number, must be non zero
+  * @param {string} filename Filename of the <tt>.hex</tt> file containing the mcuboot update
+  * @param {string} uart The connected device UART
+  * @param {integer} timeout Timeout in milliseconds. For DFU it must be more than 11000 because of response time when starting programming
+  * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
+  * @param {Function} callback A callback function to handle the async response.
+  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+  */
+ export function programMcuBootDFU(serialNumber, filename, uart, timeout, progressCallback, callback) {}
+ 
 
 /**
  * Async function to read memory from the device and write the results into a file.

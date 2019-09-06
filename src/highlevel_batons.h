@@ -196,6 +196,18 @@ class ProgramDFUBaton : public Baton
     std::string filename;
 };
 
+class ProgramMcuBootDFUBaton : public Baton
+{
+  public:
+    ProgramMcuBootDFUBaton()
+        : Baton("program", 0, true, MCUBOOT_PROBE)
+    {}
+    std::string filename;
+    std::string uart;
+    uint32_t responseTimeout;
+};
+
+
 class VerifyBaton : public Baton
 {
   public:
