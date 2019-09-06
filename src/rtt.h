@@ -36,7 +36,7 @@
 #ifndef RTT_H
 #define RTT_H
 
-#include <nan.h>
+#include "nan_wrap.h"
 
 #include <functional>
 #include <memory>
