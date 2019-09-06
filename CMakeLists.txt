@@ -30,11 +30,18 @@ include_directories(${NRFJPROG_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
 include_directories(SYSTEM ${CMAKE_JS_INC})
 
 # Specify source files
-file (GLOB SOURCE_FILES
-    "src/*.cpp"
-    "src/*.h"
-    "src/utility/*.cpp"
-    "src/utility/*.h"
+set(SOURCE_FILES
+    src/export.cpp
+    src/highlevel_helpers.cpp
+    src/highlevel.cpp
+    src/highlevelwrapper.cpp
+    src/nrfjprogwrapper.cpp
+    src/osfiles.cpp
+    src/rtt_helpers.cpp
+    src/rtt.cpp
+    src/utility/conversion.cpp
+    src/utility/errormessage.cpp
+    src/utility/utility.cpp
 )
 
 # This line will tell CMake that we're building a shared library
