@@ -36,7 +36,6 @@
 
 #include "errormessage.h"
 
-#include <iostream>
 #include <sstream>
 
 #include "../highlevel_common.h"
