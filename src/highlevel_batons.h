@@ -69,9 +69,9 @@ class Baton
     const std::string name;
     const bool mayHaveProgressCallback;
 
-    probe_type_t probeType;
     uint32_t serialNumber;
     uint32_t result;
+    probe_type_t probeType;
     nrfjprogdll_err_t lowlevelError;
 
     std::unique_ptr<uv_work_t> req;
