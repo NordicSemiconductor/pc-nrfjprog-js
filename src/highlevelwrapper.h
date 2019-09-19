@@ -60,10 +60,10 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_dfu_init)(Probe_handle_t *dfu_probe,
                                                  uint32_t snr, coprocessor_t coprocessor,
                                                  const char *jlink_path);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_mcuboot_dfu_init)(Probe_handle_t *dfu_probe,
-                                            const char * uart,
-                                            uint32_t response_timeout,
                                             progress_callback * prog_cb,
-                                            log_callback *log_cb);
+                                            log_callback *log_cb,
+                                            const char * uart,
+                                            uint32_t response_timeout);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_uninit)(Probe_handle_t *debug_probe);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_get_library_info)(Probe_handle_t debug_probe,
                                                          library_info_t *library_info);

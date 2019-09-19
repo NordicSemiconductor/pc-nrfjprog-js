@@ -259,10 +259,11 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
             initError = pHighlvlStatic->libraryFunctions.mcuboot_dfu_init(
                 &pHighlvlStatic->probe,
-                baton2->uart.c_str(),
-                baton2->responseTimeout,
                 &HighLevel::progressCallback,
-                &HighLevel::log);
+                &HighLevel::log,
+                baton2->uart.c_str(),
+                baton2->responseTimeout
+            );
         }
         else
         {
