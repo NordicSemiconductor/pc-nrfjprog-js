@@ -204,6 +204,7 @@ class ProgramMcuBootDFUBaton : public Baton
     {}
     std::string filename;
     std::string uart;
+    uint32_t baudRate;
     uint32_t responseTimeout;
 };
 

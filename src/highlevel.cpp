@@ -262,6 +262,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
                 &HighLevel::progressCallback,
                 &HighLevel::log,
                 baton2->uart.c_str(),
+                baton2->baudRate,
                 baton2->responseTimeout
             );
         }
@@ -946,6 +947,9 @@ NAN_METHOD(HighLevel::ProgramMcuBootDFU)
         argumentCount++;
 
         baton->uart = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->baudRate = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
         baton->responseTimeout = Convert::getNativeUint32(parameters[argumentCount]);
