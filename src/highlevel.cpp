@@ -286,7 +286,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         if (baton->serialNumber != 0)
         {
-            if (baton->probeType != DFU_PROBE)
+            if (baton->probeType != DFU_PROBE && baton->probeType != MCUBOOT_PROBE)
             {
                 nrfjprogdll_err_t resetError =
                     pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
@@ -940,7 +940,7 @@ NAN_METHOD(HighLevel::ProgramMcuBootDFU)
 {
     parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
                                         int &argumentCount) -> Baton * {
-        std::unique_ptr<ProgramMcuBootDFUBaton> baton(new ProgramMcuBootDFUBaton());
+        std::unique_ptr<ProgramMcuBootDFUBaton> baton = std::make_unique<ProgramMcuBootDFUBaton>();
 
         baton->filename = Convert::getNativeString(parameters[argumentCount]);
         argumentCount++;
