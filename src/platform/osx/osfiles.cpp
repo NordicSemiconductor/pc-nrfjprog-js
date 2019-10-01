@@ -125,11 +125,6 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-std::string TempFile::concatPaths(const std::string &basePath, const std::string &relativePath)
-{
-    return basePath + '/' + relativePath;
-}
-
 bool AbstractFile::pathExists(const char *path)
 {
     struct stat buffer;
@@ -160,7 +155,7 @@ std::string OSFilesGetTempFolderPath(void)
  * "/tmp" is used. */
 std::string TempFile::getTempFileName()
 {
-    std::string tempFileNameTemplate = concatPaths(OSFilesGetTempFolderPath(), "nRFXXXXXX.hex");
+    std::string tempFileNameTemplate = OSFilesGetTempFolderPath() + "/nRFXXXXXX.hex";
 
     std::vector<char> tempFileName(COMMON_MAX_PATH, '\0');
 
