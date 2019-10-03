@@ -36,7 +36,6 @@
 
 #include "highlevel.h"
 
-#include <iostream>
 #include <mutex>
 #include <queue>
 #include <sstream>
@@ -254,6 +253,19 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
                 &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
                 baton->serialNumber, CP_MODEM, nullptr);
         }
+        else if (baton->probeType == MCUBOOT_PROBE)
+        {
+            const auto baton2 = dynamic_cast<ProgramMcuBootDFUBaton*>(baton);
+
+            initError = pHighlvlStatic->libraryFunctions.mcuboot_dfu_init(
+                &pHighlvlStatic->probe,
+                &HighLevel::progressCallback,
+                &HighLevel::log,
+                baton2->uart.c_str(),
+                baton2->baudRate,
+                baton2->responseTimeout
+            );
+        }
         else
         {
             initError = pHighlvlStatic->libraryFunctions.probe_init(
@@ -275,7 +287,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         if (baton->serialNumber != 0)
         {
-            if (baton->probeType != DFU_PROBE)
+            if (baton->probeType != DFU_PROBE && baton->probeType != MCUBOOT_PROBE)
             {
                 nrfjprogdll_err_t resetError =
                     pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
@@ -469,6 +481,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
 
     Nan::SetPrototypeMethod(target, "program", Program);
     Nan::SetPrototypeMethod(target, "programDFU", ProgramDFU);
+    Nan::SetPrototypeMethod(target, "programMcuBootDFU", ProgramMcuBootDFU);
     Nan::SetPrototypeMethod(target, "readToFile", ReadToFile);
     Nan::SetPrototypeMethod(target, "verify", Verify);
     Nan::SetPrototypeMethod(target, "erase", Erase);
@@ -916,6 +929,53 @@ NAN_METHOD(HighLevel::ProgramDFU)
         options.chip_erase_mode = ERASE_NONE;
         options.qspi_erase_mode = ERASE_NONE;
         options.reset           = RESET_NONE;
+
+        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(), options);
+        return programResult;
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(HighLevel::ProgramMcuBootDFU)
+{
+    parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
+                                        int &argumentCount) -> Baton * {
+        std::unique_ptr<ProgramMcuBootDFUBaton> baton = std::make_unique<ProgramMcuBootDFUBaton>();
+
+        baton->filename = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->uart = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->baudRate = Convert::getNativeUint32(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->responseTimeout = Convert::getNativeUint32(parameters[argumentCount]);
+        argumentCount++;
+
+        return baton.release();
+    };
+
+    execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
+        auto baton                      = dynamic_cast<ProgramMcuBootDFUBaton *>(b);
+        nrfjprogdll_err_t programResult = SUCCESS;
+
+        FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);
+
+        if (!file.exists())
+        {
+            log(file.errormessage() + "\n");
+            return INVALID_PARAMETER;
+        }
+
+        std::string filename = file.getFileName();
+        program_options_t options;
+        options.verify          = VERIFY_NONE;
+        options.chip_erase_mode = ERASE_NONE;
+        options.qspi_erase_mode = ERASE_NONE;
+        options.reset           = RESET_SYSTEM;
 
         programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(), options);
         return programResult;

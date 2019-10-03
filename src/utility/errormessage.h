@@ -39,7 +39,7 @@
 
 #include "../common.h"
 #include "DllCommonDefinitions.h"
-#include <nan.h>
+#include "../nan_wrap.h"
 
 #define CUSTOM_ARGUMENT_PARSE_ERROR (-1)
 

@@ -39,7 +39,7 @@
 
 #include "../common.h"
 #include <chrono>
-#include <nan.h>
+#include "../nan_wrap.h"
 
 class Convert
 {

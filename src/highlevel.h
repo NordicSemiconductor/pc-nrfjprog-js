@@ -36,7 +36,7 @@
 #ifndef HIGHLEVEL_H
 #define HIGHLEVEL_H
 
-#include <nan.h>
+#include "nan_wrap.h"
 
 #include <functional>
 #include <memory>
@@ -81,6 +81,9 @@ class HighLevel : public Nan::ObjectWrap
                                 // qspi_erase_mode, reset}, callback(progress), callback(error)
     static NAN_METHOD(ProgramDFU); // Params: serialnumber, filename, callback(progress),
                                    // callback(error)
+    static NAN_METHOD(ProgramMcuBootDFU); // Params: serialnumber, filename, callback(progress),
+                                   // callback(error)
+
     static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode,
                                    // readuicr, readqspi}, callback(progress), callback(error)
     static NAN_METHOD(Verify);     // Params: serialnumber, filename, callback(progress),

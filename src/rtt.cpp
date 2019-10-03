@@ -674,7 +674,7 @@ NAN_METHOD(RTT::Write)
         if (info[argumentCount]->IsString())
         {
             baton->data   = Convert::getVectorForChar(info[argumentCount]);
-            baton->length = Convert::getNativeString(info[argumentCount]).length();
+            baton->length = static_cast<uint32_t>(Convert::getNativeString(info[argumentCount]).length());
         }
         else
         {

@@ -15,5 +15,6 @@ add_compile_options(
 set(PLATFORM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/linux)
 
 file (GLOB PLATFORM_SOURCE_FILES
-    "src/platform/linux/*.cpp"
+    src/platform/linux/libraryloader.cpp
+    src/platform/linux/osfiles.cpp
 )

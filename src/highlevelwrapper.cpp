@@ -84,6 +84,7 @@ errorcode_t loadHighLevelFunctions(LibraryFunctionPointersType *libraryFunctions
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_connected_probes);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(probe_init);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(dfu_init);
+    LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(mcuboot_dfu_init);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(probe_uninit);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_library_info);
     LOAD_FUNCTION_POINTER_RETURN_ON_ERROR(get_probe_info);
