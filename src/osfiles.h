@@ -41,7 +41,7 @@
 
 #include <memory>
 
-#include <nan.h>
+#include "nan_wrap.h"
 
 #define COMMON_MAX_PATH (4096) /* Arbitrarily selected MAX_PATH for every platform. */
 #define COMMON_MAX_COMMAND_LINE                                                                    \

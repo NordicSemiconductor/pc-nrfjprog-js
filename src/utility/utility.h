@@ -37,7 +37,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <nan.h>
+#include "../nan_wrap.h"
 
 class Utility
 {

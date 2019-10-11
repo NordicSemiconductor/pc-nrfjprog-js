@@ -4,8 +4,8 @@
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "nrfjprog": {
-    "version": "10.3.0",
-    "jlink": "V644e"
+    "version": "10.4.0",
+    "jlink": "V650b"
   },
   "scripts": {
     "build": "node build.js",

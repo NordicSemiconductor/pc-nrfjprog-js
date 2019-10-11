@@ -39,7 +39,7 @@
 #include "highlevel.h"
 #include "osfiles.h"
 #include "rtt.h"
-#include <nan.h>
+#include "nan_wrap.h"
 
 extern "C" {
 NAN_MODULE_INIT(init)
