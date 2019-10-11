@@ -1,6 +1,6 @@
 # pc-nrfjprog-js
 
-Node.js library that exposes the functionality of the [nRF5x Command-Line-Tools](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.tools/dita/tools/nrf5x_command_line_tools/nrf5x_command_line_tools_lpage.html?cp=5_1), used for development, programming, and debugging of Nordic Semiconductor's nRF5x SoCs (System on Chip).
+Node.js library that exposes the functionality of the [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools), used for development, programming, and debugging of Nordic Semiconductor's SoCs (System on Chip).
 
 ## Installing
 
@@ -31,17 +31,9 @@ Building from source requires the tools from Installing to be installed.
 
 ## Required setup
 
-Before using the library, some platform specific setup is required. If you are seeing errors like `Errorcode: CouldNotFindJprogDLL (0x2)` or `Errorcode: CouldNotLoadDLL (0x3)` then please check that the tools described below are properly installed.
+[SEGGER J-Link Software](https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack) must be downloaded and installed.
 
-### Windows
-
-Download [nRF-Command-Line-Tools](http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.tools%2Fdita%2Ftools%2Fnrf5x_command_line_tools%2Fnrf5x_installation.html) and run the installer (exe). This will install the required nrfjprog libraries and SEGGER J-Link.
-
-Note that the nRF-Command-Line-Tools for Windows is only available in 32-bit at the moment. This means that 32-bit Node.js is required in order to use pc-nrfjprog-js on Windows.
-
-### Linux/macOS
-
-[SEGGER J-Link](https://www.segger.com/downloads/jlink/) must be downloaded and installed. The required nRF-Command-Line-Tools libraries are bundled together with pc-nrfjprog-js on Linux/macOS, so they do not have to be installed.
+If you are seeing errors like `Errorcode: CouldNotLoadDLL (0x3)` then please check that the J-Link library is properly installed.
 
 ## API documentation
 

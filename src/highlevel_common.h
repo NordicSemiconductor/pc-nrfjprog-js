@@ -40,7 +40,7 @@
 #include "DllCommonDefinitions.h"
 #include "common.h"
 
-typedef enum { DFU_PROBE, DEBUG_PROBE } probe_type_t;
+typedef enum { MCUBOOT_PROBE, DFU_PROBE, DEBUG_PROBE } probe_type_t;
 
 typedef enum { INPUT_FORMAT_HEX_FILE, INPUT_FORMAT_HEX_STRING } input_format_t;
 

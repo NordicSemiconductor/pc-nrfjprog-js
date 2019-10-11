@@ -38,7 +38,7 @@
 #define RTT_HELPERS_H
 
 #include "DllCommonDefinitions.h"
-#include <nan.h>
+#include "nan_wrap.h"
 
 class ChannelInfo
 {

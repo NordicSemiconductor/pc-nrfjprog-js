@@ -44,7 +44,7 @@
 #include "../../osfiles.h"
 #include "../../utility/conversion.h"
 
-#include <nan.h>
+#include "../../nan_wrap.h"
 
 #include "Shlwapi.h"
 #include <windows.h>

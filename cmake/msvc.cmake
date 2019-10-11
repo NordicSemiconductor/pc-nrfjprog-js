@@ -11,5 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4200")
 set(PLATFORM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/win)
 
 file (GLOB PLATFORM_SOURCE_FILES
-    "src/platform/win/*.cpp"
+    src/platform/win/libraryloader.cpp
+    src/platform/win/osfiles.cpp
+    src/platform/win/win_delay_load_hook.cpp
 )

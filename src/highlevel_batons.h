@@ -69,9 +69,9 @@ class Baton
     const std::string name;
     const bool mayHaveProgressCallback;
 
-    probe_type_t probeType;
     uint32_t serialNumber;
     uint32_t result;
+    probe_type_t probeType;
     nrfjprogdll_err_t lowlevelError;
 
     std::unique_ptr<uv_work_t> req;
@@ -195,6 +195,19 @@ class ProgramDFUBaton : public Baton
     {}
     std::string filename;
 };
+
+class ProgramMcuBootDFUBaton : public Baton
+{
+  public:
+    ProgramMcuBootDFUBaton()
+        : Baton("program", 0, true, MCUBOOT_PROBE)
+    {}
+    std::string filename;
+    std::string uart;
+    uint32_t baudRate;
+    uint32_t responseTimeout;
+};
+
 
 class VerifyBaton : public Baton
 {
