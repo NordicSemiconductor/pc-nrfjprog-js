@@ -135,23 +135,46 @@
  *
  * @property {integer} deviceType
  *    Type of device. Value will be equal to one of the following predefined constants:<br/>
+ *
  *    <tt>nrfjprogjs.NRF51xxx_xxAA_REV1</tt><br/>
  *    <tt>nrfjprogjs.NRF51xxx_xxAA_REV2</tt><br/>
  *    <tt>nrfjprogjs.NRF51xxx_xxAA_REV3</tt><br/>
  *    <tt>nrfjprogjs.NRF51xxx_xxAB_REV3</tt><br/>
  *    <tt>nrfjprogjs.NRF51xxx_xxAC_REV3</tt><br/>
  *    <tt>nrfjprogjs.NRF51802_xxAA_REV3</tt><br/>
+ *    <tt>nrfjprogjs.NRF51801_xxAB_REV3</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF52805_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52805_xxAA_FUTURE</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF52810_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52810_xxAA_REV2<<</tt><br/>
+ *    <tt>nrfjprogjs.NRF52810_xxAA_FUTURE</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF52811_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52811_xxAA_FUTURE</tt><br/>
+ *
  *    <tt>nrfjprogjs.NRF52832_xxAA_ENGA</tt><br/>
  *    <tt>nrfjprogjs.NRF52832_xxAA_ENGB</tt><br/>
  *    <tt>nrfjprogjs.NRF52832_xxAA_REV1</tt><br/>
- *    <tt>nrfjprogjs.NRF52840_xxAA_ENGA</tt><br/>
+ *    <tt>nrfjprogjs.NRF52832_xxAA_REV2</tt><br/>
  *    <tt>nrfjprogjs.NRF52832_xxAA_FUTURE</tt><br/>
- *    <tt>nrfjprogjs.NRF52840_xxAA_FUTURE</tt><br/>
- *    <tt>nrfjprogjs.NRF52810_xxAA_REV1</tt><br/>
- *    <tt>nrfjprogjs.NRF52810_xxAA_FUTURE</tt><br/>
+ *
  *    <tt>nrfjprogjs.NRF52832_xxAB_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52832_xxAB_REV2</tt><br/>
  *    <tt>nrfjprogjs.NRF52832_xxAB_FUTURE</tt><br/>
- *    <tt>nrfjprogjs.NRF51801_xxAB_REV3</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF52833_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52833_xxAA_FUTURE</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF52840_xxAA_ENGA</tt><br/>
+ *    <tt>nrfjprogjs.NRF52840_xxAA_ENGB</tt><br/>
+ *    <tt>nrfjprogjs.NRF52840_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52840_xxAA_REV2</tt><br/>
+ *    <tt>nrfjprogjs.NRF52840_xxAA_FUTURE</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF9160_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF9160_xxAA_FUTURE</tt><br/>
  *
  * @property {integer} codeAddress  Memory address for the start of the non-volatile (flash) memory block.
  *   Typically <tt>0x0000 0000</tt>.
@@ -490,7 +513,7 @@ export function programDFU(serialNumber, filename, progressCallback, callback) {
   *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
   */
  export function programMcuBootDFU(serialNumber, filename, uart, timeout, progressCallback, callback) {}
- 
+
 
 /**
  * Async function to read memory from the device and write the results into a file.

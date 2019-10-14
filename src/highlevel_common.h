@@ -115,6 +115,7 @@ static name_map_t program_parameter_type_map = {NAME_MAP_ENTRY(INPUT_FORMAT_HEX_
                                                 NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)};
 
 static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
+                                        // nRF51
                                         NAME_MAP_ENTRY(NRF51xxx_xxAA_REV1),
                                         NAME_MAP_ENTRY(NRF51xxx_xxAA_REV2),
                                         NAME_MAP_ENTRY(NRF51xxx_xxAA_REV3),
@@ -122,11 +123,17 @@ static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
                                         NAME_MAP_ENTRY(NRF51xxx_xxAC_REV3),
                                         NAME_MAP_ENTRY(NRF51802_xxAA_REV3),
                                         NAME_MAP_ENTRY(NRF51801_xxAB_REV3),
+                                        // nRF52805
+                                        NAME_MAP_ENTRY(NRF52805_xxAA_REV1),
+                                        NAME_MAP_ENTRY(NRF52805_xxAA_FUTURE),
+                                        // nRF52810
                                         NAME_MAP_ENTRY(NRF52810_xxAA_REV1),
                                         NAME_MAP_ENTRY(NRF52810_xxAA_REV2),
                                         NAME_MAP_ENTRY(NRF52810_xxAA_FUTURE),
+                                        // nRF52811
                                         NAME_MAP_ENTRY(NRF52811_xxAA_REV1),
                                         NAME_MAP_ENTRY(NRF52811_xxAA_FUTURE),
+                                        // nRF52832
                                         NAME_MAP_ENTRY(NRF52832_xxAA_ENGA),
                                         NAME_MAP_ENTRY(NRF52832_xxAA_ENGB),
                                         NAME_MAP_ENTRY(NRF52832_xxAA_REV1),
@@ -135,11 +142,16 @@ static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
                                         NAME_MAP_ENTRY(NRF52832_xxAB_REV1),
                                         NAME_MAP_ENTRY(NRF52832_xxAB_REV2),
                                         NAME_MAP_ENTRY(NRF52832_xxAB_FUTURE),
+                                        // nRF52833
+                                        NAME_MAP_ENTRY(NRF52833_xxAA_REV1),
+                                        NAME_MAP_ENTRY(NRF52833_xxAA_FUTURE),
+                                        // nRF52840
                                         NAME_MAP_ENTRY(NRF52840_xxAA_ENGA),
                                         NAME_MAP_ENTRY(NRF52840_xxAA_ENGB),
                                         NAME_MAP_ENTRY(NRF52840_xxAA_REV1),
                                         NAME_MAP_ENTRY(NRF52840_xxAA_REV2),
                                         NAME_MAP_ENTRY(NRF52840_xxAA_FUTURE),
+                                        // nRF9160
                                         NAME_MAP_ENTRY(NRF9160_xxAA_REV1),
                                         NAME_MAP_ENTRY(NRF9160_xxAA_FUTURE)};
 
