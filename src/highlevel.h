@@ -41,8 +41,8 @@
 #include <functional>
 #include <memory>
 
-#include "highlevelwrapper.h"
 #include "osfiles.h"
+#include "highlevelnrfjprogdll.h"
 
 #include "utility/errormessage.h"
 
@@ -105,9 +105,6 @@ class HighLevel : public Nan::ObjectWrap
                              const bool hasSerialNumber);
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
-
-    static errorcode_t loadLibrary();
-    static void unloadLibrary();
 
     static void init(v8::Local<v8::FunctionTemplate> target);
 

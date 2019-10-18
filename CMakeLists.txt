@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.13)
 
 # Name of the project (will be the name of the plugin)
 project (pc-nrfjprog-js)
@@ -8,7 +8,16 @@ if(APPLE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 
-set(NRFJPROG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog)
+set(NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/share)
+
+message(STATUS "LOCATION: ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}")
+
+find_package(nRFCommandLineTools
+    10.4.0 EXACT
+    REQUIRED
+    COMPONENTS nrf::highlevelnrfjprog nrf::nrfjprogdll
+    PATHS ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}
+)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,7 +32,7 @@ else()
 endif()
 
 # Include the local include directories
-include_directories(${NRFJPROG_INCLUDE_DIR} ${PLATFORM_INCLUDE_DIR})
+include_directories(${PLATFORM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/include)
 
 # Essential include files to build a node addon,
 # you should add this line in every CMake.js based project.
@@ -34,8 +43,6 @@ set(SOURCE_FILES
     src/export.cpp
     src/highlevel_helpers.cpp
     src/highlevel.cpp
-    src/highlevelwrapper.cpp
-    src/nrfjprogwrapper.cpp
     src/osfiles.cpp
     src/rtt_helpers.cpp
     src/rtt.cpp
@@ -72,6 +79,6 @@ message(STATUS ${NRFJPROG_LIB})
 
 # Essential library files to link to a node addon,
 # you should add this line in every CMake.js based project.
-target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_JS_LIB} nrf::highlevelnrfjprog nrf::nrfjprogdll)
 
 include (cmake/clang-dev-tools.cmake)

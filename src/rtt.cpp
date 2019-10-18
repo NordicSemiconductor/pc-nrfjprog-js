@@ -45,7 +45,8 @@
 
 #include "DllCommonDefinitions.h"
 #include "highlevel_common.h"
-#include "highlevelwrapper.h"
+#include "highlevel.h"
+
 #include "rtt_batons.h"
 #include "rtt_helpers.h"
 
@@ -57,9 +58,7 @@ struct RTTStaticPrivate
 {
     std::string logMessage;
     std::timed_mutex logMutex;
-    bool libraryLoaded{false};
     std::chrono::high_resolution_clock::time_point rttStartTime{};
-    nRFjprogLibraryFunctionPointersType libraryFunctions{};
 
     static inline Nan::Persistent<v8::Function> &constructor()
     {
@@ -309,48 +308,30 @@ void RTT::log(const std::string &msg)
 
 bool RTT::isStarted()
 {
-    if (!pRTTStatic->libraryLoaded)
-    {
-        return false;
-    }
-
     bool started;
-    pRTTStatic->libraryFunctions.is_rtt_started(&started);
+    NRFJPROG_is_rtt_started(&started);
 
     return started;
 }
 
 RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
 {
-    LibraryFunctionPointersType highLevelFunctions{};
-
-    const auto loadHighlevelStatus =
-        static_cast<nrfjprogdll_err_t>(loadHighLevelFunctions(&highLevelFunctions));
-
-    if (loadHighlevelStatus != SUCCESS)
-    {
-        baton->lowlevelError = loadHighlevelStatus;
-        return RTTCouldNotOpenHighlevelLibrary;
-    }
-
     const nrfjprogdll_err_t openHighlevelStatus =
-        highLevelFunctions.dll_open(nullptr, &RTT::log);
+        NRFJPROG_dll_open(nullptr, &RTT::log);
 
     if (openHighlevelStatus != SUCCESS)
     {
-        releaseHighLevel();
         baton->lowlevelError = openHighlevelStatus;
         return RTTCouldNotOpenHighlevelLibrary;
     }
 
     Probe_handle_t probe;
     const nrfjprogdll_err_t initProbeStatus =
-        highLevelFunctions.probe_init(&probe, nullptr, &RTT::log, baton->serialNumber, nullptr);
+        NRFJPROG_probe_init(&probe, nullptr, &RTT::log, baton->serialNumber, nullptr);
 
     if (initProbeStatus != SUCCESS)
     {
-        highLevelFunctions.dll_close();
-        releaseHighLevel();
+        NRFJPROG_dll_close();
         baton->lowlevelError = initProbeStatus;
         return RTTCouldNotGetDeviceInformation;
     }
@@ -359,19 +340,17 @@ RTTErrorcodes_t RTT::getDeviceInformation(RTTStartBaton *baton)
     device_info_t deviceInfo;
     library_info_t libraryInfo;
 
-    RETURN_ERROR_ON_FAIL(highLevelFunctions.get_probe_info(probe, &probeInfo),
+    RETURN_ERROR_ON_FAIL(NRFJPROG_get_probe_info(probe, &probeInfo),
                          RTTCouldNotGetDeviceInformation);
-    RETURN_ERROR_ON_FAIL(highLevelFunctions.get_device_info(probe, &deviceInfo),
+    RETURN_ERROR_ON_FAIL(NRFJPROG_get_device_info(probe, &deviceInfo),
                          RTTCouldNotGetDeviceInformation);
-    RETURN_ERROR_ON_FAIL(highLevelFunctions.get_library_info(probe, &libraryInfo),
+    RETURN_ERROR_ON_FAIL(NRFJPROG_get_library_info(probe, &libraryInfo),
                          RTTCouldNotGetDeviceInformation);
 
-    RETURN_ERROR_ON_FAIL(highLevelFunctions.reset(probe, RESET_SYSTEM),
+    RETURN_ERROR_ON_FAIL(NRFJPROG_reset(probe, RESET_SYSTEM),
                          RTTCouldNotGetDeviceInformation);
-    RETURN_ERROR_ON_FAIL(highLevelFunctions.probe_uninit(&probe), RTTCouldNotGetDeviceInformation);
-    highLevelFunctions.dll_close();
-
-    releaseHighLevel();
+    RETURN_ERROR_ON_FAIL(NRFJPROG_probe_uninit(&probe), RTTCouldNotGetDeviceInformation);
+    NRFJPROG_dll_close();
 
     baton->clockSpeed = probeInfo.clockspeed_khz;
     baton->family     = deviceInfo.device_family;
@@ -387,7 +366,7 @@ RTTErrorcodes_t RTT::waitForControlBlock(RTTStartBaton *baton)
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         bool controlBlockFound = false;
         RETURN_ERROR_ON_FAIL(
-            pRTTStatic->libraryFunctions.rtt_is_control_block_found(&controlBlockFound),
+            NRFJPROG_rtt_is_control_block_found(&controlBlockFound),
             RTTCouldNotCallFunction);
 
         if (controlBlockFound)
@@ -415,7 +394,7 @@ RTTErrorcodes_t RTT::getChannelInformation(RTTStartBaton *baton)
     uint32_t upChannelNumber;
 
     RETURN_ERROR_ON_FAIL(
-        pRTTStatic->libraryFunctions.rtt_read_channel_count(&downChannelNumber, &upChannelNumber),
+        NRFJPROG_rtt_read_channel_count(&downChannelNumber, &upChannelNumber),
         RTTCouldNotGetChannelInformation);
 
     for (uint32_t i = 0; i < downChannelNumber; ++i)
@@ -423,7 +402,7 @@ RTTErrorcodes_t RTT::getChannelInformation(RTTStartBaton *baton)
         char channelName[32];
         char *pChannelName = static_cast<char *>(channelName);
         uint32_t channelSize;
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_read_channel_info(
+        RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_read_channel_info(
                                  i, DOWN_DIRECTION, pChannelName, 32, &channelSize),
                              RTTCouldNotGetChannelInformation);
 
@@ -437,7 +416,7 @@ RTTErrorcodes_t RTT::getChannelInformation(RTTStartBaton *baton)
         char channelName[32];
         char *pChannelName = static_cast<char *>(channelName);
         uint32_t channelSize;
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_read_channel_info(
+        RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_read_channel_info(
                                  i, UP_DIRECTION, pChannelName, 32, &channelSize),
                              RTTCouldNotGetChannelInformation);
 
@@ -477,31 +456,25 @@ NAN_METHOD(RTT::Start)
             return deviceInformationStatus;
         }
 
-        RETURN_ERROR_ON_FAIL(
-            (nrfjprogdll_err_t)loadnRFjprogFunctions(&pRTTStatic->libraryFunctions),
-            RTTCouldNotLoadnRFjprogLibrary);
-
-        pRTTStatic->libraryLoaded = true;
-
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.open_dll(baton->jlinkarmlocation.c_str(),
+        RETURN_ERROR_ON_FAIL(NRFJPROG_open_dll(baton->jlinkarmlocation.c_str(),
                                                                    &RTT::log, baton->family),
                              RTTCouldNotOpennRFjprogLibrary);
 
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.connect_to_emu_with_snr(
+        RETURN_ERROR_ON_FAIL(NRFJPROG_connect_to_emu_with_snr(
                                  baton->serialNumber, baton->clockSpeed),
                              RTTCouldNotConnectToDevice);
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.connect_to_device(),
+        RETURN_ERROR_ON_FAIL(NRFJPROG_connect_to_device(),
                              RTTCouldNotConnectToDevice);
 
         if (baton->hasControlBlockLocation)
         {
-            RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_set_control_block_address(
+            RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_set_control_block_address(
                                      baton->controlBlockLocation),
                                  RTTCouldNotFindControlBlock);
         }
 
         pRTTStatic->rttStartTime = std::chrono::high_resolution_clock::now();
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_start(), RTTCouldNotStartRTT);
+        RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_start(), RTTCouldNotStartRTT);
 
         const RTTErrorcodes_t waitStatus = waitForControlBlock(baton);
 
@@ -548,34 +521,23 @@ NAN_METHOD(RTT::Start)
 
 void RTT::cleanup()
 {
-    if (!pRTTStatic->libraryLoaded)
-    {
-        return;
-    }
-
     bool started;
 
-    pRTTStatic->libraryFunctions.is_rtt_started(&started);
+    NRFJPROG_is_rtt_started(&started);
 
     if (started)
     {
-        pRTTStatic->libraryFunctions.rtt_stop();
+        NRFJPROG_rtt_stop();
     }
 
     bool connected;
 
-    pRTTStatic->libraryFunctions.is_connected_to_device(&connected);
+    NRFJPROG_is_connected_to_device(&connected);
 
     if (connected)
     {
-        pRTTStatic->libraryFunctions.disconnect_from_emu();
+        NRFJPROG_disconnect_from_emu();
     }
-
-    pRTTStatic->libraryFunctions.close_dll();
-
-    releasenRFjprog();
-
-    pRTTStatic->libraryLoaded = false;
 }
 
 NAN_METHOD(RTT::Stop)
@@ -593,14 +555,9 @@ NAN_METHOD(RTT::Stop)
             return RTTNotInitialized;
         }
 
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_stop(), RTTCouldNotCallFunction);
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.disconnect_from_emu(),
+        RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_stop(), RTTCouldNotCallFunction);
+        RETURN_ERROR_ON_FAIL(NRFJPROG_disconnect_from_emu(),
                              RTTCouldNotCallFunction);
-        pRTTStatic->libraryFunctions.close_dll();
-
-        releasenRFjprog();
-        pRTTStatic->libraryLoaded = false;
-
         return RTTSuccess;
     };
 
@@ -635,7 +592,7 @@ NAN_METHOD(RTT::Read)
 
         baton->functionStart = std::chrono::high_resolution_clock::now();
 
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_read(baton->channelIndex,
+        RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_read(baton->channelIndex,
                                                                    baton->data.data(),
                                                                    baton->length, &readLength),
                              RTTCouldNotCallFunction);
@@ -698,7 +655,7 @@ NAN_METHOD(RTT::Write)
         uint32_t writeLength = 0;
 
         baton->functionStart = std::chrono::high_resolution_clock::now();
-        RETURN_ERROR_ON_FAIL(pRTTStatic->libraryFunctions.rtt_write(baton->channelIndex,
+        RETURN_ERROR_ON_FAIL(NRFJPROG_rtt_write(baton->channelIndex,
                                                                     baton->data.data(),
                                                                     baton->length, &writeLength),
                              RTTCouldNotCallFunction);

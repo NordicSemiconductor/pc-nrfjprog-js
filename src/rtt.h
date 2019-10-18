@@ -41,7 +41,6 @@
 #include <functional>
 #include <memory>
 
-#include "nrfjprogwrapper.h"
 #include "osfiles.h"
 
 #include "utility/errormessage.h"

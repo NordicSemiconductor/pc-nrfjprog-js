@@ -54,7 +54,6 @@
 
 struct HighLevelStaticPrivate
 {
-    LibraryFunctionPointersType libraryFunctions{};
     bool loaded{false};
     bool keepDeviceOpen{false};
     Probe_handle_t probe{};
@@ -220,20 +219,13 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         uv_async_init(uv_default_loop(), pHighlvlStatic->progressEvent.get(), sendProgress);
     }
 
-    baton->result = loadLibrary();
-
-    if (baton->result != errorcode_t::JsSuccess)
-    {
-        return;
-    }
-
     bool isOpen;
-    pHighlvlStatic->libraryFunctions.is_dll_open(&isOpen);
+    NRFJPROG_is_dll_open(&isOpen);
 
     if (!isOpen)
     {
         nrfjprogdll_err_t openError =
-            pHighlvlStatic->libraryFunctions.dll_open(nullptr, &HighLevel::log);
+            NRFJPROG_dll_open(nullptr, &HighLevel::log);
 
         if (openError != SUCCESS)
         {
@@ -249,7 +241,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
         if (baton->probeType == DFU_PROBE)
         {
-            initError = pHighlvlStatic->libraryFunctions.dfu_init(
+            initError = NRFJPROG_dfu_init(
                 &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
                 baton->serialNumber, CP_MODEM, nullptr);
         }
@@ -257,7 +249,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         {
             const auto baton2 = dynamic_cast<ProgramMcuBootDFUBaton*>(baton);
 
-            initError = pHighlvlStatic->libraryFunctions.mcuboot_dfu_init(
+            initError = NRFJPROG_mcuboot_dfu_init(
                 &pHighlvlStatic->probe,
                 &HighLevel::progressCallback,
                 &HighLevel::log,
@@ -268,7 +260,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         }
         else
         {
-            initError = pHighlvlStatic->libraryFunctions.probe_init(
+            auto probeInitResult = NRFJPROG_probe_init(
                 &pHighlvlStatic->probe, &HighLevel::progressCallback, &HighLevel::log,
                 baton->serialNumber, nullptr);
         }
@@ -290,7 +282,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
             if (baton->probeType != DFU_PROBE && baton->probeType != MCUBOOT_PROBE)
             {
                 nrfjprogdll_err_t resetError =
-                    pHighlvlStatic->libraryFunctions.reset(pHighlvlStatic->probe, RESET_SYSTEM);
+                    NRFJPROG_reset(pHighlvlStatic->probe, RESET_SYSTEM);
 
                 if (resetError != SUCCESS)
                 {
@@ -301,7 +293,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
             }
 
             nrfjprogdll_err_t uninitError =
-                pHighlvlStatic->libraryFunctions.probe_uninit(&pHighlvlStatic->probe);
+                NRFJPROG_probe_uninit(&pHighlvlStatic->probe);
 
             if (uninitError != SUCCESS)
             {
@@ -311,9 +303,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
             }
         }
 
-        pHighlvlStatic->libraryFunctions.dll_close();
-
-        unloadLibrary();
+        NRFJPROG_dll_close();
     }
 
     if (executeError != SUCCESS)
@@ -445,28 +435,6 @@ void HighLevel::sendProgress(uv_async_t * /*handle*/)
     }
 }
 
-errorcode_t HighLevel::loadLibrary()
-{
-    if (pHighlvlStatic->loaded)
-    {
-        return errorcode_t::JsSuccess;
-    }
-
-    errorcode_t library_load_result = loadHighLevelFunctions(&pHighlvlStatic->libraryFunctions);
-    pHighlvlStatic->loaded          = library_load_result == errorcode_t::JsSuccess;
-
-    return library_load_result;
-}
-
-void HighLevel::unloadLibrary()
-{
-    if (pHighlvlStatic->loaded)
-    {
-        pHighlvlStatic->loaded = false;
-        releaseHighLevel();
-    }
-}
-
 void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
 {
     Nan::SetPrototypeMethod(target, "getDllVersion", GetLibraryVersion); // Deprecated
@@ -593,8 +561,8 @@ NAN_METHOD(HighLevel::GetLibraryVersion)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetLibraryVersionBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.dll_get_version(&baton->major, &baton->minor,
-                                                                &baton->revision);
+        return NRFJPROG_dll_version(&baton->major, &baton->minor,
+                                    &baton->revision);
     };
 
     return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -625,7 +593,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         auto baton = dynamic_cast<GetConnectedDevicesBaton *>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
         uint32_t available      = 0;
-        nrfjprogdll_err_t error = pHighlvlStatic->libraryFunctions.get_connected_probes(
+        nrfjprogdll_err_t error = NRFJPROG_get_connected_probes(
             static_cast<uint32_t *>(serialNumbers), MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
@@ -636,7 +604,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         for (uint32_t i = 0; i < available; i++)
         {
             Probe_handle_t getInfoProbe;
-            nrfjprogdll_err_t initError = pHighlvlStatic->libraryFunctions.probe_init(
+            nrfjprogdll_err_t initError = NRFJPROG_probe_init(
                 &getInfoProbe, &HighLevel::progressCallback, &HighLevel::log, serialNumbers[i],
                 nullptr);
 
@@ -646,11 +614,11 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
             if (initError == SUCCESS)
             {
-                pHighlvlStatic->libraryFunctions.get_device_info(getInfoProbe, &device_info);
-                pHighlvlStatic->libraryFunctions.get_probe_info(getInfoProbe, &probe_info);
-                pHighlvlStatic->libraryFunctions.get_library_info(getInfoProbe, &library_info);
+                NRFJPROG_get_device_info(getInfoProbe, &device_info);
+                NRFJPROG_get_probe_info(getInfoProbe, &probe_info);
+                NRFJPROG_get_library_info(getInfoProbe, &library_info);
 
-                pHighlvlStatic->libraryFunctions.probe_uninit(&getInfoProbe);
+                NRFJPROG_probe_uninit(&getInfoProbe);
             }
             baton->probes.emplace_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info,
                                                                       probe_info, library_info));
@@ -690,7 +658,7 @@ NAN_METHOD(HighLevel::GetSerialNumbers)
         auto baton = dynamic_cast<GetSerialNumbersBaton *>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
         uint32_t available      = 0;
-        nrfjprogdll_err_t error = pHighlvlStatic->libraryFunctions.get_connected_probes(
+        nrfjprogdll_err_t error = NRFJPROG_get_connected_probes(
             static_cast<uint32_t *>(serialNumbers), MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
@@ -735,7 +703,7 @@ NAN_METHOD(HighLevel::GetProbeInfo)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetProbeInfoBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.get_probe_info(probe, &baton->probeInfo);
+        return NRFJPROG_get_probe_info(probe, &baton->probeInfo);
     };
 
     return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -759,7 +727,7 @@ NAN_METHOD(HighLevel::GetLibraryInfo)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetLibraryInfoBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.get_library_info(probe, &baton->libraryInfo);
+        return NRFJPROG_get_library_info(probe, &baton->libraryInfo);
     };
 
     return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -783,7 +751,7 @@ NAN_METHOD(HighLevel::GetDeviceInfo)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetDeviceInfoBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.get_device_info(probe, &baton->deviceInfo);
+        return NRFJPROG_get_device_info(probe, &baton->deviceInfo);
     };
 
     return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -816,7 +784,7 @@ NAN_METHOD(HighLevel::Read)
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<ReadBaton *>(b);
         baton->data.resize(baton->length, 0);
-        return pHighlvlStatic->libraryFunctions.read(probe, baton->address, baton->data.data(),
+        return NRFJPROG_read(probe, baton->address, baton->data.data(),
                                                      baton->length);
     };
 
@@ -846,7 +814,7 @@ NAN_METHOD(HighLevel::ReadU32)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<ReadU32Baton *>(b);
-        return pHighlvlStatic->libraryFunctions.read_u32(probe, baton->address, &baton->data);
+        return NRFJPROG_read_u32(probe, baton->address, &baton->data);
     };
 
     return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
@@ -893,17 +861,17 @@ NAN_METHOD(HighLevel::Program)
 
         baton->filename = file.getFileName();
 
-        programResult = pHighlvlStatic->libraryFunctions.program(probe, baton->filename.c_str(),
+        programResult = NRFJPROG_program(probe, baton->filename.c_str(),
                                                                  baton->options);
 
         if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION &&
             baton->options.chip_erase_mode == ERASE_ALL)
         {
-            const nrfjprogdll_err_t recoverResult = pHighlvlStatic->libraryFunctions.recover(probe);
+            const nrfjprogdll_err_t recoverResult = NRFJPROG_recover(probe);
 
             if (recoverResult == SUCCESS)
             {
-                programResult = pHighlvlStatic->libraryFunctions.program(
+                programResult = NRFJPROG_program(
                     probe, baton->filename.c_str(), baton->options);
             }
             else
@@ -949,7 +917,7 @@ NAN_METHOD(HighLevel::ProgramDFU)
         options.qspi_erase_mode = ERASE_NONE;
         options.reset           = RESET_NONE;
 
-        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(), options);
+        programResult = NRFJPROG_program(probe, filename.c_str(), options);
         return programResult;
     };
 
@@ -996,7 +964,7 @@ NAN_METHOD(HighLevel::ProgramMcuBootDFU)
         options.qspi_erase_mode = ERASE_NONE;
         options.reset           = RESET_SYSTEM;
 
-        programResult = pHighlvlStatic->libraryFunctions.program(probe, filename.c_str(), options);
+        programResult = NRFJPROG_program(probe, filename.c_str(), options);
         return programResult;
     };
 
@@ -1022,7 +990,7 @@ NAN_METHOD(HighLevel::ReadToFile)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<ReadToFileBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.read_to_file(probe, baton->filename.c_str(),
+        return NRFJPROG_read_to_file(probe, baton->filename.c_str(),
                                                              baton->options);
     };
 
@@ -1049,7 +1017,7 @@ NAN_METHOD(HighLevel::Verify)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<VerifyBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.verify(probe, baton->filename.c_str(), VERIFY_READ);
+        return NRFJPROG_verify(probe, baton->filename.c_str(), VERIFY_READ);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -1073,7 +1041,7 @@ NAN_METHOD(HighLevel::Erase)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<EraseBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.erase(probe, baton->erase_mode,
+        return NRFJPROG_erase(probe, baton->erase_mode,
                                                       baton->start_address, baton->end_address);
     };
 
@@ -1088,7 +1056,7 @@ NAN_METHOD(HighLevel::Recover)
     };
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
-        return pHighlvlStatic->libraryFunctions.recover(probe);
+        return NRFJPROG_recover(probe);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -1112,7 +1080,7 @@ NAN_METHOD(HighLevel::Write)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<WriteBaton *>(b);
-        return pHighlvlStatic->libraryFunctions.write(probe, baton->address, baton->data.data(),
+        return NRFJPROG_write(probe, baton->address, baton->data.data(),
                                                       baton->length);
     };
 
@@ -1136,7 +1104,7 @@ NAN_METHOD(HighLevel::WriteU32)
 
     execute_function_t e = [&](Baton *b, Probe_handle_t probe) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<WriteU32Baton *>(b);
-        return pHighlvlStatic->libraryFunctions.write_u32(probe, baton->address, baton->data);
+        return NRFJPROG_write_u32(probe, baton->address, baton->data);
     };
 
     CallFunction(info, p, e, nullptr, true);
