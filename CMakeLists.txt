@@ -13,7 +13,7 @@ set(NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/nr
 message(STATUS "LOCATION: ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}")
 
 find_package(nRFCommandLineTools
-    10.4.0 EXACT
+    10.4.1 EXACT
     REQUIRED
     COMPONENTS nrf::highlevelnrfjprog nrf::nrfjprogdll
     PATHS ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}
@@ -44,8 +44,6 @@ set(SOURCE_FILES
     src/highlevel_helpers.cpp
     src/highlevel.cpp
     src/osfiles.cpp
-    src/rtt_helpers.cpp
-    src/rtt.cpp
     src/utility/conversion.cpp
     src/utility/errormessage.cpp
     src/utility/utility.cpp
@@ -73,6 +71,12 @@ elseif(APPLE)
 else()
     # Assume Linux
 #    target_link_libraries(${PROJECT_NAME} "udev")
+endif()
+
+if(MSVC)
+  target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+  target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 message(STATUS ${NRFJPROG_LIB})

@@ -63,14 +63,14 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
         return scope.Escape(Nan::Undefined());
     }
 
-    std::string errorcodeString(Convert::valueToString(errorCode, errorcodeMapper));
+    const std::string errorcodeString(Convert::valueToString(errorCode, errorcodeMapper));
 
     std::ostringstream errorStringStream;
     errorStringStream << "Error occured when " << customMessage << ". "
                       << "Errorcode: " << errorcodeString << " (0x" << std::hex << errorCode << ")"
                       << std::endl;
 
-    std::string lowLevelMessage(Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
+    const std::string lowLevelMessage(Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
 
     if (lowlevelError != SUCCESS)
     {
@@ -78,9 +78,9 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
                           << std::endl;
     }
 
-    v8::Local<v8::Value> error =
+    const v8::Local<v8::Value> error =
         Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
-    v8::Local<v8::Object> errorObject = error.As<v8::Object>();
+    const v8::Local<v8::Object> errorObject = error.As<v8::Object>();
 
     Utility::Set(errorObject, "errno", Convert::toJsNumber(errorCode));
     Utility::Set(errorObject, "errcode", Convert::toJsString(errorcodeString));

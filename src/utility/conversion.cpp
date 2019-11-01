@@ -426,7 +426,7 @@ v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_m
                                                v8::Handle<v8::Value> defaultValue)
 {
     Nan::EscapableHandleScope scope;
-    auto it = name_map.find(value);
+    const auto it = name_map.find(value);
 
     if (it == name_map.end())
     {

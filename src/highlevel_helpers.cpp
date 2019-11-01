@@ -211,5 +211,29 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
     }
 }
 
-VerifyOptions::VerifyOptions(v8::Local<v8::Object> obj)
+VerifyOptions::VerifyOptions(v8::Local<v8::Object>)
 {}
+
+v8::Local<v8::Object> ChannelInfo::ToJs()
+{
+    Nan::EscapableHandleScope scope;
+    v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+
+    Utility::Set(obj, "channelIndex", Convert::toJsNumber(channelIndex));
+    Utility::Set(obj, "direction", Convert::toJsNumber(direction));
+    Utility::Set(obj, "name", Convert::toJsString(name));
+    Utility::Set(obj, "size", Convert::toJsNumber(size));
+
+    return scope.Escape(obj);
+}
+
+StartOptions::StartOptions(v8::Local<v8::Object> obj)
+{
+    hasControlBlockLocation = false;
+
+    if (Utility::Has(obj, "controlBlockLocation"))
+    {
+        hasControlBlockLocation = true;
+        controlBlockLocation    = Convert::getNativeUint32(obj, "controlBlockLocation");
+    }
+}

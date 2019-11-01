@@ -39,6 +39,10 @@
 
 #include "DllCommonDefinitions.h"
 #include "common.h"
+#include "highlevelnrfjprogdll.h"
+#include "nan_wrap.h"
+#include <functional>
+#include <map>
 
 typedef enum { MCUBOOT_PROBE, DFU_PROBE, DEBUG_PROBE } probe_type_t;
 
@@ -62,22 +66,6 @@ typedef enum {
     CouldNotExecuteDueToLoad
 } errorcode_t;
 
-typedef enum RTTErrorcodes {
-    RTTSuccess,
-    RTTCouldNotLoadHighlevelLibrary,
-    RTTCouldNotOpenHighlevelLibrary,
-    RTTCouldNotGetDeviceInformation,
-    RTTCouldNotLoadnRFjprogLibrary,
-    RTTCouldNotOpennRFjprogLibrary,
-    RTTCouldNotConnectToDevice,
-    RTTCouldNotStartRTT,
-    RTTCouldNotFindControlBlock,
-    RTTCouldNotGetChannelInformation,
-    RTTCouldNotCallFunction,
-    RTTNotInitialized,
-    RTTCouldNotExecuteDueToLoad
-} RTTErrorcodes_t;
-
 static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::JsSuccess, "Success"},
     {errorcode_t::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL"},
@@ -95,21 +83,6 @@ static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile"},
     {errorcode_t::CouldNotExecuteDueToLoad,
      "Could not execute the function due to too many calls in line"}};
-
-static name_map_t rtt_err_map = {
-    {RTTSuccess, "Success"},
-    {RTTCouldNotLoadHighlevelLibrary, "Could Not Load Highlevel Library"},
-    {RTTCouldNotOpenHighlevelLibrary, "Could Not Open Highlevel Library"},
-    {RTTCouldNotGetDeviceInformation, "Could Not Get Device Information"},
-    {RTTCouldNotLoadnRFjprogLibrary, "Could Not Load nRFjprog Library"},
-    {RTTCouldNotOpennRFjprogLibrary, "Could Not Open nRFjprog Library"},
-    {RTTCouldNotConnectToDevice, "Could Not Connect To Device"},
-    {RTTCouldNotStartRTT, "Could Not Start RTT"},
-    {RTTCouldNotFindControlBlock, "Could Not Find Control Block"},
-    {RTTCouldNotGetChannelInformation, "Could Not Get Channel Information"},
-    {RTTCouldNotCallFunction, "Could Not Call Function"},
-    {RTTNotInitialized, "There is no RTT connection open"},
-    {RTTCouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line"}};
 
 static name_map_t program_parameter_type_map = {NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),
                                                 NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)};
@@ -182,5 +155,13 @@ static name_map_t nrfjprogdll_err_map = {NAME_MAP_ENTRY(SUCCESS),
                                          NAME_MAP_ENTRY(NRFJPROG_SUB_DLL_COULD_NOT_LOAD_FUNCTIONS),
                                          NAME_MAP_ENTRY(VERIFY_ERROR),
                                          NAME_MAP_ENTRY(NOT_IMPLEMENTED_ERROR)};
+
+// Forward declare batons
+class Baton;
+
+typedef std::function<Baton *(Nan::NAN_METHOD_ARGS_TYPE, int &)> parse_parameters_function_t;
+typedef std::function<nrfjprogdll_err_t(Baton *)> execute_function_t;
+typedef std::function<std::vector<v8::Local<v8::Value>>(Baton *)> return_function_t;
+
 
 #endif // __NRFJPROG_COMMON_H__
