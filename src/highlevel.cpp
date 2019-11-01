@@ -64,14 +64,14 @@ struct HighLevelStaticPrivate
     std::queue<std::string> progressProcess;
     std::chrono::high_resolution_clock::time_point rttStartTime{};
 
-    static inline Nan::Persistent<v8::Function> &constructor()
+    static inline Nan::Persistent<v8::Function> & constructor()
     {
         static Nan::Persistent<v8::Function> my_constructor;
         return my_constructor;
     }
 };
 
-static HighLevelStaticPrivate *pHighlvlStatic = nullptr;
+static HighLevelStaticPrivate * pHighlvlStatic = nullptr;
 
 std::timed_mutex Baton::executionMutex;
 
@@ -96,12 +96,11 @@ NAN_METHOD(HighLevel::New)
     }
     else
     {
-        const int argc                  = 1;
-        v8::Local<v8::Value> argv[argc] = {info[0]};
-        const v8::Local<v8::Function> cons    = Nan::New(HighLevelStaticPrivate::constructor());
+        const int argc                     = 1;
+        v8::Local<v8::Value> argv[argc]    = {info[0]};
+        const v8::Local<v8::Function> cons = Nan::New(HighLevelStaticPrivate::constructor());
         info.GetReturnValue().Set(
-            Nan::NewInstance(cons, argc, static_cast<v8::Local<v8::Value> *>(argv))
-                .ToLocalChecked());
+            Nan::NewInstance(cons, argc, static_cast<v8::Local<v8::Value> *>(argv)).ToLocalChecked());
     }
 }
 
@@ -113,8 +112,9 @@ HighLevel::HighLevel()
 }
 
 void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
-                             const parse_parameters_function_t &parse,
-                             const execute_function_t &execute, const return_function_t &ret,
+                             const parse_parameters_function_t & parse,
+                             const execute_function_t & execute,
+                             const return_function_t & ret,
                              const bool hasSerialNumber)
 {
     // This is a check that there exists a parse- and execute function, both of which are
@@ -124,9 +124,9 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     if (parse == nullptr || execute == nullptr)
     {
         const auto message = ErrorMessage::getErrorMessage(
-            1, nrfjprog_js_err_map,
-            std::string(
-                "One or more of the parse, or execute functions is missing for this function"));
+            1,
+            nrfjprog_js_err_map,
+            std::string("One or more of the parse, or execute functions is missing for this function"));
         Nan::ThrowError(message);
         return;
     }
@@ -164,12 +164,12 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
         {
             argumentCount = CUSTOM_ARGUMENT_PARSE_ERROR;
             std::ostringstream errorStringStream;
-            errorStringStream << "Too many parameters. The function " << baton->name
-                              << " does not take " << info.Length() << " parameters.";
+            errorStringStream << "Too many parameters. The function " << baton->name << " does not take "
+                              << info.Length() << " parameters.";
             throw std::runtime_error(errorStringStream.str());
         }
     }
-    catch (const std::runtime_error &error)
+    catch (const std::runtime_error & error)
     {
         baton = nullptr;
 
@@ -186,7 +186,8 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     if (ret == nullptr && baton->returnParameterCount > 0)
     {
         const auto message = ErrorMessage::getErrorMessage(
-            1, nrfjprog_js_err_map,
+            1,
+            nrfjprog_js_err_map,
             std::string("The return function has more than one parameter and is required for this "
                         "function, but is missing"));
         Nan::ThrowError(message);
@@ -202,13 +203,13 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     // TODO: is to still store the probe handle in pHighlvlStatic
     baton->probe = pHighlvlStatic->probe;
 
-    uv_queue_work(uv_default_loop(), baton->req.get(), ExecuteFunction,
-                  reinterpret_cast<uv_after_work_cb>(ReturnFunction));
+    uv_queue_work(
+        uv_default_loop(), baton->req.get(), ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
 
     (void)baton.release();
 }
 
-void HighLevel::ExecuteFunction(uv_work_t *req)
+void HighLevel::ExecuteFunction(uv_work_t * req)
 {
     auto baton = static_cast<Baton *>(req->data);
 
@@ -231,8 +232,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
 
     if (!isOpen)
     {
-        nrfjprogdll_err_t openError =
-            NRFJPROG_dll_open(nullptr, &HighLevel::log);
+        nrfjprogdll_err_t openError = NRFJPROG_dll_open(nullptr, &HighLevel::log);
 
         if (openError != SUCCESS)
         {
@@ -249,30 +249,30 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         if (baton->probeType == DFU_PROBE)
         {
             // TODO: do not store in pHighlvlStatic
-            initError = NRFJPROG_dfu_init(
-                &(pHighlvlStatic->probe), &HighLevel::progressCallback, &HighLevel::log,
-                baton->serialNumber, CP_MODEM, nullptr);
+            initError = NRFJPROG_dfu_init(&(pHighlvlStatic->probe),
+                                          &HighLevel::progressCallback,
+                                          &HighLevel::log,
+                                          baton->serialNumber,
+                                          CP_MODEM,
+                                          nullptr);
         }
         else if (baton->probeType == MCUBOOT_PROBE)
         {
-            const auto baton2 = dynamic_cast<ProgramMcuBootDFUBaton*>(baton);
+            const auto baton2 = dynamic_cast<ProgramMcuBootDFUBaton *>(baton);
 
             // TODO: do not store in pHighlvlStatic
-            initError = NRFJPROG_mcuboot_dfu_init(
-                &(pHighlvlStatic->probe),
-                &HighLevel::progressCallback,
-                &HighLevel::log,
-                baton2->uart.c_str(),
-                baton2->baudRate,
-                baton2->responseTimeout
-            );
+            initError = NRFJPROG_mcuboot_dfu_init(&(pHighlvlStatic->probe),
+                                                  &HighLevel::progressCallback,
+                                                  &HighLevel::log,
+                                                  baton2->uart.c_str(),
+                                                  baton2->baudRate,
+                                                  baton2->responseTimeout);
         }
         else
         {
             // TODO: do not store in pHighlvlStatic
             initError = NRFJPROG_probe_init(
-                &(pHighlvlStatic->probe), &HighLevel::progressCallback, &HighLevel::log,
-                baton->serialNumber, nullptr);
+                &(pHighlvlStatic->probe), &HighLevel::progressCallback, &HighLevel::log, baton->serialNumber, nullptr);
         }
 
         if (initError != SUCCESS)
@@ -291,8 +291,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
         {
             if (baton->probeType != DFU_PROBE && baton->probeType != MCUBOOT_PROBE)
             {
-                const auto resetError =
-                    NRFJPROG_reset(baton->probe, RESET_SYSTEM);
+                const auto resetError = NRFJPROG_reset(baton->probe, RESET_SYSTEM);
 
                 if (resetError != SUCCESS)
                 {
@@ -302,8 +301,7 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
                 }
             }
 
-            const auto uninitError =
-                NRFJPROG_probe_uninit(&(baton->probe));
+            const auto uninitError = NRFJPROG_probe_uninit(&(baton->probe));
 
             if (uninitError != SUCCESS)
             {
@@ -326,12 +324,11 @@ void HighLevel::ExecuteFunction(uv_work_t *req)
     {
         const auto handle = reinterpret_cast<uv_handle_t *>(pHighlvlStatic->progressEvent.get());
 
-        uv_close(handle,
-                 [](uv_handle_t * /*closeHandle*/) { pHighlvlStatic->progressEvent = nullptr; });
+        uv_close(handle, [](uv_handle_t * /*closeHandle*/) { pHighlvlStatic->progressEvent = nullptr; });
     }
 }
 
-void HighLevel::ReturnFunction(uv_work_t *req)
+void HighLevel::ReturnFunction(uv_work_t * req)
 {
     Nan::HandleScope scope;
 
@@ -349,8 +346,8 @@ void HighLevel::ReturnFunction(uv_work_t *req)
         }
     }
 
-    argv.emplace_back(ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name,
-                                                    msg, baton->lowlevelError));
+    argv.emplace_back(
+        ErrorMessage::getErrorMessage(baton->result, nrfjprog_js_err_map, baton->name, msg, baton->lowlevelError));
 
     if (baton->result != errorcode_t::JsSuccess)
     {
@@ -375,12 +372,12 @@ void HighLevel::ReturnFunction(uv_work_t *req)
     baton->callback->Call(baton->returnParameterCount + 1, argv.data(), &resource);
 }
 
-void HighLevel::log(const char *msg)
+void HighLevel::log(const char * msg)
 {
     log(std::string(msg));
 }
 
-void HighLevel::log(const std::string &msg)
+void HighLevel::log(const std::string & msg)
 {
     std::unique_lock<std::timed_mutex> lock(pHighlvlStatic->logMutex, std::defer_lock);
 
@@ -404,7 +401,7 @@ void HighLevel::resetLog()
     pHighlvlStatic->logMessage.clear();
 }
 
-void HighLevel::progressCallback(const char *process)
+void HighLevel::progressCallback(const char * process)
 {
     if (pHighlvlStatic->jsProgressCallback)
     {
@@ -440,8 +437,7 @@ void HighLevel::sendProgress(uv_async_t * /*handle*/)
         argv[0] = progressObj;
 
         Nan::AsyncResource resource("pc-nrfjprog-js:callback");
-        pHighlvlStatic->jsProgressCallback->Call(1, static_cast<v8::Local<v8::Value> *>(argv),
-                                                 &resource);
+        pHighlvlStatic->jsProgressCallback->Call(1, static_cast<v8::Local<v8::Value> *>(argv), &resource);
     }
 }
 
@@ -481,17 +477,17 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
 void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
 {
     // nRF51 versions
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV1); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV2); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAA_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAB_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51xxx_xxAC_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51802_xxAA_REV3); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF51801_xxAB_REV3); // NOLINT(hicpp-signed-bitwise)
 
     // nRF52805 versions
     NODE_DEFINE_CONSTANT(target, NRF52805_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52805_xxAA_FUTURE);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52805_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
     // nRF52810 versions
     NODE_DEFINE_CONSTANT(target, NRF52810_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
@@ -514,7 +510,7 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
 
     // nRF52833 versions
     NODE_DEFINE_CONSTANT(target, NRF52833_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF52833_xxAA_FUTURE);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF52833_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
     // nRF52840 versions
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
@@ -524,8 +520,8 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
     // nRF9160 versions
-    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_REV1);    // NOLINT(hicpp-signed-bitwise)
-    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE);  // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
     NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);   // NOLINT(hicpp-signed-bitwise)
@@ -582,7 +578,7 @@ void HighLevel::rttCleanup(Probe_handle_t probe)
     }
 }
 
-nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, bool &isControlBlockFound)
+nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, bool & isControlBlockFound)
 {
     while (true)
     {
@@ -600,8 +596,7 @@ nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, boo
 
         auto attemptedStartupTime = std::chrono::high_resolution_clock::now();
 
-        if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime -
-                                                             pHighlvlStatic->rttStartTime)
+        if (std::chrono::duration_cast<std::chrono::seconds>(attemptedStartupTime - pHighlvlStatic->rttStartTime)
                 .count() > 5)
         {
             isControlBlockFound = false;
@@ -611,13 +606,12 @@ nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, boo
     }
 }
 
-nrfjprogdll_err_t HighLevel::getChannelInformation(RTTStartBaton *baton, bool &isChannelInformationAvailable)
+nrfjprogdll_err_t HighLevel::getChannelInformation(RTTStartBaton * baton, bool & isChannelInformationAvailable)
 {
     uint32_t downChannelNumber;
     uint32_t upChannelNumber;
 
-    const auto countStatus =
-        NRFJPROG_rtt_read_channel_count(baton->probe, &downChannelNumber, &upChannelNumber);
+    const auto countStatus = NRFJPROG_rtt_read_channel_count(baton->probe, &downChannelNumber, &upChannelNumber);
 
     if (countStatus != SUCCESS)
     {
@@ -629,11 +623,11 @@ nrfjprogdll_err_t HighLevel::getChannelInformation(RTTStartBaton *baton, bool &i
     for (uint32_t i = 0; i < downChannelNumber; ++i)
     {
         char channelName[32];
-        auto *pChannelName = static_cast<char *>(channelName);
+        auto * pChannelName = static_cast<char *>(channelName);
         uint32_t channelSize;
 
-        const auto status = NRFJPROG_rtt_read_channel_info(baton->probe,
-                      i, DOWN_DIRECTION, pChannelName, 32, &channelSize);
+        const auto status =
+            NRFJPROG_rtt_read_channel_info(baton->probe, i, DOWN_DIRECTION, pChannelName, 32, &channelSize);
         if (status != SUCCESS)
         {
             isChannelInformationAvailable = false;
@@ -642,18 +636,17 @@ nrfjprogdll_err_t HighLevel::getChannelInformation(RTTStartBaton *baton, bool &i
         }
 
         std::string name(pChannelName);
-        baton->downChannelInfo.emplace_back(
-            std::make_unique<ChannelInfo>(i, DOWN_DIRECTION, name, channelSize));
+        baton->downChannelInfo.emplace_back(std::make_unique<ChannelInfo>(i, DOWN_DIRECTION, name, channelSize));
     }
 
     for (uint32_t i = 0; i < upChannelNumber; ++i)
     {
         char channelName[32];
-        auto *pChannelName = static_cast<char *>(channelName);
+        auto * pChannelName = static_cast<char *>(channelName);
         uint32_t channelSize;
 
-        const auto status = NRFJPROG_rtt_read_channel_info(baton->probe,
-                                i, UP_DIRECTION, pChannelName, 32, &channelSize);
+        const auto status =
+            NRFJPROG_rtt_read_channel_info(baton->probe, i, UP_DIRECTION, pChannelName, 32, &channelSize);
 
         if (status != SUCCESS)
         {
@@ -663,15 +656,13 @@ nrfjprogdll_err_t HighLevel::getChannelInformation(RTTStartBaton *baton, bool &i
         }
 
         std::string name(pChannelName);
-        baton->upChannelInfo.emplace_back(
-            std::make_unique<ChannelInfo>(i, UP_DIRECTION, name, channelSize));
+        baton->upChannelInfo.emplace_back(std::make_unique<ChannelInfo>(i, UP_DIRECTION, name, channelSize));
     }
 
     isChannelInformationAvailable = true;
 
     return SUCCESS;
 }
-
 
 bool HighLevel::isRttStarted(Probe_handle_t probe)
 {
@@ -680,21 +671,18 @@ bool HighLevel::isRttStarted(Probe_handle_t probe)
     return started;
 }
 
-
 NAN_METHOD(HighLevel::GetLibraryVersion)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new GetLibraryVersionBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetLibraryVersionBaton *>(b);
-        return NRFJPROG_dll_version(&baton->major, &baton->minor,
-                                    &baton->revision);
+        return NRFJPROG_dll_version(&baton->major, &baton->minor, &baton->revision);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         const auto baton = dynamic_cast<GetLibraryVersionBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -713,17 +701,16 @@ NAN_METHOD(HighLevel::GetLibraryVersion)
 
 NAN_METHOD(HighLevel::GetConnectedDevices)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new GetConnectedDevicesBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetConnectedDevicesBaton *>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
-        uint32_t available      = 0;
-        const nrfjprogdll_err_t error = NRFJPROG_get_connected_probes(
-            static_cast<uint32_t *>(serialNumbers), MAX_SERIAL_NUMBERS, &available);
+        uint32_t available = 0;
+        const nrfjprogdll_err_t error =
+            NRFJPROG_get_connected_probes(static_cast<uint32_t *>(serialNumbers), MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
         {
@@ -734,8 +721,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
         {
             Probe_handle_t getInfoProbe;
             const nrfjprogdll_err_t initError = NRFJPROG_probe_init(
-                &getInfoProbe, &HighLevel::progressCallback, &HighLevel::log, serialNumbers[i],
-                nullptr);
+                &getInfoProbe, &HighLevel::progressCallback, &HighLevel::log, serialNumbers[i], nullptr);
 
             device_info_t device_info;
             probe_info_t probe_info;
@@ -749,20 +735,20 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
                 NRFJPROG_probe_uninit(&getInfoProbe);
             }
-            baton->probes.emplace_back(std::make_unique<ProbeDetails>(serialNumbers[i], device_info,
-                                                                      probe_info, library_info));
+            baton->probes.emplace_back(
+                std::make_unique<ProbeDetails>(serialNumbers[i], device_info, probe_info, library_info));
         }
 
         return SUCCESS;
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         auto baton = dynamic_cast<GetConnectedDevicesBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
         v8::Local<v8::Array> connectedDevices = Nan::New<v8::Array>();
         int i                                 = 0;
-        for (auto &element : baton->probes)
+        for (auto & element : baton->probes)
         {
             Nan::Set(connectedDevices, Convert::toJsNumber(i), element->ToJs());
             i++;
@@ -778,17 +764,16 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
 NAN_METHOD(HighLevel::GetSerialNumbers)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new GetSerialNumbersBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetSerialNumbersBaton *>(b);
         uint32_t serialNumbers[MAX_SERIAL_NUMBERS];
-        uint32_t available      = 0;
-        const nrfjprogdll_err_t error = NRFJPROG_get_connected_probes(
-            static_cast<uint32_t *>(serialNumbers), MAX_SERIAL_NUMBERS, &available);
+        uint32_t available = 0;
+        const nrfjprogdll_err_t error =
+            NRFJPROG_get_connected_probes(static_cast<uint32_t *>(serialNumbers), MAX_SERIAL_NUMBERS, &available);
 
         if (error != SUCCESS)
         {
@@ -803,7 +788,7 @@ NAN_METHOD(HighLevel::GetSerialNumbers)
         return SUCCESS;
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         auto baton = dynamic_cast<GetSerialNumbersBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -825,17 +810,16 @@ NAN_METHOD(HighLevel::GetSerialNumbers)
 
 NAN_METHOD(HighLevel::GetProbeInfo)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new GetProbeInfoBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetProbeInfoBaton *>(b);
         return NRFJPROG_get_probe_info(b->probe, &baton->probeInfo);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         const auto baton = dynamic_cast<GetProbeInfoBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -849,17 +833,16 @@ NAN_METHOD(HighLevel::GetProbeInfo)
 
 NAN_METHOD(HighLevel::GetLibraryInfo)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new GetLibraryInfoBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetLibraryInfoBaton *>(b);
         return NRFJPROG_get_library_info(b->probe, &baton->libraryInfo);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         const auto baton = dynamic_cast<GetLibraryInfoBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -873,17 +856,16 @@ NAN_METHOD(HighLevel::GetLibraryInfo)
 
 NAN_METHOD(HighLevel::GetDeviceInfo)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new GetDeviceInfoBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<GetDeviceInfoBaton *>(b);
         return NRFJPROG_get_device_info(b->probe, &baton->deviceInfo);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         const auto baton = dynamic_cast<GetDeviceInfoBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -897,8 +879,7 @@ NAN_METHOD(HighLevel::GetDeviceInfo)
 
 NAN_METHOD(HighLevel::Read)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<ReadBaton>();
 
         baton->address = Convert::getNativeUint32(parameters[argumentCount]);
@@ -910,14 +891,13 @@ NAN_METHOD(HighLevel::Read)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<ReadBaton *>(b);
         baton->data.resize(baton->length, 0);
-        return NRFJPROG_read(b->probe, baton->address, baton->data.data(),
-                                                     baton->length);
+        return NRFJPROG_read(b->probe, baton->address, baton->data.data(), baton->length);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         auto baton = dynamic_cast<ReadBaton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -931,21 +911,20 @@ NAN_METHOD(HighLevel::Read)
 
 NAN_METHOD(HighLevel::ReadU32)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
-        auto baton = std::make_unique<ReadU32Baton>();
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
+        auto baton     = std::make_unique<ReadU32Baton>();
         baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<ReadU32Baton *>(b);
         return NRFJPROG_read_u32(b->probe, baton->address, &baton->data);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         const auto baton = dynamic_cast<ReadU32Baton *>(b);
         std::vector<v8::Local<v8::Value>> returnData;
 
@@ -959,8 +938,7 @@ NAN_METHOD(HighLevel::ReadU32)
 
 NAN_METHOD(HighLevel::Program)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         std::unique_ptr<ProgramBaton> baton(new ProgramBaton());
 
         baton->file = Convert::getNativeString(parameters[argumentCount]);
@@ -975,8 +953,8 @@ NAN_METHOD(HighLevel::Program)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
-        auto baton                      = dynamic_cast<ProgramBaton *>(b);
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        auto baton = dynamic_cast<ProgramBaton *>(b);
 
         FileFormatHandler file(baton->file, baton->inputFormat);
 
@@ -988,18 +966,15 @@ NAN_METHOD(HighLevel::Program)
 
         baton->filename = file.getFileName();
 
-        auto programResult = NRFJPROG_program(b->probe, baton->filename.c_str(),
-                                                           baton->options);
+        auto programResult = NRFJPROG_program(b->probe, baton->filename.c_str(), baton->options);
 
-        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION &&
-            baton->options.chip_erase_mode == ERASE_ALL)
+        if (programResult == NOT_AVAILABLE_BECAUSE_PROTECTION && baton->options.chip_erase_mode == ERASE_ALL)
         {
             const nrfjprogdll_err_t recoverResult = NRFJPROG_recover(b->probe);
 
             if (recoverResult == SUCCESS)
             {
-                programResult = NRFJPROG_program(
-                    b->probe, baton->filename.c_str(), baton->options);
+                programResult = NRFJPROG_program(b->probe, baton->filename.c_str(), baton->options);
             }
             else
             {
@@ -1015,17 +990,16 @@ NAN_METHOD(HighLevel::Program)
 
 NAN_METHOD(HighLevel::ProgramDFU)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
-        auto baton = std::make_unique<ProgramDFUBaton>();
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
+        auto baton      = std::make_unique<ProgramDFUBaton>();
         baton->filename = Convert::getNativeString(parameters[argumentCount]);
         argumentCount++;
 
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
-        const auto baton                      = dynamic_cast<ProgramDFUBaton *>(b);
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        const auto baton = dynamic_cast<ProgramDFUBaton *>(b);
 
         FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);
 
@@ -1050,8 +1024,7 @@ NAN_METHOD(HighLevel::ProgramDFU)
 
 NAN_METHOD(HighLevel::ProgramMcuBootDFU)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<ProgramMcuBootDFUBaton>();
 
         baton->filename = Convert::getNativeString(parameters[argumentCount]);
@@ -1069,8 +1042,8 @@ NAN_METHOD(HighLevel::ProgramMcuBootDFU)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
-        const auto baton                      = dynamic_cast<ProgramMcuBootDFUBaton *>(b);
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        const auto baton = dynamic_cast<ProgramMcuBootDFUBaton *>(b);
         nrfjprogdll_err_t programResult;
 
         FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);
@@ -1097,8 +1070,7 @@ NAN_METHOD(HighLevel::ProgramMcuBootDFU)
 
 NAN_METHOD(HighLevel::ReadToFile)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<ReadToFileBaton>();
 
         baton->filename = Convert::getNativeString(parameters[argumentCount]);
@@ -1112,10 +1084,9 @@ NAN_METHOD(HighLevel::ReadToFile)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<ReadToFileBaton *>(b);
-        return NRFJPROG_read_to_file(b->probe, baton->filename.c_str(),
-                                                             baton->options);
+        return NRFJPROG_read_to_file(b->probe, baton->filename.c_str(), baton->options);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -1123,8 +1094,7 @@ NAN_METHOD(HighLevel::ReadToFile)
 
 NAN_METHOD(HighLevel::Verify)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<VerifyBaton>();
 
         baton->filename = Convert::getNativeString(parameters[argumentCount]);
@@ -1138,7 +1108,7 @@ NAN_METHOD(HighLevel::Verify)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<VerifyBaton *>(b);
         return NRFJPROG_verify(b->probe, baton->filename.c_str(), VERIFY_READ);
     };
@@ -1148,9 +1118,8 @@ NAN_METHOD(HighLevel::Verify)
 
 NAN_METHOD(HighLevel::Erase)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
-        auto baton = std::make_unique<EraseBaton>();
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
+        auto baton                               = std::make_unique<EraseBaton>();
         const v8::Local<v8::Object> eraseOptions = Convert::getJsObject(parameters[argumentCount]);
         const EraseOptions options(eraseOptions);
         baton->erase_mode    = options.eraseMode;
@@ -1161,10 +1130,9 @@ NAN_METHOD(HighLevel::Erase)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<EraseBaton *>(b);
-        return NRFJPROG_erase(b->probe, baton->erase_mode,
-                                                      baton->start_address, baton->end_address);
+        return NRFJPROG_erase(b->probe, baton->erase_mode, baton->start_address, baton->end_address);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -1172,22 +1140,18 @@ NAN_METHOD(HighLevel::Erase)
 
 NAN_METHOD(HighLevel::Recover)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
         return new RecoverBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
-        return NRFJPROG_recover(b->probe);
-    };
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t { return NRFJPROG_recover(b->probe); };
 
     CallFunction(info, p, e, nullptr, true);
 }
 
 NAN_METHOD(HighLevel::Write)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<WriteBaton>();
 
         baton->address = Convert::getNativeUint32(parameters[argumentCount]);
@@ -1200,10 +1164,9 @@ NAN_METHOD(HighLevel::Write)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<WriteBaton *>(b);
-        return NRFJPROG_write(b->probe, baton->address, baton->data.data(),
-                                                      baton->length);
+        return NRFJPROG_write(b->probe, baton->address, baton->data.data(), baton->length);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -1211,9 +1174,8 @@ NAN_METHOD(HighLevel::Write)
 
 NAN_METHOD(HighLevel::WriteU32)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &argumentCount) -> Baton * {
-        auto baton = std::make_unique<WriteU32Baton>();
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
+        auto baton     = std::make_unique<WriteU32Baton>();
         baton->address = Convert::getNativeUint32(parameters[argumentCount]);
         argumentCount++;
 
@@ -1223,7 +1185,7 @@ NAN_METHOD(HighLevel::WriteU32)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<WriteU32Baton *>(b);
         return NRFJPROG_write_u32(b->probe, baton->address, baton->data);
     };
@@ -1233,10 +1195,11 @@ NAN_METHOD(HighLevel::WriteU32)
 
 NAN_METHOD(HighLevel::OpenDevice)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                        int &) -> Baton * { return new OpenBaton(); };
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+        return new OpenBaton();
+    };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         if (pHighlvlStatic->keepDeviceOpen)
         {
             pHighlvlStatic->keepDeviceOpen = false;
@@ -1251,10 +1214,9 @@ NAN_METHOD(HighLevel::OpenDevice)
 
 NAN_METHOD(HighLevel::CloseDevice)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE,
-                                        int &) -> Baton * { return new CloseBaton(); };
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * { return new CloseBaton(); };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         pHighlvlStatic->keepDeviceOpen = false;
         return SUCCESS;
     };
@@ -1264,8 +1226,7 @@ NAN_METHOD(HighLevel::CloseDevice)
 
 NAN_METHOD(HighLevel::RttStart)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters,
-                                            int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<RTTStartBaton>();
 
         baton->serialNumber = Convert::getNativeUint32(info[argumentCount]);
@@ -1280,7 +1241,7 @@ NAN_METHOD(HighLevel::RttStart)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<RTTStartBaton *>(b);
 
         if (baton->hasControlBlockLocation)
@@ -1295,7 +1256,6 @@ NAN_METHOD(HighLevel::RttStart)
         }
 
         pHighlvlStatic->rttStartTime = std::chrono::high_resolution_clock::now();
-
 
         const auto result = NRFJPROG_rtt_start(b->probe);
 
@@ -1316,14 +1276,14 @@ NAN_METHOD(HighLevel::RttStart)
         return getChannelInformation(baton, baton->foundChannelInformation);
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         auto baton = dynamic_cast<RTTStartBaton *>(b);
 
         std::vector<v8::Local<v8::Value>> returnData;
 
         v8::Local<v8::Array> downChannelInfo = Nan::New<v8::Array>();
         int i                                = 0;
-        for (auto &element : baton->downChannelInfo)
+        for (auto & element : baton->downChannelInfo)
         {
             Nan::Set(downChannelInfo, Convert::toJsNumber(i), element->ToJs());
             ++i;
@@ -1333,7 +1293,7 @@ NAN_METHOD(HighLevel::RttStart)
 
         v8::Local<v8::Array> upChannelInfo = Nan::New<v8::Array>();
         i                                  = 0;
-        for (auto &element : baton->upChannelInfo)
+        for (auto & element : baton->upChannelInfo)
         {
             Nan::Set(upChannelInfo, Convert::toJsNumber(i), element->ToJs());
             ++i;
@@ -1349,12 +1309,11 @@ NAN_METHOD(HighLevel::RttStart)
 
 NAN_METHOD(HighLevel::RttStop)
 {
-    const parse_parameters_function_t  p = [&](Nan::NAN_METHOD_ARGS_TYPE,
-                                            int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new RTTStopBaton();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<RTTStopBaton *>(b);
 
         if (!isRttStarted(b->probe))
@@ -1381,8 +1340,7 @@ NAN_METHOD(HighLevel::RttStop)
 
 NAN_METHOD(HighLevel::RttRead)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE,
-                                            int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<RTTReadBaton>();
 
         baton->channelIndex = Convert::getNativeUint32(info[argumentCount]);
@@ -1394,7 +1352,7 @@ NAN_METHOD(HighLevel::RttRead)
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<RTTReadBaton *>(b);
 
         if (!isRttStarted(b->probe))
@@ -1408,9 +1366,8 @@ NAN_METHOD(HighLevel::RttRead)
 
         baton->functionStart = std::chrono::high_resolution_clock::now();
 
-        const auto status = NRFJPROG_rtt_read(b->probe, baton->channelIndex,
-                                                                   baton->data.data(),
-                                                                   baton->length, &readLength);
+        const auto status =
+            NRFJPROG_rtt_read(b->probe, baton->channelIndex, baton->data.data(), baton->length, &readLength);
 
         if (status != SUCCESS)
         {
@@ -1423,18 +1380,15 @@ NAN_METHOD(HighLevel::RttRead)
         return status;
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         auto baton = dynamic_cast<RTTReadBaton *>(b);
 
         std::vector<v8::Local<v8::Value>> returnData;
 
         returnData.emplace_back(Convert::toJsString(baton->data.data(), baton->length));
-        returnData.emplace_back(Convert::toJsValueArray(
-            reinterpret_cast<uint8_t *>(baton->data.data()), baton->length)
-        );
         returnData.emplace_back(
-            Convert::toTimeDifferenceUS(pHighlvlStatic->rttStartTime, baton->functionStart)
-        );
+            Convert::toJsValueArray(reinterpret_cast<uint8_t *>(baton->data.data()), baton->length));
+        returnData.emplace_back(Convert::toTimeDifferenceUS(pHighlvlStatic->rttStartTime, baton->functionStart));
 
         return returnData;
     };
@@ -1444,8 +1398,7 @@ NAN_METHOD(HighLevel::RttRead)
 
 NAN_METHOD(HighLevel::RttWrite)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE,
-                                            int &argumentCount) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<RTTWriteBaton>();
 
         baton->channelIndex = Convert::getNativeUint32(info[argumentCount]);
@@ -1459,15 +1412,15 @@ NAN_METHOD(HighLevel::RttWrite)
         else
         {
             const auto tempData = Convert::getVectorForUint8(info[argumentCount]);
-            baton->data                   = std::vector<char>(tempData.begin(), tempData.end());
-            baton->length                 = Convert::getLengthOfArray(info[argumentCount]);
+            baton->data         = std::vector<char>(tempData.begin(), tempData.end());
+            baton->length       = Convert::getLengthOfArray(info[argumentCount]);
         }
         ++argumentCount;
 
         return baton.release();
     };
 
-    const execute_function_t e = [&](Baton *b) -> nrfjprogdll_err_t {
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<RTTWriteBaton *>(b);
 
         if (!isRttStarted(b->probe))
@@ -1480,9 +1433,8 @@ NAN_METHOD(HighLevel::RttWrite)
 
         baton->functionStart = std::chrono::high_resolution_clock::now();
 
-        const auto status = NRFJPROG_rtt_write(b->probe, baton->channelIndex,
-                                               baton->data.data(),
-                                               baton->length, &writeLength);
+        const auto status =
+            NRFJPROG_rtt_write(b->probe, baton->channelIndex, baton->data.data(), baton->length, &writeLength);
 
         if (status != SUCCESS)
         {
@@ -1494,14 +1446,13 @@ NAN_METHOD(HighLevel::RttWrite)
         return status;
     };
 
-    const return_function_t r = [&](Baton *b) -> std::vector<v8::Local<v8::Value>> {
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
         const auto baton = dynamic_cast<RTTWriteBaton *>(b);
 
         std::vector<v8::Local<v8::Value>> returnData;
 
         returnData.emplace_back(Convert::toJsNumber(baton->length));
-        returnData.emplace_back(
-            Convert::toTimeDifferenceUS(pHighlvlStatic->rttStartTime, baton->functionStart));
+        returnData.emplace_back(Convert::toTimeDifferenceUS(pHighlvlStatic->rttStartTime, baton->functionStart));
 
         return returnData;
     };

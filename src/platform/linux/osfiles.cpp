@@ -51,7 +51,7 @@
 
 #include <iostream>
 
-std::string *pLibrarySearchPath = nullptr;
+std::string * pLibrarySearchPath = nullptr;
 
 // NAN_METHOD is a macro; it's shorthand so you don't have to write that the
 // first and only parameter is of type Nan::FunctionCallbackInfo<v8::Value>
@@ -74,7 +74,7 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
 /* Try to locate a dynamically-linked library named fileName, and set libraryPath
  * to the full path to that library.
  */
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string & libraryPath, const std::string & fileName)
 {
     std::vector<char> tempLibraryPath(COMMON_MAX_PATH, '\0');
 
@@ -115,7 +115,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
     // Last recourse, try loading the library through dlopen().
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
-    void *libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+    void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
     if (libraryHandle != nullptr)
     {
@@ -128,10 +128,11 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-bool AbstractFile::pathExists(const char *path)
+bool AbstractFile::pathExists(const char * path)
 {
     struct stat buffer
-    {};
+    {
+    };
     return ((0 == stat(path, &buffer)));
 }
 
@@ -141,9 +142,9 @@ std::string OSFilesGetTempFolderPath()
 {
     static const std::vector<std::string> temp_keys = {"TMPDIR", "TMP", "TEMP", "TEMPDIR"};
 
-    for (const std::string &temp_key : temp_keys)
+    for (const std::string & temp_key : temp_keys)
     {
-        char *val = getenv(temp_key.c_str());
+        char * val = getenv(temp_key.c_str());
 
         if (val != nullptr)
         {

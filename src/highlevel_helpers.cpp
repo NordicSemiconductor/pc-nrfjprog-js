@@ -59,8 +59,7 @@ v8::Local<v8::Object> ProbeInfo::ToJs()
 
     Utility::Set(obj, "serialNumber", Convert::toJsNumber(probe_info.serial_number));
     Utility::Set(obj, "clockSpeedkHz", Convert::toJsNumber(probe_info.clockspeed_khz));
-    Utility::Set(obj, "firmwareString",
-                 Convert::toJsString(static_cast<const char *>(probe_info.firmware_string)));
+    Utility::Set(obj, "firmwareString", Convert::toJsString(static_cast<const char *>(probe_info.firmware_string)));
 
     return scope.Escape(obj);
 }
@@ -110,8 +109,7 @@ v8::Local<v8::Object> LibraryInfo::ToJs()
     Utility::Set(versionObj, "revision", Convert::toJsString(&library_info.version_revision, 1));
 
     Utility::Set(obj, "version", versionObj);
-    Utility::Set(obj, "path",
-                 Convert::toJsString(static_cast<const char *>(library_info.file_path)));
+    Utility::Set(obj, "path", Convert::toJsString(static_cast<const char *>(library_info.file_path)));
 
     return scope.Escape(obj);
 }
@@ -189,14 +187,12 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 
     if (Utility::Has(obj, "chip_erase_mode"))
     {
-        options.chip_erase_mode =
-            static_cast<erase_action_t>(Convert::getNativeUint32(obj, "chip_erase_mode"));
+        options.chip_erase_mode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "chip_erase_mode"));
     }
 
     if (Utility::Has(obj, "qspi_erase_mode"))
     {
-        options.qspi_erase_mode =
-            static_cast<erase_action_t>(Convert::getNativeUint32(obj, "qspi_erase_mode"));
+        options.qspi_erase_mode = static_cast<erase_action_t>(Convert::getNativeUint32(obj, "qspi_erase_mode"));
     }
 
     if (Utility::Has(obj, "reset"))
@@ -212,7 +208,8 @@ ProgramOptions::ProgramOptions(v8::Local<v8::Object> obj)
 }
 
 VerifyOptions::VerifyOptions(v8::Local<v8::Object>)
-{}
+{
+}
 
 v8::Local<v8::Object> ChannelInfo::ToJs()
 {

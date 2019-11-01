@@ -40,15 +40,15 @@
 
 #include <windows.h>
 
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
+LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char * func_name)
 {
     return GetProcAddress(libraryHandle, func_name);
 }
 
-LibraryHandleType LibraryLoad(const std::string &path)
+LibraryHandleType LibraryLoad(const std::string & path)
 {
     const int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
-    auto wstr = std::vector<wchar_t>(wchars_num);
+    auto wstr            = std::vector<wchar_t>(wchars_num);
     MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wstr.data(), wchars_num);
 
     return LoadLibraryW(wstr.data());

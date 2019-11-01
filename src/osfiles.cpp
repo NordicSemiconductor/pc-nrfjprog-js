@@ -44,7 +44,7 @@ void OSFilesInit(v8::Local<v8::Object> target)
     Nan::SetMethod(target, "setLibrarySearchPath", OSFilesSetLibrarySearchPath);
 }
 
-FileFormatHandler::FileFormatHandler(const std::string &fileinfo, input_format_t inputFormat)
+FileFormatHandler::FileFormatHandler(const std::string & fileinfo, input_format_t inputFormat)
 {
     if (inputFormat == INPUT_FORMAT_HEX_STRING)
     {
@@ -76,12 +76,12 @@ std::string AbstractFile::getFileName()
     return filename;
 }
 
-bool AbstractFile::pathExists(const std::string &path)
+bool AbstractFile::pathExists(const std::string & path)
 {
     return pathExists(path.c_str());
 }
 
-TempFile::TempFile(const std::string &fileContent)
+TempFile::TempFile(const std::string & fileContent)
     : error(TempNoError)
 {
     filename = writeTempFile(fileContent);
@@ -92,7 +92,7 @@ TempFile::~TempFile()
     deleteFile();
 }
 
-std::string TempFile::writeTempFile(const std::string &fileContent)
+std::string TempFile::writeTempFile(const std::string & fileContent)
 {
     std::string filePath = getTempFileName();
 
@@ -124,7 +124,7 @@ std::string TempFile::errormessage()
     return "No error";
 }
 
-LocalFile::LocalFile(const std::string &fileName)
+LocalFile::LocalFile(const std::string & fileName)
 {
     filename = fileName;
 }

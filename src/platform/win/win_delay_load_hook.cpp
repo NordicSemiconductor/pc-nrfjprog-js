@@ -20,7 +20,7 @@
 #include <delayimp.h>
 #include <string.h>
 
-static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo *info)
+static FARPROC WINAPI load_exe_hook(unsigned int event, DelayLoadInfo * info)
 {
     HMODULE m;
     if (event != dliNotePreLoadLibrary)

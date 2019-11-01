@@ -44,11 +44,21 @@
 #include <functional>
 #include <map>
 
-typedef enum { MCUBOOT_PROBE, DFU_PROBE, DEBUG_PROBE } probe_type_t;
+typedef enum
+{
+    MCUBOOT_PROBE,
+    DFU_PROBE,
+    DEBUG_PROBE
+} probe_type_t;
 
-typedef enum { INPUT_FORMAT_HEX_FILE, INPUT_FORMAT_HEX_STRING } input_format_t;
+typedef enum
+{
+    INPUT_FORMAT_HEX_FILE,
+    INPUT_FORMAT_HEX_STRING
+} input_format_t;
 
-typedef enum {
+typedef enum
+{
     JsSuccess,
     CouldNotFindJlinkDLL,
     CouldNotFindJprogDLL,
@@ -81,8 +91,7 @@ static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::CouldNotProgram, "CouldNotProgram"},
     {errorcode_t::CouldNotRead, "CouldNotRead"},
     {errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile"},
-    {errorcode_t::CouldNotExecuteDueToLoad,
-     "Could not execute the function due to too many calls in line"}};
+    {errorcode_t::CouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line"}};
 
 static name_map_t program_parameter_type_map = {NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),
                                                 NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)};
@@ -128,7 +137,8 @@ static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
                                         NAME_MAP_ENTRY(NRF9160_xxAA_REV1),
                                         NAME_MAP_ENTRY(NRF9160_xxAA_FUTURE)};
 
-static name_map_t device_family_map = {NAME_MAP_ENTRY(NRF51_FAMILY), NAME_MAP_ENTRY(NRF52_FAMILY),
+static name_map_t device_family_map = {NAME_MAP_ENTRY(NRF51_FAMILY),
+                                       NAME_MAP_ENTRY(NRF52_FAMILY),
                                        NAME_MAP_ENTRY(UNKNOWN_FAMILY)};
 
 static name_map_t nrfjprogdll_err_map = {NAME_MAP_ENTRY(SUCCESS),
@@ -162,6 +172,5 @@ class Baton;
 typedef std::function<Baton *(Nan::NAN_METHOD_ARGS_TYPE, int &)> parse_parameters_function_t;
 typedef std::function<nrfjprogdll_err_t(Baton *)> execute_function_t;
 typedef std::function<std::vector<v8::Local<v8::Value>>(Baton *)> return_function_t;
-
 
 #endif // __NRFJPROG_COMMON_H__
