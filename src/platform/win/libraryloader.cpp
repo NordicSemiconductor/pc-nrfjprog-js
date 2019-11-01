@@ -47,7 +47,7 @@ LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *fun
 
 LibraryHandleType LibraryLoad(const std::string &path)
 {
-    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, NULL, 0);
+    const int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
     auto wstr = std::vector<wchar_t>(wchars_num);
     MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wstr.data(), wchars_num);
 

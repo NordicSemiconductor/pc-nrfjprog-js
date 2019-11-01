@@ -95,7 +95,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
 bool AbstractFile::pathExists(const char *path)
 {
-    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
+    const int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
     auto wstr = std::vector<wchar_t>(wchars_num);
     MultiByteToWideChar(CP_UTF8, 0, path, -1, wstr.data(), wchars_num);
 
@@ -109,7 +109,7 @@ std::string TempFile::getTempFileName()
     std::vector<char> tempFolderPath(MAX_PATH);
     std::vector<char> tempFilePath(MAX_PATH);
 
-    DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath.data());
+    const DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath.data());
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {
