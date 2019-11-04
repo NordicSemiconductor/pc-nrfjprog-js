@@ -1223,9 +1223,6 @@ NAN_METHOD(HighLevel::RttStart)
     const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
         auto baton = std::make_unique<RTTStartBaton>();
 
-        baton->serialNumber = Convert::getNativeUint32(info[argumentCount]);
-        ++argumentCount;
-
         const auto startOptions = Convert::getJsObject(parameters[argumentCount]);
         const StartOptions options(startOptions);
         baton->hasControlBlockLocation = options.hasControlBlockLocation;
