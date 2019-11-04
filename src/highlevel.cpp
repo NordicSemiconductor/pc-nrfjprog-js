@@ -583,9 +583,15 @@ nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, boo
 
         if (status != SUCCESS)
         {
-            isControlBlockFound = true;
+            isControlBlockFound = false;
             rttCleanup(probe);
             return status;
+        }
+
+        if (controlBlockFound)
+        {
+            isControlBlockFound = true;
+            return SUCCESS;
         }
 
         auto attemptedStartupTime = std::chrono::high_resolution_clock::now();
@@ -1256,7 +1262,7 @@ NAN_METHOD(HighLevel::RttStart)
             return result;
         }
 
-        const auto waitStatus = waitForControlBlock(baton, baton->foundControlBlock);
+        const auto waitStatus = waitForControlBlock(baton->probe, baton->foundControlBlock);
 
         if (waitStatus != SUCCESS)
         {
