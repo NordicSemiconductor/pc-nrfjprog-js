@@ -55,7 +55,6 @@ struct HighLevelStaticPrivate
 {
     bool loaded{false};
     bool keepDeviceOpen{false};
-    Probe_handle_t probe{};
     std::string logMessage;
     std::timed_mutex logMutex;
     std::unique_ptr<Nan::Callback> jsProgressCallback;
@@ -198,11 +197,6 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     baton->returnFunction  = ret;
     baton->serialNumber    = serialNumber;
 
-    // TODO: provide the probe handle through argument or some other means
-    // TODO: a temporary hack that still prevents multi adapter functionality
-    // TODO: is to still store the probe handle in pHighlvlStatic
-    baton->probe = pHighlvlStatic->probe;
-
     uv_queue_work(
         uv_default_loop(), baton->req.get(), ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
 
@@ -249,7 +243,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
         if (baton->probeType == DFU_PROBE)
         {
             // TODO: do not store in pHighlvlStatic
-            initError = NRFJPROG_dfu_init(&(pHighlvlStatic->probe),
+            initError = NRFJPROG_dfu_init(&(baton->probe),
                                           &HighLevel::progressCallback,
                                           &HighLevel::log,
                                           baton->serialNumber,
@@ -261,7 +255,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
             const auto baton2 = dynamic_cast<ProgramMcuBootDFUBaton *>(baton);
 
             // TODO: do not store in pHighlvlStatic
-            initError = NRFJPROG_mcuboot_dfu_init(&(pHighlvlStatic->probe),
+            initError = NRFJPROG_mcuboot_dfu_init(&(baton->probe),
                                                   &HighLevel::progressCallback,
                                                   &HighLevel::log,
                                                   baton2->uart.c_str(),
@@ -272,7 +266,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
         {
             // TODO: do not store in pHighlvlStatic
             initError = NRFJPROG_probe_init(
-                &(pHighlvlStatic->probe), &HighLevel::progressCallback, &HighLevel::log, baton->serialNumber, nullptr);
+                &(baton->probe), &HighLevel::progressCallback, &HighLevel::log, baton->serialNumber, nullptr);
         }
 
         if (initError != SUCCESS)
