@@ -39,6 +39,7 @@
 #include <mutex>
 #include <queue>
 #include <sstream>
+#include <thread>
 #include <vector>
 
 #include "highlevel_batons.h"
@@ -54,7 +55,6 @@ constexpr int MAX_SERIAL_NUMBERS = 100;
 struct HighLevelStaticPrivate
 {
     bool loaded{false};
-    bool keepDeviceOpen{false};
     std::string logMessage;
     std::timed_mutex logMutex;
     std::unique_ptr<Nan::Callback> jsProgressCallback;
@@ -63,10 +63,60 @@ struct HighLevelStaticPrivate
     std::queue<std::string> progressProcess;
     std::chrono::high_resolution_clock::time_point rttStartTime{};
 
+    std::map<uint32_t, Probe_handle_t> openProbeMap{};
+    std::mutex openProbeMapMutex;
+
     static inline Nan::Persistent<v8::Function> & constructor()
     {
         static Nan::Persistent<v8::Function> my_constructor;
         return my_constructor;
+    }
+
+    nrfjprogdll_err_t registerProbe(const uint32_t serialNumber, Probe_handle_t probe)
+    {
+        std::unique_lock<std::mutex> lock(openProbeMapMutex);
+        if (openProbeMap.find(serialNumber) != openProbeMap.end())
+        {
+            return INVALID_OPERATION; // Already opened
+        }
+
+        openProbeMap[serialNumber] = probe;
+        return SUCCESS;
+    }
+
+    void unregisterProbe(const uint32_t serialNumber)
+    {
+        std::unique_lock<std::mutex> lock(openProbeMapMutex);
+        openProbeMap.erase(serialNumber);
+    }
+
+    void unregisterProbe(const Probe_handle_t probe)
+    {
+        std::unique_lock<std::mutex> lock(openProbeMapMutex);
+        const auto it = std::find_if(
+            openProbeMap.begin(),
+            openProbeMap.end(),
+            [probe](std::pair<const uint32_t, Probe_handle_t> v) { return v.second == probe; }
+        );
+        if (it != openProbeMap.end())
+        {
+            openProbeMap.erase(it);
+        }
+    }
+
+    Probe_handle_t getProbe(const uint32_t serialNumber)
+    {
+        std::unique_lock<std::mutex> lock(openProbeMapMutex);
+        const auto it = openProbeMap.find(serialNumber);
+        if (it != openProbeMap.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    inline bool hasProbe(const uint32_t serialNumber)
+    {
+        return getProbe(serialNumber) != nullptr;
     }
 };
 
@@ -108,6 +158,8 @@ HighLevel::HighLevel()
     static HighLevelStaticPrivate highLevelStaticPrivate;
     pHighlvlStatic = &highLevelStaticPrivate;
     resetLog();
+
+    NRFJPROG_dll_open(nullptr, &HighLevel::log);
 }
 
 void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
@@ -221,26 +273,16 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
         uv_async_init(uv_default_loop(), pHighlvlStatic->progressEvent.get(), sendProgress);
     }
 
-    bool isOpen;
-    NRFJPROG_is_dll_open(&isOpen);
-
-    if (!isOpen)
+    if (baton->serialNumber != 0)
     {
-        nrfjprogdll_err_t openError = NRFJPROG_dll_open(nullptr, &HighLevel::log);
+        nrfjprogdll_err_t initError = SUCCESS;
 
-        if (openError != SUCCESS)
+        auto probe = pHighlvlStatic->getProbe(baton->serialNumber);
+        if (probe)
         {
-            baton->result        = errorcode_t::CouldNotOpenDLL;
-            baton->lowlevelError = openError;
-            return;
+            baton->probe = probe;
         }
-    }
-
-    if (baton->serialNumber != 0 && !pHighlvlStatic->keepDeviceOpen)
-    {
-        nrfjprogdll_err_t initError;
-
-        if (baton->probeType == DFU_PROBE)
+        else if (baton->probeType == DFU_PROBE)
         {
             // TODO: do not store in pHighlvlStatic
             initError = NRFJPROG_dfu_init(&(baton->probe),
@@ -279,7 +321,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
 
     const auto executeError = baton->executeFunction(baton);
 
-    if (!pHighlvlStatic->keepDeviceOpen)
+    if (pHighlvlStatic->getProbe(baton->serialNumber) == nullptr)
     {
         if (baton->serialNumber != 0)
         {
@@ -304,8 +346,6 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
                 return;
             }
         }
-
-        NRFJPROG_dll_close();
     }
 
     if (executeError != SUCCESS)
@@ -570,6 +610,8 @@ void HighLevel::rttCleanup(Probe_handle_t probe)
     {
         NRFJPROG_rtt_stop(probe);
     }
+
+    pHighlvlStatic->unregisterProbe(probe);
 }
 
 nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, bool & isControlBlockFound)
@@ -1200,13 +1242,7 @@ NAN_METHOD(HighLevel::OpenDevice)
     };
 
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
-        if (pHighlvlStatic->keepDeviceOpen)
-        {
-            pHighlvlStatic->keepDeviceOpen = false;
-            return INVALID_OPERATION; // Already opened
-        }
-        pHighlvlStatic->keepDeviceOpen = true;
-        return SUCCESS;
+        return pHighlvlStatic->registerProbe(b->serialNumber, b->probe);
     };
 
     CallFunction(info, p, e, nullptr, true);
@@ -1217,7 +1253,7 @@ NAN_METHOD(HighLevel::CloseDevice)
     const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * { return new CloseBaton(); };
 
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
-        pHighlvlStatic->keepDeviceOpen = false;
+        pHighlvlStatic->unregisterProbe(b->serialNumber);
         return SUCCESS;
     };
 
@@ -1240,6 +1276,11 @@ NAN_METHOD(HighLevel::RttStart)
 
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         auto baton = dynamic_cast<RTTStartBaton *>(b);
+
+        if (pHighlvlStatic->hasProbe(baton->serialNumber))
+        {
+            return INVALID_OPERATION; // Already opened
+        }
 
         if (baton->hasControlBlockLocation)
         {
@@ -1270,7 +1311,15 @@ NAN_METHOD(HighLevel::RttStart)
             return waitStatus;
         }
 
-        return getChannelInformation(baton, baton->foundChannelInformation);
+        const auto channelInfo = getChannelInformation(baton, baton->foundChannelInformation);
+
+        if (channelInfo != SUCCESS)
+        {
+            return channelInfo;
+        }
+
+        // Add to registry to keep it open
+        return pHighlvlStatic->registerProbe(b->serialNumber, b->probe);
     };
 
     const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
@@ -1313,10 +1362,12 @@ NAN_METHOD(HighLevel::RttStop)
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<RTTStopBaton *>(b);
 
+        pHighlvlStatic->unregisterProbe(b->serialNumber);
+
         if (!isRttStarted(b->probe))
         {
             baton->rttNotStarted = true;
-            return SUCCESS;
+            return INVALID_OPERATION;
         }
 
         baton->rttNotStarted = false;
@@ -1326,7 +1377,6 @@ NAN_METHOD(HighLevel::RttStop)
         if (status != SUCCESS)
         {
             rttCleanup(b->probe);
-            return status;
         }
 
         return status;
