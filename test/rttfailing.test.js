@@ -37,13 +37,12 @@
 'use strict';
 
 const nRFjprog = require('../index.js');
-const RTT = nRFjprog.RTT;
 
 let device;
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-describe('RTT without RTT firmware', () => {
+describe.skip('RTT without RTT firmware', () => {
     beforeAll(done => {
         const programCallback = err => {
             expect(err).toBeUndefined();
@@ -71,7 +70,7 @@ describe('RTT without RTT firmware', () => {
                 done();
             };
 
-            RTT.start(device.serialNumber, {}, startCallback);
+            nRFjprog.rttStart(device.serialNumber, {}, startCallback);
         });
     });
 });
