@@ -8,16 +8,16 @@ if(APPLE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 
-set(NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/share)
+# set(NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/share)
 
-message(STATUS "LOCATION: ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}")
+# message(STATUS "LOCATION: ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}")
 
-find_package(nRFCommandLineTools
-    10.4.1 EXACT
-    REQUIRED
-    COMPONENTS nrf::highlevelnrfjprog nrf::nrfjprogdll
-    PATHS ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}
-)
+# find_package(nRFCommandLineTools
+#     10.4.1 EXACT
+#     REQUIRED
+#     COMPONENTS nrf::highlevelnrfjprog nrf::nrfjprogdll
+#     PATHS ${NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION}
+# )
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,7 +32,8 @@ else()
 endif()
 
 # Include the local include directories
-include_directories(${PLATFORM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/include)
+# include_directories(${PLATFORM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/include)
+include_directories(${PLATFORM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog)
 
 # Essential include files to build a node addon,
 # you should add this line in every CMake.js based project.
@@ -81,8 +82,11 @@ endif()
 
 message(STATUS ${NRFJPROG_LIB})
 
+
+find_library(HIGHLEVEL highlevelnrfjprog PATHS "${CMAKE_SOURCE_DIR}/nrfjprog")
+
 # Essential library files to link to a node addon,
 # you should add this line in every CMake.js based project.
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_JS_LIB} nrf::highlevelnrfjprog)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_JS_LIB} ${HIGHLEVEL})
 
 include (cmake/clang-dev-tools.cmake)
