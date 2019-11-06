@@ -52,6 +52,7 @@ class Baton
         , name(_name)
         , mayHaveProgressCallback(_mayHaveProgressCallback)
         , serialNumber(0)
+        , coProcessor(CP_APPLICATION)
         , result(JsSuccess)
         , probeType(_probeType)
         , probe(_probe)
@@ -72,6 +73,7 @@ class Baton
     const bool mayHaveProgressCallback;
 
     uint32_t serialNumber;
+    coprocessor_t coProcessor;
     uint32_t result;
     probe_type_t probeType;
     Probe_handle_t probe;

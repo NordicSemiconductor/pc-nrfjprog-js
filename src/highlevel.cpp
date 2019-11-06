@@ -118,6 +118,8 @@ struct HighLevelStaticPrivate
     {
         return getProbe(serialNumber) != nullptr;
     }
+
+    const std::vector<coprocessor_t> coProcessors{ CP_APPLICATION, CP_NETWORK };
 };
 
 static HighLevelStaticPrivate * pHighlvlStatic = nullptr;
@@ -174,9 +176,8 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     // NAN_METHOD defining the functions.
     if (parse == nullptr || execute == nullptr)
     {
-        const auto message = ErrorMessage::getErrorMessage(
-            1,
-            nrfjprog_js_err_map,
+        auto message = ErrorMessage::getErrorMessage(
+            errorcode_t::CouldNotCallFunction, nrfjprog_js_err_map,
             std::string("One or more of the parse, or execute functions is missing for this function"));
         Nan::ThrowError(message);
         return;
@@ -187,6 +188,7 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     auto argumentCount = 0;
     std::unique_ptr<Baton> baton;
     uint32_t serialNumber = 0;
+    coprocessor_t coProcessor = CP_APPLICATION;
 
     pHighlvlStatic->jsProgressCallback.reset();
 
@@ -194,8 +196,34 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     {
         if (hasSerialNumber)
         {
-            serialNumber = Convert::getNativeUint32(info[argumentCount]);
-            argumentCount++;
+            try
+            {
+                serialNumber = Convert::getNativeUint32(info[argumentCount]);
+                ++argumentCount;
+            }
+            catch (...)
+            {
+                const auto str = Convert::getNativeString(info[argumentCount]);
+                ++argumentCount;
+
+                char sep;
+                uint32_t cop;
+                if (3 != std::sscanf(str.c_str(), "%u%c%u", &serialNumber, &sep, &cop)) {
+                    auto message = ErrorMessage::getErrorMessage(
+                        errorcode_t::CouldNotCallFunction, nrfjprog_js_err_map,
+                        std::string("parsing serialnumber:coprocessor"));
+                    Nan::ThrowError(message);
+                    return;
+                }
+                if (cop >= pHighlvlStatic->coProcessors.size()) {
+                    auto message = ErrorMessage::getErrorMessage(
+                        errorcode_t::CouldNotCallFunction, nrfjprog_js_err_map,
+                        std::string("parsing coprocessor number"));
+                    Nan::ThrowError(message);
+                    return;
+                }
+                coProcessor = pHighlvlStatic->coProcessors[cop];
+            }
         }
 
         baton.reset(parse(info, argumentCount));
@@ -248,6 +276,7 @@ void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
     baton->executeFunction = execute;
     baton->returnFunction  = ret;
     baton->serialNumber    = serialNumber;
+    baton->coProcessor     = coProcessor;
 
     uv_queue_work(
         uv_default_loop(), baton->req.get(), ExecuteFunction, reinterpret_cast<uv_after_work_cb>(ReturnFunction));
@@ -296,7 +325,6 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
         {
             const auto baton2 = dynamic_cast<ProgramMcuBootDFUBaton *>(baton);
 
-            // TODO: do not store in pHighlvlStatic
             initError = NRFJPROG_mcuboot_dfu_init(&(baton->probe),
                                                   &HighLevel::progressCallback,
                                                   &HighLevel::log,
@@ -306,9 +334,13 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
         }
         else
         {
-            // TODO: do not store in pHighlvlStatic
             initError = NRFJPROG_probe_init(
                 &(baton->probe), &HighLevel::progressCallback, &HighLevel::log, baton->serialNumber, nullptr);
+
+            if (initError == SUCCESS)
+            {
+                initError = NRFJPROG_probe_set_coprocessor(baton->probe, baton->coProcessor);
+            }
         }
 
         if (initError != SUCCESS)
