@@ -54,6 +54,8 @@ typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_init)(Probe_handle_t *debug_probe,
                                                    progress_callback * prog_cb,
                                                    log_callback *log_cb, uint32_t snr,
                                                    const char *jlink_path);
+typedef nrfjprogdll_err_t (*HILVL_nRFJ_probe_set_coprocessor)(Probe_handle_t debug_probe,
+                                                              coprocessor_t coprocessor);
 typedef nrfjprogdll_err_t (*HILVL_nRFJ_dfu_init)(Probe_handle_t *dfu_probe,
                                                  progress_callback * prog_cb,
                                                  log_callback *log_cb,
@@ -102,6 +104,7 @@ struct LibraryFunctionPointersType
     HILVL_nRFJ_is_dll_open is_dll_open;
     HILVL_nRFJ_get_connected_probes get_connected_probes;
     HILVL_nRFJ_probe_init probe_init;
+    HILVL_nRFJ_probe_set_coprocessor probe_set_coprocessor;
     HILVL_nRFJ_dfu_init dfu_init;
     HILVL_nRFJ_mcuboot_dfu_init mcuboot_dfu_init;
     HILVL_nRFJ_probe_uninit probe_uninit;
