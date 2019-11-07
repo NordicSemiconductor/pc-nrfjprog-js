@@ -57,6 +57,7 @@ class Baton
         , probeType(_probeType)
         , probe(_probe)
         , lowlevelError(SUCCESS)
+        , cpuNeedsReset(false)
     {
         req       = std::make_unique<uv_work_t>();
         req->data = static_cast<void *>(this);
@@ -78,6 +79,7 @@ class Baton
     probe_type_t probeType;
     Probe_handle_t probe;
     nrfjprogdll_err_t lowlevelError;
+    bool cpuNeedsReset;
 
     std::chrono::high_resolution_clock::time_point functionStart;
 
@@ -88,6 +90,19 @@ class Baton
     return_function_t returnFunction;
 
     static std::timed_mutex executionMutex;
+};
+
+class BatonNeedsReset : public Baton
+{
+  public:
+    BatonNeedsReset(const std::string _name, const uint32_t _returnParameterCount,
+                    const bool _mayHaveProgressCallback,
+                    const probe_type_t _probeType = DEBUG_PROBE,
+                    Probe_handle_t _probe = nullptr)
+          : Baton(_name, _returnParameterCount, _mayHaveProgressCallback, _probeType, _probe)
+      {
+        cpuNeedsReset = true;
+      }
 };
 
 class GetLibraryVersionBaton : public Baton
@@ -127,14 +142,6 @@ class GetDeviceInfoBaton : public Baton
     {}
     uint32_t serialNumber;
     device_info_t deviceInfo;
-
-    /* New data members introduced for multi core devices (nRF53) */
-    /* Type of device we are dealing with. */
-    device_family_t     device_family;
-    device_version_t    device_type;
-
-    std::vector<device_info_t> cores;
-
 };
 
 class GetProbeInfoBaton : public Baton
@@ -165,11 +172,11 @@ class GetDeviceVersionBaton : public Baton
     device_version_t deviceVersion;
 };
 
-class ReadBaton : public Baton
+class ReadBaton : public BatonNeedsReset
 {
   public:
     ReadBaton()
-        : Baton("read", 1, false)
+        : BatonNeedsReset("read", 1, false)
     {}
 
     uint32_t address;
@@ -177,22 +184,22 @@ class ReadBaton : public Baton
     std::vector<uint8_t> data;
 };
 
-class ReadU32Baton : public Baton
+class ReadU32Baton : public BatonNeedsReset
 {
   public:
     ReadU32Baton()
-        : Baton("read u32", 1, false)
+        : BatonNeedsReset("read u32", 1, false)
     {}
     uint32_t address;
     uint32_t length;
     uint32_t data;
 };
 
-class ProgramBaton : public Baton
+class ProgramBaton : public BatonNeedsReset
 {
   public:
     ProgramBaton()
-        : Baton("program", 0, true)
+        : BatonNeedsReset("program", 0, true)
     {}
     std::string file;
     std::string filename;
@@ -200,11 +207,11 @@ class ProgramBaton : public Baton
     input_format_t inputFormat;
 };
 
-class ProgramDFUBaton : public Baton
+class ProgramDFUBaton : public BatonNeedsReset
 {
   public:
     ProgramDFUBaton()
-        : Baton("program", 0, true, DFU_PROBE)
+        : BatonNeedsReset("program", 0, true, DFU_PROBE)
     {}
     std::string filename;
 };
@@ -221,60 +228,68 @@ class ProgramMcuBootDFUBaton : public Baton
     uint32_t responseTimeout;
 };
 
-class VerifyBaton : public Baton
+class VerifyBaton : public BatonNeedsReset
 {
   public:
     VerifyBaton()
-        : Baton("verify", 0, true)
+        : BatonNeedsReset("verify", 0, true)
     {}
     std::string filename;
 };
 
-class ReadToFileBaton : public Baton
+class ReadToFileBaton : public BatonNeedsReset
 {
   public:
     ReadToFileBaton()
-        : Baton("read to file", 0, true)
+        : BatonNeedsReset("read to file", 0, true)
     {}
     std::string filename;
     read_options_t options;
 };
 
-class EraseBaton : public Baton
+class EraseBaton : public BatonNeedsReset
 {
   public:
     EraseBaton()
-        : Baton("erase", 0, true)
+        : BatonNeedsReset("erase", 0, true)
     {}
     erase_action_t erase_mode;
     uint32_t start_address;
     uint32_t end_address;
 };
 
-class RecoverBaton : public Baton
+class RecoverBaton : public BatonNeedsReset
 {
   public:
     RecoverBaton()
-        : Baton("recover", 0, true)
+        : BatonNeedsReset("recover", 0, true)
     {}
 };
 
-class WriteBaton : public Baton
+class ResetBaton : public Baton
+{
+  public:
+    ResetBaton()
+        : Baton("reset", 0, false)
+    {}
+};
+
+class WriteBaton : public BatonNeedsReset
 {
   public:
     WriteBaton()
-        : Baton("write", 0, false)
+        : BatonNeedsReset("write", 0, false)
     {}
     uint32_t address;
     std::vector<uint8_t> data;
     uint32_t length;
 };
 
-class WriteU32Baton : public Baton
+class WriteU32Baton : public BatonNeedsReset
 {
   public:
     WriteU32Baton()
-        : Baton("write u32", 0, false)
+        : BatonNeedsReset("write u32", 0, false)
     {}
     uint32_t address;
     uint32_t data;
@@ -288,11 +303,11 @@ class OpenBaton : public Baton
     {}
 };
 
-class CloseBaton : public Baton
+class CloseBaton : public BatonNeedsReset
 {
   public:
     CloseBaton()
-        : Baton("close opened device", 0, false)
+        : BatonNeedsReset("close opened device", 0, false)
     {}
 };
 
@@ -336,11 +351,7 @@ class RTTStopBaton : public Baton
     {}
     std::string toString()
     {
-        std::stringstream stream;
-
-        stream << "No parameters";
-
-        return stream.str();
+        return "No parameters";
     }
 
     bool rttNotStarted;
