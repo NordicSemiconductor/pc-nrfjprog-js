@@ -355,21 +355,21 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
 
     if (pHighlvlStatic->getProbe(baton->serialNumber) == nullptr)
     {
-        if (baton->probeType == DEBUG_PROBE && baton->cpuNeedsReset)
-        {
-            nrfjprogdll_err_t resetError =
-                NRFJPROG_reset(baton->probe, RESET_SYSTEM);
-
-            if (resetError != SUCCESS)
-            {
-                baton->result        = errorcode_t::CouldNotResetDevice;
-                baton->lowlevelError = resetError;
-                return;
-            }
-        }
-
         if (baton->serialNumber != 0)
         {
+            if (baton->probeType == DEBUG_PROBE && baton->cpuNeedsReset)
+            {
+                nrfjprogdll_err_t resetError =
+                    NRFJPROG_reset(baton->probe, RESET_SYSTEM);
+
+                if (resetError != SUCCESS)
+                {
+                    baton->result        = errorcode_t::CouldNotResetDevice;
+                    baton->lowlevelError = resetError;
+                    return;
+                }
+            }
+
             const auto uninitError = NRFJPROG_probe_uninit(&(baton->probe));
 
             if (uninitError != SUCCESS)
