@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.12)
 
 # Name of the project (will be the name of the plugin)
 project (pc-nrfjprog-js)
