@@ -359,8 +359,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
         {
             if (baton->probeType == DEBUG_PROBE && baton->cpuNeedsReset)
             {
-                nrfjprogdll_err_t resetError =
-                    NRFJPROG_reset(baton->probe, RESET_SYSTEM);
+                const auto resetError = NRFJPROG_reset(baton->probe, RESET_SYSTEM);
 
                 if (resetError != SUCCESS)
                 {
