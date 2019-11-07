@@ -93,54 +93,6 @@ static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile"},
     {errorcode_t::CouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line"}};
 
-static name_map_t program_parameter_type_map = {NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),
-                                                NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)};
-
-static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
-                                        // nRF51
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAA_REV3),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAB_REV3),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAC_REV3),
-                                        NAME_MAP_ENTRY(NRF51802_xxAA_REV3),
-                                        NAME_MAP_ENTRY(NRF51801_xxAB_REV3),
-                                        // nRF52805
-                                        NAME_MAP_ENTRY(NRF52805_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52805_xxAA_FUTURE),
-                                        // nRF52810
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_FUTURE),
-                                        // nRF52811
-                                        NAME_MAP_ENTRY(NRF52811_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52811_xxAA_FUTURE),
-                                        // nRF52832
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_ENGA),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_ENGB),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_FUTURE),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV1),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV2),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_FUTURE),
-                                        // nRF52833
-                                        NAME_MAP_ENTRY(NRF52833_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52833_xxAA_FUTURE),
-                                        // nRF52840
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_ENGA),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_ENGB),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_FUTURE),
-                                        // nRF9160
-                                        NAME_MAP_ENTRY(NRF9160_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF9160_xxAA_FUTURE)};
-
-static name_map_t device_family_map = {NAME_MAP_ENTRY(NRF51_FAMILY),
-                                       NAME_MAP_ENTRY(NRF52_FAMILY),
-                                       NAME_MAP_ENTRY(UNKNOWN_FAMILY)};
-
 static name_map_t nrfjprogdll_err_map = {NAME_MAP_ENTRY(SUCCESS),
                                          NAME_MAP_ENTRY(OUT_OF_MEMORY),
                                          NAME_MAP_ENTRY(INVALID_OPERATION),
