@@ -46,7 +46,6 @@ describe('RTT', () => {
     beforeAll(done => {
         const programCallback = err => {
             expect(err).toBeUndefined();
-
             done();
         };
 
@@ -148,11 +147,9 @@ describe('RTT', () => {
             nRFjprog.rttWrite(device.serialNumber, 0, "test", writeCallback);
         });
 
-        it('fails cleanly when calling stop without start', (done) => {
+        it('can be stopped without start', (done) => {
             const stopCallback = (err) => {
-                expect(err).toBeDefined();
-                expect(err).toMatchSnapshot();
-
+                expect(err).toBeUndefined();
                 done();
             };
 
@@ -369,5 +366,3 @@ describe('RTT', () => {
         });
     });
 });
-
-
