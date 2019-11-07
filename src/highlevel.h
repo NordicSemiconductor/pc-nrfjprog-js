@@ -87,6 +87,7 @@ class HighLevel : public Nan::ObjectWrap
                                    // end_address}, callback(progress), callback(error)
 
     static NAN_METHOD(Recover); // Params: serialnumber, callback(progress), callback(error)
+    static NAN_METHOD(Reset);   // Params: serialnumber, callback(error)
 
     static NAN_METHOD(Write);    // Params: serialnumber, address, dataarray, callback(error)
     static NAN_METHOD(WriteU32); // Params: serialnumber, address, data, callback(error)
@@ -120,7 +121,7 @@ class HighLevel : public Nan::ObjectWrap
     static bool isRttStarted(Probe_handle_t probe);
     static nrfjprogdll_err_t waitForControlBlock(Probe_handle_t probe, bool &isControlBlockFound);
     static nrfjprogdll_err_t getChannelInformation(RTTStartBaton *baton, bool &isChannelInformationAvailable);
-    static void rttCleanup(Probe_handle_t probe);
+    static nrfjprogdll_err_t rttCleanup(Probe_handle_t probe);
 };
 
 #endif // __NRFJPROG_H__

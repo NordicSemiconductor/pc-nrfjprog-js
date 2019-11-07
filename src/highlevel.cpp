@@ -337,7 +337,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
             initError = NRFJPROG_probe_init(
                 &(baton->probe), &HighLevel::progressCallback, &HighLevel::log, baton->serialNumber, nullptr);
 
-            if (initError == SUCCESS)
+            if (initError == SUCCESS && baton->coProcessor != CP_APPLICATION)
             {
                 initError = NRFJPROG_probe_set_coprocessor(baton->probe, baton->coProcessor);
             }
@@ -355,20 +355,21 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
 
     if (pHighlvlStatic->getProbe(baton->serialNumber) == nullptr)
     {
+        if (baton->probeType == DEBUG_PROBE && baton->cpuNeedsReset)
+        {
+            nrfjprogdll_err_t resetError =
+                NRFJPROG_reset(baton->probe, RESET_SYSTEM);
+
+            if (resetError != SUCCESS)
+            {
+                baton->result        = errorcode_t::CouldNotResetDevice;
+                baton->lowlevelError = resetError;
+                return;
+            }
+        }
+
         if (baton->serialNumber != 0)
         {
-            if (baton->probeType != DFU_PROBE && baton->probeType != MCUBOOT_PROBE)
-            {
-                const auto resetError = NRFJPROG_reset(baton->probe, RESET_SYSTEM);
-
-                if (resetError != SUCCESS)
-                {
-                    baton->result        = errorcode_t::CouldNotResetDevice;
-                    baton->lowlevelError = resetError;
-                    return;
-                }
-            }
-
             const auto uninitError = NRFJPROG_probe_uninit(&(baton->probe));
 
             if (uninitError != SUCCESS)
@@ -527,6 +528,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
     Nan::SetPrototypeMethod(target, "erase", Erase);
 
     Nan::SetPrototypeMethod(target, "recover", Recover);
+    Nan::SetPrototypeMethod(target, "reset", Reset);
 
     Nan::SetPrototypeMethod(target, "write", Write);
     Nan::SetPrototypeMethod(target, "writeU32", WriteU32);
@@ -585,12 +587,18 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_REV2);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52840_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
+    // nRF53XXX versions
+    NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
+
     // nRF9160 versions
     NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF9160_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
     NODE_DEFINE_CONSTANT(target, NRF51_FAMILY);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF52_FAMILY);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF53_FAMILY);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF91_FAMILY);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, UNKNOWN_FAMILY); // NOLINT(hicpp-signed-bitwise)
 
@@ -632,18 +640,20 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
     NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION); // NOLINT(hicpp-signed-bitwise)
 }
 
-void HighLevel::rttCleanup(Probe_handle_t probe)
+nrfjprogdll_err_t HighLevel::rttCleanup(Probe_handle_t probe)
 {
+    nrfjprogdll_err_t status = SUCCESS;
     bool started;
 
     NRFJPROG_is_rtt_started(probe, &started);
 
     if (started)
     {
-        NRFJPROG_rtt_stop(probe);
+        status = NRFJPROG_rtt_stop(probe);
     }
 
     pHighlvlStatic->unregisterProbe(probe);
+    return status;
 }
 
 nrfjprogdll_err_t HighLevel::waitForControlBlock(const Probe_handle_t probe, bool & isControlBlockFound)
@@ -747,7 +757,7 @@ bool HighLevel::isRttStarted(Probe_handle_t probe)
 
 NAN_METHOD(HighLevel::GetLibraryVersion)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new GetLibraryVersionBaton();
     };
 
@@ -775,7 +785,7 @@ NAN_METHOD(HighLevel::GetLibraryVersion)
 
 NAN_METHOD(HighLevel::GetConnectedDevices)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new GetConnectedDevicesBaton();
     };
 
@@ -838,7 +848,7 @@ NAN_METHOD(HighLevel::GetConnectedDevices)
 
 NAN_METHOD(HighLevel::GetSerialNumbers)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new GetSerialNumbersBaton();
     };
 
@@ -884,7 +894,7 @@ NAN_METHOD(HighLevel::GetSerialNumbers)
 
 NAN_METHOD(HighLevel::GetProbeInfo)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new GetProbeInfoBaton();
     };
 
@@ -907,7 +917,7 @@ NAN_METHOD(HighLevel::GetProbeInfo)
 
 NAN_METHOD(HighLevel::GetLibraryInfo)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new GetLibraryInfoBaton();
     };
 
@@ -930,7 +940,7 @@ NAN_METHOD(HighLevel::GetLibraryInfo)
 
 NAN_METHOD(HighLevel::GetDeviceInfo)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new GetDeviceInfoBaton();
     };
 
@@ -1214,11 +1224,26 @@ NAN_METHOD(HighLevel::Erase)
 
 NAN_METHOD(HighLevel::Recover)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new RecoverBaton();
     };
 
-    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t { return NRFJPROG_recover(b->probe); };
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        return NRFJPROG_recover(b->probe);
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(HighLevel::Reset)
+{
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
+        return new ResetBaton();
+    };
+
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        return NRFJPROG_reset(b->probe, RESET_SYSTEM);
+    };
 
     CallFunction(info, p, e, nullptr, true);
 }
@@ -1269,7 +1294,7 @@ NAN_METHOD(HighLevel::WriteU32)
 
 NAN_METHOD(HighLevel::OpenDevice)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int &) -> Baton * {
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
         return new OpenBaton();
     };
 
@@ -1282,7 +1307,9 @@ NAN_METHOD(HighLevel::OpenDevice)
 
 NAN_METHOD(HighLevel::CloseDevice)
 {
-    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * { return new CloseBaton(); };
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
+        return new CloseBaton();
+    };
 
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         pHighlvlStatic->unregisterProbe(b->serialNumber);
@@ -1312,6 +1339,14 @@ NAN_METHOD(HighLevel::RttStart)
         if (pHighlvlStatic->hasProbe(baton->serialNumber))
         {
             return INVALID_OPERATION; // Already opened
+        }
+
+        {
+            const auto result = NRFJPROG_reset(b->probe, RESET_SYSTEM);
+            if (result != SUCCESS)
+            {
+                return result;
+            }
         }
 
         if (baton->hasControlBlockLocation)
@@ -1392,26 +1427,7 @@ NAN_METHOD(HighLevel::RttStop)
     };
 
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
-        const auto baton = dynamic_cast<RTTStopBaton *>(b);
-
-        pHighlvlStatic->unregisterProbe(b->serialNumber);
-
-        if (!isRttStarted(b->probe))
-        {
-            baton->rttNotStarted = true;
-            return INVALID_OPERATION;
-        }
-
-        baton->rttNotStarted = false;
-
-        const auto status = NRFJPROG_rtt_stop(b->probe);
-
-        if (status != SUCCESS)
-        {
-            rttCleanup(b->probe);
-        }
-
-        return status;
+        return rttCleanup(b->probe);
     };
 
     CallFunction(info, p, e, nullptr, true);
