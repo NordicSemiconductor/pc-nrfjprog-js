@@ -38,7 +38,6 @@
 #define COMMON_H
 
 #include <map>
-#include <string>
 
 #define NAME_MAP_ENTRY(EXP)                                                                        \
     {                                                                                              \
@@ -46,6 +45,7 @@
     }
 
 // Typedef of name to string with enum name, covers most cases
+// TODO: fix this so that a name map have specific enums istead of 
 using name_map_t = std::map<uint16_t, const char *>;
 
 #endif // COMMON_H

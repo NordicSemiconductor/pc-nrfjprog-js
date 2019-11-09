@@ -43,18 +43,17 @@
 #include "utility.h"
 
 v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
-                                                   const name_map_t &errorcodeMapper,
-                                                   const std::string &customMessage)
+                                                   const name_map_t & errorcodeMapper,
+                                                   const std::string & customMessage)
 {
-    return getErrorMessage(errorCode, errorcodeMapper, customMessage, std::string(),
-                           static_cast<nrfjprogdll_err_t>(0));
+    return getErrorMessage(errorCode, errorcodeMapper, customMessage, std::string(), static_cast<nrfjprogdll_err_t>(0));
 }
 
 v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
-                                                   const name_map_t &errorcodeMapper,
-                                                   const std::string &customMessage,
-                                                   const std::string &logmessage,
-                                                   const nrfjprogdll_err_t &lowlevelError)
+                                                   const name_map_t & errorcodeMapper,
+                                                   const std::string & customMessage,
+                                                   const std::string & logmessage,
+                                                   const nrfjprogdll_err_t & lowlevelError)
 {
     Nan::EscapableHandleScope scope;
 
@@ -63,24 +62,21 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
         return scope.Escape(Nan::Undefined());
     }
 
-    std::string errorcodeString(Convert::valueToString(errorCode, errorcodeMapper));
+    const std::string errorcodeString(Convert::valueToString(errorCode, errorcodeMapper));
 
     std::ostringstream errorStringStream;
     errorStringStream << "Error occured when " << customMessage << ". "
-                      << "Errorcode: " << errorcodeString << " (0x" << std::hex << errorCode << ")"
-                      << std::endl;
+                      << "Errorcode: " << errorcodeString << " (0x" << std::hex << errorCode << ")" << std::endl;
 
-    std::string lowLevelMessage(Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
+    const std::string lowLevelMessage(Convert::valueToString(lowlevelError, nrfjprogdll_err_map));
 
     if (lowlevelError != SUCCESS)
     {
-        errorStringStream << "Lowlevel error: " << lowLevelMessage << " (" << lowlevelError << ")"
-                          << std::endl;
+        errorStringStream << "Lowlevel error: " << lowLevelMessage << " (" << lowlevelError << ")" << std::endl;
     }
 
-    v8::Local<v8::Value> error =
-        Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
-    v8::Local<v8::Object> errorObject = error.As<v8::Object>();
+    const v8::Local<v8::Value> error        = Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
+    const v8::Local<v8::Object> errorObject = error.As<v8::Object>();
 
     Utility::Set(errorObject, "errno", Convert::toJsNumber(errorCode));
     Utility::Set(errorObject, "errcode", Convert::toJsString(errorcodeString));
@@ -93,18 +89,17 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
     return scope.Escape(error);
 }
 
-v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber,
-                                                        const std::string &message)
+v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber, const std::string & message)
 {
-    static name_map_t argumentCountMap = {{0, "First"}, {1, "Second"}, {2, "Third"},  {3, "Fourth"},
-                                          {4, "Fifth"}, {5, "Sixth"},  {6, "Seventh"}};
+    static name_map_t argumentCountMap = {
+        {0, "First"}, {1, "Second"}, {2, "Third"}, {3, "Fourth"}, {4, "Fifth"}, {5, "Sixth"}, {6, "Seventh"}};
 
     std::ostringstream stream;
 
     if (argumentNumber != CUSTOM_ARGUMENT_PARSE_ERROR)
     {
-        stream << Convert::valueToString(argumentNumber, argumentCountMap, "Unknown")
-               << " argument must be a " << message;
+        stream << Convert::valueToString(argumentNumber, argumentCountMap, "Unknown") << " argument must be a "
+               << message;
     }
     else
     {
@@ -114,8 +109,7 @@ v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber
     return Convert::toJsString(stream.str())->ToString();
 }
 
-v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string &name,
-                                                          const std::string &message)
+v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string & name, const std::string & message)
 {
     std::ostringstream stream;
 

@@ -1,11 +1,11 @@
 {
   "name": "pc-nrfjprog-js",
-  "version": "1.5.9",
+  "version": "1.6.0",
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "nrfjprog": {
-    "version": "10.4.0",
-    "jlink": "V650b"
+    "version": "10.5.0",
+    "jlink": "V654c"
   },
   "scripts": {
     "build": "node build.js",

@@ -51,7 +51,7 @@
 
 #include <libproc.h> // proc pidpathinfo maxsize
 
-std::string *pLibrarySearchPath = nullptr;
+std::string * pLibrarySearchPath = nullptr;
 
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
@@ -69,7 +69,7 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
     }
 }
 
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string & libraryPath, const std::string & fileName)
 {
     int ret;
     pid_t pid;
@@ -113,7 +113,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
 
     // Last recourse, try loading the library through dlopen().
     // That will look into /usr/lib and into whatever LD_LIBRARY_PATH looks into.
-    void *libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+    void * libraryHandle = dlopen(fileName.c_str(), RTLD_LAZY);
 
     if (libraryHandle)
     {
@@ -125,7 +125,7 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-bool AbstractFile::pathExists(const char *path)
+bool AbstractFile::pathExists(const char * path)
 {
     struct stat buffer;
     return ((0 == stat(path, &buffer)));
@@ -139,7 +139,7 @@ std::string OSFilesGetTempFolderPath(void)
 
     for (uint32_t i = 0; i < 4; i++)
     {
-        char *val = getenv(tempKeys[i].c_str());
+        char * val = getenv(tempKeys[i].c_str());
 
         if (val != NULL)
         {

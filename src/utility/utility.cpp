@@ -37,7 +37,7 @@
 #include "utility.h"
 #include "conversion.h"
 
-v8::Local<v8::Value> Utility::Get(v8::Local<v8::Object> jsobj, const char *name)
+v8::Local<v8::Value> Utility::Get(v8::Local<v8::Object> jsobj, const char * name)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::Get(jsobj, Nan::New(name).ToLocalChecked()).ToLocalChecked());
@@ -49,69 +49,67 @@ v8::Local<v8::Value> Utility::Get(v8::Local<v8::Object> jsobj, const int index)
     return scope.Escape(Nan::Get(jsobj, index).ToLocalChecked());
 }
 
-void Utility::SetMethod(v8::Handle<v8::Object> target, const char *exportName,
-                        Nan::FunctionCallback function)
+void Utility::SetMethod(v8::Handle<v8::Object> target, const char * exportName, Nan::FunctionCallback function)
 {
-    Utility::Set(target, exportName,
-                 Nan::GetFunction(Nan::New<v8::FunctionTemplate>(function)).ToLocalChecked());
+    Utility::Set(target, exportName, Nan::GetFunction(Nan::New<v8::FunctionTemplate>(function)).ToLocalChecked());
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int32_t value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, int32_t value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, uint32_t value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, uint32_t value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int16_t value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, int16_t value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, uint16_t value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, uint16_t value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, int8_t value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, int8_t value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, uint8_t value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, uint8_t value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, bool value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, bool value)
 {
     return Utility::Set(target, name, Convert::toJsBool(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, double value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, double value)
 {
     return Utility::Set(target, name, Convert::toJsNumber(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const char *value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, const char * value)
 {
     return Utility::Set(target, name, Convert::toJsString(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, const std::string &value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, const std::string & value)
 {
     return Utility::Set(target, name, Convert::toJsString(value));
 }
 
-bool Utility::Set(v8::Handle<v8::Object> target, const char *name, v8::Local<v8::Value> value)
+bool Utility::Set(v8::Handle<v8::Object> target, const char * name, v8::Local<v8::Value> value)
 {
     return Nan::Set(target, Nan::New(name).ToLocalChecked(), value).FromMaybe(false);
 }
 
-bool Utility::Has(v8::Handle<v8::Object> target, const char *name)
+bool Utility::Has(v8::Handle<v8::Object> target, const char * name)
 {
     return target->Has(target->CreationContext(), Nan::New(name).ToLocalChecked()).FromMaybe(false);
 }
@@ -126,12 +124,12 @@ void Utility::SetReturnValue(Nan::NAN_METHOD_ARGS_TYPE info, v8::Local<v8::Objec
     info.GetReturnValue().Set(value);
 }
 
-bool Utility::IsObject(v8::Local<v8::Object> jsobj, const char *name)
+bool Utility::IsObject(v8::Local<v8::Object> jsobj, const char * name)
 {
     return Utility::Get(jsobj, name)->IsObject();
 }
 
-bool Utility::IsNull(v8::Local<v8::Object> jsobj, const char *name)
+bool Utility::IsNull(v8::Local<v8::Object> jsobj, const char * name)
 {
     return Utility::Get(jsobj, name)->IsNull();
 }
@@ -154,7 +152,7 @@ bool Utility::IsBetween(const uint8_t value, const uint8_t min, const uint8_t ma
     return !(value < min || value > max);
 }
 
-bool Utility::EnsureAsciiNumbers(uint8_t *value, const int length)
+bool Utility::EnsureAsciiNumbers(uint8_t * value, const int length)
 {
     for (int i = 0; i < length; ++i)
     {

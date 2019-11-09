@@ -54,7 +54,7 @@
 #define MAX_KEY_LENGTH 1000
 #define MAX_VALUE_NAME 1000
 
-std::string *pLibrarySearchPath = nullptr;
+std::string * pLibrarySearchPath = nullptr;
 
 NAN_METHOD(OSFilesSetLibrarySearchPath)
 {
@@ -72,7 +72,7 @@ NAN_METHOD(OSFilesSetLibrarySearchPath)
     }
 }
 
-errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &fileName)
+errorcode_t OSFilesFindLibrary(std::string & libraryPath, const std::string & fileName)
 {
     // Try to find the DLLs from the path given to OSFilesSetLibrarySearchPath()
     if (pLibrarySearchPath != nullptr)
@@ -93,10 +93,10 @@ errorcode_t OSFilesFindLibrary(std::string &libraryPath, const std::string &file
     return errorcode_t::CouldNotFindJprogDLL;
 }
 
-bool AbstractFile::pathExists(const char *path)
+bool AbstractFile::pathExists(const char * path)
 {
-    int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
-    auto wstr = std::vector<wchar_t>(wchars_num);
+    const int wchars_num = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
+    auto wstr            = std::vector<wchar_t>(wchars_num);
     MultiByteToWideChar(CP_UTF8, 0, path, -1, wstr.data(), wchars_num);
 
     return PathFileExistsW(wstr.data()) == TRUE;
@@ -109,7 +109,7 @@ std::string TempFile::getTempFileName()
     std::vector<char> tempFolderPath(MAX_PATH);
     std::vector<char> tempFilePath(MAX_PATH);
 
-    DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath.data());
+    const DWORD pathLength = GetTempPath(MAX_PATH, tempFolderPath.data());
 
     if (pathLength > MAX_PATH || (pathLength == 0))
     {

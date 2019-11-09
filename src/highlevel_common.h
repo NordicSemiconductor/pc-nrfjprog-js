@@ -39,12 +39,26 @@
 
 #include "DllCommonDefinitions.h"
 #include "common.h"
+#include "highlevelnrfjprogdll.h"
+#include "nan_wrap.h"
+#include <functional>
+#include <map>
 
-typedef enum { MCUBOOT_PROBE, DFU_PROBE, DEBUG_PROBE } probe_type_t;
+typedef enum
+{
+    MCUBOOT_PROBE,
+    DFU_PROBE,
+    DEBUG_PROBE
+} probe_type_t;
 
-typedef enum { INPUT_FORMAT_HEX_FILE, INPUT_FORMAT_HEX_STRING } input_format_t;
+typedef enum
+{
+    INPUT_FORMAT_HEX_FILE,
+    INPUT_FORMAT_HEX_STRING
+} input_format_t;
 
-typedef enum {
+typedef enum
+{
     JsSuccess,
     CouldNotFindJlinkDLL,
     CouldNotFindJprogDLL,
@@ -62,22 +76,6 @@ typedef enum {
     CouldNotExecuteDueToLoad
 } errorcode_t;
 
-typedef enum RTTErrorcodes {
-    RTTSuccess,
-    RTTCouldNotLoadHighlevelLibrary,
-    RTTCouldNotOpenHighlevelLibrary,
-    RTTCouldNotGetDeviceInformation,
-    RTTCouldNotLoadnRFjprogLibrary,
-    RTTCouldNotOpennRFjprogLibrary,
-    RTTCouldNotConnectToDevice,
-    RTTCouldNotStartRTT,
-    RTTCouldNotFindControlBlock,
-    RTTCouldNotGetChannelInformation,
-    RTTCouldNotCallFunction,
-    RTTNotInitialized,
-    RTTCouldNotExecuteDueToLoad
-} RTTErrorcodes_t;
-
 static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::JsSuccess, "Success"},
     {errorcode_t::CouldNotFindJlinkDLL, "CouldNotFindJlinkDLL"},
@@ -93,70 +91,7 @@ static name_map_t nrfjprog_js_err_map = {
     {errorcode_t::CouldNotProgram, "CouldNotProgram"},
     {errorcode_t::CouldNotRead, "CouldNotRead"},
     {errorcode_t::CouldNotOpenHexFile, "CouldNotOpenHexFile"},
-    {errorcode_t::CouldNotExecuteDueToLoad,
-     "Could not execute the function due to too many calls in line"}};
-
-static name_map_t rtt_err_map = {
-    {RTTSuccess, "Success"},
-    {RTTCouldNotLoadHighlevelLibrary, "Could Not Load Highlevel Library"},
-    {RTTCouldNotOpenHighlevelLibrary, "Could Not Open Highlevel Library"},
-    {RTTCouldNotGetDeviceInformation, "Could Not Get Device Information"},
-    {RTTCouldNotLoadnRFjprogLibrary, "Could Not Load nRFjprog Library"},
-    {RTTCouldNotOpennRFjprogLibrary, "Could Not Open nRFjprog Library"},
-    {RTTCouldNotConnectToDevice, "Could Not Connect To Device"},
-    {RTTCouldNotStartRTT, "Could Not Start RTT"},
-    {RTTCouldNotFindControlBlock, "Could Not Find Control Block"},
-    {RTTCouldNotGetChannelInformation, "Could Not Get Channel Information"},
-    {RTTCouldNotCallFunction, "Could Not Call Function"},
-    {RTTNotInitialized, "There is no RTT connection open"},
-    {RTTCouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line"}};
-
-static name_map_t program_parameter_type_map = {NAME_MAP_ENTRY(INPUT_FORMAT_HEX_FILE),
-                                                NAME_MAP_ENTRY(INPUT_FORMAT_HEX_STRING)};
-
-static name_map_t device_version_map = {NAME_MAP_ENTRY(UNKNOWN),
-                                        // nRF51
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAA_REV3),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAB_REV3),
-                                        NAME_MAP_ENTRY(NRF51xxx_xxAC_REV3),
-                                        NAME_MAP_ENTRY(NRF51802_xxAA_REV3),
-                                        NAME_MAP_ENTRY(NRF51801_xxAB_REV3),
-                                        // nRF52805
-                                        NAME_MAP_ENTRY(NRF52805_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52805_xxAA_FUTURE),
-                                        // nRF52810
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF52810_xxAA_FUTURE),
-                                        // nRF52811
-                                        NAME_MAP_ENTRY(NRF52811_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52811_xxAA_FUTURE),
-                                        // nRF52832
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_ENGA),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_ENGB),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF52832_xxAA_FUTURE),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV1),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_REV2),
-                                        NAME_MAP_ENTRY(NRF52832_xxAB_FUTURE),
-                                        // nRF52833
-                                        NAME_MAP_ENTRY(NRF52833_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52833_xxAA_FUTURE),
-                                        // nRF52840
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_ENGA),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_ENGB),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_REV2),
-                                        NAME_MAP_ENTRY(NRF52840_xxAA_FUTURE),
-                                        // nRF9160
-                                        NAME_MAP_ENTRY(NRF9160_xxAA_REV1),
-                                        NAME_MAP_ENTRY(NRF9160_xxAA_FUTURE)};
-
-static name_map_t device_family_map = {NAME_MAP_ENTRY(NRF51_FAMILY), NAME_MAP_ENTRY(NRF52_FAMILY),
-                                       NAME_MAP_ENTRY(UNKNOWN_FAMILY)};
+    {errorcode_t::CouldNotExecuteDueToLoad, "Could not execute the function due to too many calls in line"}};
 
 static name_map_t nrfjprogdll_err_map = {NAME_MAP_ENTRY(SUCCESS),
                                          NAME_MAP_ENTRY(OUT_OF_MEMORY),
@@ -182,5 +117,12 @@ static name_map_t nrfjprogdll_err_map = {NAME_MAP_ENTRY(SUCCESS),
                                          NAME_MAP_ENTRY(NRFJPROG_SUB_DLL_COULD_NOT_LOAD_FUNCTIONS),
                                          NAME_MAP_ENTRY(VERIFY_ERROR),
                                          NAME_MAP_ENTRY(NOT_IMPLEMENTED_ERROR)};
+
+// Forward declare batons
+class Baton;
+
+typedef std::function<Baton *(Nan::NAN_METHOD_ARGS_TYPE, int &)> parse_parameters_function_t;
+typedef std::function<nrfjprogdll_err_t(Baton *)> execute_function_t;
+typedef std::function<std::vector<v8::Local<v8::Value>>(Baton *)> return_function_t;
 
 #endif // __NRFJPROG_COMMON_H__

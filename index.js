@@ -61,4 +61,3 @@ Object.keys(nRFjprog).forEach(key => {
 });
 
 module.exports = instance;
-module.exports.RTT = new nRFjprog.RTT();

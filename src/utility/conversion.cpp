@@ -41,17 +41,17 @@
 
 #include "utility.h"
 
-#define RETURN_VALUE_OR_THROW_EXCEPTION(method)                                                    \
-    try                                                                                            \
-    {                                                                                              \
-        return (method);                                                                           \
-    }                                                                                              \
-    catch (const std::runtime_error &error)                                                        \
-    {                                                                                              \
-        std::cout << "Exception: " << name << ":" << error.what() << std::endl;                    \
-        std::stringstream ex;                                                                      \
-        ex << "Failed to get property " << name << ": " << error.what();                           \
-        throw std::runtime_error(ex.str());                                                        \
+#define RETURN_VALUE_OR_THROW_EXCEPTION(method)                                                                        \
+    try                                                                                                                \
+    {                                                                                                                  \
+        return (method);                                                                                               \
+    }                                                                                                                  \
+    catch (const std::runtime_error & error)                                                                           \
+    {                                                                                                                  \
+        std::cout << "Exception: " << name << ":" << error.what() << std::endl;                                        \
+        std::stringstream ex;                                                                                          \
+        ex << "Failed to get property " << name << ": " << error.what();                                               \
+        throw std::runtime_error(ex.str());                                                                            \
     }
 
 template <typename NativeType> class ConvUtil
@@ -97,28 +97,28 @@ template <typename NativeType> class ConvUtil
         return static_cast<NativeType>(js->BooleanValue());
     }
 
-    static NativeType getNativeUnsigned(v8::Local<v8::Object> js, const char *name)
+    static NativeType getNativeUnsigned(v8::Local<v8::Object> js, const char * name)
     {
         return getNativeUnsigned(js->Get(Nan::New(name).ToLocalChecked()));
     }
 
-    static NativeType getNativeSigned(v8::Local<v8::Object> js, const char *name)
+    static NativeType getNativeSigned(v8::Local<v8::Object> js, const char * name)
     {
         return getNativeSigned(js->Get(Nan::New(name).ToLocalChecked()));
     }
 
-    static NativeType getNativeFloat(v8::Local<v8::Object> js, const char *name)
+    static NativeType getNativeFloat(v8::Local<v8::Object> js, const char * name)
     {
         return getNativeFloat(js->Get(Nan::New(name).ToLocalChecked()));
     }
 
-    static NativeType getNativeBool(v8::Local<v8::Object> js, const char *name)
+    static NativeType getNativeBool(v8::Local<v8::Object> js, const char * name)
     {
         return getNativeBool(js->Get(Nan::New(name).ToLocalChecked()));
     }
 };
 
-uint32_t Convert::getNativeUint32(v8::Local<v8::Object> js, const char *name)
+uint32_t Convert::getNativeUint32(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint32_t>::getNativeUnsigned(js, name));
 }
@@ -128,7 +128,7 @@ uint32_t Convert::getNativeUint32(v8::Local<v8::Value> js)
     return ConvUtil<uint32_t>::getNativeUnsigned(js);
 }
 
-uint16_t Convert::getNativeUint16(v8::Local<v8::Object> js, const char *name)
+uint16_t Convert::getNativeUint16(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint16_t>::getNativeUnsigned(js, name));
 }
@@ -138,7 +138,7 @@ uint16_t Convert::getNativeUint16(v8::Local<v8::Value> js)
     return ConvUtil<uint16_t>::getNativeUnsigned(js);
 }
 
-uint8_t Convert::getNativeUint8(v8::Local<v8::Object> js, const char *name)
+uint8_t Convert::getNativeUint8(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<uint8_t>::getNativeUnsigned(js, name));
 }
@@ -148,7 +148,7 @@ uint8_t Convert::getNativeUint8(v8::Local<v8::Value> js)
     return ConvUtil<uint8_t>::getNativeUnsigned(js);
 }
 
-int32_t Convert::getNativeInt32(v8::Local<v8::Object> js, const char *name)
+int32_t Convert::getNativeInt32(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int32_t>::getNativeSigned(js, name));
 }
@@ -158,7 +158,7 @@ int32_t Convert::getNativeInt32(v8::Local<v8::Value> js)
     return ConvUtil<int32_t>::getNativeSigned(js);
 }
 
-int16_t Convert::getNativeInt16(v8::Local<v8::Object> js, const char *name)
+int16_t Convert::getNativeInt16(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int16_t>::getNativeSigned(js, name));
 }
@@ -168,7 +168,7 @@ int16_t Convert::getNativeInt16(v8::Local<v8::Value> js)
     return ConvUtil<int16_t>::getNativeSigned(js);
 }
 
-int8_t Convert::getNativeInt8(v8::Local<v8::Object> js, const char *name)
+int8_t Convert::getNativeInt8(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<int8_t>::getNativeSigned(js, name));
 }
@@ -178,7 +178,7 @@ int8_t Convert::getNativeInt8(v8::Local<v8::Value> js)
     return ConvUtil<int8_t>::getNativeSigned(js);
 }
 
-double Convert::getNativeDouble(v8::Local<v8::Object> js, const char *name)
+double Convert::getNativeDouble(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<double>::getNativeFloat(js, name));
 }
@@ -188,7 +188,7 @@ double Convert::getNativeDouble(v8::Local<v8::Value> js)
     return ConvUtil<double>::getNativeFloat(js);
 }
 
-uint8_t Convert::getNativeBool(v8::Local<v8::Object> js, const char *name)
+uint8_t Convert::getNativeBool(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<bool>::getNativeBool(js, name));
 }
@@ -198,7 +198,7 @@ uint8_t Convert::getNativeBool(v8::Local<v8::Value> js)
     return ConvUtil<uint8_t>::getNativeBool(js);
 }
 
-bool Convert::getBool(v8::Local<v8::Object> js, const char *name)
+bool Convert::getBool(v8::Local<v8::Object> js, const char * name)
 {
     RETURN_VALUE_OR_THROW_EXCEPTION(ConvUtil<bool>::getNativeBool(js, name));
 }
@@ -208,7 +208,7 @@ bool Convert::getBool(v8::Local<v8::Value> js)
     return ConvUtil<bool>::getNativeBool(js);
 }
 
-std::vector<char> Convert::getVectorForChar(v8::Local<v8::Object> js, const char *name)
+std::vector<char> Convert::getVectorForChar(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
@@ -224,7 +224,7 @@ std::vector<char> Convert::getVectorForChar(v8::Local<v8::Value> js)
     return returnData;
 }
 
-std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Object> js, const char *name)
+std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
@@ -250,7 +250,7 @@ std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
     return returnData;
 }
 
-uint32_t Convert::getLengthOfArray(v8::Local<v8::Object> js, const char *name)
+uint32_t Convert::getLengthOfArray(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> value = Utility::Get(js, name);
 
@@ -273,7 +273,7 @@ v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Value> js)
     return js->ToObject();
 }
 
-v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Object> js, const char *name)
+v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
@@ -297,14 +297,14 @@ v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Value> js)
     throw std::runtime_error("object or null");
 }
 
-v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Object> js, const char *name)
+v8::Local<v8::Object> Convert::getJsObjectOrNull(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
     RETURN_VALUE_OR_THROW_EXCEPTION(Convert::getJsObjectOrNull(obj));
 }
 
-std::string Convert::getNativeString(v8::Local<v8::Object> js, const char *name)
+std::string Convert::getNativeString(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
@@ -375,7 +375,7 @@ v8::Handle<v8::Value> Convert::toJsBool(bool nativeValue)
     return scope.Escape(Nan::New<v8::Boolean>(nativeValue));
 }
 
-v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t *nativeValue, uint32_t length)
+v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t * nativeValue, uint32_t length)
 {
     Nan::EscapableHandleScope scope;
 
@@ -389,28 +389,28 @@ v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t *nativeValue, uint32_t len
     return scope.Escape(valueArray);
 }
 
-v8::Handle<v8::Value> Convert::toJsString(const char *cString)
+v8::Handle<v8::Value> Convert::toJsString(const char * cString)
 {
     return Convert::toJsString(cString, strlen(cString));
 }
 
-v8::Handle<v8::Value> Convert::toJsString(const char *cString, size_t length)
+v8::Handle<v8::Value> Convert::toJsString(const char * cString, size_t length)
 {
     return Convert::toJsString(std::string(cString, length));
 }
 
-v8::Handle<v8::Value> Convert::toJsString(uint8_t *cString, size_t length)
+v8::Handle<v8::Value> Convert::toJsString(uint8_t * cString, size_t length)
 {
     return Convert::toJsString(reinterpret_cast<const char *>(cString), length);
 }
 
-v8::Handle<v8::Value> Convert::toJsString(const std::string &string)
+v8::Handle<v8::Value> Convert::toJsString(const std::string & string)
 {
     Nan::EscapableHandleScope scope;
     return scope.Escape(Nan::New<v8::String>(string).ToLocalChecked());
 }
 
-const char *Convert::valueToString(uint16_t value, name_map_t name_map, const char *defaultValue)
+const char * Convert::valueToString(uint16_t value, name_map_t name_map, const char * defaultValue)
 {
     auto it = name_map.find(value);
 
@@ -422,11 +422,10 @@ const char *Convert::valueToString(uint16_t value, name_map_t name_map, const ch
     return it->second;
 }
 
-v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_map,
-                                               v8::Handle<v8::Value> defaultValue)
+v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_map, v8::Handle<v8::Value> defaultValue)
 {
     Nan::EscapableHandleScope scope;
-    auto it = name_map.find(value);
+    const auto it = name_map.find(value);
 
     if (it == name_map.end())
     {
@@ -436,16 +435,15 @@ v8::Handle<v8::Value> Convert::valueToJsString(uint16_t value, name_map_t name_m
     return scope.Escape(Nan::New<v8::String>(it->second).ToLocalChecked());
 }
 
-v8::Handle<v8::Value>
-Convert::toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime,
-                            std::chrono::high_resolution_clock::time_point endTime)
+v8::Handle<v8::Value> Convert::toTimeDifferenceUS(std::chrono::high_resolution_clock::time_point startTime,
+                                                  std::chrono::high_resolution_clock::time_point endTime)
 {
-    uint32_t duration = static_cast<uint32_t>(
-        std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count());
+    uint32_t duration =
+        static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count());
     return Convert::toJsNumber(duration);
 }
 
-v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Object> js, const char *name)
+v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Object> js, const char * name)
 {
     v8::Local<v8::Value> obj = Utility::Get(js, name);
 
@@ -462,7 +460,7 @@ v8::Local<v8::Function> Convert::getCallbackFunction(v8::Local<v8::Value> js)
     return scope.Escape(js.As<v8::Function>());
 }
 
-v8::Handle<v8::Value> Convert::encodeHex(const char *text, int length)
+v8::Handle<v8::Value> Convert::encodeHex(const char * text, int length)
 {
     std::ostringstream encoded;
     encoded.flags(std::ios::uppercase);

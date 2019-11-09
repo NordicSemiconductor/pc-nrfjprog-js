@@ -37,23 +37,27 @@
 #ifndef NRFJPROG_BATONS_H
 #define NRFJPROG_BATONS_H
 
-#include "highlevel.h"
 #include "highlevel_common.h"
 #include "highlevel_helpers.h"
 #include <memory>
+#include <mutex>
+#include <sstream>
 
 class Baton
 {
   public:
     explicit Baton(const std::string _name, const uint32_t _returnParameterCount,
-                   const bool _mayHaveProgressCallback, const probe_type_t _probeType = DEBUG_PROBE)
+                   const bool _mayHaveProgressCallback, const probe_type_t _probeType = DEBUG_PROBE, Probe_handle_t _probe = nullptr)
         : returnParameterCount(_returnParameterCount)
         , name(_name)
         , mayHaveProgressCallback(_mayHaveProgressCallback)
         , serialNumber(0)
+        , coProcessor(CP_APPLICATION)
         , result(JsSuccess)
         , probeType(_probeType)
+        , probe(_probe)
         , lowlevelError(SUCCESS)
+        , cpuNeedsReset(false)
     {
         req       = std::make_unique<uv_work_t>();
         req->data = static_cast<void *>(this);
@@ -65,14 +69,19 @@ class Baton
         callback.reset();
     }
 
-    const uint32_t returnParameterCount;
+    const int32_t returnParameterCount;
     const std::string name;
     const bool mayHaveProgressCallback;
 
     uint32_t serialNumber;
+    coprocessor_t coProcessor;
     uint32_t result;
     probe_type_t probeType;
+    Probe_handle_t probe;
     nrfjprogdll_err_t lowlevelError;
+    bool cpuNeedsReset;
+
+    std::chrono::high_resolution_clock::time_point functionStart;
 
     std::unique_ptr<uv_work_t> req;
     std::unique_ptr<Nan::Callback> callback;
@@ -83,7 +92,18 @@ class Baton
     static std::timed_mutex executionMutex;
 };
 
-std::timed_mutex Baton::executionMutex;
+class BatonNeedsReset : public Baton
+{
+  public:
+    BatonNeedsReset(const std::string _name, const uint32_t _returnParameterCount,
+                    const bool _mayHaveProgressCallback,
+                    const probe_type_t _probeType = DEBUG_PROBE,
+                    Probe_handle_t _probe = nullptr)
+          : Baton(_name, _returnParameterCount, _mayHaveProgressCallback, _probeType, _probe)
+      {
+        cpuNeedsReset = true;
+      }
+};
 
 class GetLibraryVersionBaton : public Baton
 {
@@ -152,11 +172,11 @@ class GetDeviceVersionBaton : public Baton
     device_version_t deviceVersion;
 };
 
-class ReadBaton : public Baton
+class ReadBaton : public BatonNeedsReset
 {
   public:
     ReadBaton()
-        : Baton("read", 1, false)
+        : BatonNeedsReset("read", 1, false)
     {}
 
     uint32_t address;
@@ -164,22 +184,22 @@ class ReadBaton : public Baton
     std::vector<uint8_t> data;
 };
 
-class ReadU32Baton : public Baton
+class ReadU32Baton : public BatonNeedsReset
 {
   public:
     ReadU32Baton()
-        : Baton("read u32", 1, false)
+        : BatonNeedsReset("read u32", 1, false)
     {}
     uint32_t address;
     uint32_t length;
     uint32_t data;
 };
 
-class ProgramBaton : public Baton
+class ProgramBaton : public BatonNeedsReset
 {
   public:
     ProgramBaton()
-        : Baton("program", 0, true)
+        : BatonNeedsReset("program", 0, true)
     {}
     std::string file;
     std::string filename;
@@ -187,11 +207,11 @@ class ProgramBaton : public Baton
     input_format_t inputFormat;
 };
 
-class ProgramDFUBaton : public Baton
+class ProgramDFUBaton : public BatonNeedsReset
 {
   public:
     ProgramDFUBaton()
-        : Baton("program", 0, true, DFU_PROBE)
+        : BatonNeedsReset("program", 0, true, DFU_PROBE)
     {}
     std::string filename;
 };
@@ -208,61 +228,68 @@ class ProgramMcuBootDFUBaton : public Baton
     uint32_t responseTimeout;
 };
 
-
-class VerifyBaton : public Baton
+class VerifyBaton : public BatonNeedsReset
 {
   public:
     VerifyBaton()
-        : Baton("verify", 0, true)
+        : BatonNeedsReset("verify", 0, true)
     {}
     std::string filename;
 };
 
-class ReadToFileBaton : public Baton
+class ReadToFileBaton : public BatonNeedsReset
 {
   public:
     ReadToFileBaton()
-        : Baton("read to file", 0, true)
+        : BatonNeedsReset("read to file", 0, true)
     {}
     std::string filename;
     read_options_t options;
 };
 
-class EraseBaton : public Baton
+class EraseBaton : public BatonNeedsReset
 {
   public:
     EraseBaton()
-        : Baton("erase", 0, true)
+        : BatonNeedsReset("erase", 0, true)
     {}
     erase_action_t erase_mode;
     uint32_t start_address;
     uint32_t end_address;
 };
 
-class RecoverBaton : public Baton
+class RecoverBaton : public BatonNeedsReset
 {
   public:
     RecoverBaton()
-        : Baton("recover", 0, true)
+        : BatonNeedsReset("recover", 0, true)
     {}
 };
 
-class WriteBaton : public Baton
+class ResetBaton : public Baton
+{
+  public:
+    ResetBaton()
+        : Baton("reset", 0, false)
+    {}
+};
+
+class WriteBaton : public BatonNeedsReset
 {
   public:
     WriteBaton()
-        : Baton("write", 0, false)
+        : BatonNeedsReset("write", 0, false)
     {}
     uint32_t address;
     std::vector<uint8_t> data;
     uint32_t length;
 };
 
-class WriteU32Baton : public Baton
+class WriteU32Baton : public BatonNeedsReset
 {
   public:
     WriteU32Baton()
-        : Baton("write u32", 0, false)
+        : BatonNeedsReset("write u32", 0, false)
     {}
     uint32_t address;
     uint32_t data;
@@ -276,12 +303,108 @@ class OpenBaton : public Baton
     {}
 };
 
-class CloseBaton : public Baton
+class CloseBaton : public BatonNeedsReset
 {
   public:
     CloseBaton()
-        : Baton("close opened device", 0, false)
+        : BatonNeedsReset("close opened device", 0, false)
     {}
+};
+
+class RTTStartBaton : public Baton
+{
+  public:
+    RTTStartBaton()
+        : Baton("start rtt", 2, false)
+    {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "Parameters:" << std::endl;
+        stream << "Serialnumber: " << serialNumber << std::endl;
+        stream << "Has Controlblock: " << (hasControlBlockLocation ? "true" : "false") << std::endl;
+        stream << "Controlblock location: " << controlBlockLocation << std::endl;
+
+        return stream.str();
+    }
+
+    uint32_t serialNumber;
+    bool hasControlBlockLocation;
+    bool foundControlBlock;
+    uint32_t controlBlockLocation;
+
+    uint32_t clockSpeed;
+    device_family_t family;
+    std::string jlinkarmlocation;
+
+    bool foundChannelInformation;
+    std::vector<std::unique_ptr<ChannelInfo>> upChannelInfo;
+    std::vector<std::unique_ptr<ChannelInfo>> downChannelInfo;
+};
+
+class RTTStopBaton : public Baton
+{
+  public:
+    RTTStopBaton()
+        : Baton("stop rtt", 0, false)
+    {}
+    std::string toString()
+    {
+        return "No parameters";
+    }
+
+    bool rttNotStarted;
+};
+
+class RTTReadBaton : public Baton
+{
+  public:
+    RTTReadBaton()
+        : Baton("rtt read", 3, false)
+    {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "Parameters:" << std::endl;
+        stream << "ChanneldIndex: " << channelIndex << std::endl;
+        stream << "Length wanted: " << length << std::endl;
+        stream << "RTT not started: " << rttNotStarted;
+
+        return stream.str();
+    }
+
+    uint32_t channelIndex;
+    uint32_t length;
+    std::vector<char> data;
+
+    bool rttNotStarted;
+};
+
+class RTTWriteBaton : public Baton
+{
+  public:
+    RTTWriteBaton()
+        : Baton("rtt write", 2, false)
+    {}
+    std::string toString()
+    {
+        std::stringstream stream;
+
+        stream << "Parameters:" << std::endl;
+        stream << "ChanneldIndex: " << channelIndex << std::endl;
+        stream << "Length wanted: " << length << std::endl;
+        stream << "Data" << data.data() << std::endl;
+
+        return stream.str();
+    }
+
+    uint32_t channelIndex;
+    uint32_t length;
+    std::vector<char> data;
+
+    bool rttNotStarted;
 };
 
 #endif

@@ -158,7 +158,10 @@ describe('Single device - non-destructive', () => {
             expect(err).toBeUndefined();
             nRFjprog.open(device.serialNumber, (err) => {
                 expect(err).toBeDefined();
-                done();
+                nRFjprog.close(device.serialNumber, (err) => {
+                    expect(err).toBeUndefined();
+                    done();
+                });
             });
         });
     });

@@ -37,18 +37,15 @@
 #define EXPORT_H
 
 #include "highlevel.h"
-#include "osfiles.h"
-#include "rtt.h"
 #include "nan_wrap.h"
+#include "osfiles.h"
 
 extern "C" {
 NAN_MODULE_INIT(init)
 {
     OSFilesInit(target);
     HighLevel::initConsts(target);
-    RTT::initConsts(target);
     HighLevel::Init(target);
-    RTT::Init(target);
 }
 };
 

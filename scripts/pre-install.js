@@ -60,6 +60,7 @@ const crypto = require('crypto');
 const { nrfjprog } = require('../package.json');
 
 const DOWNLOAD_DIR = path.join(__dirname, '..', 'nrfjprog');
+const BUILD_DIR = path.join(__dirname, '..', 'build', 'Release');
 const DOWNLOAD_URL = 'https://github.com/NordicSemiconductor/pc-nrfjprog-js/releases/download/nrfjprog';
 
 const requiredVersion = nrfjprog.version;
@@ -159,7 +160,12 @@ function removeDirIfExists(dirPath) {
 function installNrfjprog(pathToArtifact) {
     if (pathToArtifact.endsWith('.tar') || pathToArtifact.endsWith('.tar.gz')) {
         console.log(`Extracting ${pathToArtifact} to ${DOWNLOAD_DIR}...`);
-        return extractTarFile(pathToArtifact, DOWNLOAD_DIR);
+        return extractTarFile(pathToArtifact, DOWNLOAD_DIR)
+            .then(() => sander.readdir(DOWNLOAD_DIR))
+            .then(files => files.filter(fn => fn.match(/\.(so|dll|dylib)$/)))
+            .then(files => files.forEach(
+                fn => sander.symlinkOrCopySync(path.join(DOWNLOAD_DIR, fn)).to(path.join(BUILD_DIR, fn))
+            ));
     }
     return Promise.reject(new Error(`Unsupported nrfjprog artifact: ${pathToArtifact}`));
 }

@@ -41,16 +41,11 @@
 #include <functional>
 #include <memory>
 
-#include "highlevelwrapper.h"
 #include "osfiles.h"
+#include "highlevelnrfjprogdll.h"
 
+#include "highlevel_batons.h"
 #include "utility/errormessage.h"
-
-class Baton;
-
-typedef std::function<Baton *(Nan::NAN_METHOD_ARGS_TYPE, int &)> parse_parameters_function_t;
-typedef std::function<nrfjprogdll_err_t(Baton *, Probe_handle_t)> execute_function_t;
-typedef std::function<std::vector<v8::Local<v8::Value>>(Baton *)> return_function_t;
 
 class HighLevel : public Nan::ObjectWrap
 {
@@ -92,6 +87,7 @@ class HighLevel : public Nan::ObjectWrap
                                    // end_address}, callback(progress), callback(error)
 
     static NAN_METHOD(Recover); // Params: serialnumber, callback(progress), callback(error)
+    static NAN_METHOD(Reset);   // Params: serialnumber, callback(error)
 
     static NAN_METHOD(Write);    // Params: serialnumber, address, dataarray, callback(error)
     static NAN_METHOD(WriteU32); // Params: serialnumber, address, data, callback(error)
@@ -99,15 +95,19 @@ class HighLevel : public Nan::ObjectWrap
     static NAN_METHOD(OpenDevice);  // Params: serialnumber, callback(error)
     static NAN_METHOD(CloseDevice); // Params: serialnumber, callback(error)
 
+    static NAN_METHOD(RttStart); // Params: serialNumber, { location }, callback(error, down, up)
+    static NAN_METHOD(RttStop);  // Params: callback(error)
+
+    static NAN_METHOD(RttRead);  // Params: channelIndex, callback(error, data, raw, time)
+    static NAN_METHOD(RttWrite); // Params: channelIndex, data, callback(error, writtenlength, time)
+
     static void CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
                              const parse_parameters_function_t &parse,
                              const execute_function_t &execute, const return_function_t &ret,
-                             const bool hasSerialNumber);
+                             const bool hasSerialNumber = false
+    );
     static void ExecuteFunction(uv_work_t *req);
     static void ReturnFunction(uv_work_t *req);
-
-    static errorcode_t loadLibrary();
-    static void unloadLibrary();
 
     static void init(v8::Local<v8::FunctionTemplate> target);
 
@@ -117,6 +117,11 @@ class HighLevel : public Nan::ObjectWrap
 
     static void progressCallback(const char *process);
     static void sendProgress(uv_async_t *handle);
+
+    static bool isRttStarted(Probe_handle_t probe);
+    static nrfjprogdll_err_t waitForControlBlock(Probe_handle_t probe, bool &isControlBlockFound);
+    static nrfjprogdll_err_t getChannelInformation(RTTStartBaton *baton, bool &isChannelInformationAvailable);
+    static nrfjprogdll_err_t rttCleanup(Probe_handle_t probe);
 };
 
 #endif // __NRFJPROG_H__

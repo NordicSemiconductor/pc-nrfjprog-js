@@ -42,12 +42,17 @@ const fs = require('fs');
 let device;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
+let testfile = './test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex';
+
 describe('Single device - destructive', () => {
     beforeAll(done => {
         const callback = (err, connectedDevices) => {
             expect(err).toBeUndefined();
             expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
             device = connectedDevices[0];
+            if (device.deviceInfo.family === nRFjprog.NRF53_FAMILY) {
+                testfile = './test/hex/while_true_nrf53_application.hex';
+            }
             done();
         };
 
@@ -68,7 +73,7 @@ describe('Single device - destructive', () => {
         const callback = (err) => {
             expect(err).toBeUndefined();
 
-            nRFjprog.verify(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, verifyCallback);
+            nRFjprog.verify(device.serialNumber, testfile, { }, verifyCallback);
         };
 
         const verifyCallback = (err) => {
@@ -76,7 +81,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.program(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
+        nRFjprog.program(device.serialNumber, testfile, { }, callback);
     });
 
     it('reads device content', done => {
@@ -94,7 +99,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.verify(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, callback);
+        nRFjprog.verify(device.serialNumber, testfile, { }, callback);
     });
 
     // There's an issue with the mocked progress callback under jest,
@@ -108,14 +113,14 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        nRFjprog.verify(device.serialNumber, "./test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex", { }, mockProgressCallback, callback);
+        nRFjprog.verify(device.serialNumber, testfile, { }, mockProgressCallback, callback);
     });
 
     it('programs a hex string', done => {
         const callback = (err) => {
             expect(err).toBeUndefined();
 
-            nRFjprog.verify(device.serialNumber, './test/hex/program.hex', { }, verifyCallback);
+            nRFjprog.verify(device.serialNumber, testfile, { }, verifyCallback);
         };
 
         const verifyCallback = (err) => {
@@ -123,7 +128,7 @@ describe('Single device - destructive', () => {
             done();
         };
 
-        const filecontent = fs.readFileSync('./test/hex/program.hex').toString('utf-8');
+        const filecontent = fs.readFileSync(testfile).toString('utf-8');
 
         nRFjprog.program(device.serialNumber, filecontent, { inputFormat: nRFjprog.INPUT_FORMAT_HEX_STRING }, callback);
     });

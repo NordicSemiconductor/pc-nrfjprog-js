@@ -39,12 +39,12 @@
 #include <dlfcn.h>
 #include <stddef.h>
 
-LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char *func_name)
+LoadedFunctionType LoadFunction(LibraryHandleType libraryHandle, const char * func_name)
 {
     return dlsym(libraryHandle, func_name);
 }
 
-LibraryHandleType LibraryLoad(const std::string &path)
+LibraryHandleType LibraryLoad(const std::string & path)
 {
     return dlopen(path.c_str(), RTLD_LAZY);
 }
