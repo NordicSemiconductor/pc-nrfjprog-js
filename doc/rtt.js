@@ -70,13 +70,10 @@
  * <p>You may at any time have at most <strong>one</strong> RTT connection open.</p>
  *
  * @example
- * const nRFjprogjs = require('pc-nrfjprog-js');
- * const RTT = nrfjprogjs.RTT;
- *
- * RTT.start(12345678, {}, function(err, down, up) {
- *      RTT.write(0, 'Some data to write', function(err, length, timeSinceRTTStartInUs) {
- *          RTT.read(0, 100, function(err, stringData, rawData, timeSinceRTTStartInUs) {
- *              RTT.stop(function(err) {
+ * nrfjprogjs.rttStart(12345678, {}, function(err, down, up) {
+ *      nrfjprogjs.rttWrite(12345678, 0, 'Some data to write', function(err, length, timeSinceRTTStartInUs) {
+ *          nrfjprogjs.rttRead(12345678, 0, 100, function(err, stringData, rawData, timeSinceRTTStartInUs) {
+ *              nrfjprogjs.rttStop(12345678, function(err) {
  *                  console.log('Stopped');
  *              });
  *          });
@@ -115,7 +112,7 @@
  * @property {String} log The complete log from the internal functions.
  *
  * @example
- * RTT.start(12345678, {}, function(err, down, up){
+ * nrfjprogjs.rttStart(12345678, {}, function(err, down, up) {
  *     if (err) {
  *         throw err;
  *     } else {
@@ -124,7 +121,7 @@
  * });
  *
  * @example
- * RTT.start(12345678, {}, function(err, down, up){
+ * nrfjprogjs.rttStart(12345678, {}, function(err, down, up) {
  *     if (err && err.errno === nrfjprogjs.RTTCouldNotFindControlBlock) {
  *          console.error('The firmware is not RTT capable');
  *     }
@@ -142,7 +139,7 @@
  * @property {integer} size The size of the channel
  */
 
- /**
+/**
  * Option flags to be used when starting RTT. This may speed up the process of locating the control block, and the RTT Start. If <tt>controlBlockLocation</tt>
  * specified, only that location will be searched for the RTT control block, and an error will be returned if no control block where found. If no value
  * is specified for <tt>controlBlockLocation</tt>, the RAM will be searched for the location of the RTT control block.
@@ -167,7 +164,7 @@
  * <p>When you are done with the RTT session, you should call <tt>stop()</tt>.</p>
  *
  * @example
- * RTT.start(12345678, {}, function(err, down, up){
+ * nrfjprogjs.rttStart(12345678, {}, function(err, down, up) {
  *      if (err) console.error('The firmware is not RTT capable');
  *
  *      console.log('Down channels');
@@ -193,20 +190,21 @@
  *   It shall expect three parameters: ({@link pc-nrfjprog-js.module:RTT~Error|Error}, Array of {@link pc-nrfjprog-js.module:RTT~ChannelInfo|ChannelInfo},
  *   Array of {@link pc-nrfjprog-js.module:RTT~ChannelInfo|ChannelInfo})
  */
-export function start(serialnumber, startoptions, callback) {}
+export function rttStart(serialnumber, startoptions, callback) {}
 
 /**
  * Async function to stop RTT.
  *
  * @example
- * RTT.stop(function(err){
+ * nrfjprogjs.rttStop(12345678, function(err) {
  *     if (err) console.error('Stopping RTT failed');
  * });
  *
+ * @param {integer} serialNumber The serial number of the device to stop RTT on
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect one parameter: ({@link pc-nrfjprog-js.module:RTT~Error|Error})
  */
-export function stop(callback) {}
+export function rttStop(serialnumber, callback) {}
 
 /**
  * <p>Async function to read RTT contents from an up channel on the device. You read on the up channel
@@ -220,22 +218,21 @@ export function stop(callback) {}
  * the returned string and array will be empty.</p>
  *
  * @example
- * RTT.read(0, 100, function(err, stringData, rawData, timeSinceRTTStartInUs) {
+ * nrfjprogjs.rttRead(12345678, 0, 100, function(err, stringData, rawData, timeSinceRTTStartInUs) {
  *      if (err) throw err;
  *      console.log(stringData);
  *      console.log(rawData);
  *      console.log('Time since start of RTT in micro seconds:', timeSinceRTTStartInUs)
- * } );
+ * });
  *
  *
+ * @param {integer} serialNumber The serial number of the device to read RTT on
  * @param {integer} channelIndex The RTT up channel index to read from
  * @param {integer} length The max amout of bytes to read
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect four parameters: ({@link pc-nrfjprog-js.module:RTT~Error|Error}, String, Array of Integers, integer)
  */
-export function read(channelIndex, length, callback) {}
-
-
+export function rttRead(serialnumber, channelIndex, length, callback) {}
 
 /**
  * Async function to write data to a down channel on the device. You write on the down channel specified by
@@ -243,23 +240,24 @@ export function read(channelIndex, length, callback) {}
  * data will be UTF8 encoded.
  *
  * @example
- * RTT.write(0, 'Start command', function(err, length, timeSinceRTTStartInUs) {
+ * nrfjprogjs.rttWrite(12345678, 0, 'Start command', function(err, length, timeSinceRTTStartInUs) {
  *      if (err) throw err;
  *      console.log('Amount of bytes written', length);
  *      console.log('Time since start of RTT in micro seconds:', timeSinceRTTStartInUs)
- * } );
+ * });
  *
  * @example
- * RTT.write(0, [0, 1, 2, 3, 4], function(err, length, timeSinceRTTStartInUs) {
+ * nrfjprogjs.rttWrite(12345678, 0, [0, 1, 2, 3, 4], function(err, length, timeSinceRTTStartInUs) {
  *      if (err) throw err;
  *      console.log('Amount of bytes written', length);
  *      console.log('Time since start of RTT in micro seconds:', timeSinceRTTStartInUs)
- * } );
+ * });
  *
+ * @param {integer} serialNumber The serial number of the device to write RTT on
  * @param {integer} channelIndex The RTT down channel index to write to
  * @param {string|integer[]} data The data to send
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect three parameters: ({@link pc-nrfjprog-js.module:RTT~Error|Error}, integer, integer)
  */
-export function write(channelIndex, data, callback) {}
+export function rttWrite(serialnumber, channelIndex, data, callback) {}
 
