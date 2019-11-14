@@ -37,7 +37,7 @@ If you are seeing errors like `Errorcode: CouldNotLoadDLL (0x3)` then please che
 
 ## API documentation
 
-http://nordicsemiconductor.github.io/pc-nrfjprog-js/
+https://nordicsemiconductor.github.io/pc-nrfjprog-js/
 
 ## Example
 
