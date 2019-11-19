@@ -49,7 +49,7 @@
  * to your nodeJS programs.
  *
  * @example
- * let nrfjprogjs = require('pc-nrfjprog-js');
+ * const nrfjprogjs = require('pc-nrfjprog-js');
  *
  * nrfjprogjs.getConnectedDevices(function(err, devices) {
  *     console.log('There are ' + devices.length + ' nRF devices connected.');
@@ -85,7 +85,7 @@
  * @property {String} log The complete log from the internal functions.
  *
  * @example
- * nrfprogjs.getLibraryVersion(function(err, version){
+ * nrfprogjs.getLibraryVersion(function(err, version) {
  *     if (err) {
  *         throw err;
  *     } else {
@@ -94,7 +94,7 @@
  * });
  *
  * @example
- * nrfprogjs.program(serialNumber, file, programmingOptions, function(err){
+ * nrfprogjs.program(serialNumber, file, programmingOptions, function(err) {
  *     if (err && err.errno === nrfprogjs.CouldNotOpenHexFile) {
  *          console.error('.hex file not found');
  *     }
@@ -299,7 +299,7 @@ export function getDllVersion(callback) {}
  * nrfjprogjs.getLibraryVersion( function(err, version) {
  *      if (err) throw err;
  *      console.log( version.major + '.' + version.minor + '.' + version.revision ) // e.g. 9.6.0
- * } );
+ * });
  *
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {@link module:pc-nrfjprog-js~Version|Version}).
@@ -320,7 +320,7 @@ export function getLibraryVersion(callback) {}
  *              ' bytes of RAM'
  *          );
  *      }
- * } );
+ * });
  *
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of {@link module:pc-nrfjprog-js~SerialNumberAndDeviceInformation|SerialNumberAndDeviceInformation}).
@@ -336,7 +336,7 @@ export function getConnectedDevices(callback) {}
  *      for (let i = 0; i < serialNumbers.length; i++) {
  *          console.log(serialNumbers[i]);
  *      }
- * } );
+ * });
  *
  * @param {Function} callback A callback function to handle the async response.
  *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, Array of {integer}.
@@ -350,7 +350,7 @@ export function getSerialNumbers(callback) {}
  * nrfjprogjs.getDeviceInfo(123456789, function(err, info) {
  *      if (err) throw err;
  *      console.log('Selected device has' + info.ramSize + ' bytes of RAM');
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to query
  * @param {Function} callback A callback function to handle the async response.
@@ -367,7 +367,7 @@ export function getDeviceInfo(serialNumber, callback) {}
  * nrfjprogjs.getProbeInfo(123456789, function(err, info) {
  *      if (err) throw err;
  *      console.log('Selected device has the following clockspeed ' + info.clockSpeedkHz + 'kHz');
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to query
  * @param {Function} callback A callback function to handle the async response.
@@ -384,7 +384,7 @@ export function getProbeInfo(serialNumber, callback) {}
  * nrfjprogjs.getLibraryInfo(123456789, function(err, info) {
  *      if (err) throw err;
  *      console.log('Selected device uses ' + info.path + ' to connect');
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to query
  * @param {Function} callback A callback function to handle the async response.
@@ -412,7 +412,7 @@ export function getLibraryInfo(serialNumber, callback) {}
  * nrfjprogjs.read(123456789, 0, 16, function(err, data) {
  *      if (err) throw err;
  *      console.log('The first 16 bytes of memory look like: ' + data.join(','));
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to read memory from
  * @param {integer} address The start address of the block of memory to be read
@@ -444,7 +444,7 @@ export function read(serialNumber, address, length, callback) {}
  * nrfjprogjs.read(123456789, 0, function(err, data) {
  *      if (err) throw err;
  *      console.log('The first word of memory looks like: ' + data);
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to read memory from
  * @param {integer} address The address of the word to be read
@@ -466,7 +466,7 @@ export function readU32(serialNumber, address, callback) {}
  * @example
  * nrfjprogjs.program(123456789, "/some/path/nrf52832_abcd.hex", {}, function(err) {
  *      if (err) throw err;
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to program
  * @param {string} filename Either the filename of the <tt>.hex</tt> file containing the program, or the contents of such a file.
@@ -485,7 +485,7 @@ export function program(serialNumber, filename, options, progressCallback, callb
  * @example
  * nrfjprogjs.programDFU(123456789, "/some/path/nrf52832_abcd.zip", function(err) {
  *      if (err) throw err;
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to program
  * @param {string} filename The filename of the <tt>.zip</tt> file containing the update.
@@ -500,19 +500,24 @@ export function programDFU(serialNumber, filename, progressCallback, callback) {
  * <br/>
  *
  * @example
- * nrfjprogjs.programDFU(-1, "/some/path/nrf52832_abcd.hex", "COM1", 15000, function(progress) { console.log(progress) }, function(err) {
-  *      if (err) throw err;
-  * } );
-  *
-  * @param {integer} serialNumber Fake serial number, must be non zero
-  * @param {string} filename Filename of the <tt>.hex</tt> file containing the mcuboot update
-  * @param {string} uart The connected device UART
-  * @param {integer} timeout Timeout in milliseconds. For DFU it must be more than 11000 because of response time when starting programming
-  * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
-  * @param {Function} callback A callback function to handle the async response.
-  *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
-  */
- export function programMcuBootDFU(serialNumber, filename, uart, timeout, progressCallback, callback) {}
+ * nrfjprogjs.programMcuBootDFU(-1, "/some/path/nrf52832_abcd.hex", "COM1", 15000,
+ *     function(progress) {
+ *         console.log(progress);
+ *     },
+ *     function(err) {
+ *         if (err) throw err;
+ *     }
+ * );
+ *
+ * @param {integer} serialNumber Fake serial number, must be non zero
+ * @param {string} filename Filename of the <tt>.hex</tt> file containing the mcuboot update
+ * @param {string} uart The connected device UART
+ * @param {integer} timeout Timeout in milliseconds. For DFU it must be more than 11000 because of response time when starting programming
+ * @param {Function} [progressCallback] Optional parameter for getting progress callbacks. It shall expect one parameter: ({@link module:pc-nrfjprog-js~Progress|Progress}).
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect one parameter: ({@link module:pc-nrfjprog-js~Error|Error}).
+ */
+export function programMcuBootDFU(serialNumber, filename, uart, timeout, progressCallback, callback) {}
 
 
 /**
@@ -527,7 +532,7 @@ export function programDFU(serialNumber, filename, progressCallback, callback) {
  * @example
  * nrfjprogjs.readToFile(123456789, "/some/path/to/store/file.hex", {}, function(err) {
  *      if (err) throw err;
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to read
  * @param {string} filename The filename of the <tt>.hex</tt> file where the content of the device should be stored.
@@ -550,7 +555,7 @@ export function readToFile(serialNumber, filename, options, progressCallback, ca
  * @example
  * nrfjprogjs.verify(123456789, "/some/path/nrf52832_abcd.hex", function(err) {
  *      if (err) throw err;
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device
  * @param {string} filename The filename of the <tt>.hex</tt> file containing the program.
@@ -668,7 +673,7 @@ export function writeU32(serialNumber, address, data, callback) {}
  *       nrfjprogjs.close(123456789, function() {});
  *     } );
  *   } );
- * } );
+ * });
  *
  * @param {integer} serialNumber The serial number of the device to open
  * @param {Function} callback A callback function to handle the async response.
