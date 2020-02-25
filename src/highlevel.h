@@ -78,6 +78,8 @@ class HighLevel : public Nan::ObjectWrap
                                    // callback(error)
     static NAN_METHOD(ProgramMcuBootDFU); // Params: serialnumber, filename, callback(progress),
                                    // callback(error)
+    static NAN_METHOD(ProgramModemUartDFU); // Params: serialnumber, filename, callback(progress),
+                                   // callback(error)
 
     static NAN_METHOD(ReadToFile); // Params: serialnumber, filename, options {readram, readcode,
                                    // readuicr, readqspi}, callback(progress), callback(error)
