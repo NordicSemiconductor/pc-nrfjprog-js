@@ -48,7 +48,8 @@ typedef enum
 {
     MCUBOOT_PROBE,
     DFU_PROBE,
-    DEBUG_PROBE
+    DEBUG_PROBE,
+    MODEMUARTDFU_PROBE
 } probe_type_t;
 
 typedef enum

@@ -332,6 +332,17 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
                                                   baton2->baudRate,
                                                   baton2->responseTimeout);
         }
+        else if (baton->probeType == MODEMUARTDFU_PROBE)
+        {
+            const auto baton2 = dynamic_cast<ProgramModemUartDFUBaton *>(baton);
+
+            initError = NRFJPROG_modemdfu_dfu_serial_init(&(baton->probe),
+                                                          &HighLevel::progressCallback,
+                                                          &HighLevel::log,
+                                                          baton2->uart.c_str(),
+                                                          baton2->baudRate,
+                                                          baton2->responseTimeout);
+        }
         else
         {
             initError = NRFJPROG_probe_init(
@@ -522,6 +533,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
     Nan::SetPrototypeMethod(target, "program", Program);
     Nan::SetPrototypeMethod(target, "programDFU", ProgramDFU);
     Nan::SetPrototypeMethod(target, "programMcuBootDFU", ProgramMcuBootDFU);
+    Nan::SetPrototypeMethod(target, "programModemUartDFU", ProgramModemUartDFU);
     Nan::SetPrototypeMethod(target, "readToFile", ReadToFile);
     Nan::SetPrototypeMethod(target, "verify", Verify);
     Nan::SetPrototypeMethod(target, "erase", Erase);
@@ -1127,6 +1139,52 @@ NAN_METHOD(HighLevel::ProgramMcuBootDFU)
 
     const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
         const auto baton = dynamic_cast<ProgramMcuBootDFUBaton *>(b);
+        nrfjprogdll_err_t programResult;
+
+        FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);
+
+        if (!file.exists())
+        {
+            log(file.errormessage() + "\n");
+            return INVALID_PARAMETER;
+        }
+
+        const std::string filename = file.getFileName();
+        program_options_t options;
+        options.verify          = VERIFY_NONE;
+        options.chip_erase_mode = ERASE_NONE;
+        options.qspi_erase_mode = ERASE_NONE;
+        options.reset           = RESET_SYSTEM;
+
+        programResult = NRFJPROG_program(b->probe, filename.c_str(), options);
+        return programResult;
+    };
+
+    CallFunction(info, p, e, nullptr, true);
+}
+
+NAN_METHOD(HighLevel::ProgramModemUartDFU)
+{
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE parameters, int & argumentCount) -> Baton * {
+        auto baton = std::make_unique<ProgramModemUartDFUBaton>();
+
+        baton->filename = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->uart = Convert::getNativeString(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->baudRate = Convert::getNativeUint32(parameters[argumentCount]);
+        argumentCount++;
+
+        baton->responseTimeout = Convert::getNativeUint32(parameters[argumentCount]);
+        argumentCount++;
+
+        return baton.release();
+    };
+
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        const auto baton = dynamic_cast<ProgramModemUartDFUBaton *>(b);
         nrfjprogdll_err_t programResult;
 
         FileFormatHandler file(baton->filename, INPUT_FORMAT_HEX_FILE);

@@ -228,6 +228,18 @@ class ProgramMcuBootDFUBaton : public Baton
     uint32_t responseTimeout;
 };
 
+class ProgramModemUartDFUBaton : public Baton
+{
+  public:
+    ProgramModemUartDFUBaton()
+        : Baton("program", 0, true, MODEMUARTDFU_PROBE)
+    {}
+    std::string filename;
+    std::string uart;
+    uint32_t baudRate;
+    uint32_t responseTimeout;
+};
+
 class VerifyBaton : public BatonNeedsReset
 {
   public:
