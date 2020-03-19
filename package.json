@@ -5,7 +5,7 @@
   "main": "index.js",
   "nrfjprog": {
     "version": "10.7.0",
-    "jlink": "V660e"
+    "jlink": "V662b"
   },
   "scripts": {
     "build": "node build.js",
