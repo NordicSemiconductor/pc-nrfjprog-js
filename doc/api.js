@@ -148,11 +148,15 @@
  *    <tt>nrfjprogjs.NRF52805_xxAA_FUTURE</tt><br/>
  *
  *    <tt>nrfjprogjs.NRF52810_xxAA_REV1</tt><br/>
- *    <tt>nrfjprogjs.NRF52810_xxAA_REV2<<</tt><br/>
+ *    <tt>nrfjprogjs.NRF52810_xxAA_REV2</tt><br/>
  *    <tt>nrfjprogjs.NRF52810_xxAA_FUTURE</tt><br/>
  *
  *    <tt>nrfjprogjs.NRF52811_xxAA_REV1</tt><br/>
  *    <tt>nrfjprogjs.NRF52811_xxAA_FUTURE</tt><br/>
+ *
+ *    <tt>nrfjprogjs.NRF52820_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF52820_xxAA_REV2</tt><br/>
+ *    <tt>nrfjprogjs.NRF52820_xxAA_FUTURE</tt><br/>
  *
  *    <tt>nrfjprogjs.NRF52832_xxAA_ENGA</tt><br/>
  *    <tt>nrfjprogjs.NRF52832_xxAA_ENGB</tt><br/>
