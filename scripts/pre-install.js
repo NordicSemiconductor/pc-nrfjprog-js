@@ -68,6 +68,7 @@ const platform = `${process.platform}_${process.arch}`;
 const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
 const fileUrl = `${DOWNLOAD_URL}/${filename}`;
 const destinationFile = path.join(DOWNLOAD_DIR, filename);
+const skipDownload = process.env.RELEASE;
 
 async function downloadChecksum() {
     console.log('Downloading', `${fileUrl}.md5`);
@@ -80,11 +81,16 @@ async function downloadChecksum() {
 }
 
 async function downloadFile() {
+    if (skipDownload === 'true') {
+        console.log('RELEASE is set to true. Skip downloading nrfjprog.');
+        return Promise.resolve();
+    }
+
     const hash = crypto.createHash('md5');
     const expectedChecksum = await downloadChecksum();
 
     console.log(`Downloading nrfjprog from ${fileUrl}...`);
-
+    await removeDirIfExists(DOWNLOAD_DIR)
     await sander.mkdir(DOWNLOAD_DIR);
 
     const { status, data: stream } = await axios.get(
@@ -191,8 +197,7 @@ getLibraryVersion()
             console.log('Trying to install nrfjprog');
 
             let exitCode = 0;
-            return removeDirIfExists(DOWNLOAD_DIR)
-                .then(() => downloadFile())
+            return downloadFile()
                 // without this sleep windows install fails with EBUSY
                 .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
                 .then(() => installNrfjprog(destinationFile))
