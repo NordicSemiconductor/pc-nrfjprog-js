@@ -94,7 +94,7 @@ template <typename NativeType> class ConvUtil
             throw std::runtime_error("bool");
         }
 
-        return static_cast<NativeType>(js->BooleanValue(Nan::GetCurrentContext()->GetIsolate()));
+        return Nan::To<bool>(js).FromJust();
     }
 
     static NativeType getNativeUnsigned(v8::Local<v8::Object> js, const char * name)
@@ -245,7 +245,7 @@ std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
     for (uint32_t i = 0; i < length; ++i)
     {
         returnData.push_back(static_cast<uint8_t>(
-            jsarray->Get(Nan::GetCurrentContext(), Nan::New(i)).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust()));
+            Nan::To<uint32_t>(Nan::Get(jsarray, i).ToLocalChecked()).FromJust()));
     }
 
     return returnData;
