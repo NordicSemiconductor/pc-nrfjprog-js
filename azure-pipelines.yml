@@ -229,7 +229,6 @@ jobs:
     - task: PublishPipelineArtifact@1
       inputs:
         path: $(System.DefaultWorkingDirectory)/build/stage
-        artifact: binding
       displayName: 'Publish artifacts'
 
   - job: GitHubRelease
@@ -239,8 +238,7 @@ jobs:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        patterns: '*.tar.gz'
-        artifact: binding
+        patterns: '**/*.tar.gz'
       displayName: 'Download artifacts'
     - task: GitHubRelease@0
       inputs:
