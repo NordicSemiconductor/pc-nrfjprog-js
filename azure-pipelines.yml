@@ -231,6 +231,7 @@ jobs:
     dependsOn: [
       Build,
     ]
+    steps:
     - task: GitHubRelease@0
       inputs:
         gitHubConnection: 'waylandCI'
