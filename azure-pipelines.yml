@@ -223,15 +223,23 @@ jobs:
         NODE_PRE_GYP_GITHUB_TOKEN: $(wayland_github_token)
       }
       displayName: 'Build'
-    - bash: |
-        cp -R build/stage/**/*.tar.gz "$(Build.ArtifactStagingDirectory)"
-      displayName: 'Copy artifacts'
+    # - bash: |
+    #     cp -R build/stage/**/*.tar.gz "$(Build.ArtifactStagingDirectory)"
+    #   displayName: 'Copy artifacts'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        path: 'build/stage/**/*.tar.gz'
+      displayName: 'Publish artifacts'
 
   - job: GitHubRelease
     dependsOn: [
       Build,
     ]
     steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        patterns: '*.tar.gz'
+      displayName: 'Download artifacts'
     - task: GitHubRelease@0
       inputs:
         gitHubConnection: 'waylandCI'
