@@ -226,6 +226,11 @@ jobs:
     - bash: |
         cp -R build/stage/**/*.tar.gz "$(Build.ArtifactStagingDirectory)"
       displayName: 'Copy artifacts'
+
+  - job: GitHubRelease
+    dependsOn: [
+      Build,
+    ]
     - task: GitHubRelease@0
       inputs:
         gitHubConnection: 'waylandCI'
@@ -240,7 +245,7 @@ jobs:
 
   - job: Test
     dependsOn: [
-      Build,
+      GitHubRelease,
     ]
     strategy:
       matrix:
