@@ -228,7 +228,7 @@ jobs:
     #   displayName: 'Copy artifacts'
     - task: PublishPipelineArtifact@1
       inputs:
-        path: $(System.DefaultWorkingDirectory)/build/stage/**/*.tar.gz
+        path: $(System.DefaultWorkingDirectory)/build/stage
         artifact: binding
       displayName: 'Publish artifacts'
 
