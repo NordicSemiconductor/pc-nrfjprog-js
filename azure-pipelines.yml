@@ -223,9 +223,6 @@ jobs:
         NODE_PRE_GYP_GITHUB_TOKEN: $(wayland_github_token)
       }
       displayName: 'Build'
-    # - bash: |
-    #     cp -R build/stage/**/*.tar.gz "$(Build.ArtifactStagingDirectory)"
-    #   displayName: 'Copy artifacts'
     - task: PublishPipelineArtifact@1
       inputs:
         path: $(System.DefaultWorkingDirectory)/build/stage
@@ -247,6 +244,7 @@ jobs:
         action: 'edit'
         tagSource: 'Git tag'
         tag: '$(Build.SourceBranchName)'
+        assets: $(Pipeline.Workspace)/**/*.tar.gz'
         assetUploadMode: 'replace'
         isDraft: 'true'
         addChangeLog: 'false'
