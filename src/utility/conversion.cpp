@@ -64,7 +64,7 @@ template <typename NativeType> class ConvUtil
             throw std::runtime_error("unsigned integer");
         }
 
-        return static_cast<NativeType>(js->Uint32Value());
+        return static_cast<NativeType>(js->Uint32Value(Nan::GetCurrentContext()).FromJust());
     }
 
     static NativeType getNativeSigned(v8::Local<v8::Value> js)
@@ -74,7 +74,7 @@ template <typename NativeType> class ConvUtil
             throw std::runtime_error("signed integer");
         }
 
-        return static_cast<NativeType>(js->IntegerValue());
+        return static_cast<NativeType>(js->IntegerValue(Nan::GetCurrentContext()).FromJust());
     }
 
     static NativeType getNativeFloat(v8::Local<v8::Value> js)
@@ -84,7 +84,7 @@ template <typename NativeType> class ConvUtil
             throw std::runtime_error("float");
         }
 
-        return static_cast<NativeType>(js->NumberValue());
+        return static_cast<NativeType>(js->NumberValue(Nan::GetCurrentContext()).FromJust());
     }
 
     static NativeType getNativeBool(v8::Local<v8::Value> js)
@@ -94,27 +94,27 @@ template <typename NativeType> class ConvUtil
             throw std::runtime_error("bool");
         }
 
-        return static_cast<NativeType>(js->BooleanValue());
+        return static_cast<NativeType>(js->BooleanValue(Nan::GetCurrentContext()->GetIsolate()));
     }
 
     static NativeType getNativeUnsigned(v8::Local<v8::Object> js, const char * name)
     {
-        return getNativeUnsigned(js->Get(Nan::New(name).ToLocalChecked()));
+        return getNativeUnsigned(Nan::Get(js, Nan::New(name).ToLocalChecked()).ToLocalChecked());
     }
 
     static NativeType getNativeSigned(v8::Local<v8::Object> js, const char * name)
     {
-        return getNativeSigned(js->Get(Nan::New(name).ToLocalChecked()));
+        return getNativeSigned(Nan::Get(js, Nan::New(name).ToLocalChecked()).ToLocalChecked());
     }
 
     static NativeType getNativeFloat(v8::Local<v8::Object> js, const char * name)
     {
-        return getNativeFloat(js->Get(Nan::New(name).ToLocalChecked()));
+        return getNativeFloat(Nan::Get(js, Nan::New(name).ToLocalChecked()).ToLocalChecked());
     }
 
     static NativeType getNativeBool(v8::Local<v8::Object> js, const char * name)
     {
-        return getNativeBool(js->Get(Nan::New(name).ToLocalChecked()));
+        return getNativeBool(Nan::Get(js, Nan::New(name).ToLocalChecked()).ToLocalChecked());
     }
 };
 
@@ -244,7 +244,8 @@ std::vector<uint8_t> Convert::getVectorForUint8(v8::Local<v8::Value> js)
 
     for (uint32_t i = 0; i < length; ++i)
     {
-        returnData.push_back(static_cast<uint8_t>(jsarray->Get(Nan::New(i))->Uint32Value()));
+        returnData.push_back(static_cast<uint8_t>(
+            jsarray->Get(Nan::GetCurrentContext(), Nan::New(i)).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust()));
     }
 
     return returnData;
@@ -270,7 +271,7 @@ v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Value> js)
         throw std::runtime_error("object");
     }
 
-    return js->ToObject();
+    return js->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 }
 
 v8::Local<v8::Object> Convert::getJsObject(v8::Local<v8::Object> js, const char * name)
@@ -383,7 +384,7 @@ v8::Handle<v8::Value> Convert::toJsValueArray(uint8_t * nativeValue, uint32_t le
 
     for (uint32_t i = 0; i < length; ++i)
     {
-        valueArray->Set(i, Convert::toJsNumber(nativeValue[i]));
+        Nan::Set(valueArray, i, Convert::toJsNumber(nativeValue[i]));
     }
 
     return scope.Escape(valueArray);
