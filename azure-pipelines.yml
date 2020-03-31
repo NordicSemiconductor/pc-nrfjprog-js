@@ -228,7 +228,7 @@ jobs:
         path: $(System.DefaultWorkingDirectory)/build/stage
       displayName: 'Publish artifacts'
 
-  - job: GitHubRelease
+  - deployment: GitHubRelease
     dependsOn: [
       Build,
     ]
@@ -236,6 +236,7 @@ jobs:
     - task: DownloadPipelineArtifact@2
       inputs:
         patterns: '**/*.tar.gz'
+        path: $(Build.ArtifactStagingDirectory)
       displayName: 'Download artifacts'
     - task: GitHubRelease@0
       inputs:
@@ -244,7 +245,6 @@ jobs:
         action: 'edit'
         tagSource: 'Git tag'
         tag: '$(Build.SourceBranchName)'
-        assets: $(Pipeline.Workspace)/**/*.tar.gz'
         assetUploadMode: 'replace'
         isDraft: 'true'
         addChangeLog: 'false'
