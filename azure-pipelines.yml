@@ -241,7 +241,7 @@ jobs:
     - task: DownloadSecureFile@1
       name: nrfjprog
       inputs:
-        secureFile: 'nrfjprog-$(nrfjprog_version)-$(nrfjprog_suffix).tar.gz'
+        secureFile: "nrfjprog-$(nrfjprog_version)-$(nrfjprog_suffix).tar.gz"
       condition: eq(variables['release'], 'true')
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
