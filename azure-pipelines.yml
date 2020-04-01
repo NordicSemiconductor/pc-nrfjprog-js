@@ -245,8 +245,8 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        mkdir $(Build.SourcesDirectory)/nrfjprog
-        mv $(nrfjprogLinux.secureFilePath) $(Build.SourcesDirectory)/nrfjprog
+        mkdir nrfjprog
+        mv $(nrfjprogLinux.secureFilePath) nrfjprog
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
@@ -256,8 +256,8 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        mkdir $(Build.SourcesDirectory)/nrfjprog
-        mv $(nrfjprogMac.secureFilePath) $(Build.SourcesDirectory)/nrfjprog
+        mkdir nrfjprog
+        mv $(nrfjprogMac.secureFilePath) nrfjprog
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
@@ -267,8 +267,8 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        mkdir $(Build.SourcesDirectory)/nrfjprog
-        mv $(nrfjprogWin64.secureFilePath) $(Build.SourcesDirectory)/nrfjprog
+        mkdir nrfjprog
+        mv $(nrfjprogWin64.secureFilePath) nrfjprog
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
@@ -278,8 +278,8 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        mkdir $(Build.SourcesDirectory)/nrfjprog
-        mv $(nrfjprogWin32.secureFilePath) $(Build.SourcesDirectory)/nrfjprog
+        mkdir nrfjprog
+        mv $(nrfjprogWin32.secureFilePath) nrfjprog
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Download internal nrfjprog for release'
     - bash: |
