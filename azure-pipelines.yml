@@ -245,7 +245,7 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        tar xzvf $(nrfjprogLinux.secureFilePath)
+        mv $(nrfjprogLinux.secureFilePath) $(Build.SourcesDirectory)
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
@@ -255,7 +255,7 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        tar xzvf $(nrfjprogMac.secureFilePath)
+        mv $(nrfjprogMac.secureFilePath) $(Build.SourcesDirectory)
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
@@ -265,7 +265,7 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        tar xzvf $(nrfjprogWin64.secureFilePath)
+        mv $(nrfjprogWin64.secureFilePath) $(Build.SourcesDirectory)
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
@@ -275,7 +275,7 @@ jobs:
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
-        tar xzvf $(nrfjprogWin32.secureFilePath)
+        mv $(nrfjprogWin32.secureFilePath) $(Build.SourcesDirectory)
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Download internal nrfjprog for release'
     - bash: |
