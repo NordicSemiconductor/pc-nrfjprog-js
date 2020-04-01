@@ -240,8 +240,8 @@ jobs:
         path: $(Build.ArtifactStagingDirectory)
       displayName: 'Download artifacts'
     - bash: |
-        mv $(Build.ArtifactStagingDirectory)/*/* $(Build.ArtifactStagingDirectory)
-        displayName: 'Move files'
+        mv $(Build.ArtifactStagingDirectory)/*/*/* $(Build.ArtifactStagingDirectory)
+      displayName: 'Move files'
     - task: GitHubRelease@0
       inputs:
         gitHubConnection: 'waylandCI'
