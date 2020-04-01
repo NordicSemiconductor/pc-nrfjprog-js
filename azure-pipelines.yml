@@ -49,132 +49,132 @@ jobs:
           npm_config_runtime: 'electron'
           npm_config_target: 8.2.0
           npm_config_disturl: 'https://electronjs.org/headers'
-        # macOS_node_8_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 8.15.0
-        # macOS_node_10_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 10.15.0
-        # macOS_node_11_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 11.7.0
-        # macOS_node_12_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 12.16.1
-        # macOS_node_13_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 13.12.0
-        # macOS_electron_2_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 8.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 2.0.17
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # macOS_electron_4_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 10.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 4.0.6
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # macOS_electron_5_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 10.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 5.0.6
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # macOS_electron_8_x:
-        #   image_name: 'macos-10.15'
-        #   node_version: 12.16.1
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 8.2.0
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # win64_node_8_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 8.15.0
-        # win64_node_10_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 10.15.0
-        # win64_node_11_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 11.7.0
-        # win64_node_12_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 12.16.1
-        # win64_node_13_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 13.12.0
-        # win64_electron_2_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 8.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 2.0.17
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # win64_electron_4_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 10.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 4.0.6
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # win64_electron_5_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 10.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 5.0.6
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # win64_electron_8_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 12.16.1
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 8.2.0
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        # win32_node_8_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 8.15.0
-        #   node_arch: '32'
-        # win32_node_10_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 10.15.0
-        #   node_arch: '32'
-        # win32_node_11_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 11.7.0
-        #   node_arch: '32'
-        # win32_node_12_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 12.16.1
-        #   node_arch: '32'
-        # win32_node_13_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 13.12.0
-        #   node_arch: '32'
-        # win32_electron_2_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 8.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 2.0.17
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        #   node_arch: '32'
-        # win32_electron_4_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 10.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 4.0.6
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        #   node_arch: '32'
-        # win32_electron_5_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 10.15.0
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 5.0.6
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        #   node_arch: '32'
-        # win32_electron_8_x:
-        #   image_name: 'vs2017-win2016'
-        #   node_version: 12.16.1
-        #   npm_config_runtime: 'electron'
-        #   npm_config_target: 8.2.0
-        #   npm_config_disturl: 'https://electronjs.org/headers'
-        #   node_arch: '32'
+        macOS_node_8_x:
+          image_name: 'macos-10.15'
+          node_version: 8.15.0
+        macOS_node_10_x:
+          image_name: 'macos-10.15'
+          node_version: 10.15.0
+        macOS_node_11_x:
+          image_name: 'macos-10.15'
+          node_version: 11.7.0
+        macOS_node_12_x:
+          image_name: 'macos-10.15'
+          node_version: 12.16.1
+        macOS_node_13_x:
+          image_name: 'macos-10.15'
+          node_version: 13.12.0
+        macOS_electron_2_x:
+          image_name: 'macos-10.15'
+          node_version: 8.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 2.0.17
+          npm_config_disturl: 'https://electronjs.org/headers'
+        macOS_electron_4_x:
+          image_name: 'macos-10.15'
+          node_version: 10.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 4.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+        macOS_electron_5_x:
+          image_name: 'macos-10.15'
+          node_version: 10.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 5.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+        macOS_electron_8_x:
+          image_name: 'macos-10.15'
+          node_version: 12.16.1
+          npm_config_runtime: 'electron'
+          npm_config_target: 8.2.0
+          npm_config_disturl: 'https://electronjs.org/headers'
+        win64_node_8_x:
+          image_name: 'vs2017-win2016'
+          node_version: 8.15.0
+        win64_node_10_x:
+          image_name: 'vs2017-win2016'
+          node_version: 10.15.0
+        win64_node_11_x:
+          image_name: 'vs2017-win2016'
+          node_version: 11.7.0
+        win64_node_12_x:
+          image_name: 'vs2017-win2016'
+          node_version: 12.16.1
+        win64_node_13_x:
+          image_name: 'vs2017-win2016'
+          node_version: 13.12.0
+        win64_electron_2_x:
+          image_name: 'vs2017-win2016'
+          node_version: 8.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 2.0.17
+          npm_config_disturl: 'https://electronjs.org/headers'
+        win64_electron_4_x:
+          image_name: 'vs2017-win2016'
+          node_version: 10.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 4.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+        win64_electron_5_x:
+          image_name: 'vs2017-win2016'
+          node_version: 10.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 5.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+        win64_electron_8_x:
+          image_name: 'vs2017-win2016'
+          node_version: 12.16.1
+          npm_config_runtime: 'electron'
+          npm_config_target: 8.2.0
+          npm_config_disturl: 'https://electronjs.org/headers'
+        win32_node_8_x:
+          image_name: 'vs2017-win2016'
+          node_version: 8.15.0
+          node_arch: '32'
+        win32_node_10_x:
+          image_name: 'vs2017-win2016'
+          node_version: 10.15.0
+          node_arch: '32'
+        win32_node_11_x:
+          image_name: 'vs2017-win2016'
+          node_version: 11.7.0
+          node_arch: '32'
+        win32_node_12_x:
+          image_name: 'vs2017-win2016'
+          node_version: 12.16.1
+          node_arch: '32'
+        win32_node_13_x:
+          image_name: 'vs2017-win2016'
+          node_version: 13.12.0
+          node_arch: '32'
+        win32_electron_2_x:
+          image_name: 'vs2017-win2016'
+          node_version: 8.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 2.0.17
+          npm_config_disturl: 'https://electronjs.org/headers'
+          node_arch: '32'
+        win32_electron_4_x:
+          image_name: 'vs2017-win2016'
+          node_version: 10.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 4.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+          node_arch: '32'
+        win32_electron_5_x:
+          image_name: 'vs2017-win2016'
+          node_version: 10.15.0
+          npm_config_runtime: 'electron'
+          npm_config_target: 5.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+          node_arch: '32'
+        win32_electron_8_x:
+          image_name: 'vs2017-win2016'
+          node_version: 12.16.1
+          npm_config_runtime: 'electron'
+          npm_config_target: 8.2.0
+          npm_config_disturl: 'https://electronjs.org/headers'
+          node_arch: '32'
     pool:
       vmImage: $(image_name)
     steps:
@@ -229,9 +229,7 @@ jobs:
       displayName: 'Publish artifacts'
 
   - job: GitHubRelease
-    dependsOn: [
-      Build,
-    ]
+    dependsOn: Build
     steps:
     - checkout: none
     - task: DownloadPipelineArtifact@2
@@ -254,28 +252,26 @@ jobs:
         addChangeLog: 'false'
       condition: ne(variables['Build.Reason'], 'PullRequest')
 
-  # - job: Test
-  #   dependsOn: [
-  #     GitHubRelease,
-  #   ]
-  #   strategy:
-  #     matrix:
-  #       linux:
-  #         osType: 'linux'
-  #       mac:
-  #         osType: 'mac'
-  #       win64:
-  #         osType: 'win64'
-  #       win32:
-  #         osType: 'win32'
-  #   pool: server
-  #   steps:
-  #   - task: InvokeRESTAPI@1
-  #     displayName: Test
-  #     inputs:
-  #       connectionType: 'connectedServiceName'
-  #       serviceConnection: 'waylandJenkins'
-  #       method: 'POST'
-  #       urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
-  #       waitForCompletion: 'true'
-  #     condition: ne(variables['Build.Reason'], 'PullRequest')
+  - job: Test
+    dependsOn: GitHubRelease
+    strategy:
+      matrix:
+        linux:
+          osType: 'linux'
+        mac:
+          osType: 'mac'
+        win64:
+          osType: 'win64'
+        win32:
+          osType: 'win32'
+    pool: server
+    steps:
+    - task: InvokeRESTAPI@1
+      displayName: Test
+      inputs:
+        connectionType: 'connectedServiceName'
+        serviceConnection: 'waylandJenkins'
+        method: 'POST'
+        urlSuffix: 'view/pc-nrfjprog-js/job/pc-nrfjprog-js-$(osType)/buildWithParameters?BRANCH=$(Build.SourceBranch)&VSTS_URL=$(system.CollectionUri)&TOKEN=$(system.AccessToken)&PROJECT_ID=$(system.teamProjectId)&HUB_NAME=$(system.hostType)&PLAN_ID=$(system.planId)&TASK_ID=$(system.taskInstanceId)&JOB_ID=$(system.jobId)'
+        waitForCompletion: 'true'
+      condition: ne(variables['Build.Reason'], 'PullRequest')
