@@ -242,41 +242,41 @@ jobs:
       name: nrfjprogLinux
       inputs:
         secureFile: "nrfjprog-10.7.0-linuix_x64.tar.gz"
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
         tar xzvf $(nrfjprogLinux.secureFilePath)
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
       name: nrfjprogMac
       inputs:
         secureFile: "nrfjprog-10.7.0-darwin_x64.tar.gz"
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
         tar xzvf $(nrfjprogMac.secureFilePath)
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'mac'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
       name: nrfjprogWin64
       inputs:
         secureFile: "nrfjprog-10.7.0-win32_x64.tar.gz"
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
         tar xzvf $(nrfjprogWin64.secureFilePath)
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Download internal nrfjprog for release'
     - task: DownloadSecureFile@1
       name: nrfjprogWin32
       inputs:
         secureFile: "nrfjprog-10.7.0-win32_ia32.tar.gz"
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
         tar xzvf $(nrfjprogWin32.secureFilePath)
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win')
+      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
       displayName: 'Download internal nrfjprog for release'
     - bash: |
         set -o errexit -o pipefail
