@@ -259,7 +259,7 @@ jobs:
         npm_config_disturl: $(npm_config_disturl),
         NODE_VERSION: $(node_version),
         NODE_ARCH: $(node_arch),
-        NODE_PRE_GYP_GITHUB_TOKEN: $(wayland_github_token)
+        NODE_PRE_GYP_GITHUB_TOKEN: $(wayland_github_token),
         RELEASE: $(release)
       }
       displayName: 'Build'
