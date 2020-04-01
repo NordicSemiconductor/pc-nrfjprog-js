@@ -241,7 +241,7 @@ jobs:
     - task: DownloadSecureFile@1
       name: nrfjprogLinux
       inputs:
-        secureFile: "nrfjprog-10.7.0-linuix_x64.tar.gz"
+        secureFile: "nrfjprog-10.7.0-linux_x64.tar.gz"
       condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'linux'))
       displayName: 'Donwload internal nrfjprog for release'
     - bash: |
