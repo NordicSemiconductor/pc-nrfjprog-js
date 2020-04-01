@@ -276,12 +276,18 @@ jobs:
       name: nrfjprogWin32
       inputs:
         secureFile: "nrfjprog-10.7.0-win32_ia32.tar.gz"
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
+      condition: and(
+        eq(variables['release'], 'true'),
+        contains(variables['image_name'], 'win'),
+        eq(variables['node_arch'], '32'))
       displayName: 'Donwload internal nrfjprog for release'
-    - bash: |
+    - script: |
         mkdir nrfjprog
-        mv $(nrfjprogWin32.secureFilePath) nrfjprog
-      condition: and(eq(variables['release'], 'true'), contains(variables['image_name'], 'win'))
+        move $(nrfjprogWin32.secureFilePath) nrfjprog
+      condition: and(
+        eq(variables['release'], 'true'),
+        contains(variables['image_name'], 'win'),
+        eq(variables['node_arch'], '32'))
       displayName: 'Download internal nrfjprog for release'
     - bash: |
         set -o errexit -o pipefail
