@@ -294,6 +294,7 @@ jobs:
         node -v
         npm i --build-from-source
         npm run package-prebuilt
+        npm pack
       env: {
         npm_config_runtime: $(npm_config_runtime),
         npm_config_target: $(npm_config_target),
@@ -304,6 +305,10 @@ jobs:
         RELEASE: $(release)
       }
       displayName: 'Build'
+    - bash: |
+        set -o errexit -o pipefail
+        mv *.tgz ./build/stage
+      displayName: 'Move package'
     - task: PublishPipelineArtifact@1
       inputs:
         path: $(System.DefaultWorkingDirectory)/build/stage
