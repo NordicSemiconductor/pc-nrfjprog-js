@@ -69,7 +69,7 @@ const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
 const fileUrl = `${DOWNLOAD_URL}/${filename}`;
 const destinationFile = path.join(DOWNLOAD_DIR, filename);
 const skipDownload = process.env.RELEASE;
-const localNrfjprogPath = process.env.EXIST_NRFJPROG_PATH;
+const localNrfjprogPath = process.env.LOCAL_NRFJPROG_PATH;
 
 async function downloadChecksum() {
     console.log('Downloading', `${fileUrl}.md5`);
@@ -86,7 +86,7 @@ async function downloadFile() {
         console.log('RELEASE is set to true. Skip downloading nrfjprog.');
         if (localNrfjprogPath) {
             console.log(`LOCAL_NRFJPROG_PATH is set to ${localNrfjprogPath}`);
-            sander.symlinkOrCopySync(localNrfjprogPath).to(DOWNLOAD_DIR)
+            sander.copyFileSync(localNrfjprogPath).to(destinationFile)
         }
         return Promise.resolve();
     }
