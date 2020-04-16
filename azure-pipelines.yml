@@ -308,7 +308,7 @@ jobs:
         set -o errexit -o pipefail
         npm pack
         mv *.tgz ./build/stage
-      displayName: 'Move package'
+      displayName: 'Pack and move package'
     - task: PublishPipelineArtifact@1
       inputs:
         path: $(System.DefaultWorkingDirectory)/build/stage
