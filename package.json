@@ -34,6 +34,7 @@
     "remote_path": "v{version}"
   },
   "files": [
+    "bin",
     "cmake",
     "src",
     "scripts",
