@@ -68,7 +68,7 @@ const platform = `${process.platform}_${process.arch}`;
 const filename = `nrfjprog-${requiredVersion}-${platform}.tar.gz`;
 const fileUrl = `${DOWNLOAD_URL}/${filename}`;
 const destinationFile = path.join(DOWNLOAD_DIR, filename);
-const skipDownload = process.env.RELEASE;
+const skipDownload = process.env.INTERNAL;
 const localNrfjprogPath = process.env.LOCAL_NRFJPROG_PATH;
 
 async function downloadChecksum() {
@@ -83,7 +83,7 @@ async function downloadChecksum() {
 
 async function downloadFile() {
     if (skipDownload === 'true') {
-        console.log('RELEASE is set to true. Skip downloading nrfjprog.');
+        console.log('INTERNAL is set to true. Skip downloading nrfjprog.');
         if (localNrfjprogPath) {
             console.log(`LOCAL_NRFJPROG_PATH is set to ${localNrfjprogPath}`);
             sander.copyFileSync(localNrfjprogPath).to(destinationFile)
