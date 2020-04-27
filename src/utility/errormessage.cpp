@@ -75,7 +75,7 @@ v8::Local<v8::Value> ErrorMessage::getErrorMessage(const int errorCode,
         errorStringStream << "Lowlevel error: " << lowLevelMessage << " (" << lowlevelError << ")" << std::endl;
     }
 
-    const v8::Local<v8::Value> error        = Nan::Error(Convert::toJsString(errorStringStream.str())->ToString());
+    const v8::Local<v8::Value> error        = Nan::Error(errorStringStream.str().c_str());
     const v8::Local<v8::Object> errorObject = error.As<v8::Object>();
 
     Utility::Set(errorObject, "errno", Convert::toJsNumber(errorCode));
@@ -106,7 +106,7 @@ v8::Local<v8::String> ErrorMessage::getTypeErrorMessage(const int argumentNumber
         stream << message;
     }
 
-    return Convert::toJsString(stream.str())->ToString();
+    return Convert::toJsString(stream.str())->ToString(Nan::GetCurrentContext()).ToLocalChecked();
 }
 
 v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string & name, const std::string & message)
@@ -115,5 +115,5 @@ v8::Local<v8::String> ErrorMessage::getStructErrorMessage(const std::string & na
 
     stream << "Property: " << name << " Message: " << message;
 
-    return Convert::toJsString(stream.str())->ToString();
+    return Convert::toJsString(stream.str())->ToString(Nan::GetCurrentContext()).ToLocalChecked();
 }
