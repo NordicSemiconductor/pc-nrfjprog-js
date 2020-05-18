@@ -177,6 +177,11 @@
  *    <tt>nrfjprogjs.NRF52840_xxAA_REV2</tt><br/>
  *    <tt>nrfjprogjs.NRF52840_xxAA_FUTURE</tt><br/>
  *
+ *    <tt>nrfjprogjs.NRF5340_xxAA_ENGA</tt><br/>
+ *    <tt>nrfjprogjs.NRF5340_xxAA_ENGB</tt><br/>
+ *    <tt>nrfjprogjs.NRF5340_xxAA_REV1</tt><br/>
+ *    <tt>nrfjprogjs.NRF5340_xxAA_FUTURE</tt><br/>
+ *
  *    <tt>nrfjprogjs.NRF9160_xxAA_REV1</tt><br/>
  *    <tt>nrfjprogjs.NRF9160_xxAA_FUTURE</tt><br/>
  *
