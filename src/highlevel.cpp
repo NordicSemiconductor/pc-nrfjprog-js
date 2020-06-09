@@ -605,6 +605,7 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
 
     // nRF53XXX versions
     NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_ENGA);   // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_ENGB);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_REV1);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, NRF5340_xxAA_FUTURE); // NOLINT(hicpp-signed-bitwise)
 
