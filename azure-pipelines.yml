@@ -173,7 +173,7 @@ jobs:
           npm_config_target: 8.2.0
           npm_config_disturl: 'https://electronjs.org/headers'
           node_arch: '32'
-         win32_electron_9_x:
+        win32_electron_9_x:
           image_name: 'vs2017-win2016'
           node_version: 12.16.1
           nrfjprog_suffix: 'win32_ia32'
