@@ -37,6 +37,13 @@ jobs:
           npm_config_runtime: 'electron'
           npm_config_target: 5.0.6
           npm_config_disturl: 'https://electronjs.org/headers'
+        linux_electron_7_x:
+          image_name: 'ubuntu-18.04'
+          node_version: 12.16.1
+          nrfjprog_suffix: 'linux_x64'
+          npm_config_runtime: 'electron'
+          npm_config_target: 7.2.0
+          npm_config_disturl: 'https://electronjs.org/headers'
         linux_electron_8_x:
           image_name: 'ubuntu-18.04'
           node_version: 12.16.1
@@ -76,6 +83,13 @@ jobs:
           nrfjprog_suffix: 'darwin_x64'
           npm_config_runtime: 'electron'
           npm_config_target: 5.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+        macOS_electron_7_x:
+          image_name: 'macos-10.15'
+          node_version: 12.16.1
+          nrfjprog_suffix: 'darwin_x64'
+          npm_config_runtime: 'electron'
+          npm_config_target: 7.2.0
           npm_config_disturl: 'https://electronjs.org/headers'
         macOS_electron_8_x:
           image_name: 'macos-10.15'
@@ -117,6 +131,13 @@ jobs:
           nrfjprog_suffix: 'win32_x64'
           npm_config_runtime: 'electron'
           npm_config_target: 5.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+        win64_electron_7_x:
+          image_name: 'vs2017-win2016'
+          node_version: 12.16.1
+          nrfjprog_suffix: 'win32_x64'
+          npm_config_runtime: 'electron'
+          npm_config_target: 7.2.0
           npm_config_disturl: 'https://electronjs.org/headers'
         win64_electron_8_x:
           image_name: 'vs2017-win2016'
@@ -163,6 +184,14 @@ jobs:
           nrfjprog_suffix: 'win32_ia32'
           npm_config_runtime: 'electron'
           npm_config_target: 5.0.6
+          npm_config_disturl: 'https://electronjs.org/headers'
+          node_arch: '32'
+        win32_electron_7_x:
+          image_name: 'vs2017-win2016'
+          node_version: 12.16.1
+          nrfjprog_suffix: 'win32_ia32'
+          npm_config_runtime: 'electron'
+          npm_config_target: 7.2.0
           npm_config_disturl: 'https://electronjs.org/headers'
           node_arch: '32'
         win32_electron_8_x:
