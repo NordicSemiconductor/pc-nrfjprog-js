@@ -10,7 +10,7 @@ if(APPLE)
 endif()
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH "nrfjprog")
+set(CMAKE_INSTALL_RPATH "nrfjprog" "@loader_path" "@loader_path/../../nrfjprog")
 
 # set(NRF_COMMAND_LINE_TOOLS_CMAKE_PACKAGE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/nrfjprog/share)
 
