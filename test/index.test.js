@@ -34,8 +34,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const { debug1 } = require('./debug1.test')
-const { debug2 } = require('./debug2.test')
 const { generic } = require('./generic.test')
 const { raceCondition } = require('./racecondition.test')
 const { singleDeviceDesctructive } = require('./single-device-destructive.test')
@@ -44,13 +42,11 @@ const { rtt } = require('./rtt.test')
 const { rttFailing } = require('./rttfailing.test')
 const { modemDfu } = require('./modem-dfu-destructive.test')
 
-describe('Debug1', debug1);
-describe('Debug2', debug2);
 describe('Generic functionality', generic);
 describe('Handles race conditions gracefully', raceCondition);
 describe('Single device - destructive', singleDeviceDesctructive);
 describe('Single device - non-destructive', singleDeviceNonDesctructive);
 describe('RTT', rtt);
 describe('RTT without RTT firmware', rttFailing);
-describe('Modem DFU', rttFailing);
+describe('Modem DFU', modemDfu);
 
