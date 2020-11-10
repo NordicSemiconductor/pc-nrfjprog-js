@@ -44,7 +44,8 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
 let testfile = './test/hex/connectivity_1.1.0_1m_with_s132_3.0.hex';
 
-describe('Single device - destructive', () => {
+// describe('Single device - destructive', () => {
+const singleDeviceDesctructive = () => {
     beforeAll(done => {
         const callback = (err, connectedDevices) => {
             expect(err).toBeUndefined();
@@ -187,4 +188,6 @@ describe('Single device - destructive', () => {
 
         nRFjprog.writeU32(device.serialNumber, address, data, callback);
     });
-});
+};
+
+exports.singleDeviceDesctructive = singleDeviceDesctructive;

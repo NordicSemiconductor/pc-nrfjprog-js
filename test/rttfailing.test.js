@@ -42,7 +42,8 @@ let device;
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-describe.skip('RTT without RTT firmware', () => {
+// describe.skip('RTT without RTT firmware', () => {
+const rttFailing = () => {
     beforeAll(done => {
         const programCallback = err => {
             expect(err).toBeUndefined();
@@ -73,6 +74,6 @@ describe.skip('RTT without RTT firmware', () => {
             nRFjprog.rttStart(device.serialNumber, {}, startCallback);
         });
     });
-});
+};
 
-
+exports.rttFailing = rttFailing;
