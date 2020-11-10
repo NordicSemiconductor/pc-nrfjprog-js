@@ -38,20 +38,34 @@
 
 const nRFjprog = require('../index.js');
 
-jest.setTimeout(100000);
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-const serialNumber = process.env.DK91_SERIAL_NUMBER;
-const testcase = serialNumber ? it : it.skip;
-
-// testcase('modem-dfu', async () => {
-const modemDfu = async () => {
-    expect(serialNumber).toBeDefined();
-    await new Promise((resolve, reject) => (
-        nRFjprog.programDFU(Number(serialNumber), "./test/hex/modem-dfu-image.zip", (err) => {
+const debug2 = () => {
+    it('gets deprecated dll version', done => {
+        const callback = (err, version) => {
             expect(err).toBeUndefined();
-            return err ? reject(err) : resolve();
-        })
-    ));
+            expect(version).toHaveProperty('major');
+            expect(version).toHaveProperty('minor');
+            expect(version).toHaveProperty('revision');
+            done();
+        };
+
+        nRFjprog.getDllVersion(callback);
+    });
+
+    it('finds all connected devices', done => {
+        const callback = (err, connectedDevices) => {
+            expect(err).toBeUndefined();
+            expect(connectedDevices.length).toBeGreaterThanOrEqual(1);
+            expect(connectedDevices[0]).toHaveProperty('serialNumber');
+            expect(connectedDevices[0]).toHaveProperty('deviceInfo');
+            expect(connectedDevices[0]).toHaveProperty('probeInfo');
+            expect(connectedDevices[0]).toHaveProperty('libraryInfo');
+            done();
+        };
+
+        nRFjprog.getConnectedDevices(callback);
+    });
 };
 
-exports.modemDfu = modemDfu;
+exports.debug2 = debug2;

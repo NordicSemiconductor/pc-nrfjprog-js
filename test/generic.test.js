@@ -40,7 +40,7 @@ const nRFjprog = require('../index.js');
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-describe('Generic functionality', () => {
+const generic = () => {
     it('gets library version', done => {
         const callback = (err, version) => {
             expect(err).toBeUndefined();
@@ -104,4 +104,6 @@ describe('Generic functionality', () => {
     it('throws when wrong type of parameters are sent in', () => {
         expect(() => { nRFjprog.getLibraryVersion(1); }).toThrowErrorMatchingSnapshot();
     });
-});
+};
+
+exports.generic = generic;
