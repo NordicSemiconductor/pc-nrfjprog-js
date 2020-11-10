@@ -40,7 +40,7 @@ const { singleDeviceDesctructive } = require('./single-device-destructive.test')
 const { singleDeviceNonDesctructive } = require('./single-device-non-destructive.test')
 const { rtt } = require('./rtt.test')
 const { rttFailing } = require('./rttfailing.test')
-const { modemDfu } = require('./modem-dfu-destructive.test')
+// const { modemDfu } = require('./modem-dfu-destructive.test')
 
 describe('Generic functionality', generic);
 describe('Handles race conditions gracefully', raceCondition);
@@ -48,5 +48,5 @@ describe('Single device - destructive', singleDeviceDesctructive);
 describe('Single device - non-destructive', singleDeviceNonDesctructive);
 describe('RTT', rtt);
 describe('RTT without RTT firmware', rttFailing);
-describe('Modem DFU', modemDfu);
+// describe('Modem DFU', modemDfu);
 

@@ -45,13 +45,15 @@ const testcase = serialNumber ? it : it.skip;
 
 // testcase('modem-dfu', async () => {
 const modemDfu = async () => {
-    expect(serialNumber).toBeDefined();
-    await new Promise((resolve, reject) => (
-        nRFjprog.programDFU(Number(serialNumber), "./test/hex/modem-dfu-image.zip", (err) => {
-            expect(err).toBeUndefined();
-            return err ? reject(err) : resolve();
-        })
-    ));
+    testcase('modem-dfu', async () => {
+        expect(serialNumber).toBeDefined();
+        await new Promise((resolve, reject) => (
+            nRFjprog.programDFU(Number(serialNumber), "./test/hex/modem-dfu-image.zip", (err) => {
+                expect(err).toBeUndefined();
+                return err ? reject(err) : resolve();
+            })
+        ));
+    });
 };
 
 exports.modemDfu = modemDfu;
