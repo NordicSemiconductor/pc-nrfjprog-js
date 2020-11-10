@@ -5,3 +5,94 @@ exports[`Generic functionality throws when too few parameters are sent in 1`] = 
 exports[`Generic functionality throws when too many parameters are sent in 1`] = `"Too many parameters. The function get library version does not take 2 parameters."`;
 
 exports[`Generic functionality throws when wrong type of parameters are sent in 1`] = `"First argument must be a function"`;
+
+exports[`Modem DFU can not start RTT fails cleanly 1`] = `
+[Error: Error occured when start rtt. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: Unknown value (ffffff24)
+]
+`;
+
+exports[`RTT fails cleanly when calling other functions before start fails cleanly when calling read without start 1`] = `
+[Error: Error occured when rtt read. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: Unknown value (ffffff02)
+]
+`;
+
+exports[`RTT fails cleanly when calling other functions before start fails cleanly when calling write without start 1`] = `
+[Error: Error occured when rtt write. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: Unknown value (ffffff02)
+]
+`;
+
+exports[`RTT opens and close as expected returns an error when using wrong control block location 1`] = `
+[Error: Error occured when start rtt. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: Unknown value (ffffff24)
+]
+`;
+
+exports[`RTT opens and close as expected returns an error when wrong serialnumber 1`] = `
+[Error: Error occured when start rtt. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: INVALID_PARAMETER (fffffffd)
+]
+`;
+
+exports[`RTT reads from device reads startmessage 1`] = `"RTT Loopback Session started, DK connected"`;
+
+exports[`RTT reads from device reads startmessage 2`] = `
+Array [
+  82,
+  84,
+  84,
+  32,
+  76,
+  111,
+  111,
+  112,
+  98,
+  97,
+  99,
+  107,
+  32,
+  83,
+  101,
+  115,
+  115,
+  105,
+  111,
+  110,
+  32,
+  115,
+  116,
+  97,
+  114,
+  116,
+  101,
+  100,
+  44,
+  32,
+  68,
+  75,
+  32,
+  99,
+  111,
+  110,
+  110,
+  101,
+  99,
+  116,
+  101,
+  100,
+]
+`;
+
+exports[`RTT without RTT firmware can not start RTT fails cleanly 1`] = `
+[Error: Error occured when start rtt. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: Unknown value (ffffff24)
+]
+`;
+
+exports[`Single device - non-destructive throws an error when device do not exist 1`] = `
+[Error: Error occured when get device info. Errorcode: CouldNotOpenDevice (0x4)
+Lowlevel error: EMULATOR_NOT_CONNECTED (fffffff6)
+]
+`;
