@@ -41,7 +41,6 @@ const nRFjprog = require('../index.js');
 let device;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-// describe('Handles race conditions gracefully', () => {
 const raceCondition = () => {
     beforeAll(done => {
         const callback = (err, connectedDevices) => {

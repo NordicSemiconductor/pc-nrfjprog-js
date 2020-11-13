@@ -43,7 +43,6 @@ jest.setTimeout(100000);
 const serialNumber = process.env.DK91_SERIAL_NUMBER;
 const testcase = serialNumber ? it : it.skip;
 
-// testcase('modem-dfu', async () => {
 const modemDfu = async () => {
     testcase('modem-dfu', async () => {
         expect(serialNumber).toBeDefined();
