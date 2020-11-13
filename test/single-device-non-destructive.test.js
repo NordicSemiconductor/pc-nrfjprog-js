@@ -41,7 +41,7 @@ const nRFjprog = require('../index.js');
 let device;
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-describe('Single device - non-destructive', () => {
+const singleDeviceNonDesctructive = () => {
     beforeAll(done => {
         const callback = (err, connectedDevices) => {
             expect(err).toBeUndefined();
@@ -207,4 +207,6 @@ describe('Single device - non-destructive', () => {
 
         nRFjprog.read(device.serialNumber, 0x0, readLength, callback);
     });
-});
+};
+
+exports.singleDeviceNonDesctructive = singleDeviceNonDesctructive;

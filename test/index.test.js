@@ -34,25 +34,19 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-'use strict';
+const { generic } = require('./generic.test')
+const { raceCondition } = require('./racecondition.test')
+const { singleDeviceDesctructive } = require('./single-device-destructive.test')
+const { singleDeviceNonDesctructive } = require('./single-device-non-destructive.test')
+const { rtt } = require('./rtt.test')
+const { rttFailing } = require('./rttfailing.test')
+// const { modemDfu } = require('./modem-dfu-destructive.test')
 
-const nRFjprog = require('../index.js');
+describe('Generic functionality', generic);
+describe('Handles race conditions gracefully', raceCondition);
+describe('Single device - destructive', singleDeviceDesctructive);
+describe('Single device - non-destructive', singleDeviceNonDesctructive);
+describe('RTT', rtt);
+describe('RTT without RTT firmware', rttFailing);
+// describe('Modem DFU', modemDfu);
 
-jest.setTimeout(100000);
-
-const serialNumber = process.env.DK91_SERIAL_NUMBER;
-const testcase = serialNumber ? it : it.skip;
-
-const modemDfu = async () => {
-    testcase('modem-dfu', async () => {
-        expect(serialNumber).toBeDefined();
-        await new Promise((resolve, reject) => (
-            nRFjprog.programDFU(Number(serialNumber), "./test/hex/modem-dfu-image.zip", (err) => {
-                expect(err).toBeUndefined();
-                return err ? reject(err) : resolve();
-            })
-        ));
-    });
-};
-
-exports.modemDfu = modemDfu;

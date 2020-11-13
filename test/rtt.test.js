@@ -42,7 +42,7 @@ let device;
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;
 
-describe('RTT', () => {
+const rtt = () => {
     beforeAll(done => {
         const programCallback = err => {
             expect(err).toBeUndefined();
@@ -365,4 +365,6 @@ describe('RTT', () => {
             }
         });
     });
-});
+};
+
+exports.rtt = rtt;

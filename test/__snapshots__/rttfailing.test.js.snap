@@ -1,6 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`RTT without RTT firmware can not start RTT fails cleanly 1`] = `
-[Error: Error occured when start rtt. Errorcode: Could Not Find Control Block (0x8)
-]
-`;

@@ -1,11 +1,11 @@
 {
   "name": "pc-nrfjprog-js",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "Javascript bindings for nrfjprog",
   "main": "index.js",
   "nrfjprog": {
-    "version": "10.9.0",
-    "jlink": "V680a"
+    "version": "10.11.1",
+    "jlink": "V686f"
   },
   "scripts": {
     "build": "node build.js",
@@ -17,7 +17,7 @@
     "install": "node scripts/pre-install.js && ( (which nrfconnect-build && nrfconnect-build fetch-draft) || node-pre-gyp install --fallback-to-build=false || node build.js )",
     "docs": "jsdoc doc -t node_modules/minami -R README.md -d docs",
     "deploy-docs": "gh-pages -d docs",
-    "test": "jest --runInBand --verbose --testResultsProcessor jest-bamboo-formatter",
+    "test": "jest --runInBand --verbose --testResultsProcessor jest-bamboo-formatter -- index.test.js",
     "test-watch": "jest --watch --runInBand"
   },
   "repository": {
@@ -63,8 +63,8 @@
     "jest-bamboo-formatter": "1.0.1",
     "jsdoc": "^3.6.2",
     "minami": "^1.2.3",
-    "pc-nrfconnect-build": "git+https://github.com/NordicPlayground/pc-nrfconnect-build.git#semver:^0.3.0",
-    "node-pre-gyp-github": "1.4.3"
+    "node-pre-gyp-github": "1.4.3",
+    "pc-nrfconnect-build": "github:NordicPlayground/pc-nrfconnect-build#semver:^0.3.0"
   },
   "jest": {
     "testMatch": [

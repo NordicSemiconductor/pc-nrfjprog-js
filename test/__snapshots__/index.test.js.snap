@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Generic functionality throws when too few parameters are sent in 1`] = `"First argument must be a function"`;
+
+exports[`Generic functionality throws when too many parameters are sent in 1`] = `"Too many parameters. The function get library version does not take 2 parameters."`;
+
+exports[`Generic functionality throws when wrong type of parameters are sent in 1`] = `"First argument must be a function"`;
+
 exports[`RTT fails cleanly when calling other functions before start fails cleanly when calling read without start 1`] = `
 [Error: Error occured when rtt read. Errorcode: CouldNotCallFunction (0x9)
 Lowlevel error: Unknown value (ffffff02)
@@ -70,5 +76,17 @@ Array [
   116,
   101,
   100,
+]
+`;
+
+exports[`RTT without RTT firmware can not start RTT fails cleanly 1`] = `
+[Error: Error occured when start rtt. Errorcode: CouldNotCallFunction (0x9)
+Lowlevel error: Unknown value (ffffff24)
+]
+`;
+
+exports[`Single device - non-destructive throws an error when device do not exist 1`] = `
+[Error: Error occured when get device info. Errorcode: CouldNotOpenDevice (0x4)
+Lowlevel error: EMULATOR_NOT_CONNECTED (fffffff6)
 ]
 `;
