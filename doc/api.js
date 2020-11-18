@@ -366,7 +366,27 @@ export function getSerialNumbers(callback) {}
  */
 export function getDeviceInfo(serialNumber, callback) {}
 
-
+/**
+ * Async function to get information about readback protection level of a device, given its serial number.
+ *
+ * @example
+ * nrfjprogjs.getReadbackProtection(123456789, function(err, readbackProtection) {
+ *      if (err) throw err;
+ *      console.log('Readback protection level: ' + readbackProtection);
+ * });
+ *
+ * @param {integer} serialNumber The serial number of the device to query
+ * @param {Function} callback A callback function to handle the async response.
+ *   It shall expect two parameters: ({@link module:pc-nrfjprog-js~Error|Error}, {integer}).
+ *
+ * Upon success the callback is called with readbackProtection (2nd parameter) with the following values:<br/>
+ *    <tt>nrfjprogjs.NONE</tt><br/>
+ *    <tt>nrfjprogjs.REGION_0</tt><br/>
+ *    <tt>nrfjprogjs.ALL</tt><br/>
+ *    <tt>nrfjprogjs.BOTH</tt><br/>
+ *    <tt>nrfjprogjs.SECURE</tt><br/>
+ */
+export function getReadbackProtection(serialNumber, callback) {}
 
 /**
  * Async function to get information of a single device, given its serial number.

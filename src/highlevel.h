@@ -66,6 +66,7 @@ class HighLevel : public Nan::ObjectWrap
     static NAN_METHOD(GetSerialNumbers);    // Params: callback(error, serialnumbers)
 
     static NAN_METHOD(GetDeviceInfo);  // Params: serialnumber, callback(error, deviceinfo)
+    static NAN_METHOD(GetReadbackProtection);  // Params: serialnumber, callback(error, readbackProtection)
     static NAN_METHOD(GetProbeInfo);   // Params: serialnumber, callback(error, probeinfo)
     static NAN_METHOD(GetLibraryInfo); // Params: serialnumber, callback(error, libraryinfo)
 
