@@ -525,6 +525,7 @@ void HighLevel::init(v8::Local<v8::FunctionTemplate> target)
     Nan::SetPrototypeMethod(target, "getConnectedDevices", GetConnectedDevices);
     Nan::SetPrototypeMethod(target, "getSerialNumbers", GetSerialNumbers);
     Nan::SetPrototypeMethod(target, "getDeviceInfo", GetDeviceInfo);
+    Nan::SetPrototypeMethod(target, "getReadbackProtection", GetReadbackProtection);
     Nan::SetPrototypeMethod(target, "getProbeInfo", GetProbeInfo);
     Nan::SetPrototypeMethod(target, "getLibraryInfo", GetLibraryInfo);
     Nan::SetPrototypeMethod(target, "read", Read);
@@ -655,6 +656,12 @@ void HighLevel::initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target)
 
     NODE_DEFINE_CONSTANT(target, UP_DIRECTION);   // NOLINT(hicpp-signed-bitwise)
     NODE_DEFINE_CONSTANT(target, DOWN_DIRECTION); // NOLINT(hicpp-signed-bitwise)
+
+    NODE_DEFINE_CONSTANT(target, NONE);     // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, REGION_0); // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, ALL);      // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, BOTH);     // NOLINT(hicpp-signed-bitwise)
+    NODE_DEFINE_CONSTANT(target, SECURE);   // NOLINT(hicpp-signed-bitwise)
 }
 
 nrfjprogdll_err_t HighLevel::rttCleanup(Probe_handle_t probe)
@@ -971,6 +978,29 @@ NAN_METHOD(HighLevel::GetDeviceInfo)
         std::vector<v8::Local<v8::Value>> returnData;
 
         returnData.emplace_back(DeviceInfo(baton->deviceInfo).ToJs());
+
+        return returnData;
+    };
+
+    CallFunction(info, p, e, r, true);
+}
+
+NAN_METHOD(HighLevel::GetReadbackProtection)
+{
+    const parse_parameters_function_t p = [&](Nan::NAN_METHOD_ARGS_TYPE, int &) -> Baton * {
+        return new GetReadbackProtectionBaton();
+    };
+
+    const execute_function_t e = [&](Baton * b) -> nrfjprogdll_err_t {
+        auto baton = dynamic_cast<GetReadbackProtectionBaton *>(b);
+        return NRFJPROG_get_readback_protection(b->probe, &baton->readbackProtection);
+    };
+
+    const return_function_t r = [&](Baton * b) -> std::vector<v8::Local<v8::Value>> {
+        const auto baton = dynamic_cast<GetReadbackProtectionBaton *>(b);
+        std::vector<v8::Local<v8::Value>> returnData;
+
+        returnData.emplace_back(Convert::toJsNumber(baton->readbackProtection));
 
         return returnData;
     };

@@ -144,6 +144,16 @@ class GetDeviceInfoBaton : public Baton
     device_info_t deviceInfo;
 };
 
+class GetReadbackProtectionBaton : public Baton
+{
+  public:
+    GetReadbackProtectionBaton()
+        : Baton("get readback protection", 1, false)
+    {}
+    uint32_t serialNumber;
+    readback_protection_status_t readbackProtection;
+};
+
 class GetProbeInfoBaton : public Baton
 {
   public:
