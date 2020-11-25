@@ -52,6 +52,8 @@
 
 constexpr int MAX_SERIAL_NUMBERS = 100;
 
+static std::unique_ptr<HighLevel> pHighlevel;
+
 struct HighLevelStaticPrivate
 {
     bool loaded{false};
@@ -142,7 +144,8 @@ NAN_METHOD(HighLevel::New)
 {
     if (info.IsConstructCall())
     {
-        (new HighLevel())->Wrap(info.This());
+        pHighlevel = std::make_unique<HighLevel>();
+        pHighlevel->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
     }
     else
@@ -160,8 +163,12 @@ HighLevel::HighLevel()
     static HighLevelStaticPrivate highLevelStaticPrivate;
     pHighlvlStatic = &highLevelStaticPrivate;
     resetLog();
-
     NRFJPROG_dll_open(nullptr, &HighLevel::log);
+}
+
+HighLevel::~HighLevel()
+{
+    NRFJPROG_dll_close();
 }
 
 void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
