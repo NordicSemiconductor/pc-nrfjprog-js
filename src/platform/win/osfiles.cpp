@@ -123,7 +123,7 @@ std::string TempFile::getTempFileName()
         return std::string();
     }
 
-    return std::string(tempFilePath.data());
+    return std::string(tempFilePath.data()) + ".hex";
 }
 
 void TempFile::deleteFile()
