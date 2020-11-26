@@ -52,8 +52,6 @@
 
 constexpr int MAX_SERIAL_NUMBERS = 100;
 
-static std::unique_ptr<HighLevel> pHighlevel;
-
 struct HighLevelStaticPrivate
 {
     bool loaded{false};
@@ -128,8 +126,15 @@ static HighLevelStaticPrivate * pHighlvlStatic = nullptr;
 
 std::timed_mutex Baton::executionMutex;
 
+static void closeLibrary(void *)
+{
+    NRFJPROG_dll_close();
+}
+
 NAN_MODULE_INIT(HighLevel::Init)
 {
+    node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), closeLibrary, nullptr);
+
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("nRFjprog").ToLocalChecked());
     tpl->InstanceTemplate()->SetInternalFieldCount(1);
@@ -144,8 +149,7 @@ NAN_METHOD(HighLevel::New)
 {
     if (info.IsConstructCall())
     {
-        pHighlevel = std::make_unique<HighLevel>();
-        pHighlevel->Wrap(info.This());
+        (new HighLevel())->Wrap(info.This());
         info.GetReturnValue().Set(info.This());
     }
     else
@@ -164,11 +168,6 @@ HighLevel::HighLevel()
     pHighlvlStatic = &highLevelStaticPrivate;
     resetLog();
     NRFJPROG_dll_open(nullptr, &HighLevel::log);
-}
-
-HighLevel::~HighLevel()
-{
-    NRFJPROG_dll_close();
 }
 
 void HighLevel::CallFunction(Nan::NAN_METHOD_ARGS_TYPE info,
