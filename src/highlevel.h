@@ -53,10 +53,9 @@ class HighLevel : public Nan::ObjectWrap
     static NAN_MODULE_INIT(Init);
     static void initConsts(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
 
-    explicit HighLevel();
-    virtual ~HighLevel();
-
   private:
+    explicit HighLevel();
+
     static NAN_METHOD(New);
 
     // Sync methods
