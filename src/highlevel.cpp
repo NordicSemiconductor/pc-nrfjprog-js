@@ -133,7 +133,7 @@ static void closeLibrary(void *)
 
 NAN_MODULE_INIT(HighLevel::Init)
 {
-    node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), closeLibrary, nullptr);
+    node::AtExit(closeLibrary, nullptr);
 
     v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
     tpl->SetClassName(Nan::New("nRFjprog").ToLocalChecked());
