@@ -182,6 +182,8 @@
  *
  *    <tt>nrfjprogjs.NRF5340_xxAA_ENGA</tt><br/>
  *    <tt>nrfjprogjs.NRF5340_xxAA_ENGB</tt><br/>
+ *    <tt>nrfjprogjs.NRF5340_xxAA_ENGC</tt><br/>
+ *    <tt>nrfjprogjs.NRF5340_xxAA_ENGD</tt><br/>
  *    <tt>nrfjprogjs.NRF5340_xxAA_FUTURE</tt><br/>
  *
  *    <tt>nrfjprogjs.NRF9160_xxAA_REV1</tt><br/>
