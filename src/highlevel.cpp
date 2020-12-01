@@ -382,6 +382,7 @@ void HighLevel::ExecuteFunction(uv_work_t * req)
                 {
                     baton->result        = errorcode_t::CouldNotResetDevice;
                     baton->lowlevelError = resetError;
+                    NRFJPROG_probe_uninit(&(baton->probe));
                     return;
                 }
             }
