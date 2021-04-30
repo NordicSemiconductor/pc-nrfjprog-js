@@ -38,6 +38,7 @@
 #define COMMON_H
 
 #include <map>
+#include <stdint.h>
 
 #define NAME_MAP_ENTRY(EXP)                                                                        \
     {                                                                                              \
