@@ -70,5 +70,6 @@
     "testMatch": [
       "**/test/?(*.)+(test).js?(x)"
     ]
-  }
+  },
+  "typings": "./index.d.ts"
 }
